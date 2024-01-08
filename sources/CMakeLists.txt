@@ -16,5 +16,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         main.cpp pch.h
         field.h field.cpp
         cell.h cell.cpp
-        cell_search_proxy.h cell_search_proxy.cpp)
+        cell_search_proxy.h cell_search_proxy.cpp
+        brain.h brain.cpp
+        simulation.h simulation.cpp)
 target_precompile_headers(${PROJECT_NAME} PRIVATE pch.h)

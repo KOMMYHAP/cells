@@ -1,40 +1,18 @@
+#include "brain.h"
 #include "field.h"
-
-void PrintWorld(const Field& w)
-{
-    for (auto& c : w) {
-        std::cout << std::format("({0}; {1}\n", c.position.x, c.position.y);
-    }
-    std::cout << std::endl;
-}
-
-
+#include "simulation.h"
 
 int main()
 {
-    Field field { 5, 20 };
+    Field field { 10, 10 };
+    Simulation simulation { field };
 
-    auto id1 = field.Create(Cell { {}, sf::Vector2u { 1, 1 } });
-    auto id2 = field.Create(Cell { {}, sf::Vector2u { 1, 2 } });
-    auto id3 = field.Create(Cell { {}, sf::Vector2u { 1, 3 } });
-    auto id4 = field.Create(Cell { {}, sf::Vector2u { 2, 2 } });
-    PrintWorld(field);
+    simulation.SetAutoUpdateMode(1);
 
-    field.Remove(id1);
-    PrintWorld(field);
-
-    auto& cell = field.Get(id2);
-    PrintWorld(field);
-
-    field.Move(id3, Cell { {}, sf::Vector2u { 3, 3 } });
-    PrintWorld(field);
-
-    auto cells = field.Find({ 3, 3 });
-    auto id5 = field.Create(Cell { {}, sf::Vector2u { 3, 3 } });
-    cells = field.Find({ 3, 3 });
-
-    sf::Window window(sf::VideoMode(800, 600), "My window");
+    sf::Window window(sf::VideoMode(800, 600), "Cells");
     window.setFramerateLimit(60);
+
+    sf::Clock clock;
 
     while (window.isOpen()) {
         // check all the window's events that were triggered since the last iteration of the loop
@@ -45,7 +23,10 @@ int main()
                 window.close();
         }
 
+        simulation.Update(clock.getElapsedTime());
+
         window.display();
+        clock.restart();
     }
 
     return 0;
