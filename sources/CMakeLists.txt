@@ -8,6 +8,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-window)
 
 
 target_sources(${PROJECT_NAME} PRIVATE
-    main.cpp pch.h
-    world.h world.cpp)
+        main.cpp pch.h
+        world.h world.cpp
+        cell.h cell.cpp)
 target_precompile_headers(${PROJECT_NAME} PRIVATE pch.h)

@@ -58,20 +58,3 @@ void World::Remove(CellId id)
     _cells[index].type = Type::Dummy;
     _freeIds.push_back(id);
 }
-
-std::string_view TypeToStr(Type type)
-{
-    switch (type) {
-    case Type::Unit:
-        return "Unit";
-    case Type::Food:
-        return "Food";
-    case Type::Wall:
-        return "Wall";
-    case Type::Dummy:
-        return "Dummy";
-    default:
-        assert(false);
-        return "unknown";
-    }
-}
