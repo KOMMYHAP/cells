@@ -1,4 +1,6 @@
 #pragma once
+#include <cassert>
+
 #include "cell.h"
 
 enum class CellType : uint8_t {
@@ -8,15 +10,13 @@ enum class CellType : uint8_t {
     Dummy
 };
 
+#pragma pack(push, 1)
 struct BrainInfo {
     CellType type;
     sf::Vector2<uint16_t> position;
 };
+#pragma pack(pop)
 
-struct BrainData {
-    static constexpr uint32_t memorySize = Cell::brainSize - sizeof(BrainInfo);
-    std::span<std::byte> memory;
-};
 
 class BrainView {
 public:

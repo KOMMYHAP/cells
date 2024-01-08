@@ -12,7 +12,7 @@ void Simulation::Update(sf::Time elapsedTime)
     _elapsedTime += elapsedTime;
 
     const float ticksPerDiff = _elapsedTime.asSeconds() * _ticksPerSecond;
-    const uint32_t ticksToProcess = std::round(ticksPerDiff);
+    const uint32_t ticksToProcess = std::floor(ticksPerDiff);
 
     if (ticksToProcess == 0) {
         return;
@@ -30,7 +30,7 @@ void Simulation::Tick()
 {
     for (Cell& cell : _field) {
         Brain brain { cell };
-        brain.Process();
+        brain.Process(_field);
     }
 }
 void Simulation::SetManualUpdateMode(uint32_t ticksToUpdate)

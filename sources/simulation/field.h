@@ -7,10 +7,14 @@ public:
     Field(uint32_t cellRows, uint32_t cellColumns, const Cell& empty);
 
     CellId Create(const Cell& cell);
-    void Move(CellId id, const Cell& cell);
+    void NotifyMoved(CellId id);
     const Cell& Get(CellId id) const;
     std::vector<CellId> Find(const sf::Vector2u& position) const;
     void Remove(CellId id);
+
+    sf::Vector2u GetPositionLimits() const { return { GetColumnsCount() - 1, GetRowsCount() - 1 }; }
+    uint32_t GetRowsCount() const { return _cellRows; }
+    uint32_t GetColumnsCount() const { return _cellColumns; }
 
 public:
     auto begin() { return MakeSpan().begin(); }

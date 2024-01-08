@@ -1,21 +1,30 @@
 #pragma once
 
+#include "brain_data.h"
 #include "brain_view.h"
+
+class Field;
 
 class Brain {
 public:
     Brain(Cell& cell);
 
-    void Process();
+    void Process(Field& field);
 
     BrainInfo& AccessInfo() { return *reinterpret_cast<BrainInfo*>(_cell.brain); }
-    CellType& AccessType() { return AccessInfo().type; }
-    sf::Vector2<uint16_t>& AccessPosition() { return AccessInfo().position; }
+    const BrainInfo& GetInfo() const { return *reinterpret_cast<const BrainInfo*>(_cell.brain); }
+
+    BrainData AccessData() { return GetData(); }
+    BrainData GetData() const
+    {
+        const auto memory = std::span { _cell.brain + sizeof(BrainInfo), _cell.brain + Cell::brainSize };
+        return BrainData { memory };
+    }
 
 private:
-    void ProcessUnit(const BrainData& memory);
-    void ProcessFood(const BrainData& memory);
-    void ProcessWall(const BrainData& memory);
+    void ProcessUnit(Field& field);
+    void ProcessFood();
+    void ProcessWall();
 
     Cell& _cell;
 };

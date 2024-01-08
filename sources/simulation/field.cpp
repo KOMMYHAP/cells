@@ -9,6 +9,7 @@ Field::Field(uint32_t cellRows, uint32_t cellColumns, const Cell& empty)
     , _emptyCell(empty)
 {
     const uint32_t cellsCount = cellRows * cellColumns;
+    assert(cellsCount > 0);
 
     // preallocate cells to avoid allocations during the game
     _freeIds.resize(cellsCount);
@@ -48,15 +49,9 @@ CellId Field::Create(const Cell& cell)
     return nextId;
 }
 
-void Field::Move(CellId id, const Cell& cell)
+void Field::NotifyMoved(CellId id)
 {
-    assert(_cellRows > cell.GetBrain().GetPosition().y);
-    assert(_cellColumns > cell.GetBrain().GetPosition().x);
-
-    const auto index = CellIdToInt(id);
-
     _searchProxy.Remove(id);
-    _cells[index] = cell;
     _searchProxy.Add(id);
 }
 
@@ -70,7 +65,7 @@ void Field::Remove(CellId id)
 {
     _searchProxy.Remove(id);
     const auto index = CellIdToInt(id);
-    _cells[index].GetBrain().AccessType() = CellType::Dummy;
+    _cells[index].GetBrain().AccessInfo().type = CellType::Dummy;
     _freeIds.push_back(id);
 }
 

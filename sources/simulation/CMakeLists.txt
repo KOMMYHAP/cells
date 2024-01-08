@@ -16,8 +16,10 @@ target_sources(${PROJECT_NAME} PRIVATE
         field.cpp
         cell_search_proxy.cpp
         brain.cpp
+        brain_data.cpp
         brain_view.cpp
         simulation.cpp
+        unit_processor.cpp
         pch.h)
 
 
@@ -27,8 +29,10 @@ target_sources(${PROJECT_NAME} PUBLIC
         field.h
         cell_search_proxy.h
         brain.h
+        brain_data.h
         brain_view.h
-        simulation.h)
+        simulation.h
+        unit_processor.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 

@@ -1,46 +1,46 @@
 #include "brain.h"
+#include "brain_data.h"
 #include "brain_view.h"
 #include "cell.h"
+#include "field.h"
+#include "unit_processor.h"
 
 static_assert(Cell::brainSize >= sizeof(BrainInfo));
 
 Brain::Brain(Cell& cell)
     : _cell(cell)
 {
+    assert(Cell::brainSize - sizeof(BrainInfo) == AccessData().Size());
 }
 
-void Brain::Process()
+void Brain::Process(Field& field)
 {
-    const auto memory = std::span { _cell.brain + sizeof(BrainInfo), _cell.brain + Cell::brainSize };
-    assert(BrainData::memorySize == memory.size());
-
-    const BrainData brainData {
-        memory
-    };
-
     switch (BrainView(_cell).GetType()) {
     case CellType::Unit:
-        ProcessUnit(brainData);
+        ProcessUnit(field);
         break;
     case CellType::Food:
-        ProcessFood(brainData);
+        ProcessFood();
         break;
     case CellType::Wall:
-        ProcessWall(brainData);
+        ProcessWall();
         break;
     case CellType::Dummy:
         break;
     }
 }
 
-void Brain::ProcessUnit(const BrainData& memory)
+void Brain::ProcessUnit(Field& field)
+{
+    Brain brain = _cell.GetBrain();
+    UnitProcessor processor { brain, field };
+    processor.Process();
+}
+
+void Brain::ProcessFood()
 {
 }
 
-void Brain::ProcessFood(const BrainData& memory)
-{
-}
-
-void Brain::ProcessWall(const BrainData& memory)
+void Brain::ProcessWall()
 {
 }
