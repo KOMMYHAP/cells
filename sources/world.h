@@ -1,14 +1,15 @@
 #pragma once
 #include "cell.h"
+#include "cell_search_proxy.h"
 
 class World {
 public:
-    World() = default;
-    World(uint32_t cellsCount);
+    World(uint32_t cellRows, uint32_t cellColumns);
 
     CellId Create(Cell cell);
     void Update(CellId id, const Cell& cell);
     const Cell& Get(CellId id) const;
+    std::vector<CellId> Find(const sf::Vector2u& position) const;
     void Remove(CellId id);
 
 public:
@@ -28,4 +29,7 @@ private:
     std::vector<Cell> _cells;
     std::vector<CellId> _freeIds;
     CellId _nextId { 0 };
+    CellSearchProxy _searchProxy;
+    uint32_t _cellRows { 0 };
+    uint32_t _cellColumns { 0 };
 };

@@ -16,7 +16,7 @@ enum class Type : uint8_t {
 std::string_view TypeToStr(Type type);
 
 struct Cell {
-    Type type;
+    Type type { Type::Dummy };
     sf::Vector2u position;
 };
 

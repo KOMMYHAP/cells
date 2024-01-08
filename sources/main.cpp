@@ -10,7 +10,7 @@ void PrintWorld(const World& w)
 
 int main()
 {
-    World w { 100 };
+    World w { 5, 20 };
 
     auto id1 = w.Create(Cell { Type::Unit, sf::Vector2u { 1, 1 } });
     auto id2 = w.Create(Cell { Type::Unit, sf::Vector2u { 1, 2 } });
@@ -26,6 +26,10 @@ int main()
 
     w.Update(id3, Cell { Type::Wall, sf::Vector2u { 3, 3 } });
     PrintWorld(w);
+
+    auto cells = w.Find({ 3, 3 });
+    auto id5 = w.Create(Cell { Type::Unit, sf::Vector2u { 3, 3 } });
+    cells = w.Find({ 3, 3 });
 
     sf::Window window(sf::VideoMode(800, 600), "My window");
     window.setFramerateLimit(60);
