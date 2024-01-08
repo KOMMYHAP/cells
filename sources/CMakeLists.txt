@@ -14,7 +14,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE QuadTree)
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         main.cpp pch.h
-        world.h world.cpp
+        field.h field.cpp
         cell.h cell.cpp
         cell_search_proxy.h cell_search_proxy.cpp)
 target_precompile_headers(${PROJECT_NAME} PRIVATE pch.h)

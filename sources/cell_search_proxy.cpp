@@ -1,6 +1,6 @@
 #include "cell_search_proxy.h"
-#include "world.h"
 #include "Quadtree.h"
+#include "field.h"
 
 namespace {
 
@@ -17,12 +17,11 @@ static QuadTreeBox CellPositionToBox(const sf::Vector2u& position)
 }
 
 struct CellBoxProvider {
-    const World& world;
+    const Field& world;
 
     QuadTreeBox operator()(const CellId id) const
     {
         const Cell& cell = world.Get(id);
-        assert(cell.type != Type::Dummy);
         return CellPositionToBox(cell.position);
     }
 };
@@ -30,7 +29,7 @@ struct CellBoxProvider {
 using QuadTree = quadtree::Quadtree<CellId, CellBoxProvider, std::equal_to<CellId>, QuadTreeUnit>;
 }
 
-CellSearchProxy::CellSearchProxy(World& world, uint32_t width, uint32_t height)
+CellSearchProxy::CellSearchProxy(Field& world, uint32_t width, uint32_t height)
     : _world(world)
 {
     auto boxProvider = CellBoxProvider { _world };

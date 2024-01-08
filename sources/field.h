@@ -2,12 +2,12 @@
 #include "cell.h"
 #include "cell_search_proxy.h"
 
-class World {
+class Field {
 public:
-    World(uint32_t cellRows, uint32_t cellColumns);
+    Field(uint32_t cellRows, uint32_t cellColumns);
 
-    CellId Create(Cell cell);
-    void Update(CellId id, const Cell& cell);
+    CellId Create(const Cell& cell);
+    void Move(CellId id, const Cell& cell);
     const Cell& Get(CellId id) const;
     std::vector<CellId> Find(const sf::Vector2u& position) const;
     void Remove(CellId id);

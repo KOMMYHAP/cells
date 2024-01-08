@@ -1,6 +1,6 @@
-#include "world.h"
+#include "field.h"
 
-World::World(uint32_t cellRows, uint32_t cellColumns)
+Field::Field(uint32_t cellRows, uint32_t cellColumns)
     : _searchProxy(*this, cellColumns, cellRows)
     , _cellRows(cellRows)
     , _cellColumns(cellColumns)
@@ -12,10 +12,10 @@ World::World(uint32_t cellRows, uint32_t cellColumns)
     for (auto it = _freeIds.rbegin(); it != _freeIds.rend(); ++it) {
         *it = MakeNextId();
     }
-    _cells.reserve(cellsCount);
+    _cells.resize(cellsCount);
 }
 
-CellId World::MakeNextId()
+CellId Field::MakeNextId()
 {
     if (_nextId == CellId::Invalid) {
         assert(false);
@@ -27,7 +27,7 @@ CellId World::MakeNextId()
     return id;
 }
 
-CellId World::Create(Cell cell)
+CellId Field::Create(const Cell& cell)
 {
     CellId nextId;
     if (!_freeIds.empty()) {
@@ -38,43 +38,38 @@ CellId World::Create(Cell cell)
         nextId = id;
     }
 
-    const auto index = CellIdToInt(nextId);
-    _cells.resize(index + 1);
+    const uint32_t index = CellIdToInt(nextId);
+    _cells[index] = cell;
+    _searchProxy.Add(nextId);
 
-    Update(nextId, cell);
     return nextId;
 }
 
-void World::Update(CellId id, const Cell& cell)
+void Field::Move(CellId id, const Cell& cell)
 {
     assert(_cellRows > cell.position.y);
     assert(_cellColumns > cell.position.x);
 
     const auto index = CellIdToInt(id);
 
-    const Cell& oldCell = _cells[index];
-    if (oldCell.type != Type::Dummy) {
-        _searchProxy.Remove(id);
-    }
+    _searchProxy.Remove(id);
     _cells[index] = cell;
     _searchProxy.Add(id);
 }
 
-const Cell& World::Get(CellId id) const
+const Cell& Field::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
     return _cells[index];
 }
 
-void World::Remove(CellId id)
+void Field::Remove(CellId id)
 {
-    const auto index = CellIdToInt(id);
     _searchProxy.Remove(id);
-    _cells[index].type = Type::Dummy;
     _freeIds.push_back(id);
 }
 
-std::vector<CellId> World::Find(const sf::Vector2u& position) const
+std::vector<CellId> Field::Find(const sf::Vector2u& position) const
 {
     return _searchProxy.Find(position);
 }

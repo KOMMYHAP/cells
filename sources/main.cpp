@@ -1,35 +1,37 @@
-#include "world.h"
+#include "field.h"
 
-void PrintWorld(const World& w)
+void PrintWorld(const Field& w)
 {
     for (auto& c : w) {
-        std::cout << std::format("({0}; {1}): {2}\n", c.position.x, c.position.y, TypeToStr(c.type));
+        std::cout << std::format("({0}; {1}\n", c.position.x, c.position.y);
     }
     std::cout << std::endl;
 }
 
+
+
 int main()
 {
-    World w { 5, 20 };
+    Field field { 5, 20 };
 
-    auto id1 = w.Create(Cell { Type::Unit, sf::Vector2u { 1, 1 } });
-    auto id2 = w.Create(Cell { Type::Unit, sf::Vector2u { 1, 2 } });
-    auto id3 = w.Create(Cell { Type::Unit, sf::Vector2u { 1, 3 } });
-    auto id4 = w.Create(Cell { Type::Food, sf::Vector2u { 2, 2 } });
-    PrintWorld(w);
+    auto id1 = field.Create(Cell { {}, sf::Vector2u { 1, 1 } });
+    auto id2 = field.Create(Cell { {}, sf::Vector2u { 1, 2 } });
+    auto id3 = field.Create(Cell { {}, sf::Vector2u { 1, 3 } });
+    auto id4 = field.Create(Cell { {}, sf::Vector2u { 2, 2 } });
+    PrintWorld(field);
 
-    w.Remove(id1);
-    PrintWorld(w);
+    field.Remove(id1);
+    PrintWorld(field);
 
-    auto& cell = w.Get(id2);
-    PrintWorld(w);
+    auto& cell = field.Get(id2);
+    PrintWorld(field);
 
-    w.Update(id3, Cell { Type::Wall, sf::Vector2u { 3, 3 } });
-    PrintWorld(w);
+    field.Move(id3, Cell { {}, sf::Vector2u { 3, 3 } });
+    PrintWorld(field);
 
-    auto cells = w.Find({ 3, 3 });
-    auto id5 = w.Create(Cell { Type::Unit, sf::Vector2u { 3, 3 } });
-    cells = w.Find({ 3, 3 });
+    auto cells = field.Find({ 3, 3 });
+    auto id5 = field.Create(Cell { {}, sf::Vector2u { 3, 3 } });
+    cells = field.Find({ 3, 3 });
 
     sf::Window window(sf::VideoMode(800, 600), "My window");
     window.setFramerateLimit(60);

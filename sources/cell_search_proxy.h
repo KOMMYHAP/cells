@@ -2,11 +2,11 @@
 
 #include "cell.h"
 
-class World;
+class Field;
 
 class CellSearchProxy {
 public:
-    CellSearchProxy(World& world, uint32_t width, uint32_t height);
+    CellSearchProxy(Field& world, uint32_t width, uint32_t height);
     CellSearchProxy(const CellSearchProxy&) = delete;
     CellSearchProxy(CellSearchProxy&&) = delete;
     ~CellSearchProxy();
@@ -29,7 +29,7 @@ private:
     }
 
 private:
-    World& _world;
+    Field& _world;
 
     constexpr static uint32_t _quadTreeMemorySize = 40;
     constexpr static uint32_t _quadTreeAlignment = 8;
