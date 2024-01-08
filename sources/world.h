@@ -17,8 +17,6 @@ public:
     auto end() { return MakeSpan().end(); }
     auto begin() const { return MakeSpan().begin(); }
     auto end() const { return MakeSpan().end(); }
-    auto cbegin() const { return MakeSpan().begin(); }
-    auto cend() const { return MakeSpan().end(); }
 
 private:
     CellId MakeNextId();
@@ -26,6 +24,7 @@ private:
     std::span<Cell> MakeSpan() { return std::span { _cells.begin(), _cells.end() }; }
     std::span<const Cell> MakeSpan() const { return std::span { _cells.begin(), _cells.end() }; }
 
+private:
     std::vector<Cell> _cells;
     std::vector<CellId> _freeIds;
     CellId _nextId { 0 };

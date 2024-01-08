@@ -7,6 +7,8 @@ class World;
 class CellSearchProxy {
 public:
     CellSearchProxy(World& world, uint32_t width, uint32_t height);
+    CellSearchProxy(const CellSearchProxy&) = delete;
+    CellSearchProxy(CellSearchProxy&&) = delete;
     ~CellSearchProxy();
 
     std::vector<CellId> Find(const sf::Vector2u& position) const;
