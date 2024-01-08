@@ -1,26 +1,12 @@
 #include "brain.h"
+#include "brain_view.h"
 #include "cell.h"
 
-static_assert(sizeof(Cell::brainSize) >= sizeof(BrainInfo));
+static_assert(Cell::brainSize >= sizeof(BrainInfo));
 
 Brain::Brain(Cell& cell)
     : _cell(cell)
 {
-}
-
-CellType Brain::GetType() const
-{
-    return GetBrainInfo().type;
-}
-
-BrainInfo& Brain::GetBrainInfo()
-{
-    return *reinterpret_cast<BrainInfo*>(_cell.brain);
-}
-
-const BrainInfo& Brain::GetBrainInfo() const
-{
-    return *reinterpret_cast<const BrainInfo*>(_cell.brain);
 }
 
 void Brain::Process()
@@ -32,7 +18,7 @@ void Brain::Process()
         memory
     };
 
-    switch (GetType()) {
+    switch (BrainView(_cell).GetType()) {
     case CellType::Unit:
         ProcessUnit(brainData);
         break;

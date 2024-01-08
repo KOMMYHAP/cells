@@ -10,13 +10,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE cells-simulation)
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        dummy.cpp
+        world_render.cpp
+        cell_render.cpp
         pch.h)
 
 
 # add headers
-#target_sources(${PROJECT_NAME} PRIVATE )
-#target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_sources(${PROJECT_NAME} PRIVATE
+        world_render.h
+        cell_render.h)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 # add pch

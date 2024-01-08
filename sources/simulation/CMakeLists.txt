@@ -12,20 +12,22 @@ target_link_libraries(${PROJECT_NAME} PRIVATE quadtree)
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        field.cpp
         cell.cpp
+        field.cpp
         cell_search_proxy.cpp
         brain.cpp
+        brain_view.cpp
         simulation.cpp
         pch.h)
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        field.h
         cell.h
+        field.h
         cell_search_proxy.h
         brain.h
+        brain_view.h
         simulation.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

@@ -1,9 +1,12 @@
 #include "field.h"
+#include "brain.h"
+#include "brain_view.h"
 
-Field::Field(uint32_t cellRows, uint32_t cellColumns)
+Field::Field(uint32_t cellRows, uint32_t cellColumns, const Cell& empty)
     : _searchProxy(*this, cellColumns, cellRows)
     , _cellRows(cellRows)
     , _cellColumns(cellColumns)
+    , _emptyCell(empty)
 {
     const uint32_t cellsCount = cellRows * cellColumns;
 
@@ -12,7 +15,7 @@ Field::Field(uint32_t cellRows, uint32_t cellColumns)
     for (auto it = _freeIds.rbegin(); it != _freeIds.rend(); ++it) {
         *it = MakeNextId();
     }
-    _cells.resize(cellsCount);
+    _cells.resize(cellsCount, _emptyCell);
 }
 
 CellId Field::MakeNextId()
@@ -47,8 +50,8 @@ CellId Field::Create(const Cell& cell)
 
 void Field::Move(CellId id, const Cell& cell)
 {
-    assert(_cellRows > cell.position.y);
-    assert(_cellColumns > cell.position.x);
+    assert(_cellRows > cell.GetBrain().GetPosition().y);
+    assert(_cellColumns > cell.GetBrain().GetPosition().x);
 
     const auto index = CellIdToInt(id);
 
@@ -66,6 +69,8 @@ const Cell& Field::Get(CellId id) const
 void Field::Remove(CellId id)
 {
     _searchProxy.Remove(id);
+    const auto index = CellIdToInt(id);
+    _cells[index].GetBrain().AccessType() = CellType::Dummy;
     _freeIds.push_back(id);
 }
 

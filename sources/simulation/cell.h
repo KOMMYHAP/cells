@@ -1,5 +1,8 @@
 #pragma once
 
+class Brain;
+class BrainView;
+
 enum class CellId : uint32_t {
     Invalid = std::numeric_limits<uint32_t>::max()
 };
@@ -7,7 +10,9 @@ enum class CellId : uint32_t {
 constexpr auto CellIdToInt(CellId id) { return static_cast<std::underlying_type_t<CellId>>(id); }
 
 struct Cell {
-    static constexpr uint32_t brainSize = 55;
+    static constexpr uint32_t brainSize = 64;
     std::byte brain[brainSize];
-    sf::Vector2u position;
+
+    Brain GetBrain();
+    BrainView GetBrain() const;
 };

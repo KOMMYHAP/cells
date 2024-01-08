@@ -4,7 +4,7 @@
 
 class Field {
 public:
-    Field(uint32_t cellRows, uint32_t cellColumns);
+    Field(uint32_t cellRows, uint32_t cellColumns, const Cell& empty);
 
     CellId Create(const Cell& cell);
     void Move(CellId id, const Cell& cell);
@@ -31,4 +31,5 @@ private:
     CellSearchProxy _searchProxy;
     uint32_t _cellRows { 0 };
     uint32_t _cellColumns { 0 };
+    const Cell _emptyCell;
 };
