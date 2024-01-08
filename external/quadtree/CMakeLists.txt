@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
-project(QuadTree)
+project(quadtree)
 
 set(CMAKE_CXX_STANDARD 17)
 

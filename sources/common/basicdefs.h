@@ -1,9 +1,5 @@
 #pragma once
 
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#include <SFML/System.hpp>
-
 // C
 #ifndef _GLIBCXX_NO_ASSERT
 #include <cassert>
