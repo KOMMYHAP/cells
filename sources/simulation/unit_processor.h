@@ -15,9 +15,9 @@ enum class UnitCommand : uint8_t {
 
 enum class UnitControlFlags : uint8_t {
     None = 0x00,
-    ExecuteYetAnotherOne = 0x01,
-    CommandOutOfRange = 0x01,
-    OutOfField = 0x02
+    ExecuteYetAnotherOne = 1 << 1,
+    CommandOutOfRange = 1 << 2,
+    OutOfField = 1 << 3
 };
 enum class Direction : uint8_t {
     Left,
@@ -36,11 +36,6 @@ struct UnitControlBlock {
     UnitControlFlags flags;
 };
 #pragma pack(pop)
-
-struct UnitData {
-    UnitCommand action;
-    Direction moveDirection;
-};
 
 class UnitProcessor {
 public:

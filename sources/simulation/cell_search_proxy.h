@@ -31,7 +31,7 @@ private:
 private:
     Field& _world;
 
-    constexpr static uint32_t _quadTreeMemorySize = 40;
+    constexpr static uint32_t _quadTreeMemorySize = 32;
     constexpr static uint32_t _quadTreeAlignment = 8;
     alignas(_quadTreeAlignment) std::byte _quadtreeMemory[_quadTreeMemorySize];
 };

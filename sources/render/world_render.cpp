@@ -1,7 +1,8 @@
 #include "world_render.h"
 
-WorldRender::WorldRender(Field& field)
+WorldRender::WorldRender(Field& field, CellRender::Config cellRenderConfig)
     : _field(field)
+    , _cellRender(std::move(cellRenderConfig))
 {
 }
 

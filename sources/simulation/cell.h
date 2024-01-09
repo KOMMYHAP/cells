@@ -10,9 +10,10 @@ enum class CellId : uint32_t {
 constexpr auto CellIdToInt(CellId id) { return static_cast<std::underlying_type_t<CellId>>(id); }
 
 struct Cell {
-    static constexpr uint32_t brainSize = 64;
+    static constexpr uint8_t brainSize = 255;
     std::byte brain[brainSize] {};
 
     Brain GetBrain();
     BrainView GetBrain() const;
 };
+

@@ -4,14 +4,18 @@ struct Cell;
 
 class CellRender {
 public:
-    CellRender();
+    struct Config {
+        float paddingLeft;
+        float paddingTop;
+        float cellSize;
+        sf::Vector2f fieldOffset;
+        std::vector<sf::Color> colors;
+    };
+
+    CellRender(Config config);
 
     void Render(sf::RenderTarget& target, const Cell& cell);
 
 private:
-    const float _paddingLeft;
-    const float _paddingTop;
-    const float _cellSize;
-    const sf::Vector2f _fieldOffset;
-    std::vector<sf::Color> _colors;
+    const Config _config;
 };

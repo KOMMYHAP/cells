@@ -2,11 +2,10 @@
 #include "brain.h"
 #include "brain_view.h"
 
-Field::Field(uint32_t cellRows, uint32_t cellColumns, const Cell& empty)
+Field::Field(uint32_t cellRows, uint32_t cellColumns)
     : _searchProxy(*this, cellColumns, cellRows)
     , _cellRows(cellRows)
     , _cellColumns(cellColumns)
-    , _emptyCell(empty)
 {
     const uint32_t cellsCount = cellRows * cellColumns;
     assert(cellsCount > 0);
@@ -16,6 +15,8 @@ Field::Field(uint32_t cellRows, uint32_t cellColumns, const Cell& empty)
     for (auto it = _freeIds.rbegin(); it != _freeIds.rend(); ++it) {
         *it = MakeNextId();
     }
+
+    _emptyCell.GetBrain().AccessInfo().type = CellType::Dummy;
     _cells.resize(cellsCount, _emptyCell);
 }
 

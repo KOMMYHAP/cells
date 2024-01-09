@@ -66,7 +66,6 @@ void UnitProcessor::Process()
         return;
     }
     UnitControlBlock& controlBlock = brainData.Pop<UnitControlBlock>();
-
     if (HasFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange)) {
         return;
     }
@@ -138,13 +137,13 @@ void UnitProcessor::ExecuteCommand()
         const auto direction = brainData.Pop<Direction>();
         auto& modifiedPosition = _brain.AccessInfo().position;
         const bool applied = TryApplyDirection(modifiedPosition, _field.GetPositionLimits(), direction);
-        if (!applied) {
+        if (applied != 0) {
+            // todo: propagate CellId
+            // _field.NotifyMoved(CellId { 0 });
+        } else {
             SetFlag(controlBlock.flags, UnitControlFlags::OutOfField);
-            break;
         }
 
-        // todo: propage CellId
-        _field.NotifyMoved(CellId { 0 });
         controlBlock.nextCommand += 2;
     } break;
     case UnitCommand::Look: {

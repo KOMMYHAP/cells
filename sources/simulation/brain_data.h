@@ -14,7 +14,7 @@ public:
 
     void Move(uint8_t offset);
 
-    uint8_t Size() const { return static_cast<uint8_t>(memory.size()); }
+    uint8_t Size() const { return memory.size(); }
 
     template <class T>
     bool HasBytes() const;
@@ -28,6 +28,7 @@ private:
 template <class T>
 T& BrainData::Pop()
 {
+    assert(HasBytes<T>());
     T& value = *reinterpret_cast<T*>(memory.data());
     Move<T>();
     return value;

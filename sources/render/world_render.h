@@ -5,7 +5,7 @@
 
 class WorldRender {
 public:
-    WorldRender(Field& field);
+    WorldRender(Field& field, CellRender::Config cellRenderConfig);
 
     void Render(sf::RenderTarget& target);
 

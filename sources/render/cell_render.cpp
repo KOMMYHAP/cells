@@ -2,16 +2,11 @@
 #include "brain.h"
 #include "cell.h"
 
-CellRender::CellRender()
-    : _paddingLeft(8.0f)
-    , _paddingTop(8.0f)
-    , _cellSize(16.0f)
-    , _fieldOffset(25.0f, 25.0f)
+CellRender::CellRender(Config config)
+    : _config(std::move(config))
 {
-    _colors.resize(3);
-    _colors[static_cast<int>(CellType::Unit)] = sf::Color(sf::Color::Green);
-    _colors[static_cast<int>(CellType::Food)] = sf::Color(sf::Color::Red);
-    _colors[static_cast<int>(CellType::Wall)] = sf::Color(sf::Color::Black);
+    // unit + wall + food
+    assert(_config.colors.size() == 3);
 }
 
 void CellRender::Render(sf::RenderTarget& target, const Cell& cell)
@@ -22,13 +17,14 @@ void CellRender::Render(sf::RenderTarget& target, const Cell& cell)
     }
 
     sf::RectangleShape shape;
-    shape.setSize({ _cellSize, _cellSize });
+    shape.setSize({ _config.cellSize, _config.cellSize });
 
-    const sf::Color color = _colors[static_cast<int>(type)];
+    const sf::Color color = _config.colors[static_cast<int>(type)];
     shape.setFillColor(color);
+    shape.setOutlineColor(color);
 
-    const float x = _fieldOffset.x + (_paddingLeft + _cellSize) * static_cast<float>(cell.GetBrain().GetPosition().x);
-    const float y = _fieldOffset.y + (_paddingTop + _cellSize) * static_cast<float>(cell.GetBrain().GetPosition().y);
+    const float x = _config.fieldOffset.x + (_config.paddingLeft + _config.cellSize) * static_cast<float>(cell.GetBrain().GetPosition().x);
+    const float y = _config.fieldOffset.y + (_config.paddingTop + _config.cellSize) * static_cast<float>(cell.GetBrain().GetPosition().y);
     shape.setPosition(x, y);
 
     target.draw(shape);
