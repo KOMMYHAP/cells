@@ -12,7 +12,7 @@ Brain::Brain(Cell& cell)
 
 CellInfo& Brain::AccessInfo() { return *reinterpret_cast<CellInfo*>(_cell.brain); }
 
-Memory Brain::Access()
+Memory Brain::AccessMemory()
 {
     const auto memory = std::span { _cell.brain + sizeof(CellInfo), _cell.brain + Cell::brainSize };
     return Memory { memory };

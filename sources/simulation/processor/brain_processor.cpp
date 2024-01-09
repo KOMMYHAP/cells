@@ -62,7 +62,7 @@ BrainProcessor::BrainProcessor(CellId cellId, Brain& brain, Field& field)
 
 void BrainProcessor::Process()
 {
-    Memory brainData = _brain.Access();
+    Memory brainData = _brain.AccessMemory();
     if (!brainData.HasBytes<BrainControlBlock>()) {
         assert(false);
         return;
@@ -88,7 +88,7 @@ Cell BrainProcessor::MakeDefaultUnit()
     Brain brain { defaultUnitCell };
     brain.AccessInfo().type = CellType::Unit;
 
-    Memory brainData = brain.Access();
+    Memory brainData = brain.AccessMemory();
     if (!brainData.HasBytes(sizeof(BrainControlBlock) + sizeof(CommandParam) * 2)) {
         assert(false);
         return Cell();
@@ -106,7 +106,7 @@ Cell BrainProcessor::MakeDefaultUnit()
 
 void BrainProcessor::ProcessCommand()
 {
-    Memory brainData = _brain.Access();
+    Memory brainData = _brain.AccessMemory();
     BrainControlBlock& controlBlock = brainData.Get<BrainControlBlock>();
 
     SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne, false);

@@ -21,7 +21,7 @@ Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, con
     Brain brain { cell };
     brain.AccessInfo().position = position;
 
-    Memory dataScope = brain.Access();
+    Memory dataScope = brain.AccessMemory();
     BrainControlBlock& controlBlock = dataScope.Get<BrainControlBlock>();
 
     constexpr uint8_t moveCommandSize = static_cast<uint8_t>(sizeof(CommandParam) + sizeof(Direction));

@@ -12,7 +12,7 @@ public:
     BrainBase(Unit& cell);
 
     const CellInfo& GetInfo() const;
-    ConstMemory GetView() const;
+    ConstMemory GetMemory() const;
 
 protected:
     Unit& _cell;
@@ -25,7 +25,7 @@ public:
     Brain(Cell& cell);
 
     CellInfo& AccessInfo();
-    Memory Access();
+    Memory AccessMemory();
 };
 
 class ConstBrain : public Details::BrainBase<const Cell> {

@@ -1,5 +1,7 @@
 #pragma once
 
+struct Cell;
+
 namespace Details {
 
 template <class Unit>
@@ -33,6 +35,7 @@ protected:
 
 class Memory : public Details::MemoryBase<std::byte> {
 public:
+    Memory(Cell& cell);
     Memory(std::span<std::byte> memory);
 
     template <class T>
@@ -48,6 +51,7 @@ private:
 
 class ConstMemory : public Details::MemoryBase<const std::byte> {
 public:
+    ConstMemory(const Cell& cell);
     ConstMemory(std::span<const std::byte> memory);
 };
 
