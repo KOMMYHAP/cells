@@ -21,19 +21,19 @@ Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, con
     Brain brain { cell };
     brain.AccessInfo().position = position;
 
-    Memory dataScope = brain.AccessMemory();
-    BrainControlBlock& controlBlock = dataScope.Get<BrainControlBlock>();
+    Memory memory = brain.AccessMemory();
+    BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();
 
     constexpr uint8_t moveCommandSize = static_cast<uint8_t>(sizeof(CommandParam) + sizeof(Direction));
     controlBlock.nextCommand = offset * moveCommandSize;
 
     for (int i = 0; i < moveCommandsCount; ++i) {
-        dataScope.Write(UnitCommand::Move, Direction::Right);
+        memory.Write(UnitCommand::Move, Direction::Right);
     }
     for (int i = 0; i < moveCommandsCount; ++i) {
-        dataScope.Write(UnitCommand::Move, Direction::Left);
+        memory.Write(UnitCommand::Move, Direction::Left);
     }
-    dataScope.Write(SystemCommand::Jump, CommandParam { 0 });
+    memory.Write(SystemCommand::Jump, CommandParam { 0 });
 
     return cell;
 }

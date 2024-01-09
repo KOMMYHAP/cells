@@ -88,46 +88,46 @@ Cell BrainProcessor::MakeDefaultUnit()
     Brain brain { defaultUnitCell };
     brain.AccessInfo().type = CellType::Unit;
 
-    Memory brainData = brain.AccessMemory();
-    if (!brainData.HasBytes(sizeof(BrainControlBlock) + sizeof(CommandParam) * 2)) {
+    Memory memory = brain.AccessMemory();
+    if (!memory.HasBytes(sizeof(BrainControlBlock) + sizeof(CommandParam) * 2)) {
         assert(false);
         return Cell();
     }
 
-    BrainControlBlock& controlBlock = brainData.Get<BrainControlBlock>();
+    BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();
     controlBlock = BrainControlBlock {};
     controlBlock.commandOffset = 0;
     controlBlock.flags = CommandControlFlags::None;
 
-    brainData.Write(SystemCommand::Jump, CommandParam{0});
+    memory.Write(SystemCommand::Jump, CommandParam { 0 });
 
     return defaultUnitCell;
 }
 
 void BrainProcessor::ProcessCommand()
 {
-    Memory brainData = _brain.AccessMemory();
-    BrainControlBlock& controlBlock = brainData.Get<BrainControlBlock>();
+    Memory memory = _brain.AccessMemory();
+    BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();
 
     SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne, false);
     SetFlag(controlBlock.flags, CommandControlFlags::OutOfField, false);
 
-    if (!brainData.HasBytes(controlBlock.nextCommand)) {
+    if (!memory.HasBytes(controlBlock.nextCommand)) {
         SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
         return;
     }
-    brainData.Move(controlBlock.nextCommand);
+    memory.Move(controlBlock.nextCommand);
 
-    if (!brainData.HasBytes<UnitCommand>()) {
+    if (!memory.HasBytes<UnitCommand>()) {
         SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
         return;
     }
-    const auto param = brainData.Get<CommandParam>();
+    const auto param = memory.Get<CommandParam>();
 
     if (param.value < SystemCommandCount) {
-        ProcessSystemCommand(controlBlock, brainData, static_cast<SystemCommand>(param.value));
+        ProcessSystemCommand(controlBlock, memory, static_cast<SystemCommand>(param.value));
     } else if (param.value >= SystemCommandCount && param.value < SystemCommandCount + UnitCommandCount) {
-        ProcessUnitCommand(controlBlock, brainData, static_cast<UnitCommand>(param.value));
+        ProcessUnitCommand(controlBlock, memory, static_cast<UnitCommand>(param.value));
     }
 }
 
@@ -135,6 +135,7 @@ void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memor
 {
     switch (command) {
     case SystemCommand::Nope:
+        controlBlock.nextCommand += 1;
         break;
     case SystemCommand::JumpIf: {
         if (!brainData.HasBytes<CommandParam>()) {
