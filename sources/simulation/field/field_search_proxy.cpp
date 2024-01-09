@@ -1,6 +1,6 @@
-#include "cell_search_proxy.h"
+#include "field_search_proxy.h"
 #include "Quadtree.h"
-#include "brain.h"
+#include "brain/brain.h"
 #include "field.h"
 
 namespace {
@@ -33,7 +33,7 @@ struct CellBoxProvider {
 using QuadTree = quadtree::Quadtree<CellId, CellBoxProvider, std::equal_to<CellId>, QuadTreeUnit>;
 }
 
-CellSearchProxy::CellSearchProxy(Field& world, uint32_t width, uint32_t height)
+FieldSearchProxy::FieldSearchProxy(Field& world, uint32_t width, uint32_t height)
     : _world(world)
 {
     auto boxProvider = CellBoxProvider { _world };
@@ -45,24 +45,24 @@ CellSearchProxy::CellSearchProxy(Field& world, uint32_t width, uint32_t height)
     new (_quadtreeMemory) QuadTree(QuadTreeBox { 0, 0, boxWidth, boxHeight }, boxProvider);
 }
 
-CellSearchProxy::~CellSearchProxy()
+FieldSearchProxy::~FieldSearchProxy()
 {
     As<QuadTree>().~QuadTree();
 }
 
-std::vector<CellId> CellSearchProxy::Find(const sf::Vector2u& position) const
+std::vector<CellId> FieldSearchProxy::Find(const sf::Vector2u& position) const
 {
     const auto box = CellPositionToBox(position);
     std::vector<CellId> ids = As<QuadTree>().query(box);
     return ids;
 }
 
-void CellSearchProxy::Add(CellId id)
+void FieldSearchProxy::Add(CellId id)
 {
     As<QuadTree>().add(id);
 }
 
-void CellSearchProxy::Remove(CellId id)
+void FieldSearchProxy::Remove(CellId id)
 {
     As<QuadTree>().remove(id);
 }

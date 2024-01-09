@@ -1,5 +1,5 @@
 #include "field.h"
-#include "brain.h"
+#include "brain/brain.h"
 
 Field::Field(uint32_t cellRows, uint32_t cellColumns)
     : _searchProxy(*this, cellColumns, cellRows)

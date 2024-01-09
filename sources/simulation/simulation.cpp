@@ -1,8 +1,8 @@
 #include "simulation.h"
-#include "brain.h"
-#include "field.h"
-#include "field_iterator.h"
-#include "unit_processor.h"
+#include "brain/brain.h"
+#include "field/field.h"
+#include "field/field_iterator.h"
+#include "processor/brain_processor.h"
 
 Simulation::Simulation(Field& field)
     : _field(field)
@@ -29,7 +29,7 @@ void Simulation::Tick()
 
         switch (brain.GetInfo().type) {
         case CellType::Unit: {
-            UnitProcessor processor { cellId, brain, _field };
+            BrainProcessor processor { cellId, brain, _field };
             processor.Process();
         } break;
         case CellType::Food:

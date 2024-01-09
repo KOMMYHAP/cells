@@ -1,5 +1,5 @@
 #include "world_render.h"
-#include "field_iterator.h"
+#include "field/field_iterator.h"
 
 WorldRender::WorldRender(Field& field, CellRender::Config cellRenderConfig)
     : _field(field)

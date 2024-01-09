@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cell.h"
+#include "brain/cell.h"
 #include "field.h"
 
 namespace Details {

@@ -10,32 +10,21 @@ target_link_libraries(${PROJECT_NAME} PUBLIC sfml-system)
 target_link_libraries(${PROJECT_NAME} PRIVATE quadtree)
 
 
+# add sub sources
+add_subdirectory(brain)
+add_subdirectory(field)
+add_subdirectory(processor)
+
+
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        cell.cpp
-        field.cpp
-        cell_search_proxy.cpp
-        brain.cpp
-        brain_data.cpp
-        field_iterator.cpp
         simulation.cpp
-        unit_processor.cpp
         pch.h)
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        cell.h
-        field.h
-        cell_search_proxy.h
-        brain.h
-        brain_data.h
-        brain_data.hpp
-        brain_packed_data.h
-        field_iterator.h
-        field_iterator.hpp
-        simulation.h
-        unit_processor.h)
+        simulation.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 

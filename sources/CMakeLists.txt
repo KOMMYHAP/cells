@@ -13,3 +13,4 @@ add_subdirectory(render)
 # Main
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE cells-simulation cells-render)
+target_precompile_headers(${PROJECT_NAME} PRIVATE common/basicdefs.h)

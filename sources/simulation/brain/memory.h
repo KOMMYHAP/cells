@@ -1,13 +1,11 @@
 #pragma once
 
-#include <cassert>
-
 namespace Details {
 
 template <class Unit>
-class BrainDataBase {
+class MemoryBase {
 public:
-    BrainDataBase(std::span<Unit> memory);
+    MemoryBase(std::span<Unit> memory);
 
     template <class T>
     const T& Get();
@@ -30,17 +28,17 @@ protected:
 
 }
 
-class BrainData : public Details::BrainDataBase<std::byte> {
+class Memory : public Details::MemoryBase<std::byte> {
 public:
-    BrainData(std::span<std::byte> memory);
+    Memory(std::span<std::byte> memory);
 
     template <class T>
     T& Pop();
 };
 
-class ConstBrainData : public Details::BrainDataBase<const std::byte> {
+class ConstMemory : public Details::MemoryBase<const std::byte> {
 public:
-    ConstBrainData(std::span<const std::byte> memory);
+    ConstMemory(std::span<const std::byte> memory);
 };
 
-#include "brain_data.hpp"
+#include "memory.hpp"

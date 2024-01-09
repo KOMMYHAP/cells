@@ -1,15 +1,15 @@
 #pragma once
 
-#include "cell.h"
+#include "brain/cell.h"
 
 class Field;
 
-class CellSearchProxy {
+class FieldSearchProxy {
 public:
-    CellSearchProxy(Field& world, uint32_t width, uint32_t height);
-    CellSearchProxy(const CellSearchProxy&) = delete;
-    CellSearchProxy(CellSearchProxy&&) = delete;
-    ~CellSearchProxy();
+    FieldSearchProxy(Field& world, uint32_t width, uint32_t height);
+    FieldSearchProxy(const FieldSearchProxy&) = delete;
+    FieldSearchProxy(FieldSearchProxy&&) = delete;
+    ~FieldSearchProxy();
 
     std::vector<CellId> Find(const sf::Vector2u& position) const;
 

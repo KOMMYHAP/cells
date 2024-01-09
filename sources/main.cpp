@@ -1,16 +1,10 @@
-#include <csignal>
-#include <cstdint>
-#include <limits>
-#include <span>
-#include <vector>
-
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
-#include "brain.h"
-#include "field.h"
+#include "brain/brain.h"
+#include "field/field.h"
+#include "processor/brain_processor.h"
 #include "simulation.h"
-#include "unit_processor.h"
 #include "world_render.h"
 
 void signalHandler(int signal)
@@ -23,32 +17,32 @@ void signalHandler(int signal)
 
 Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, const uint16_t moveCommandsCount)
 {
-    Cell cell = UnitProcessor::MakeDefaultUnit();
+    Cell cell = BrainProcessor::MakeDefaultUnit();
     Brain brain { cell };
     brain.AccessInfo().position = position;
 
-    BrainData dataScope = brain.AccessData();
-    UnitControlBlock& controlBlock = dataScope.Pop<UnitControlBlock>();
+    Memory dataScope = brain.Access();
+    BrainControlBlock& controlBlock = dataScope.Pop<BrainControlBlock>();
 
-    constexpr uint8_t moveCommandSize = static_cast<uint8_t>(sizeof(UnitCommandParam) + sizeof(Direction));
+    constexpr uint8_t moveCommandSize = static_cast<uint8_t>(sizeof(CommandParam) + sizeof(Direction));
     controlBlock.nextCommand = offset * moveCommandSize;
 
     for (int i = 0; i < moveCommandsCount; ++i) {
-        UnitCommandParam& move = dataScope.Pop<UnitCommandParam>();
+        CommandParam& move = dataScope.Pop<CommandParam>();
         move.value = static_cast<std::underlying_type_t<UnitCommand>>(UnitCommand::Move);
         Direction& direction = dataScope.Pop<Direction>();
         direction = Direction::Right;
     }
     for (int i = 0; i < moveCommandsCount; ++i) {
-        UnitCommandParam& move = dataScope.Pop<UnitCommandParam>();
+        CommandParam& move = dataScope.Pop<CommandParam>();
         move.value = static_cast<std::underlying_type_t<UnitCommand>>(UnitCommand::Move);
         Direction& direction = dataScope.Pop<Direction>();
         direction = Direction::Left;
     }
     {
-        UnitCommandParam& jump = dataScope.Pop<UnitCommandParam>();
+        CommandParam& jump = dataScope.Pop<CommandParam>();
         jump.value = static_cast<std::underlying_type_t<SystemCommand>>(SystemCommand::Jump);
-        UnitCommandParam& destination = dataScope.Pop<UnitCommandParam>();
+        CommandParam& destination = dataScope.Pop<CommandParam>();
         destination.value = 0;
     }
 
@@ -97,7 +91,7 @@ int main()
     for (int x = 0; x < columnsCount; ++x) {
         Cell cell;
         Brain brain { cell };
-        BrainInfo& info = brain.AccessInfo();
+        CellInfo& info = brain.AccessInfo();
         info.position = sf::Vector2<uint16_t>(x, 0);
         info.type = CellType::Wall;
         field.Create(cell);
@@ -108,7 +102,7 @@ int main()
     for (int y = 0; y < rowsCount; ++y) {
         Cell cell;
         Brain brain { cell };
-        BrainInfo& info = brain.AccessInfo();
+        CellInfo& info = brain.AccessInfo();
         info.position = sf::Vector2<uint16_t>(0, y);
         info.type = CellType::Wall;
         field.Create(cell);

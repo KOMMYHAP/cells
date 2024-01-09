@@ -20,13 +20,14 @@ enum class UnitCommand : uint8_t {
 };
 constexpr uint8_t UnitCommandCount = 2;
 
-enum class UnitControlFlags : uint8_t {
+enum class CommandControlFlags : uint8_t {
     None = 0x00,
     ExecuteYetAnotherOne = 1 << 1,
     CommandOutOfRange = 1 << 2,
     OutOfField = 1 << 3,
     InvalidCommand = 1 << 4
 };
+
 enum class Direction : uint8_t {
     Left,
     Right,
@@ -41,22 +42,20 @@ enum class CellType : uint8_t {
     Dummy
 };
 
-
 #pragma pack(push, 1)
-struct BrainInfo {
+struct CellInfo {
     CellType type;
     sf::Vector2<uint16_t> position;
 };
 
-struct UnitCommandParam {
+struct CommandParam {
     uint8_t value;
 };
 
-struct UnitControlBlock {
+struct BrainControlBlock {
+    uint8_t commandOffset;
     uint8_t nextCommand;
     uint8_t r1;
-    uint8_t r2;
-    uint8_t r3;
-    UnitControlFlags flags;
+    CommandControlFlags flags;
 };
 #pragma pack(pop)

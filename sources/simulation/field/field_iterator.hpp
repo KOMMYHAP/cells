@@ -1,8 +1,8 @@
 #pragma once
 #include <utility>
 
-#include "brain_packed_data.h"
-#include "brain.h"
+#include "brain/brain.h"
+#include "brain/brain_packed_data.h"
 
 namespace Details {
 

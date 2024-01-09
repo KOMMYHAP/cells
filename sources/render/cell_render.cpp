@@ -1,6 +1,6 @@
 #include "cell_render.h"
-#include "brain.h"
-#include "cell.h"
+#include "brain/brain.h"
+#include "brain/cell.h"
 
 CellRender::CellRender(Config config)
     : _config(std::move(config))
@@ -11,7 +11,7 @@ CellRender::CellRender(Config config)
 
 void CellRender::Render(sf::RenderTarget& target, const Cell& cell)
 {
-    const BrainInfo& info = ConstBrain(cell).GetInfo();
+    const CellInfo& info = ConstBrain(cell).GetInfo();
     const auto type = info.type;
     if (type == CellType::Dummy) {
         return;

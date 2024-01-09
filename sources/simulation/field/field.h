@@ -1,6 +1,6 @@
 #pragma once
-#include "cell.h"
-#include "cell_search_proxy.h"
+#include "brain/cell.h"
+#include "field_search_proxy.h"
 
 class Field {
     friend class FieldIterator;
@@ -26,7 +26,7 @@ private:
     std::vector<Cell> _cells;
     std::vector<CellId> _freeIds;
     CellId _nextId { 0 };
-    CellSearchProxy _searchProxy;
+    FieldSearchProxy _searchProxy;
     uint32_t _cellRows { 0 };
     uint32_t _cellColumns { 0 };
     Cell _emptyCell;
