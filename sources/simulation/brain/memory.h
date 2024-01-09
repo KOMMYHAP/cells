@@ -8,7 +8,10 @@ public:
     MemoryBase(std::span<Unit> memory);
 
     template <class T>
-    const T& Get();
+    const T& Read();
+
+    template <class T>
+    const T& Peek();
 
     template <class T>
     void Move();

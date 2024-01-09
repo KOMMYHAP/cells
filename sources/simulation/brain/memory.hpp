@@ -29,12 +29,19 @@ void MemoryBase<Unit>::Move()
 
 template <class Unit>
 template <class T>
-const T& MemoryBase<Unit>::Get()
+const T& MemoryBase<Unit>::Read()
 {
-    assert(HasBytes<T>());
-    const T& value = *reinterpret_cast<const T*>(memory.data());
+    const T& value = Peek<T>();
     Move<T>();
     return value;
+}
+
+template <class Unit>
+template <class T>
+const T& MemoryBase<Unit>::Peek()
+{
+    assert(HasBytes<T>());
+    return *reinterpret_cast<const T*>(memory.data());
 }
 
 template <class Unit>
