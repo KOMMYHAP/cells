@@ -47,7 +47,7 @@ Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, con
     }
     {
         UnitCommandParam& jump = dataScope.Pop<UnitCommandParam>();
-        jump.value = static_cast<std::underlying_type_t<UnitCommand>>(UnitCommand::Jump);
+        jump.value = static_cast<std::underlying_type_t<SystemCommand>>(SystemCommand::Jump);
         UnitCommandParam& destination = dataScope.Pop<UnitCommandParam>();
         destination.value = 0;
     }
@@ -117,10 +117,10 @@ int main()
         field.Create(cell);
     }
 
-    const uint16_t moveCommandsCount = columnsCount - 3;
+    const uint16_t moveCommandsCount = std::min(columnsCount - 3, 50);
     const uint16_t patrolCellToCreate = rowsCount - 2;
     for (int i = 0; i < patrolCellToCreate; ++i) {
-        const uint8_t moveCommandOffset = i;
+        const uint8_t moveCommandOffset = i % moveCommandsCount;
         const uint16_t patrolCellInitialPos = i + 1;
         const Cell& cell = CreatePatrolUnit(moveCommandOffset, { patrolCellInitialPos, patrolCellInitialPos }, moveCommandsCount);
         field.Create(cell);

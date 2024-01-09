@@ -70,12 +70,12 @@ void UnitProcessor::Process()
         return;
     }
 
-    ExecuteCommand();
+    ProcessCommand();
 
     constexpr int extraCommandsPerTickLimit = 1;
     for (int i = 0; i < extraCommandsPerTickLimit; ++i) {
         if (HasFlag(controlBlock.flags, UnitControlFlags::ExecuteYetAnotherOne)) {
-            ExecuteCommand();
+            ProcessCommand();
         }
     }
 }
@@ -93,20 +93,19 @@ Cell UnitProcessor::MakeDefaultUnit()
     }
 
     UnitControlBlock& controlBlock = brainData.Pop<UnitControlBlock>();
+    controlBlock = UnitControlBlock {};
     controlBlock.flags = UnitControlFlags::None;
-    controlBlock.nextCommand = 0;
-    controlBlock.result = UnitCommandParam { 0 };
 
     auto& jump = brainData.Pop<UnitCommandParam>();
-    jump.value = static_cast<std::underlying_type_t<UnitCommand>>(UnitCommand::Jump);
+    jump.value = static_cast<std::underlying_type_t<SystemCommand>>(SystemCommand::Jump);
 
     auto& jumpDestination = brainData.Pop<UnitCommandParam>();
-    jump.value = 0; // jump to command 'jump(0)'
+    jumpDestination.value = 0; // jump to command 'jump(0)'
 
     return defaultUnitCell;
 }
 
-void UnitProcessor::ExecuteCommand()
+void UnitProcessor::ProcessCommand()
 {
     BrainData brainData = _brain.AccessData();
     UnitControlBlock& controlBlock = brainData.Pop<UnitControlBlock>();
@@ -124,11 +123,59 @@ void UnitProcessor::ExecuteCommand()
         SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
         return;
     }
-    const UnitCommand command = brainData.Pop<UnitCommand>();
+    const auto param = brainData.Pop<UnitCommandParam>();
 
+    if (param.value < SystemCommandCount) {
+        ProcessSystemCommand(controlBlock, brainData, static_cast<SystemCommand>(param.value));
+    } else if (param.value >= SystemCommandCount && param.value < SystemCommandCount + UnitCommandCount) {
+        ProcessUnitCommand(controlBlock, brainData, static_cast<UnitCommand>(param.value));
+    }
+}
+
+void UnitProcessor::ProcessSystemCommand(UnitControlBlock& controlBlock, BrainData brainData, SystemCommand command)
+{
     switch (command) {
-    case UnitCommand::Nope:
+    case SystemCommand::Nope:
         break;
+    case SystemCommand::JumpIf: {
+        if (!brainData.HasBytes<UnitCommandParam>()) {
+            SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
+            break;
+        }
+        const auto condition = brainData.Pop<UnitCommandParam>();
+
+        if (!brainData.HasBytes<UnitCommandParam>()) {
+            SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
+            break;
+        }
+        const auto destination = brainData.Pop<UnitCommandParam>();
+
+        if (controlBlock.r1 == condition.value) {
+            controlBlock.nextCommand = destination.value;
+        } else {
+            controlBlock.nextCommand += 3;
+        }
+        SetFlag(controlBlock.flags, UnitControlFlags::ExecuteYetAnotherOne);
+    } break;
+    case SystemCommand::Jump: {
+        if (!brainData.HasBytes<UnitCommandParam>()) {
+            SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
+            break;
+        }
+        const auto destination = brainData.Pop<UnitCommandParam>();
+        controlBlock.nextCommand = destination.value;
+        SetFlag(controlBlock.flags, UnitControlFlags::ExecuteYetAnotherOne);
+    } break;
+    default: {
+        SetFlag(controlBlock.flags, UnitControlFlags::InvalidCommand);
+        break;
+    }
+    }
+}
+
+void UnitProcessor::ProcessUnitCommand(UnitControlBlock& controlBlock, BrainData brainData, UnitCommand command)
+{
+    switch (command) {
     case UnitCommand::Move: {
         if (!brainData.HasBytes<Direction>()) {
             SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
@@ -163,37 +210,8 @@ void UnitProcessor::ExecuteCommand()
             const Cell& cell = _field.Get(cells.back());
             type = cell.GetBrain().GetType();
         }
-        controlBlock.result.value = static_cast<std::underlying_type_t<CellType>>(type);
+        controlBlock.r1 = static_cast<std::underlying_type_t<CellType>>(type);
         controlBlock.nextCommand += 2;
-    } break;
-    case UnitCommand::JumpIf: {
-        if (!brainData.HasBytes<UnitCommandParam>()) {
-            SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
-            break;
-        }
-        const auto condition = brainData.Pop<UnitCommandParam>();
-
-        if (!brainData.HasBytes<UnitCommandParam>()) {
-            SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
-            break;
-        }
-        const auto destination = brainData.Pop<UnitCommandParam>();
-
-        if (controlBlock.result.value == condition.value) {
-            controlBlock.nextCommand = destination.value;
-        } else {
-            controlBlock.nextCommand += 3;
-        }
-        SetFlag(controlBlock.flags, UnitControlFlags::ExecuteYetAnotherOne);
-    } break;
-    case UnitCommand::Jump: {
-        if (!brainData.HasBytes<UnitCommandParam>()) {
-            SetFlag(controlBlock.flags, UnitControlFlags::CommandOutOfRange);
-            break;
-        }
-        const auto destination = brainData.Pop<UnitCommandParam>();
-        controlBlock.nextCommand = destination.value;
-        SetFlag(controlBlock.flags, UnitControlFlags::ExecuteYetAnotherOne);
     } break;
     }
 }
