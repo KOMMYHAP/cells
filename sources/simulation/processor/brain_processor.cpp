@@ -67,7 +67,7 @@ void BrainProcessor::Process()
         assert(false);
         return;
     }
-    BrainControlBlock& controlBlock = brainData.Pop<BrainControlBlock>();
+    BrainControlBlock& controlBlock = brainData.Get<BrainControlBlock>();
     if (HasFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange)) {
         return;
     }
@@ -94,15 +94,12 @@ Cell BrainProcessor::MakeDefaultUnit()
         return Cell();
     }
 
-    BrainControlBlock& controlBlock = brainData.Pop<BrainControlBlock>();
+    BrainControlBlock& controlBlock = brainData.Get<BrainControlBlock>();
     controlBlock = BrainControlBlock {};
+    controlBlock.commandOffset = 0;
     controlBlock.flags = CommandControlFlags::None;
 
-    auto& jump = brainData.Pop<CommandParam>();
-    jump.value = static_cast<std::underlying_type_t<SystemCommand>>(SystemCommand::Jump);
-
-    auto& jumpDestination = brainData.Pop<CommandParam>();
-    jumpDestination.value = 0; // jump to command 'jump(0)'
+    brainData.Write(SystemCommand::Jump, CommandParam{0});
 
     return defaultUnitCell;
 }
@@ -110,7 +107,7 @@ Cell BrainProcessor::MakeDefaultUnit()
 void BrainProcessor::ProcessCommand()
 {
     Memory brainData = _brain.Access();
-    BrainControlBlock& controlBlock = brainData.Pop<BrainControlBlock>();
+    BrainControlBlock& controlBlock = brainData.Get<BrainControlBlock>();
 
     SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne, false);
     SetFlag(controlBlock.flags, CommandControlFlags::OutOfField, false);
@@ -125,7 +122,7 @@ void BrainProcessor::ProcessCommand()
         SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
         return;
     }
-    const auto param = brainData.Pop<CommandParam>();
+    const auto param = brainData.Get<CommandParam>();
 
     if (param.value < SystemCommandCount) {
         ProcessSystemCommand(controlBlock, brainData, static_cast<SystemCommand>(param.value));
@@ -144,13 +141,13 @@ void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memor
             SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
-        const auto condition = brainData.Pop<CommandParam>();
+        const auto condition = brainData.Get<CommandParam>();
 
         if (!brainData.HasBytes<CommandParam>()) {
             SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
-        const auto destination = brainData.Pop<CommandParam>();
+        const auto destination = brainData.Get<CommandParam>();
 
         if (controlBlock.r1 == condition.value) {
             controlBlock.nextCommand = destination.value;
@@ -164,7 +161,7 @@ void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memor
             SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
-        const auto destination = brainData.Pop<CommandParam>();
+        const auto destination = brainData.Get<CommandParam>();
         controlBlock.nextCommand = destination.value;
         SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne);
     } break;
@@ -183,7 +180,7 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
             SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
-        const auto direction = brainData.Pop<Direction>();
+        const auto direction = brainData.Get<Direction>();
         auto nextPosition = _brain.AccessInfo().position;
         const bool applied = TryApplyDirection(nextPosition, _field.GetPositionLimits(), direction);
         if (applied) {
@@ -199,7 +196,7 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
             SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
-        const auto direction = brainData.Pop<Direction>();
+        const auto direction = brainData.Get<Direction>();
         auto position = _brain.AccessInfo().position;
         const bool applied = TryApplyDirection(position, _field.GetPositionLimits(), direction);
         CellType type = CellType::Dummy;

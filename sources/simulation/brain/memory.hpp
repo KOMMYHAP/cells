@@ -53,10 +53,25 @@ MemoryBase<Unit>::MemoryBase(std::span<Unit> memory)
 }
 
 template <class T>
-T& Memory::Pop()
+T& Memory::Get()
 {
     assert(HasBytes<T>());
     T& value = *reinterpret_cast<T*>(memory.data());
     Move<T>();
     return value;
+}
+
+template <class... Args>
+void Memory::Write(Args&&... args)
+{
+    if constexpr (sizeof...(args) > 0) {
+        ((WriteOne(std::forward<Args>(args))), ...);
+    }
+}
+
+template <class T>
+void Memory::WriteOne(T&& data)
+{
+    static_assert(sizeof(T) == 1);
+    Get<T>() = std::forward<T>(data);
 }

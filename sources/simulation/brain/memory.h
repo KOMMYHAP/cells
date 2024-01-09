@@ -36,7 +36,14 @@ public:
     Memory(std::span<std::byte> memory);
 
     template <class T>
-    T& Pop();
+    T& Get();
+
+    template <class... Args>
+    void Write(Args&&... args);
+
+private:
+    template <class T>
+    void WriteOne(T&& data);
 };
 
 class ConstMemory : public Details::MemoryBase<const std::byte> {

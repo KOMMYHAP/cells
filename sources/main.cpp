@@ -22,29 +22,18 @@ Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, con
     brain.AccessInfo().position = position;
 
     Memory dataScope = brain.Access();
-    BrainControlBlock& controlBlock = dataScope.Pop<BrainControlBlock>();
+    BrainControlBlock& controlBlock = dataScope.Get<BrainControlBlock>();
 
     constexpr uint8_t moveCommandSize = static_cast<uint8_t>(sizeof(CommandParam) + sizeof(Direction));
     controlBlock.nextCommand = offset * moveCommandSize;
 
     for (int i = 0; i < moveCommandsCount; ++i) {
-        CommandParam& move = dataScope.Pop<CommandParam>();
-        move.value = static_cast<std::underlying_type_t<UnitCommand>>(UnitCommand::Move);
-        Direction& direction = dataScope.Pop<Direction>();
-        direction = Direction::Right;
+        dataScope.Write(UnitCommand::Move, Direction::Right);
     }
     for (int i = 0; i < moveCommandsCount; ++i) {
-        CommandParam& move = dataScope.Pop<CommandParam>();
-        move.value = static_cast<std::underlying_type_t<UnitCommand>>(UnitCommand::Move);
-        Direction& direction = dataScope.Pop<Direction>();
-        direction = Direction::Left;
+        dataScope.Write(UnitCommand::Move, Direction::Left);
     }
-    {
-        CommandParam& jump = dataScope.Pop<CommandParam>();
-        jump.value = static_cast<std::underlying_type_t<SystemCommand>>(SystemCommand::Jump);
-        CommandParam& destination = dataScope.Pop<CommandParam>();
-        destination.value = 0;
-    }
+    dataScope.Write(SystemCommand::Jump, CommandParam { 0 });
 
     return cell;
 }
