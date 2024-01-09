@@ -55,9 +55,15 @@ void Simulation::SetAutoUpdateMode(uint32_t ticksPerSecond)
 
 void Simulation::ManualUpdate()
 {
+     sf::Clock tickClock;
+
     for (uint32_t i { 0 }; i < _ticksToUpdate; ++i) {
         Tick();
     }
+
+    const sf::Time elapsedTime = tickClock.getElapsedTime();
+    _tickProcessingTime = sf::seconds(elapsedTime.asSeconds() / _ticksToUpdate);
+
     _ticksToUpdate = 0;
 }
 

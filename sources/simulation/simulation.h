@@ -11,6 +11,8 @@ public:
 
     void Update(sf::Time elapsedTime);
 
+    sf::Time GetTickProcessingTime() const { return _tickProcessingTime; }
+
 private:
     void ManualUpdate();
     void AutoUpdate(sf::Time elapsedTime);
@@ -19,6 +21,7 @@ private:
 
     Field& _field;
     sf::Time _elapsedTime;
+    sf::Time _tickProcessingTime;
     bool _manualMode { true };
     uint32_t _ticksPerSecond { 0 };
     uint32_t _ticksToUpdate { 0 };
