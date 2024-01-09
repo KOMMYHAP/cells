@@ -17,7 +17,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_search_proxy.cpp
         brain.cpp
         brain_data.cpp
-        brain_view.cpp
         field_iterator.cpp
         simulation.cpp
         unit_processor.cpp
@@ -31,7 +30,8 @@ target_sources(${PROJECT_NAME} PUBLIC
         cell_search_proxy.h
         brain.h
         brain_data.h
-        brain_view.h
+        brain_data.hpp
+        brain_packed_data.h
         field_iterator.h
         field_iterator.hpp
         simulation.h

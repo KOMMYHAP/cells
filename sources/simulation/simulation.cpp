@@ -25,7 +25,7 @@ void Simulation::Tick()
     for (auto it = from; it != to; ++it) {
         Cell& cell = *it;
         const CellId cellId = it.GetCellId();
-        Brain brain = cell.GetBrain();
+        Brain brain { cell };
 
         switch (brain.GetInfo().type) {
         case CellType::Unit: {

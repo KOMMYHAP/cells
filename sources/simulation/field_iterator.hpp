@@ -1,7 +1,8 @@
 #pragma once
 #include <utility>
 
-#include "brain_view.h"
+#include "brain_packed_data.h"
+#include "brain.h"
 
 namespace Details {
 
@@ -51,7 +52,7 @@ template <class Cell>
 bool FieldIteratorBase<Cell>::Invalid() const
 {
     assert(_cell != _lastCell);
-    return std::as_const(*_cell).GetBrain().GetType() == CellType::Dummy;
+    return ConstBrain(*_cell).GetInfo().type == CellType::Dummy;
 }
 
 template <class Cell>

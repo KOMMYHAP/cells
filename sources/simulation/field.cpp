@@ -1,6 +1,5 @@
 #include "field.h"
 #include "brain.h"
-#include "brain_view.h"
 
 Field::Field(uint32_t cellRows, uint32_t cellColumns)
     : _searchProxy(*this, cellColumns, cellRows)
@@ -16,7 +15,8 @@ Field::Field(uint32_t cellRows, uint32_t cellColumns)
         *it = MakeNextId();
     }
 
-    _emptyCell.GetBrain().AccessInfo().type = CellType::Dummy;
+    Brain brain { _emptyCell };
+    brain.AccessInfo().type = CellType::Dummy;
     _cells.resize(cellsCount, _emptyCell);
 }
 
@@ -54,7 +54,9 @@ void Field::Move(CellId id, const sf::Vector2<uint16_t>& position)
 {
     _searchProxy.Remove(id);
     const auto index = CellIdToInt(id);
-    _cells[index].GetBrain().AccessInfo().position = position;
+    Cell& cell = _cells[index];
+    Brain brain(cell);
+    brain.AccessInfo().position = position;
     _searchProxy.Add(id);
 }
 
@@ -68,7 +70,9 @@ void Field::Remove(CellId id)
 {
     _searchProxy.Remove(id);
     const auto index = CellIdToInt(id);
-    _cells[index].GetBrain().AccessInfo().type = CellType::Dummy;
+    Cell& cell = _cells[index];
+    Brain brain(cell);
+    brain.AccessInfo().type = CellType::Dummy;
     _freeIds.push_back(id);
 }
 

@@ -24,7 +24,7 @@ void signalHandler(int signal)
 Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, const uint16_t moveCommandsCount)
 {
     Cell cell = UnitProcessor::MakeDefaultUnit();
-    Brain brain = cell.GetBrain();
+    Brain brain { cell };
     brain.AccessInfo().position = position;
 
     BrainData dataScope = brain.AccessData();
@@ -96,7 +96,7 @@ int main()
 
     for (int x = 0; x < columnsCount; ++x) {
         Cell cell;
-        Brain brain = cell.GetBrain();
+        Brain brain { cell };
         BrainInfo& info = brain.AccessInfo();
         info.position = sf::Vector2<uint16_t>(x, 0);
         info.type = CellType::Wall;
@@ -107,7 +107,7 @@ int main()
     }
     for (int y = 0; y < rowsCount; ++y) {
         Cell cell;
-        Brain brain = cell.GetBrain();
+        Brain brain { cell };
         BrainInfo& info = brain.AccessInfo();
         info.position = sf::Vector2<uint16_t>(0, y);
         info.type = CellType::Wall;

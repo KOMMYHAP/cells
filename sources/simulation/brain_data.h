@@ -2,12 +2,15 @@
 
 #include <cassert>
 
-class BrainData {
+namespace Details {
+
+template <class Unit>
+class BrainDataBase {
 public:
-    BrainData(std::span<std::byte> memory);
+    BrainDataBase(std::span<Unit> memory);
 
     template <class T>
-    T& Pop();
+    const T& Get();
 
     template <class T>
     void Move();
@@ -21,27 +24,23 @@ public:
 
     bool HasBytes(uint8_t count) const;
 
-private:
-    std::span<std::byte> memory;
+protected:
+    std::span<Unit> memory;
 };
 
-template <class T>
-T& BrainData::Pop()
-{
-    assert(HasBytes<T>());
-    T& value = *reinterpret_cast<T*>(memory.data());
-    Move<T>();
-    return value;
 }
 
-template <class T>
-void BrainData::Move()
-{
-    Move(sizeof(T));
-}
+class BrainData : public Details::BrainDataBase<std::byte> {
+public:
+    BrainData(std::span<std::byte> memory);
 
-template <class T>
-bool BrainData::HasBytes() const
-{
-    return HasBytes(sizeof(T));
-}
+    template <class T>
+    T& Pop();
+};
+
+class ConstBrainData : public Details::BrainDataBase<const std::byte> {
+public:
+    ConstBrainData(std::span<const std::byte> memory);
+};
+
+#include "brain_data.hpp"

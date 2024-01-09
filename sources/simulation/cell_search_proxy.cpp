@@ -1,6 +1,6 @@
 #include "cell_search_proxy.h"
 #include "Quadtree.h"
-#include "brain_view.h"
+#include "brain.h"
 #include "field.h"
 
 namespace {
@@ -26,7 +26,7 @@ struct CellBoxProvider {
     QuadTreeBox operator()(const CellId id) const
     {
         const Cell& cell = world.Get(id);
-        return CellPositionToBox(cell.GetBrain().GetPosition());
+        return CellPositionToBox(ConstBrain(cell).GetInfo().position);
     }
 };
 

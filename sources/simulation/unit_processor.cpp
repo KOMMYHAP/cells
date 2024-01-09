@@ -84,7 +84,7 @@ void UnitProcessor::Process()
 Cell UnitProcessor::MakeDefaultUnit()
 {
     Cell defaultUnitCell;
-    Brain brain = defaultUnitCell.GetBrain();
+    Brain brain { defaultUnitCell };
     brain.AccessInfo().type = CellType::Unit;
 
     BrainData brainData = brain.AccessData();
@@ -206,7 +206,7 @@ void UnitProcessor::ProcessUnitCommand(UnitControlBlock& controlBlock, BrainData
             std::vector<CellId> cells = _field.Find({ position.x, position.y });
             if (!cells.empty()) {
                 const Cell& cell = _field.Get(cells.back());
-                type = cell.GetBrain().GetType();
+                type = ConstBrain(cell).GetInfo().type;
             }
         } else {
             SetFlag(controlBlock.flags, UnitControlFlags::OutOfField);

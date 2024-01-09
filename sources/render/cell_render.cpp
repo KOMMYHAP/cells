@@ -11,7 +11,8 @@ CellRender::CellRender(Config config)
 
 void CellRender::Render(sf::RenderTarget& target, const Cell& cell)
 {
-    const auto type = BrainView(cell).GetType();
+    const BrainInfo& info = ConstBrain(cell).GetInfo();
+    const auto type = info.type;
     if (type == CellType::Dummy) {
         return;
     }
@@ -23,8 +24,8 @@ void CellRender::Render(sf::RenderTarget& target, const Cell& cell)
     shape.setFillColor(color);
     shape.setOutlineColor(color);
 
-    const float x = _config.fieldOffset.x + (_config.paddingLeft + _config.cellSize) * static_cast<float>(cell.GetBrain().GetPosition().x);
-    const float y = _config.fieldOffset.y + (_config.paddingTop + _config.cellSize) * static_cast<float>(cell.GetBrain().GetPosition().y);
+    const float x = _config.fieldOffset.x + (_config.paddingLeft + _config.cellSize) * static_cast<float>(info.position.x);
+    const float y = _config.fieldOffset.y + (_config.paddingTop + _config.cellSize) * static_cast<float>(info.position.y);
     shape.setPosition(x, y);
 
     target.draw(shape);
