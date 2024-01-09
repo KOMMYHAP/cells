@@ -185,7 +185,19 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
         auto nextPosition = _brain.AccessInfo().position;
         const bool applied = TryApplyDirection(nextPosition, _field.GetPositionLimits(), direction);
         if (applied) {
-            _field.Move(_cellId, nextPosition);
+            std::vector<CellId> cells = _field.Find({ nextPosition.x, nextPosition.y });
+            bool hasWall = false;
+            for (CellId id : cells) {
+                const Cell& cell = _field.Get(id);
+                ConstBrain brain { cell };
+                if (brain.GetInfo().type == CellType::Wall) {
+                    hasWall = true;
+                    break;
+                }
+            }
+            if (!hasWall) {
+                _field.Move(_cellId, nextPosition);
+            }
         } else {
             SetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
         }
