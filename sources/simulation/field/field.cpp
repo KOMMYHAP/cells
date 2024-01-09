@@ -80,3 +80,9 @@ std::vector<CellId> Field::Find(const sf::Vector2u& position) const
 {
     return _searchProxy.Find(position);
 }
+
+uint32_t Field::GetCellsCount() const
+{
+    assert(_cells.size() >= _freeIds.size());
+    return _cells.size() - _freeIds.size();
+}

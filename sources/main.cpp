@@ -65,13 +65,28 @@ void MakeTestFieldV2(Field& field)
     }
     std::shuffle(positions.begin(), positions.end(), randomEngine);
 
-    const uint16_t countLimit = std::min<uint16_t>(1000, positions.size());
+    const uint16_t percent = 40;
+    const auto countLimit = static_cast<uint16_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const uint8_t moveCommandOffset = uniformDist(randomEngine);
         const Cell& cell = CreatePatrolUnit(moveCommandOffset, position, moveCommandsCount);
         field.Create(cell);
     }
+}
+
+auto GatherTimeInfo(sf::Time time)
+{
+    const std::string_view tickUnit = time.asMilliseconds() >= 1000
+        ? "s"
+        : time.asMilliseconds() >= 1 ? "ms"
+                                     : "us";
+    const float tickTimeValue = time.asMilliseconds() >= 1000
+        ? time.asSeconds()
+        : time.asMilliseconds() >= 1 ? static_cast<float>(time.asMilliseconds())
+                                     : static_cast<float>(time.asMicroseconds());
+
+    return std::make_tuple(tickTimeValue, tickUnit);
 }
 
 int main(int argc, char** argv)
@@ -102,19 +117,14 @@ int main(int argc, char** argv)
     const uint16_t statusTextSize = 10;
     assert(statusTextOffset * 2 + statusTextSize <= fieldOffset);
 
-    const uint16_t rowsCount = 140;
-    const uint16_t columnsCount = 190;
-
-    assert(fieldWidth % columnsCount == 0);
-    assert(fieldHeight % rowsCount == 0);
-
     const uint16_t cellPadding = 0;
-    const uint16_t cellSizeX = fieldWidth / (columnsCount + cellPadding);
-    const uint16_t cellSizeY = fieldHeight / (rowsCount + cellPadding);
+    const uint16_t cellSize = 8;
 
-    assert(cellSizeX == cellSizeY);
-    assert(cellSizeX > 0);
-    const uint16_t cellSize = cellSizeX;
+    assert(fieldWidth % (cellSize + cellPadding) == 0);
+    assert(fieldHeight % (cellSize + cellPadding) == 0);
+
+    const uint16_t rowsCount = fieldHeight / (cellSize + cellPadding);
+    const uint16_t columnsCount = fieldWidth / (cellSize + cellPadding);
 
     Field field { rowsCount, columnsCount };
     Simulation simulation { field };
@@ -153,13 +163,16 @@ int main(int argc, char** argv)
     //        MakeTestFieldV1(field);
     MakeTestFieldV2(field);
 
-    simulation.SetAutoUpdateMode(100);
+    const uint16_t simulationTicksPerSecond = 100;
+
+    simulation.SetAutoUpdateMode(simulationTicksPerSecond);
 
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Cells");
     window.setVerticalSyncEnabled(false);
     //    window.setFramerateLimit(60);
 
     sf::Clock frameClock;
+    sf::Clock simulationClock;
     const sf::Color gray { 0xCCCCCCFF };
 
     sf::Text statusText;
@@ -179,21 +192,25 @@ int main(int argc, char** argv)
                 window.close();
         }
 
+        simulationClock.restart();
         simulation.Update(elapsedTime);
+        const sf::Time simulationTime = simulationClock.getElapsedTime();
 
-        const sf::Time tickTime = simulation.GetTickProcessingTime();
-        const std::string_view tickUnit = tickTime.asMilliseconds() >= 1000
-            ? "s"
-            : tickTime.asMilliseconds() >= 1 ? "ms"
-                                             : "us";
-        const float tickTimeValue = tickTime.asMilliseconds() >= 1000
-            ? tickTime.asSeconds()
-            : tickTime.asMilliseconds() >= 1 ? static_cast<float>(tickTime.asMilliseconds())
-                                             : static_cast<float>(tickTime.asMicroseconds());
+        const auto [tickTimeValue, tickUnit] = GatherTimeInfo(simulation.GetTickProcessingTime());
+        const auto [frameTimeValue, frameUnit] = GatherTimeInfo(elapsedTime);
+        const auto [simulationTimeValue, simulationTimeUnit] = GatherTimeInfo(simulationTime);
 
-        const float fps = 1 / elapsedTime.asSeconds();
+        const float fps = elapsedTime != sf::Time::Zero ? 1 / elapsedTime.asSeconds() : 0.0f;
+        const uint32_t cellsCount = field.GetCellsCount();
+        const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(field.GetCellsCount()) / (field.GetColumnsCount() * field.GetRowsCount()) * 100.0f);
 
-        std::string tickTimeText = std::format("FPS {:3.2f} | Tick {:2}{:2}", fps, tickTimeValue, tickUnit);
+        std::string tickTimeText = std::format(
+            "FPS {:3.2f} | Frame {:04}{:2} | Simulation {:04}{:2} | Tick {:04}{:2} | Cells {:08} ({:02}%)",
+            fps,
+            frameTimeValue, frameUnit,
+            simulationTimeValue, simulationTimeUnit,
+            tickTimeValue, tickUnit,
+            cellsCount, cellsCountPercent);
         statusText.setString(sf::String(tickTimeText));
 
         window.clear(gray);

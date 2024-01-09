@@ -19,6 +19,8 @@ public:
     uint32_t GetRowsCount() const { return _cellRows; }
     uint32_t GetColumnsCount() const { return _cellColumns; }
 
+    uint32_t GetCellsCount() const;
+
 private:
     CellId MakeNextId();
 
