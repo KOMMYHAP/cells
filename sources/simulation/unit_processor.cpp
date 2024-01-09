@@ -53,9 +53,10 @@ static void SetFlag(T& value, T flag, bool enabled = true)
     }
 }
 
-UnitProcessor::UnitProcessor(Brain& brain, Field& field)
+UnitProcessor::UnitProcessor(CellId cellId, Brain& brain, Field& field)
     : _brain(brain)
     , _field(field)
+    , _cellId(cellId)
 {
 }
 void UnitProcessor::Process()
@@ -182,11 +183,10 @@ void UnitProcessor::ProcessUnitCommand(UnitControlBlock& controlBlock, BrainData
             break;
         }
         const auto direction = brainData.Pop<Direction>();
-        auto& modifiedPosition = _brain.AccessInfo().position;
-        const bool applied = TryApplyDirection(modifiedPosition, _field.GetPositionLimits(), direction);
-        if (applied != 0) {
-            // todo: propagate CellId
-            // _field.NotifyMoved(CellId { 0 });
+        auto nextPosition = _brain.AccessInfo().position;
+        const bool applied = TryApplyDirection(nextPosition, _field.GetPositionLimits(), direction);
+        if (applied) {
+            _field.Move(_cellId, nextPosition);
         } else {
             SetFlag(controlBlock.flags, UnitControlFlags::OutOfField);
         }
@@ -201,15 +201,17 @@ void UnitProcessor::ProcessUnitCommand(UnitControlBlock& controlBlock, BrainData
         const auto direction = brainData.Pop<Direction>();
         auto position = _brain.AccessInfo().position;
         const bool applied = TryApplyDirection(position, _field.GetPositionLimits(), direction);
-        if (!applied) {
+        CellType type = CellType::Dummy;
+        if (applied) {
+            std::vector<CellId> cells = _field.Find({ position.x, position.y });
+            if (!cells.empty()) {
+                const Cell& cell = _field.Get(cells.back());
+                type = cell.GetBrain().GetType();
+            }
+        } else {
             SetFlag(controlBlock.flags, UnitControlFlags::OutOfField);
         }
-        std::vector<CellId> cells = _field.Find({ position.x, position.y });
-        CellType type = CellType::Dummy;
-        if (!cells.empty()) {
-            const Cell& cell = _field.Get(cells.back());
-            type = cell.GetBrain().GetType();
-        }
+
         controlBlock.r1 = static_cast<std::underlying_type_t<CellType>>(type);
         controlBlock.nextCommand += 2;
     } break;

@@ -3,11 +3,14 @@
 #include "cell_search_proxy.h"
 
 class Field {
+    friend class FieldIterator;
+    friend class ConstFieldIterator;
+
 public:
     Field(uint32_t cellRows, uint32_t cellColumns);
 
     CellId Create(const Cell& cell);
-    void NotifyMoved(CellId id);
+    void Move(CellId id, const sf::Vector2<uint16_t>& position);
     const Cell& Get(CellId id) const;
     std::vector<CellId> Find(const sf::Vector2u& position) const;
     void Remove(CellId id);
@@ -16,17 +19,8 @@ public:
     uint32_t GetRowsCount() const { return _cellRows; }
     uint32_t GetColumnsCount() const { return _cellColumns; }
 
-public:
-    auto begin() { return MakeSpan().begin(); }
-    auto end() { return MakeSpan().end(); }
-    auto begin() const { return MakeSpan().begin(); }
-    auto end() const { return MakeSpan().end(); }
-
 private:
     CellId MakeNextId();
-
-    std::span<Cell> MakeSpan() { return std::span { _cells.begin(), _cells.end() }; }
-    std::span<const Cell> MakeSpan() const { return std::span { _cells.begin(), _cells.end() }; }
 
 private:
     std::vector<Cell> _cells;

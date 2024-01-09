@@ -18,6 +18,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         brain.cpp
         brain_data.cpp
         brain_view.cpp
+        field_iterator.cpp
         simulation.cpp
         unit_processor.cpp
         pch.h)
@@ -31,6 +32,8 @@ target_sources(${PROJECT_NAME} PUBLIC
         brain.h
         brain_data.h
         brain_view.h
+        field_iterator.h
+        field_iterator.hpp
         simulation.h
         unit_processor.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

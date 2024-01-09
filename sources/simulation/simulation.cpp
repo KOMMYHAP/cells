@@ -1,6 +1,8 @@
 #include "simulation.h"
 #include "brain.h"
 #include "field.h"
+#include "field_iterator.h"
+#include "unit_processor.h"
 
 Simulation::Simulation(Field& field)
     : _field(field)
@@ -8,6 +10,58 @@ Simulation::Simulation(Field& field)
 }
 
 void Simulation::Update(sf::Time elapsedTime)
+{
+    if (_manualMode) {
+        ManualUpdate();
+    } else {
+        AutoUpdate(elapsedTime);
+    }
+}
+
+void Simulation::Tick()
+{
+    FieldIterator from = begin(_field);
+    FieldIterator to = end(_field);
+    for (auto it = from; it != to; ++it) {
+        Cell& cell = *it;
+        const CellId cellId = it.GetCellId();
+        Brain brain = cell.GetBrain();
+
+        switch (brain.GetInfo().type) {
+        case CellType::Unit: {
+            UnitProcessor processor { cellId, brain, _field };
+            processor.Process();
+        } break;
+        case CellType::Food:
+            break;
+        case CellType::Wall:
+            break;
+        case CellType::Dummy:
+            break;
+        }
+    }
+}
+void Simulation::SetManualUpdateMode(uint32_t ticksToUpdate)
+{
+    _manualMode = true;
+    _ticksToUpdate = ticksToUpdate;
+}
+
+void Simulation::SetAutoUpdateMode(uint32_t ticksPerSecond)
+{
+    _manualMode = false;
+    _ticksPerSecond = ticksPerSecond;
+}
+
+void Simulation::ManualUpdate()
+{
+    for (uint32_t i { 0 }; i < _ticksToUpdate; ++i) {
+        Tick();
+    }
+    _ticksToUpdate = 0;
+}
+
+void Simulation::AutoUpdate(sf::Time elapsedTime)
 {
     _elapsedTime += elapsedTime;
 
@@ -21,26 +75,6 @@ void Simulation::Update(sf::Time elapsedTime)
     const float processedTime = ticksToProcess / static_cast<float>(_ticksPerSecond);
     _elapsedTime -= sf::seconds(processedTime);
 
-    for (uint32_t i { 0 }; i < ticksToProcess; ++i) {
-        Tick();
-    }
-}
-
-void Simulation::Tick()
-{
-    for (Cell& cell : _field) {
-        Brain brain { cell };
-        brain.Process(_field);
-    }
-}
-void Simulation::SetManualUpdateMode(uint32_t ticksToUpdate)
-{
-    _manualMode = true;
-    _ticksToUpdate = ticksToUpdate;
-}
-
-void Simulation::SetAutoUpdateMode(uint32_t ticksPerSecond)
-{
-    _manualMode = false;
-    _ticksPerSecond = ticksPerSecond;
+    _ticksToUpdate = ticksToProcess;
+    ManualUpdate();
 }

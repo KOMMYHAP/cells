@@ -9,8 +9,6 @@ class Brain {
 public:
     Brain(Cell& cell);
 
-    void Process(Field& field);
-
     BrainInfo& AccessInfo() { return *reinterpret_cast<BrainInfo*>(_cell.brain); }
     const BrainInfo& GetInfo() const { return *reinterpret_cast<const BrainInfo*>(_cell.brain); }
 
@@ -22,9 +20,5 @@ public:
     }
 
 private:
-    void ProcessUnit(Field& field);
-    void ProcessFood();
-    void ProcessWall();
-
     Cell& _cell;
 };

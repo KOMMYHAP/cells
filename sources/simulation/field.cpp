@@ -50,9 +50,11 @@ CellId Field::Create(const Cell& cell)
     return nextId;
 }
 
-void Field::NotifyMoved(CellId id)
+void Field::Move(CellId id, const sf::Vector2<uint16_t>& position)
 {
     _searchProxy.Remove(id);
+    const auto index = CellIdToInt(id);
+    _cells[index].GetBrain().AccessInfo().position = position;
     _searchProxy.Add(id);
 }
 

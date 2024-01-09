@@ -40,8 +40,6 @@ CellSearchProxy::CellSearchProxy(Field& world, uint32_t width, uint32_t height)
     static_assert(sizeof(QuadTree) == _quadTreeMemorySize);
     static_assert(alignof(QuadTree) == _quadTreeAlignment);
 
-//    const auto boxWidth = static_cast<QuadTreeUnit>(width + quadTreeBoxCellSize);
-//    const auto boxHeight = static_cast<QuadTreeUnit>(height + quadTreeBoxCellSize);
     const auto boxWidth = static_cast<QuadTreeUnit>(std::bit_ceil(width));
     const auto boxHeight = static_cast<QuadTreeUnit>(std::bit_ceil(height));
     new (_quadtreeMemory) QuadTree(QuadTreeBox { 0, 0, boxWidth, boxHeight }, boxProvider);

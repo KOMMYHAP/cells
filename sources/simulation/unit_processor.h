@@ -55,7 +55,7 @@ struct UnitControlBlock {
 
 class UnitProcessor {
 public:
-    UnitProcessor(Brain& brain, Field& field);
+    UnitProcessor(CellId cellId, Brain& brain, Field& field);
 
     static Cell MakeDefaultUnit();
 
@@ -68,4 +68,5 @@ private:
 
     Brain& _brain;
     Field& _field;
+    const CellId _cellId;
 };

@@ -12,6 +12,9 @@ public:
     void Update(sf::Time elapsedTime);
 
 private:
+    void ManualUpdate();
+    void AutoUpdate(sf::Time elapsedTime);
+
     void Tick();
 
     Field& _field;

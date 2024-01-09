@@ -12,35 +12,3 @@ Brain::Brain(Cell& cell)
 {
     assert(Cell::brainSize - sizeof(BrainInfo) == AccessData().Size());
 }
-
-void Brain::Process(Field& field)
-{
-    switch (BrainView(_cell).GetType()) {
-    case CellType::Unit:
-        ProcessUnit(field);
-        break;
-    case CellType::Food:
-        ProcessFood();
-        break;
-    case CellType::Wall:
-        ProcessWall();
-        break;
-    case CellType::Dummy:
-        break;
-    }
-}
-
-void Brain::ProcessUnit(Field& field)
-{
-    Brain brain = _cell.GetBrain();
-    UnitProcessor processor { brain, field };
-    processor.Process();
-}
-
-void Brain::ProcessFood()
-{
-}
-
-void Brain::ProcessWall()
-{
-}
