@@ -1,5 +1,5 @@
 #include "brain_processor.h"
-#include "brain/brain.h"
+#include "brain.h"
 
 static bool TryApplyDirection(sf::Vector2<uint16_t>& position, const sf::Vector2u& limits, Direction direction)
 {

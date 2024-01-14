@@ -2,7 +2,7 @@
 #include "brain/brain.h"
 #include "field/field.h"
 #include "field/field_iterator.h"
-#include "processor/brain_processor.h"
+#include "brain/brain_processor.h"
 
 Simulation::Simulation(Field& field)
     : _field(field)

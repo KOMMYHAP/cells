@@ -1,8 +1,8 @@
 #pragma once
 
-#include "brain/brain_packed_data.h"
-#include "brain/cell.h"
-#include "field/field.h"
+#include "../field/field.h"
+#include "brain_packed_data.h"
+#include "cell.h"
 
 class Brain;
 class Memory;

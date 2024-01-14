@@ -2,6 +2,7 @@
 target_sources(${PROJECT_NAME} PRIVATE
         cell.cpp
         brain.cpp
+        brain_processor.cpp
 )
 
 
@@ -11,4 +12,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         brain.h
         brain.hpp
         brain_packed_data.h
+        brain_processor.h
 )

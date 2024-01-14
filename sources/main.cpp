@@ -8,9 +8,9 @@
 #include "basicdefs.h"
 
 #include "brain/brain.h"
+#include "brain/brain_processor.h"
 #include "field/field.h"
 #include "memory.h"
-#include "processor/brain_processor.h"
 #include "simulation.h"
 #include "world_render.h"
 
