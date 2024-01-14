@@ -2,7 +2,7 @@
 target_sources(${PROJECT_NAME} PRIVATE
         cell.cpp
         brain.cpp
-        memory.cpp)
+)
 
 
 # add headers
@@ -11,6 +11,4 @@ target_sources(${PROJECT_NAME} PUBLIC
         brain.h
         brain.hpp
         brain_packed_data.h
-        memory.h
-        memory.hpp
 )

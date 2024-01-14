@@ -1,0 +1,13 @@
+TODO LIST
+
+Add commands
+1. WRITE
+2. CMP
+3. equality flag, less flag, greater flag
+4. JE
+5. DEC
+
+Move processor's context to separate memory view?
+Extract unit's logic outside of processor?
+How to process interuption like invalid command?
+Extract processor bits? E.g. replace uint8_t with ProcessorMemoryUnit with suitable methods set/get

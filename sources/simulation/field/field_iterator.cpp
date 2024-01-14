@@ -22,16 +22,16 @@ ConstFieldIterator end(const Field& field)
 
 FieldIterator::FieldIterator(Field& field, bool begin)
     : Base(
-        begin ? field._cells.begin().base() : field._cells.end().base(),
-        field._cells.begin().base(),
-        field._cells.end().base())
+        begin ? std::to_address(field._cells.begin()) : std::to_address(field._cells.end()),
+        std::to_address(field._cells.begin()),
+        std::to_address(field._cells.end()))
 {
 }
 
 ConstFieldIterator::ConstFieldIterator(const Field& field, bool begin)
     : Base(
-        begin ? field._cells.begin().base() : field._cells.end().base(),
-        field._cells.begin().base(),
-        field._cells.end().base())
+        begin ? std::to_address(field._cells.begin()) : std::to_address(field._cells.end()),
+        std::to_address(field._cells.begin()),
+        std::to_address(field._cells.end()))
 {
 }

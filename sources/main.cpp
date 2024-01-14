@@ -1,8 +1,15 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+#include <windows.h>
+
+#include <processthreadsapi.h>
+
+#include "basicdefs.h"
+
 #include "brain/brain.h"
 #include "field/field.h"
+#include "memory.h"
 #include "processor/brain_processor.h"
 #include "simulation.h"
 #include "world_render.h"
@@ -54,7 +61,7 @@ void MakeTestFieldV2(Field& field)
 {
     std::default_random_engine randomEngine;
     const uint16_t moveCommandsCount = std::min<uint16_t>(field.GetColumnsCount() - 3, 50);
-    std::uniform_int_distribution<uint8_t> uniformDist(0, moveCommandsCount - 1);
+    std::uniform_int_distribution<uint16_t> uniformDist(0, moveCommandsCount - 1);
 
     std::vector<sf::Vector2<uint16_t>> positions;
     positions.reserve(field.GetColumnsCount() * field.GetRowsCount());
@@ -65,7 +72,7 @@ void MakeTestFieldV2(Field& field)
     }
     std::shuffle(positions.begin(), positions.end(), randomEngine);
 
-    const uint16_t percent = 40;
+    const uint16_t percent = 10;
     const auto countLimit = static_cast<uint16_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
 
     for (const auto& position : std::span(positions).first(countLimit)) {
@@ -94,6 +101,11 @@ int main(int argc, char** argv)
     auto previous_handler = std::signal(SIGABRT, signalHandler);
     if (previous_handler == SIG_ERR) {
         return EXIT_FAILURE;
+    }
+
+    HRESULT hr = SetThreadDescription(GetCurrentThread(), L"main");
+    if (FAILED(hr)) {
+        // Call failed.
     }
 
     if (argc != 2) {
@@ -218,5 +230,6 @@ int main(int argc, char** argv)
         window.draw(statusText);
         window.display();
     }
+
     return 0;
 }

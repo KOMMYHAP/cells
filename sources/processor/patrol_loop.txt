@@ -1,0 +1,30 @@
+OFFSET 		COMMAND 	ARGS
+0			WRITE		reg1, 2
+3			CMP			reg1, 0
+6			JE			24			# jump to the end of outer loop if zero flag is up
+8			DEC			reg1
+10			WRITE		reg0, 250
+13			CMP			reg0, 0
+16			JE			3			# jump to the start of outer loop
+18			GO			reg2
+20			DEC			reg0
+22			JUMP		13
+24 			CMP			reg2, RIGHT	# switch direction
+27			JE			34
+29			WRITE		reg2, RIGHT
+32			JUMP		40
+34			WRITE		reg2, LEFT
+37			JUMP		0
+39			NOPE
+
+
+TODO:
+1. WRITE
+2. CMP
+3. equality flag, less flag, grether flag
+4. JE
+5. DEC
+
+Move processor's context to separate memory view?
+Extract unit's logic outside of processor?
+How to process interuption like invalid command?

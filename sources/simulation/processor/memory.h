@@ -1,6 +1,6 @@
 #pragma once
 
-struct Cell;
+#include <span>
 
 namespace Details {
 
@@ -27,6 +27,8 @@ public:
 
     bool HasBytes(uint8_t count) const;
 
+    std::span<Unit> MakeSubSpan(uint8_t bytesCount);
+
 protected:
     std::span<Unit> memory;
 };
@@ -35,7 +37,6 @@ protected:
 
 class Memory : public Details::MemoryBase<std::byte> {
 public:
-    Memory(Cell& cell);
     Memory(std::span<std::byte> memory);
 
     template <class T>
@@ -51,7 +52,6 @@ private:
 
 class ConstMemory : public Details::MemoryBase<const std::byte> {
 public:
-    ConstMemory(const Cell& cell);
     ConstMemory(std::span<const std::byte> memory);
 };
 

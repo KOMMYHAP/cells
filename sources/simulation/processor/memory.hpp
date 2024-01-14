@@ -50,6 +50,12 @@ MemoryBase<Unit>::MemoryBase(std::span<Unit> memory)
 {
 }
 
+template <class Unit>
+std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t bytesCount)
+{
+    return memory.subspan(0, bytesCount);
+}
+
 }
 
 template <class T>
