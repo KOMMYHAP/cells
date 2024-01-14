@@ -1,6 +1,6 @@
 #pragma once
 
-#include "memory.h"
+#include "processor/memory.h"
 
 struct ProcedureInfo;
 class ProcessorContext;

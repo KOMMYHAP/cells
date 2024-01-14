@@ -2,7 +2,7 @@
 
 #include "brain_packed_data.h"
 #include "cell.h"
-#include "memory.h"
+#include "processor/memory.h"
 
 namespace Details {
 

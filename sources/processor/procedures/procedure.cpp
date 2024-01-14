@@ -1,6 +1,6 @@
 #include "procedure.h"
 #include "procedure_table.h"
-#include "processor.h"
+#include "processor/processor.h"
 
 ProcedureContext::ProcedureContext(ProcessorContext& context, const Memory& memory)
     : _processorContext(context)

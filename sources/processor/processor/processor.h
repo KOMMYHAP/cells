@@ -1,7 +1,7 @@
 #pragma once
 #include "memory.h"
-#include "procedure.h"
-#include "procedure_table.h"
+#include "procedures/procedure.h"
+#include "procedures/procedure_table.h"
 #include "processor_control_block.h"
 
 class ProcessorContext {

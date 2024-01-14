@@ -1,7 +1,7 @@
 #include "brain.h"
-#include "cell.h"
 #include "brain_processor.h"
-#include "memory.h"
+#include "cell.h"
+#include "processor/memory.h"
 
 static_assert(Cell::brainSize >= sizeof(CellInfo));
 
