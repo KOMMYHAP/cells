@@ -16,9 +16,10 @@ target_sources(${PROJECT_NAME} PRIVATE
 
 
 # add headers
-target_sources(${PROJECT_NAME} PRIVATE
+target_sources(${PROJECT_NAME} PUBLIC
         world_render.h
         cell_render.h
+        render_profile_category.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

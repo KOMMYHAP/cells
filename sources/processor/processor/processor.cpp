@@ -1,5 +1,6 @@
 #include "processor.h"
 #include "flags.h"
+#include "processor_profile_category.h"
 
 ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, ProcessorControlBlock& controlBlock, const Memory& memory)
     : _procedureTable(procedureTable)
@@ -53,5 +54,17 @@ std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(Procedure
 
 void Processor::Execute(ProcessorContext& context)
 {
+    common::ProfileScope processorProfileScope { "Processor", ProcessorProfileCategory };
+
+    TryProcessInstruction(context);
+}
+
+std::optional<ProcessorInstruction> Processor::TryProcessInstruction(ProcessorContext& context)
+{
+    if (context.HasFlag(ProcessorFlags::InvalidCommand)) {
+        return {};
+    }
+
     // todo
+    return {};
 }

@@ -1,6 +1,9 @@
 project(common)
 add_library(${PROJECT_NAME} STATIC)
 
+option(ENABLE_PROFILE "Enable profiling" OFF)
+
+add_subdirectory(profile)
 
 
 # add sources

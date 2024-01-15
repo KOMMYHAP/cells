@@ -6,12 +6,12 @@ class Field;
 
 class FieldSearchProxy {
 public:
-    FieldSearchProxy(Field& world, uint32_t width, uint32_t height);
+    FieldSearchProxy(Field& world, uint32_t width, uint32_t height, uint32_t bufferSize);
     FieldSearchProxy(const FieldSearchProxy&) = delete;
     FieldSearchProxy(FieldSearchProxy&&) = delete;
     ~FieldSearchProxy();
 
-    std::vector<CellId> Find(const sf::Vector2u& position) const;
+    std::span<const CellId> Find(const sf::Vector2u& position, uint32_t searchSizeLimit) const;
 
     void Add(CellId id);
     void Remove(CellId id);
@@ -30,6 +30,7 @@ private:
 
 private:
     Field& _world;
+    mutable std::vector<CellId> _searchBuffer;
 
     constexpr static uint32_t _quadTreeMemorySize = 32;
     constexpr static uint32_t _quadTreeAlignment = 8;

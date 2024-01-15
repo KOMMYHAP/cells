@@ -22,7 +22,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE quadtree)
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        simulation.h)
+        simulation.h
+        simulation_profile_category.h
+)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

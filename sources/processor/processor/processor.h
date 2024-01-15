@@ -28,8 +28,10 @@ private:
 
 class Processor {
 public:
+    Processor(uint8_t systemInstructionToPerform);
+
     void Execute(ProcessorContext& context);
 
 private:
-    ProcessorContext _context;
+    std::optional<ProcessorInstruction> TryProcessInstruction(ProcessorContext& context);
 };

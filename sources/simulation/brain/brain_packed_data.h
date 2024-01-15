@@ -1,17 +1,5 @@
 #pragma once
 
-enum class SystemCommand : uint8_t {
-    Nope,
-    Jump,
-    JumpIf,
-    Reserved1,
-    Reserved2,
-    Reserved3,
-    Reserved4,
-    Reserved5,
-    Reserved6,
-    Reserved7,
-};
 constexpr uint8_t SystemCommandCount = 10;
 
 enum class UnitCommand : uint8_t {

@@ -1,5 +1,7 @@
 #include "brain_processor.h"
 #include "brain.h"
+#include "processor/processor_control_block.h"
+#include "simulation_profile_category.h"
 
 static bool TryApplyDirection(sf::Vector2<uint16_t>& position, const sf::Vector2u& limits, Direction direction)
 {
@@ -62,6 +64,8 @@ BrainProcessor::BrainProcessor(CellId cellId, Brain& brain, Field& field)
 
 void BrainProcessor::Process()
 {
+    common::ProfileScope brainProfileScope { "Brain::Process", SimulationProfileCategory };
+
     Memory brainData = _brain.AccessMemory();
     if (!brainData.HasBytes<BrainControlBlock>()) {
         assert(false);
@@ -99,7 +103,7 @@ Cell BrainProcessor::MakeDefaultUnit()
     controlBlock.commandOffset = 0;
     controlBlock.flags = CommandControlFlags::None;
 
-    memory.Write(SystemCommand::Jump, CommandParam { 0 });
+    memory.Write(ProcessorInstruction::Jump, CommandParam { 0 });
 
     return defaultUnitCell;
 }
@@ -125,39 +129,41 @@ void BrainProcessor::ProcessCommand()
     const auto param = memory.Get<CommandParam>();
 
     if (param.value < SystemCommandCount) {
-        ProcessSystemCommand(controlBlock, memory, static_cast<SystemCommand>(param.value));
+        ProcessSystemCommand(controlBlock, memory, static_cast<ProcessorInstruction>(param.value));
     } else if (param.value >= SystemCommandCount && param.value < SystemCommandCount + UnitCommandCount) {
         ProcessUnitCommand(controlBlock, memory, static_cast<UnitCommand>(param.value));
     }
 }
 
-void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memory brainData, SystemCommand command)
+void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memory brainData, ProcessorInstruction command)
 {
+    common::ProfileScope brainProfileScope { "Brain::System", SimulationProfileCategory };
+
     switch (command) {
-    case SystemCommand::Nope:
+    case ProcessorInstruction::Nope:
         controlBlock.nextCommand += 1;
         break;
-    case SystemCommand::JumpIf: {
-        if (!brainData.HasBytes<CommandParam>()) {
-            SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
-            break;
-        }
-        const auto condition = brainData.Get<CommandParam>();
-
-        if (!brainData.HasBytes<CommandParam>()) {
-            SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
-            break;
-        }
-        const auto destination = brainData.Get<CommandParam>();
-
-        if (controlBlock.r1 == condition.value) {
-            controlBlock.nextCommand = destination.value;
-        } else {
-            controlBlock.nextCommand += 3;
-        }
-        SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne);
-    } break;
-    case SystemCommand::Jump: {
+        //    case ProcessorInstruction::JumpIf: {
+        //        if (!brainData.HasBytes<CommandParam>()) {
+        //            SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
+        //            break;
+        //        }
+        //        const auto condition = brainData.Get<CommandParam>();
+        //
+        //        if (!brainData.HasBytes<CommandParam>()) {
+        //            SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
+        //            break;
+        //        }
+        //        const auto destination = brainData.Get<CommandParam>();
+        //
+        //        if (controlBlock.r1 == condition.value) {
+        //            controlBlock.nextCommand = destination.value;
+        //        } else {
+        //            controlBlock.nextCommand += 3;
+        //        }
+        //        SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne);
+        //    } break;
+    case ProcessorInstruction::Jump: {
         if (!brainData.HasBytes<CommandParam>()) {
             SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
@@ -175,6 +181,8 @@ void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memor
 
 void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory brainData, UnitCommand command)
 {
+    common::ProfileScope brainProfileScope { "Brain::Unit", SimulationProfileCategory };
+
     switch (command) {
     case UnitCommand::Move: {
         if (!brainData.HasBytes<Direction>()) {
@@ -185,17 +193,17 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
         auto nextPosition = _brain.AccessInfo().position;
         const bool applied = TryApplyDirection(nextPosition, _field.GetPositionLimits(), direction);
         if (applied) {
-            std::vector<CellId> cells = _field.Find({ nextPosition.x, nextPosition.y });
-            bool hasWall = false;
+            std::span<const CellId> cells = _field.Find({ nextPosition.x, nextPosition.y });
+            bool canMove = true;
             for (CellId id : cells) {
                 const Cell& cell = _field.Get(id);
                 ConstBrain brain { cell };
-                if (brain.GetInfo().type == CellType::Wall) {
-                    hasWall = true;
+                if (brain.GetInfo().type == CellType::Wall || brain.GetInfo().type == CellType::Unit) {
+                    canMove = false;
                     break;
                 }
             }
-            if (!hasWall) {
+            if (canMove) {
                 _field.Move(_cellId, nextPosition);
             }
         } else {
@@ -214,9 +222,9 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
         const bool applied = TryApplyDirection(position, _field.GetPositionLimits(), direction);
         CellType type = CellType::Dummy;
         if (applied) {
-            std::vector<CellId> cells = _field.Find({ position.x, position.y });
+            std::span<const CellId> cells = _field.Find({ position.x, position.y }, 1);
             if (!cells.empty()) {
-                const Cell& cell = _field.Get(cells.back());
+                const Cell& cell = _field.Get(cells.front());
                 type = ConstBrain(cell).GetInfo().type;
             }
         } else {

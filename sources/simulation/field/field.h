@@ -7,12 +7,12 @@ class Field {
     friend class ConstFieldIterator;
 
 public:
-    Field(uint32_t cellRows, uint32_t cellColumns);
+    Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint);
 
     CellId Create(const Cell& cell);
     void Move(CellId id, const sf::Vector2<uint16_t>& position);
     const Cell& Get(CellId id) const;
-    std::vector<CellId> Find(const sf::Vector2u& position) const;
+    std::span<const CellId> Find(const sf::Vector2u& position, uint32_t searchSizeLimit = std::numeric_limits<uint32_t>::max()) const;
     void Remove(CellId id);
 
     sf::Vector2u GetPositionLimits() const { return { GetColumnsCount() - 1, GetRowsCount() - 1 }; }

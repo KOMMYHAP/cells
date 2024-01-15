@@ -1,8 +1,9 @@
 #include "simulation.h"
 #include "brain/brain.h"
+#include "brain/brain_processor.h"
 #include "field/field.h"
 #include "field/field_iterator.h"
-#include "brain/brain_processor.h"
+#include "simulation_profile_category.h"
 
 Simulation::Simulation(Field& field)
     : _field(field)
@@ -11,6 +12,8 @@ Simulation::Simulation(Field& field)
 
 void Simulation::Update(sf::Time elapsedTime)
 {
+    common::ProfileScope("Update", SimulationProfileCategory);
+
     if (_manualMode) {
         ManualUpdate();
     } else {
@@ -20,6 +23,8 @@ void Simulation::Update(sf::Time elapsedTime)
 
 void Simulation::Tick()
 {
+    common::ProfileScope("Tick", SimulationProfileCategory);
+
     FieldIterator from = begin(_field);
     FieldIterator to = end(_field);
     for (auto it = from; it != to; ++it) {
@@ -55,7 +60,7 @@ void Simulation::SetAutoUpdateMode(uint32_t ticksPerSecond)
 
 void Simulation::ManualUpdate()
 {
-     sf::Clock tickClock;
+    sf::Clock tickClock;
 
     for (uint32_t i { 0 }; i < _ticksToUpdate; ++i) {
         Tick();

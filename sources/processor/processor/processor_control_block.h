@@ -2,6 +2,17 @@
 
 constexpr uint8_t ProcessorUnitSize = 1;
 
+enum class ProcessorInstruction : uint8_t {
+    Nope,
+    Write,
+    Compare,
+    Decrement,
+    Increment,
+    Jump,
+    JumpIfEqual,
+    Call,
+};
+
 enum class ProcessorFlags : uint8_t {
     None = 1 << 0,
     InvalidCommand = 1 << 1,

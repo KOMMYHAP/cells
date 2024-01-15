@@ -11,6 +11,8 @@
 #include "brain/brain_processor.h"
 #include "field/field.h"
 #include "processor/memory.h"
+#include "processor/processor_control_block.h"
+#include "profile/profile.h"
 #include "simulation.h"
 #include "world_render.h"
 
@@ -40,7 +42,7 @@ Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, con
     for (int i = 0; i < moveCommandsCount; ++i) {
         memory.Write(UnitCommand::Move, Direction::Left);
     }
-    memory.Write(SystemCommand::Jump, CommandParam { 0 });
+    memory.Write(ProcessorInstruction::Jump, CommandParam { 0 });
 
     return cell;
 }
@@ -72,7 +74,7 @@ void MakeTestFieldV2(Field& field)
     }
     std::shuffle(positions.begin(), positions.end(), randomEngine);
 
-    const uint16_t percent = 10;
+    const uint16_t percent = 80;
     const auto countLimit = static_cast<uint16_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
 
     for (const auto& position : std::span(positions).first(countLimit)) {
@@ -138,7 +140,8 @@ int main(int argc, char** argv)
     const uint16_t rowsCount = fieldHeight / (cellSize + cellPadding);
     const uint16_t columnsCount = fieldWidth / (cellSize + cellPadding);
 
-    Field field { rowsCount, columnsCount };
+    const uint32_t cellsPerPoint = 3; // food + cell + another cell
+    Field field { rowsCount, columnsCount, cellsPerPoint };
     Simulation simulation { field };
 
     CellRender::Config cellRenderConfig {
@@ -192,7 +195,11 @@ int main(int argc, char** argv)
     statusText.setCharacterSize(statusTextSize);
     statusText.setPosition(fieldOffset + statusTextOffset, statusTextOffset);
 
+    const auto mainCategory = common::MakeProfileCategory();
+
     while (window.isOpen()) {
+        common::ProfileScope frameProfileScope { "Frame", mainCategory };
+
         const sf::Time elapsedTime = frameClock.getElapsedTime();
         frameClock.restart();
 

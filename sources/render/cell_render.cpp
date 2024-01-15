@@ -1,6 +1,7 @@
 #include "cell_render.h"
 #include "brain/brain.h"
 #include "brain/cell.h"
+#include "render_profile_category.h"
 
 CellRender::CellRender(Config config)
     : _config(std::move(config))
@@ -11,6 +12,8 @@ CellRender::CellRender(Config config)
 
 void CellRender::Render(sf::RenderTarget& target, const Cell& cell)
 {
+    common::ProfileScope renderScope("Cell", RenderProfileCategory);
+
     const CellInfo& info = ConstBrain(cell).GetInfo();
     const auto type = info.type;
     if (type == CellType::Dummy) {

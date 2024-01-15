@@ -1,15 +1,15 @@
 #include "field.h"
 #include "brain/brain.h"
 
-Field::Field(uint32_t cellRows, uint32_t cellColumns)
-    : _searchProxy(*this, cellColumns, cellRows)
+Field::Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint)
+    : _searchProxy(*this, cellColumns, cellRows, cellsPerPoint)
     , _cellRows(cellRows)
     , _cellColumns(cellColumns)
 {
     const uint32_t cellsCount = cellRows * cellColumns;
     assert(cellsCount > 0);
 
-    // preallocate cells to avoid allocations during the game
+    // preallocate cellsPerPoint to avoid allocations during the game
     _freeIds.resize(cellsCount);
     for (auto it = _freeIds.rbegin(); it != _freeIds.rend(); ++it) {
         *it = MakeNextId();
@@ -76,9 +76,9 @@ void Field::Remove(CellId id)
     _freeIds.push_back(id);
 }
 
-std::vector<CellId> Field::Find(const sf::Vector2u& position) const
+std::span<const CellId> Field::Find(const sf::Vector2u& position, uint32_t searchSizeLimit /*= std::numeric_limits<uint32_t>::max()*/) const
 {
-    return _searchProxy.Find(position);
+    return _searchProxy.Find(position, searchSizeLimit);
 }
 
 uint32_t Field::GetCellsCount() const
