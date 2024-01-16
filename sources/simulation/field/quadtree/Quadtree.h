@@ -152,6 +152,7 @@ private:
                 add(node->children[static_cast<std::size_t>(i)].get(), depth + 1, computeBox(box, i), value);
             // Otherwise, we add the value in the current node
             else
+                // TODO: this generate a lot of objects and degrade performance due to linear search
                 node->values.push_back(value);
         }
     }
