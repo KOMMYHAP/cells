@@ -12,7 +12,7 @@ Simulation::Simulation(Field& field)
 
 void Simulation::Update(sf::Time elapsedTime)
 {
-    common::ProfileScope("Update", SimulationProfileCategory);
+    common::ProfileScope updateProfileScope { "Update", SimulationProfileCategory };
 
     if (_manualMode) {
         ManualUpdate();
@@ -23,7 +23,7 @@ void Simulation::Update(sf::Time elapsedTime)
 
 void Simulation::Tick()
 {
-    common::ProfileScope("Tick", SimulationProfileCategory);
+    common::ProfileScope tickProfileScope { "Tick", SimulationProfileCategory };
 
     FieldIterator from = begin(_field);
     FieldIterator to = end(_field);

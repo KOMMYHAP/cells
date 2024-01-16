@@ -7,7 +7,7 @@ class Field {
     friend class ConstFieldIterator;
 
 public:
-    Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint);
+    Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint, uint32_t cellSize);
 
     CellId Create(const Cell& cell);
     void Move(CellId id, const sf::Vector2<uint16_t>& position);

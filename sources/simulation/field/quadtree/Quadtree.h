@@ -8,6 +8,8 @@
 #include <type_traits>
 #include <vector>
 
+#include "simulation_profile_category.h"
+
 namespace quadtree {
 
 template <typename T, typename GetBox, typename Equal = std::equal_to<T>, typename Float = float>
@@ -38,13 +40,6 @@ public:
         remove(mRoot.get(), mBox, value);
     }
 
-    std::vector<T> query(const Box<Float>& box) const
-    {
-        auto values = std::vector<T>();
-        query(mRoot.get(), mBox, box, values);
-        return values;
-    }
-
     std::span<T> query(const Box<Float>& box, std::span<T> result) const
     {
         const size_t processedNodesCount = query(mRoot.get(), mBox, box, result);
@@ -63,11 +58,6 @@ public:
         return mBox;
     }
 
-    void processTree(const std::function<void(CellId)>& func)
-    {
-        processTree(mRoot);
-    }
-
 private:
     static constexpr auto Threshold = std::size_t(16);
     static constexpr auto MaxDepth = std::size_t(8);
@@ -81,19 +71,6 @@ private:
     std::unique_ptr<Node> mRoot;
     GetBox mGetBox;
     Equal mEqual;
-
-    void processTree(const std::function<void(CellId)>& func, const Node& node)
-    {
-        if (isLeaf(&node)) {
-            for (const auto& child : node.children) {
-                processTree(func, *(child.get()));
-            }
-        }
-
-        for (const auto& value : node.values) {
-            func(value);
-        }
-    }
 
     bool isLeaf(const Node* node) const
     {
@@ -275,11 +252,17 @@ private:
                 }
             }
         }
+        if (resultBuffer.empty()) {
+            return processedNodeCount;
+        }
         if (!isLeaf(node)) {
             for (auto i = std::size_t(0); i < node->children.size(); ++i) {
                 auto childBox = computeBox(box, static_cast<int>(i));
                 if (queryBox.intersects(childBox)) {
                     processedNodeCount += query(node->children[i].get(), childBox, queryBox, resultBuffer);
+                    if (resultBuffer.empty()) {
+                        break;
+                    }
                 }
             }
         }

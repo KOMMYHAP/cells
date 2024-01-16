@@ -6,7 +6,7 @@ class Field;
 
 class FieldSearchProxy {
 public:
-    FieldSearchProxy(Field& world, uint32_t width, uint32_t height, uint32_t bufferSize);
+    FieldSearchProxy(Field& world, uint32_t width, uint32_t height, uint32_t bufferSize, uint32_t cellSize);
     FieldSearchProxy(const FieldSearchProxy&) = delete;
     FieldSearchProxy(FieldSearchProxy&&) = delete;
     ~FieldSearchProxy();
@@ -31,8 +31,9 @@ private:
 private:
     Field& _world;
     mutable std::vector<CellId> _searchBuffer;
+    uint32_t _cellSize;
 
-    constexpr static uint32_t _quadTreeMemorySize = 32;
+    constexpr static uint32_t _quadTreeMemorySize = 40;
     constexpr static uint32_t _quadTreeAlignment = 8;
     alignas(_quadTreeAlignment) std::byte _quadtreeMemory[_quadTreeMemorySize];
 };

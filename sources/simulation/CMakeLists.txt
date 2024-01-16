@@ -17,7 +17,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         simulation.cpp
         simulation_pch.h
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE quadtree)
 
 
 # add headers

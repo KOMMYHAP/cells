@@ -141,7 +141,7 @@ int main(int argc, char** argv)
     const uint16_t columnsCount = fieldWidth / (cellSize + cellPadding);
 
     const uint32_t cellsPerPoint = 3; // food + cell + another cell
-    Field field { rowsCount, columnsCount, cellsPerPoint };
+    Field field { rowsCount, columnsCount, cellsPerPoint, static_cast<uint32_t>(cellSize) };
     Simulation simulation { field };
 
     CellRender::Config cellRenderConfig {

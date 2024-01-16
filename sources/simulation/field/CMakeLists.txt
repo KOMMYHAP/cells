@@ -1,3 +1,5 @@
+add_subdirectory(quadtree)
+
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         field.cpp

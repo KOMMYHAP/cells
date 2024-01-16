@@ -1,8 +1,8 @@
 #include "field.h"
 #include "brain/brain.h"
 
-Field::Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint)
-    : _searchProxy(*this, cellColumns, cellRows, cellsPerPoint)
+Field::Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint, uint32_t cellSize)
+    : _searchProxy(*this, cellColumns, cellRows, cellsPerPoint, cellSize)
     , _cellRows(cellRows)
     , _cellColumns(cellColumns)
 {
