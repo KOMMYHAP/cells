@@ -1,4 +1,4 @@
-project(common)
+project(cells-common)
 add_library(${PROJECT_NAME} STATIC)
 
 option(ENABLE_PROFILE "Enable profiling" OFF)
