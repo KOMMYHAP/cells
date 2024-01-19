@@ -200,7 +200,7 @@ private:
 
     void removeValue(Node* node, const T& value)
     {
-        // Find the value in node->values
+        // FindAll the value in node->values
         auto it = std::find_if(std::begin(node->values), std::end(node->values),
             [this, &value](const auto& rhs) { return mEqual(value, rhs); });
         assert(it != std::end(node->values) && "Trying to remove a value that is not present in the node");
@@ -273,7 +273,7 @@ private:
 
     void findAllIntersections(Node* node, std::vector<std::pair<T, T>>& intersections) const
     {
-        // Find intersections between values stored in this node
+        // FindAll intersections between values stored in this node
         // Make sure to not report the same intersection twice
         for (auto i = std::size_t(0); i < node->values.size(); ++i) {
             for (auto j = std::size_t(0); j < i; ++j) {
@@ -287,7 +287,7 @@ private:
                 for (const auto& value : node->values)
                     findIntersectionsInDescendants(child.get(), value, intersections);
             }
-            // Find intersections in children
+            // FindAll intersections in children
             for (const auto& child : node->children)
                 findAllIntersections(child.get(), intersections);
         }

@@ -1,12 +1,12 @@
 #include "field.h"
 #include "brain/brain.h"
 
-Field::Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint, uint32_t cellSize)
-    : _searchProxy(*this, cellColumns, cellRows, cellsPerPoint, cellSize)
-    , _cellRows(cellRows)
-    , _cellColumns(cellColumns)
+Field::Field(uint16_t cellsInColumn, uint16_t cellsInRow)
+    : _searchProxy(cellsInRow, cellsInColumn)
+    , _cellRows(cellsInColumn)
+    , _cellColumns(cellsInRow)
 {
-    const uint32_t cellsCount = cellRows * cellColumns;
+    const uint32_t cellsCount = cellsInColumn * cellsInRow;
     assert(cellsCount > 0);
 
     // preallocate cellsPerPoint to avoid allocations during the game
@@ -15,9 +15,10 @@ Field::Field(uint32_t cellRows, uint32_t cellColumns, uint32_t cellsPerPoint, ui
         *it = MakeNextId();
     }
 
-    Brain brain { _emptyCell };
+    Cell emptyCell;
+    Brain brain { emptyCell };
     brain.AccessInfo().type = CellType::Dummy;
-    _cells.resize(cellsCount, _emptyCell);
+    _cells.resize(cellsCount, emptyCell);
 }
 
 CellId Field::MakeNextId()
@@ -34,30 +35,32 @@ CellId Field::MakeNextId()
 
 CellId Field::Create(const Cell& cell)
 {
-    CellId nextId;
+    CellId id;
     if (!_freeIds.empty()) {
-        nextId = _freeIds.back();
+        id = _freeIds.back();
         _freeIds.pop_back();
     } else {
-        const auto id = MakeNextId();
-        nextId = id;
+        const CellId nextId = MakeNextId();
+        id = nextId;
     }
 
-    const uint32_t index = CellIdToInt(nextId);
+    const uint32_t index = CellIdToInt(id);
     _cells[index] = cell;
-    _searchProxy.Add(nextId);
 
-    return nextId;
+    ConstBrain brain { cell };
+    _searchProxy.Add(brain.GetInfo().position, id);
+
+    return id;
 }
 
-void Field::Move(CellId id, const sf::Vector2<uint16_t>& position)
+void Field::Move(CellId id, const CellPosition& position)
 {
-    _searchProxy.Remove(id);
     const auto index = CellIdToInt(id);
     Cell& cell = _cells[index];
     Brain brain(cell);
+    _searchProxy.Remove(brain.GetInfo().position, id);
     brain.AccessInfo().position = position;
-    _searchProxy.Add(id);
+    _searchProxy.Add(position, id);
 }
 
 const Cell& Field::Get(CellId id) const
@@ -66,23 +69,34 @@ const Cell& Field::Get(CellId id) const
     return _cells[index];
 }
 
+Cell& Field::Modify(CellId id)
+{
+    const auto index = CellIdToInt(id);
+    return _cells[index];
+}
+
 void Field::Remove(CellId id)
 {
-    _searchProxy.Remove(id);
     const auto index = CellIdToInt(id);
     Cell& cell = _cells[index];
     Brain brain(cell);
+    _searchProxy.Remove(brain.GetInfo().position, id);
     brain.AccessInfo().type = CellType::Dummy;
     _freeIds.push_back(id);
 }
 
-std::span<const CellId> Field::Find(const sf::Vector2u& position, uint32_t searchSizeLimit /*= std::numeric_limits<uint32_t>::max()*/) const
+std::span<const CellId> Field::FindAll(const CellPosition& position, uint32_t searchSizeLimit /*= std::numeric_limits<uint32_t>::max()*/) const
 {
-    return _searchProxy.Find(position, searchSizeLimit);
+    return _searchProxy.FindAll(position, searchSizeLimit);
 }
 
 uint32_t Field::GetCellsCount() const
 {
     assert(_cells.size() >= _freeIds.size());
     return _cells.size() - _freeIds.size();
+}
+
+CellId Field::Find(const CellPosition& position) const
+{
+    return _searchProxy.Find(position);
 }

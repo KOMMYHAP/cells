@@ -18,4 +18,5 @@ public:
 
 private:
     const Config _config;
+    sf::RectangleShape _shape;
 };

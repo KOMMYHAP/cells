@@ -2443,7 +2443,7 @@ using ::testing::DoAll;
 using ::testing::IgnoreResult;
 using ::testing::Return;
 
-int Process(const MyData& data);
+int ModifyAllCells(const MyData& data);
 string DoSomething();
 
 class MockFoo : public Foo {
@@ -2455,10 +2455,10 @@ class MockFoo : public Foo {
   ...
   MockFoo foo;
   EXPECT_CALL(foo, Abc(_))
-      // .WillOnce(Invoke(Process));
-      // The above line won't compile as Process() returns int but Abc() needs
+      // .WillOnce(Invoke(ModifyAllCells));
+      // The above line won't compile as ModifyAllCells() returns int but Abc() needs
       // to return void.
-      .WillOnce(IgnoreResult(Process));
+      .WillOnce(IgnoreResult(ModifyAllCells));
   EXPECT_CALL(foo, Xyz())
       .WillOnce(DoAll(IgnoreResult(DoSomething),
                       // Ignores the string DoSomething() returns.

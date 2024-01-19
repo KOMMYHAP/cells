@@ -1494,14 +1494,14 @@ std::string CreateUnifiedDiff(const std::vector<std::string>& left,
   size_t l_i = 0, r_i = 0, edit_i = 0;
   std::stringstream ss;
   while (edit_i < edits.size()) {
-    // Find first edit.
+    // FindAll first edit.
     while (edit_i < edits.size() && edits[edit_i] == kMatch) {
       ++l_i;
       ++r_i;
       ++edit_i;
     }
 
-    // Find the first line to include in the hunk.
+    // FindAll the first line to include in the hunk.
     const size_t prefix_context = std::min(l_i, context);
     Hunk hunk(l_i - prefix_context + 1, r_i - prefix_context + 1);
     for (size_t i = prefix_context; i > 0; --i) {
@@ -1647,9 +1647,9 @@ AssertionResult DoubleNearPredFormat(const char* expr1, const char* expr2,
   const double diff = fabs(val1 - val2);
   if (diff <= abs_error) return AssertionSuccess();
 
-  // Find the value which is closest to zero.
+  // FindAll the value which is closest to zero.
   const double min_abs = std::min(fabs(val1), fabs(val2));
-  // Find the distance to the next double from that value.
+  // FindAll the distance to the next double from that value.
   const double epsilon =
       nextafter(min_abs, std::numeric_limits<double>::infinity()) - min_abs;
   // Detect the case where abs_error is so small that EXPECT_NEAR is

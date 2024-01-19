@@ -2034,8 +2034,8 @@ GTEST_API_ AssertionResult DoubleLE(const char* expr1, const char* expr2,
 //
 // Examples:
 //
-//   EXPECT_NO_FATAL_FAILURE(Process());
-//   ASSERT_NO_FATAL_FAILURE(Process()) << "Process() failed";
+//   EXPECT_NO_FATAL_FAILURE(ModifyAllCells());
+//   ASSERT_NO_FATAL_FAILURE(Process()) << "ModifyAllCells() failed";
 //
 #define ASSERT_NO_FATAL_FAILURE(statement) \
   GTEST_TEST_NO_FATAL_FAILURE_(statement, GTEST_FATAL_FAILURE_)

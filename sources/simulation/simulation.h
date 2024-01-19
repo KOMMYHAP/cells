@@ -11,7 +11,10 @@ public:
 
     void Update(sf::Time elapsedTime);
 
-    sf::Time GetTickProcessingTime() const { return _tickProcessingTime; }
+    struct Statistics {
+        uint32_t processedTicks { 0 };
+    };
+    const Statistics& GetUpdateStatistics() const { return _statistics; }
 
 private:
     void ManualUpdate();
@@ -21,8 +24,8 @@ private:
 
     Field& _field;
     sf::Time _elapsedTime;
-    sf::Time _tickProcessingTime;
     bool _manualMode { true };
     uint32_t _ticksPerSecond { 0 };
     uint32_t _ticksToUpdate { 0 };
+    Statistics _statistics;
 };

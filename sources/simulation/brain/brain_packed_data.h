@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cell.h"
+
 constexpr uint8_t SystemCommandCount = 10;
 
 enum class UnitCommand : uint8_t {
@@ -33,7 +35,7 @@ enum class CellType : uint8_t {
 #pragma pack(push, 1)
 struct CellInfo {
     CellType type;
-    sf::Vector2<uint16_t> position;
+    CellPosition position;
 };
 
 struct CommandParam {

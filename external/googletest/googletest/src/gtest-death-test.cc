@@ -899,7 +899,7 @@ int FuchsiaDeathTest::Wait() {
       status_zx = child_process_.kill();
       GTEST_DEATH_TEST_CHECK_(status_zx == ZX_OK);
     } else if (packet.key == kProcessKey) {
-      // Process terminated.
+      // ModifyAllCells terminated.
       GTEST_DEATH_TEST_CHECK_(ZX_PKT_IS_SIGNAL_ONE(packet.type));
       GTEST_DEATH_TEST_CHECK_(packet.signal.observed & ZX_PROCESS_TERMINATED);
       process_terminated = true;

@@ -1,78 +1,69 @@
 #include "field_search_proxy.h"
 #include "brain/brain.h"
 #include "field.h"
-#include "field/quadtree/Quadtree.h"
-#include "simulation_profile_category.h"
 
-namespace {
+/// Maybe try quadtree later this: https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
 
-// todo:
-// 1. Profile this, remove extra allocations
-// 2. Try this: https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
-
-using QuadTreeUnit = uint16_t;
-using QuadTreeBox = quadtree::Box<QuadTreeUnit>;
-
-template <class T>
-static QuadTreeBox CellPositionToBox(const sf::Vector2<T>& position, QuadTreeUnit cellSize)
+FieldGrid::FieldGrid(uint32_t cellsInRow, uint32_t cellsInColumn)
+    : _cellsInRow(cellsInRow)
+    , _cellsInColumn(cellsInColumn)
 {
-    return QuadTreeBox { static_cast<QuadTreeUnit>(position.x), static_cast<QuadTreeUnit>(position.y), cellSize, cellSize };
+    _grid.resize(_cellsInRow * _cellsInColumn, CellId::Invalid);
 }
 
-struct CellBoxProvider final {
-    const Field& world;
-    const QuadTreeUnit cellSize;
+std::span<const CellId> FieldGrid::FindAll(const CellPosition& position, uint32_t /*searchSizeLimit*/) const
+{
+    static std::vector<CellId> stub { 1, CellId::Invalid };
+    stub[0] = Find(position);
+    return std::span(stub);
+}
 
-    QuadTreeBox operator()(const CellId id) const
-    {
-        const Cell& cell = world.Get(id);
-        return CellPositionToBox(ConstBrain(cell).GetInfo().position, cellSize);
+void FieldGrid::Add(const CellPosition& position, CellId id)
+{
+    const uint32_t index = TryGetGridIndex(position);
+    if (index == InvalidGridIndex) {
+        return;
     }
-};
-
-using QuadTree = quadtree::Quadtree<CellId, CellBoxProvider, std::equal_to<CellId>, QuadTreeUnit>;
+    assert(_grid[index] == CellId::Invalid && id != CellId::Invalid);
+    _grid[index] = id;
 }
 
-FieldSearchProxy::FieldSearchProxy(Field& world, uint32_t width, uint32_t height, uint32_t bufferSize, uint32_t cellSize)
-    : _world(world)
-    , _searchBuffer(bufferSize)
-    , _cellSize(cellSize)
+void FieldGrid::Remove(const CellPosition& position, CellId id)
 {
-    auto boxProvider = CellBoxProvider { _world, static_cast<QuadTreeUnit>(_cellSize) };
-    static_assert(sizeof(QuadTree) == _quadTreeMemorySize);
-    static_assert(alignof(QuadTree) == _quadTreeAlignment);
-
-    const auto boxWidth = static_cast<QuadTreeUnit>(std::bit_ceil(width));
-    const auto boxHeight = static_cast<QuadTreeUnit>(std::bit_ceil(height));
-    new (_quadtreeMemory) QuadTree(QuadTreeBox { 0, 0, boxWidth, boxHeight }, boxProvider);
-}
-
-FieldSearchProxy::~FieldSearchProxy()
-{
-    As<QuadTree>().~QuadTree();
-}
-
-std::span<const CellId> FieldSearchProxy::Find(const sf::Vector2u& position, uint32_t searchSizeLimit) const
-{
-    common::ProfileScope searchProxyProfileScope { "SearchProxy::Find", SimulationProfileCategory };
-
-    const auto box = CellPositionToBox(position, static_cast<QuadTreeUnit>(_cellSize));
-
-    std::span searchBuffer { _searchBuffer };
-    if (searchSizeLimit < searchBuffer.size()) {
-        searchBuffer = searchBuffer.subspan(searchSizeLimit);
+    const uint32_t index = TryGetGridIndex(position);
+    if (index == InvalidGridIndex) {
+        return;
     }
-    return As<QuadTree>().query(box, searchBuffer);
+    assert(_grid[index] == id && id != CellId::Invalid);
+    _grid[index] = CellId::Invalid;
 }
 
-void FieldSearchProxy::Add(CellId id)
+CellId FieldGrid::Find(const CellPosition& position) const
 {
-    common::ProfileScope searchProxyProfileScope { "SearchProxy::Add", SimulationProfileCategory };
-    As<QuadTree>().add(id);
+    const uint32_t index = TryGetGridIndex(position);
+    if (index != InvalidGridIndex) {
+        return _grid[index];
+    }
+    return CellId::Invalid;
 }
 
-void FieldSearchProxy::Remove(CellId id)
+uint32_t FieldGrid::TryGetGridIndex(const CellPosition& position) const
 {
-    common::ProfileScope searchProxyProfileScope { "SearchProxy::Remove", SimulationProfileCategory };
-    As<QuadTree>().remove(id);
+    const uint32_t index = GetGridIndex(position);
+    if (index < _grid.size()) {
+        return index;
+    }
+    return InvalidGridIndex;
+}
+
+CellPosition FieldGrid::GetCellPosition(uint32_t gridIndex) const
+{
+    const uint16_t x = gridIndex % _cellsInRow;
+    const uint16_t y = gridIndex / _cellsInRow;
+    return { x, y };
+}
+
+uint32_t FieldGrid::GetGridIndex(const CellPosition& position) const
+{
+    return position.y * _cellsInRow + position.x;
 }

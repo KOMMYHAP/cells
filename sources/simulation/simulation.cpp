@@ -25,16 +25,15 @@ void Simulation::Tick()
 {
     common::ProfileScope tickProfileScope { "Tick", SimulationProfileCategory };
 
-    FieldIterator from = begin(_field);
-    FieldIterator to = end(_field);
-    for (auto it = from; it != to; ++it) {
-        Cell& cell = *it;
-        const CellId cellId = it.GetCellId();
-        Brain brain { cell };
+    _field.IterateAllCells([this](const CellId id) {
+        if (id == CellId::Invalid) {
+            return;
+        }
+        Brain brain { _field.Modify(id) };
 
         switch (brain.GetInfo().type) {
         case CellType::Unit: {
-            BrainProcessor processor { cellId, brain, _field };
+            BrainProcessor processor { id, brain, _field };
             processor.Process();
         } break;
         case CellType::Food:
@@ -44,7 +43,7 @@ void Simulation::Tick()
         case CellType::Dummy:
             break;
         }
-    }
+    });
 }
 void Simulation::SetManualUpdateMode(uint32_t ticksToUpdate)
 {
@@ -60,15 +59,10 @@ void Simulation::SetAutoUpdateMode(uint32_t ticksPerSecond)
 
 void Simulation::ManualUpdate()
 {
-    sf::Clock tickClock;
-
     for (uint32_t i { 0 }; i < _ticksToUpdate; ++i) {
         Tick();
     }
-
-    const sf::Time elapsedTime = tickClock.getElapsedTime();
-    _tickProcessingTime = sf::seconds(elapsedTime.asSeconds() / _ticksToUpdate);
-
+    _statistics.processedTicks = _ticksToUpdate;
     _ticksToUpdate = 0;
 }
 

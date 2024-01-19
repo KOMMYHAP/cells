@@ -1,4 +1,5 @@
 add_subdirectory(quadtree)
+add_subdirectory(quadtree_my)
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE

@@ -3,7 +3,7 @@
 #include "processor/processor_control_block.h"
 #include "simulation_profile_category.h"
 
-static bool TryApplyDirection(sf::Vector2<uint16_t>& position, const sf::Vector2u& limits, Direction direction)
+static bool TryApplyDirection(CellPosition& position, const CellPosition& limits, Direction direction)
 {
     switch (direction) {
     case Direction::Left:
@@ -64,8 +64,6 @@ BrainProcessor::BrainProcessor(CellId cellId, Brain& brain, Field& field)
 
 void BrainProcessor::Process()
 {
-    common::ProfileScope brainProfileScope { "Brain::Process", SimulationProfileCategory };
-
     Memory brainData = _brain.AccessMemory();
     if (!brainData.HasBytes<BrainControlBlock>()) {
         assert(false);
@@ -137,8 +135,6 @@ void BrainProcessor::ProcessCommand()
 
 void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memory brainData, ProcessorInstruction command)
 {
-    common::ProfileScope brainProfileScope { "Brain::System", SimulationProfileCategory };
-
     switch (command) {
     case ProcessorInstruction::Nope:
         controlBlock.nextCommand += 1;
@@ -181,8 +177,6 @@ void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memor
 
 void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory brainData, UnitCommand command)
 {
-    common::ProfileScope brainProfileScope { "Brain::Unit", SimulationProfileCategory };
-
     switch (command) {
     case UnitCommand::Move: {
         if (!brainData.HasBytes<Direction>()) {
@@ -193,17 +187,8 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
         auto nextPosition = _brain.AccessInfo().position;
         const bool applied = TryApplyDirection(nextPosition, _field.GetPositionLimits(), direction);
         if (applied) {
-            std::span<const CellId> cells = _field.Find({ nextPosition.x, nextPosition.y });
-            bool canMove = true;
-            for (CellId id : cells) {
-                const Cell& cell = _field.Get(id);
-                ConstBrain brain { cell };
-                if (brain.GetInfo().type == CellType::Wall || brain.GetInfo().type == CellType::Unit) {
-                    canMove = false;
-                    break;
-                }
-            }
-            if (canMove) {
+            const CellId id = _field.Find(nextPosition);
+            if (id == CellId::Invalid) {
                 _field.Move(_cellId, nextPosition);
             }
         } else {
@@ -222,9 +207,9 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
         const bool applied = TryApplyDirection(position, _field.GetPositionLimits(), direction);
         CellType type = CellType::Dummy;
         if (applied) {
-            std::span<const CellId> cells = _field.Find({ position.x, position.y }, 1);
-            if (!cells.empty()) {
-                const Cell& cell = _field.Get(cells.front());
+            const CellId id = _field.Find(position);
+            if (id != CellId::Invalid) {
+                const Cell& cell = _field.Get(id);
                 type = ConstBrain(cell).GetInfo().type;
             }
         } else {
