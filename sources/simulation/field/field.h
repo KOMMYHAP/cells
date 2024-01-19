@@ -24,9 +24,33 @@ public:
     uint32_t GetCellsCount() const;
 
     template <class Func>
-    void IterateAllCells(Func&& func) const
+    void IterateByPositions(Func&& func) const
     {
         _searchProxy.ViewAllCell(std::forward<Func>(func));
+    }
+
+    template <class Func>
+        requires std::invocable<Func, CellId, const Cell&>
+    void IterateByData(Func&& func) const
+    {
+        const uint32_t cellsCount = _cells.size();
+        for (uint32_t idx { 0 }; idx < cellsCount; ++idx) {
+            const CellId id = static_cast<CellId>(idx);
+            const Cell& cell = _cells[idx];
+            func(id, cell);
+        }
+    }
+
+    template <class Func>
+        requires std::invocable<Func, CellId, Cell&>
+    void IterateByData(Func&& func)
+    {
+        const uint32_t cellsCount = _cells.size();
+        for (uint32_t idx { 0 }; idx < cellsCount; ++idx) {
+            const CellId id = static_cast<CellId>(idx);
+            Cell& cell = _cells[idx];
+            func(id, cell);
+        }
     }
 
 private:

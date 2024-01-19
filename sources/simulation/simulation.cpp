@@ -25,11 +25,8 @@ void Simulation::Tick()
 {
     common::ProfileScope tickProfileScope { "Tick", SimulationProfileCategory };
 
-    _field.IterateAllCells([this](const CellId id) {
-        if (id == CellId::Invalid) {
-            return;
-        }
-        Brain brain { _field.Modify(id) };
+    _field.IterateByData([this](const CellId id, Cell& cell) {
+        Brain brain { cell };
 
         switch (brain.GetInfo().type) {
         case CellType::Unit: {

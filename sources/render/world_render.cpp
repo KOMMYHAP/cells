@@ -21,8 +21,12 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
 {
     common::ProfileScope renderScope("Render", RenderProfileCategory);
 
-    _field.IterateAllCells([this](const CellId id, const CellPosition& position) {
-        ProcessCell(id, position);
+    //    _field.IterateByPositions([this](const CellId id, const CellPosition& position) {
+    //        ProcessCellByPosition(id, position);
+    //    });
+
+    _field.IterateByData([this](const CellId /*id*/, const Cell& cell) {
+        ProcessCellByData(cell);
     });
 
     //    sf::RenderStates states { &_shader };
@@ -31,7 +35,7 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     target.draw(_shape, states);
 }
 
-void WorldRender::ProcessCell(const CellId id, const CellPosition& position)
+void WorldRender::ProcessCellByPosition(const CellId id, const CellPosition& position)
 {
     const uint16_t width = _field.GetColumnsCount();
     uint32_t& pixel = _textureData[position.y * width + position.x];
@@ -61,4 +65,16 @@ sf::Color WorldRender::GetColor(CellType type) const
         assert(false);
         return GetColor(CellType::Dummy);
     }
+}
+
+void WorldRender::ProcessCellByData(const Cell& cell)
+{
+    ConstBrain brain { cell };
+    const CellInfo& info = brain.GetInfo();
+
+    const uint16_t width = _field.GetColumnsCount();
+    uint32_t& pixel = _textureData[info.position.y * width + info.position.x];
+
+    const CellType cellType = brain.GetInfo().type;
+    pixel = GetColor(cellType).toInteger();
 }

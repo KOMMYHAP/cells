@@ -15,20 +15,14 @@ public:
     void Remove(const CellPosition& position, CellId id);
 
     template <class Func>
-        requires (std::invocable<Func, const CellId&> || std::invocable<Func, const CellId&, const CellPosition&>)
+        requires std::invocable<Func, const CellId&, const CellPosition&>
     void ViewAllCell(Func&& func) const
     {
         uint32_t rawGridId { 0 };
         for (uint16_t y { 0 }; y < _cellsInColumn; ++y) {
             for (uint16_t x { 0 }; x < _cellsInRow; ++x) {
-                CellId cell = _grid[rawGridId];
-
-                if constexpr (std::invocable<Func, const CellId&>) {
-                    func(cell);
-                } else if constexpr (std::invocable<Func, const CellId&, const CellPosition&>) {
-                    func(cell, CellPosition { x, y });
-                }
-
+                const CellId id = _grid[rawGridId];
+                func(id, CellPosition { x, y });
                 ++rawGridId;
             }
         }
@@ -37,9 +31,7 @@ public:
 private:
     inline static constexpr uint32_t InvalidGridIndex = std::numeric_limits<uint32_t>::max();
 
-    uint32_t GetGridIndex(const CellPosition& position) const;
     uint32_t TryGetGridIndex(const CellPosition& position) const;
-    CellPosition GetCellPosition(uint32_t gridIndex) const;
 
     const uint32_t _cellsInRow;
     const uint32_t _cellsInColumn;

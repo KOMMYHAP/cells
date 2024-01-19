@@ -74,7 +74,7 @@ void MakeTestFieldV2(Field& field)
     }
     std::shuffle(positions.begin(), positions.end(), randomEngine);
 
-    const uint8_t percent = 40;
+    const uint8_t percent = 80;
     const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
 
     for (const auto& position : std::span(positions).first(countLimit)) {
@@ -177,7 +177,7 @@ int main(int argc, char** argv)
     //        MakeTestFieldV1(field);
     MakeTestFieldV2(field);
 
-    const uint16_t simulationTicksPerSecond = 1;
+    const uint16_t simulationTicksPerSecond = 100;
 
     simulation.SetAutoUpdateMode(simulationTicksPerSecond);
 

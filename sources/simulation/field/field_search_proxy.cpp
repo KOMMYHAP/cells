@@ -49,21 +49,9 @@ CellId FieldGrid::Find(const CellPosition& position) const
 
 uint32_t FieldGrid::TryGetGridIndex(const CellPosition& position) const
 {
-    const uint32_t index = GetGridIndex(position);
+    const uint32_t index = position.y * _cellsInRow + position.x;
     if (index < _grid.size()) {
         return index;
     }
     return InvalidGridIndex;
-}
-
-CellPosition FieldGrid::GetCellPosition(uint32_t gridIndex) const
-{
-    const uint16_t x = gridIndex % _cellsInRow;
-    const uint16_t y = gridIndex / _cellsInRow;
-    return { x, y };
-}
-
-uint32_t FieldGrid::GetGridIndex(const CellPosition& position) const
-{
-    return position.y * _cellsInRow + position.x;
 }
