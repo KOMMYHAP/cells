@@ -10,6 +10,7 @@ add_subdirectory(profile)
 target_sources(${PROJECT_NAME} PRIVATE
         common_pch.h
         flags.cpp
+        command_line.cpp
 )
 
 
@@ -17,6 +18,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 target_sources(${PROJECT_NAME} PUBLIC
         basicdefs.h
         flags.h
+        command_line.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -2,6 +2,7 @@ add_subdirectory(common)
 add_subdirectory(processor)
 add_subdirectory(simulation)
 add_subdirectory(render)
+add_subdirectory(tests)
 
 add_executable(${PROJECT_NAME} main.cpp)
 

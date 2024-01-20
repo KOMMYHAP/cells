@@ -3,51 +3,62 @@
 #include "field/field_iterator.h"
 #include "render_profile_category.h"
 
-WorldRender::WorldRender(Field& field, CellRender::Config cellRenderConfig)
+WorldRender::WorldRender(Field& field, Config&& config)
     : _field(field)
-    , _cellRender(cellRenderConfig)
-    , _config(cellRenderConfig)
+    , _config(std::move(config))
+    , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
 {
-    const bool textureCreated = _texture.create(_field.GetColumnsCount(), _field.GetRowsCount());
-    assert(textureCreated);
+    const uint16_t cellsWidth = _field.GetColumnsCount();
+    const uint16_t cellsHeight = _field.GetRowsCount();
 
-    _shape.setSize({ static_cast<float>(_field.GetColumnsCount()), static_cast<float>(_field.GetRowsCount()) });
-    _shape.setTexture(&_texture, true);
+    const auto pixelsWidth = static_cast<float>(cellsWidth * _config.cellSize);
+    const auto pixelsHeight = static_cast<float>(cellsHeight * _config.cellSize);
 
-    _textureData.resize(_field.GetColumnsCount() * _field.GetRowsCount(), sf::Color::Transparent.toInteger());
+    if (!_texture.create(cellsWidth, cellsHeight)) {
+        assert(false);
+    }
+
+    if (!_config.fragmentShader->isAvailable()) {
+        assert(false);
+    }
+
+    _config.fragmentShader->setUniform("texture", _texture);
+    _config.fragmentShader->setUniform("cellsResolution", sf::Vector2f { (float)cellsWidth, (float)cellsHeight });
+
+    _textureData.resize(cellsWidth * cellsHeight);
+
+    if (!_vertexBuffer.isAvailable()) {
+        assert(false);
+    }
+    std::array<sf::Vertex, 4> vertices {
+        sf::Vertex { { pixelsWidth, 0.0f }, { 1.0f, 0.0f } },
+        sf::Vertex { { 0.0f, 0.0f }, { 0.0f, 0.0f } },
+        sf::Vertex { { pixelsWidth, pixelsHeight }, { 1.0f, 1.0f } },
+        sf::Vertex { { 0.0f, pixelsHeight }, { 0.0f, 1.0f } },
+
+    };
+    if (!_vertexBuffer.create(vertices.size())) {
+        assert(false);
+    }
+    if (!_vertexBuffer.update(vertices.data())) {
+        assert(false);
+    }
 }
 
 void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
 {
     common::ProfileScope renderScope("Render", RenderProfileCategory);
 
-    //    _field.IterateByPositions([this](const CellId id, const CellPosition& position) {
-    //        ProcessCellByPosition(id, position);
-    //    });
+    const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
+    std::fill(_textureData.begin(), _textureData.end(), clearColor);
 
     _field.IterateByData([this](const CellId /*id*/, const Cell& cell) {
         ProcessCellByData(cell);
     });
-
-    //    sf::RenderStates states { &_shader };
     _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
 
-    target.draw(_shape, states);
-}
-
-void WorldRender::ProcessCellByPosition(const CellId id, const CellPosition& position)
-{
-    const uint16_t width = _field.GetColumnsCount();
-    uint32_t& pixel = _textureData[position.y * width + position.x];
-
-    if (id == CellId::Invalid) {
-        pixel = sf::Color::Transparent.toInteger();
-        return;
-    }
-
-    ConstBrain brain { _field.Get(id) };
-    CellType cellType = brain.GetInfo().type;
-    pixel = GetColor(cellType).toInteger();
+    states.shader = _config.fragmentShader.get();
+    target.draw(_vertexBuffer, states);
 }
 
 sf::Color WorldRender::GetColor(CellType type) const

@@ -6,8 +6,8 @@ class Simulation {
 public:
     Simulation(Field& field);
 
-    void SetManualUpdateMode(uint32_t ticksToUpdate);
-    void SetAutoUpdateMode(uint32_t ticksPerSecond);
+    void AddTicksToUpdate(float ticksToUpdate);
+    void SetAutoUpdateMode(float ticksPerSecond);
 
     void Update(sf::Time elapsedTime);
 
@@ -25,7 +25,7 @@ private:
     Field& _field;
     sf::Time _elapsedTime;
     bool _manualMode { true };
-    uint32_t _ticksPerSecond { 0 };
-    uint32_t _ticksToUpdate { 0 };
+    float _ticksPerSecond { 0.0f };
+    float _ticksToUpdate { 0.0f };
     Statistics _statistics;
 };

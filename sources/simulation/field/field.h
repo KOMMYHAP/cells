@@ -17,7 +17,7 @@ public:
     CellId Find(const CellPosition& position) const;
     void Remove(CellId id);
 
-    CellPosition GetPositionLimits() const { return { static_cast<uint16_t>(GetColumnsCount() - 1), static_cast<uint16_t>(GetRowsCount() - 1) }; }
+    CellPosition GetPositionLimits() const { return { static_cast<int16_t>(GetColumnsCount() - 1), static_cast<int16_t>(GetRowsCount() - 1) }; }
     uint16_t GetRowsCount() const { return _cellRows; }
     uint16_t GetColumnsCount() const { return _cellColumns; }
 
@@ -26,7 +26,7 @@ public:
     template <class Func>
     void IterateByPositions(Func&& func) const
     {
-        _searchProxy.ViewAllCell(std::forward<Func>(func));
+        _grid.ViewAllCell(std::forward<Func>(func));
     }
 
     template <class Func>
@@ -60,7 +60,7 @@ private:
     std::vector<Cell> _cells;
     std::vector<CellId> _freeIds;
     CellId _nextId { 0 };
-    FieldGrid _searchProxy;
+    FieldGrid _grid;
     uint16_t _cellRows { 0 };
     uint16_t _cellColumns { 0 };
 };

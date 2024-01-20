@@ -9,6 +9,7 @@
 
 #include "brain/brain.h"
 #include "brain/brain_processor.h"
+#include "command_line.h"
 #include "field/field.h"
 #include "processor/memory.h"
 #include "processor/processor_control_block.h"
@@ -24,7 +25,7 @@ void signalHandler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
-Cell CreatePatrolUnit(uint8_t offset, const sf::Vector2<uint16_t>& position, const uint16_t moveCommandsCount)
+Cell CreatePatrolUnit(uint8_t offset, const CellPosition& position, const uint16_t moveCommandsCount)
 {
     Cell cell = BrainProcessor::MakeDefaultUnit();
     Brain brain { cell };
@@ -53,28 +54,27 @@ void MakeTestFieldV1(Field& field)
     const uint16_t patrolCellToCreate = field.GetRowsCount() - 2;
     for (int i = 0; i < patrolCellToCreate; ++i) {
         const uint8_t moveCommandOffset = i % moveCommandsCount;
-        const uint16_t patrolCellInitialPos = i + 1;
+        const int16_t patrolCellInitialPos = i + 1;
         const Cell& cell = CreatePatrolUnit(moveCommandOffset, { patrolCellInitialPos, patrolCellInitialPos }, moveCommandsCount);
         field.Create(cell);
     }
 }
 
-void MakeTestFieldV2(Field& field)
+void MakeTestFieldV2(Field& field, uint8_t percent)
 {
     std::default_random_engine randomEngine;
     const uint16_t moveCommandsCount = std::min<uint16_t>(field.GetColumnsCount() - 3, 50);
     std::uniform_int_distribution<uint16_t> uniformDist(0, moveCommandsCount - 1);
 
-    std::vector<sf::Vector2<uint16_t>> positions;
+    std::vector<sf::Vector2<int16_t>> positions;
     positions.reserve(field.GetColumnsCount() * field.GetRowsCount());
-    for (uint16_t x { 1 }; x < field.GetColumnsCount() - 1; ++x) {
-        for (uint16_t y { 1 }; y < field.GetRowsCount() - 1; ++y) {
+    for (int16_t x { 0 }; x < field.GetColumnsCount(); ++x) {
+        for (int16_t y { 0 }; y < field.GetRowsCount(); ++y) {
             positions.emplace_back(x, y);
         }
     }
     std::shuffle(positions.begin(), positions.end(), randomEngine);
 
-    const uint8_t percent = 80;
     const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
 
     for (const auto& position : std::span(positions).first(countLimit)) {
@@ -97,114 +97,136 @@ auto GatherTimeInfo(sf::Time time)
     return std::make_tuple(tickTimeValue, tickUnit);
 }
 
+std::optional<std::filesystem::path> ParseSandboxDirectory(int argc, char** argv)
+{
+    std::string_view helpMessage = "Please specify path to sandbox using --sandbox $directory";
+
+    if (argc != 3) {
+        std::cerr << helpMessage << std::endl;
+        return {};
+    }
+    if (std::string_view(argv[1]) != "--sandbox") {
+        std::cerr << helpMessage << std::endl;
+        return {};
+    }
+    std::error_code ec;
+    std::filesystem::path sandbox { argv[2] };
+    if (!is_directory(sandbox, ec)) {
+        std::cerr << std::format("Sandbox must be a directory: error code {}", ec.message()) << std::endl;
+        return {};
+    }
+
+    return std::move(sandbox);
+}
+
 int main(int argc, char** argv)
 {
+    const std::string_view FontArgument = "--font";
+    const std::string_view FragmentShaderArgument = "--fragment-shader";
+
+    const sf::Time TargetSimulationTime = sf::milliseconds(30);
+    const float SimulationTimeScalingUpCoef = 0.5f;
+    const float SimulationTimeScalingDownCoef = 1.0f;
+    const uint8_t CellsCountPercentOfLimit = 5;
+
+    const uint16_t ScreenWidth = 800;
+    const uint16_t ScreenHeight = 600;
+
+    const uint16_t FieldOffset = 20;
+    const uint16_t FieldWidth = ScreenWidth - 2 * FieldOffset;
+    const uint16_t FieldHeight = ScreenHeight - 2 * FieldOffset;
+
+    const uint16_t StatusTextOffset = 5;
+    const uint16_t StatusTextSize = 10;
+    assert(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
+
+    const uint16_t CellPadding = 0;
+    const uint16_t CellSize = 8;
+
+    assert(FieldWidth % (CellSize + CellPadding) == 0);
+    assert(FieldHeight % (CellSize + CellPadding) == 0);
+
+    const uint16_t RowsCount = FieldHeight / (CellSize + CellPadding);
+    const uint16_t ColumnsCount = FieldWidth / (CellSize + CellPadding);
+
+    const sf::Color Gray { 0xCCCCCCFF };
+    const uint16_t StatusMessageBufferLimit = 200;
+
+    common::CommandLine commandLine { argc, argv };
+
     auto previous_handler = std::signal(SIGABRT, signalHandler);
     if (previous_handler == SIG_ERR) {
-        return EXIT_FAILURE;
+        std::cerr << "Failed to set signal handler for SIGABRT" << std::endl;
+        return -1;
     }
 
     HRESULT hr = SetThreadDescription(GetCurrentThread(), L"main");
     if (FAILED(hr)) {
-        // Call failed.
+        std::cerr << "Failed to set name for main thread" << std::endl;
+        return -1;
     }
 
-    if (argc != 2) {
-        std::cerr << "Please specify path to font" << std::endl;
-        return 1;
+    auto mbFontPath = commandLine.TryFindValue(FontArgument);
+    if (!mbFontPath.has_value()) {
+        std::cerr << std::format("Please specify filepath to font file using {} $path", FontArgument) << std::endl;
+        return -1;
     }
 
     sf::Font defaultFont;
-    if (!defaultFont.loadFromFile(argv[1])) {
-        return 1;
+    if (!defaultFont.loadFromFile(std::string { *mbFontPath })) {
+        return -1;
     }
 
-    const uint16_t screenWidth = 800;
-    const uint16_t screenHeight = 600;
+    auto mbFragmentShaderPath = commandLine.TryFindValue(FragmentShaderArgument);
+    if (!mbFragmentShaderPath.has_value()) {
+        std::cerr << std::format("Please specify filepath to fragment shader using {} $path", FragmentShaderArgument) << std::endl;
+        return -1;
+    }
 
-    const uint16_t fieldOffset = 20;
-    const uint16_t fieldWidth = screenWidth - 2 * fieldOffset;
-    const uint16_t fieldHeight = screenHeight - 2 * fieldOffset;
+    auto shader = std::make_unique<sf::Shader>();
+    if (!shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment)) {
+        return -1;
+    }
 
-    const uint16_t statusTextOffset = 5;
-    const uint16_t statusTextSize = 10;
-    assert(statusTextOffset * 2 + statusTextSize <= fieldOffset);
+    sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
+    window.setVerticalSyncEnabled(false);
 
-    const uint16_t cellPadding = 0;
-    const uint16_t cellSize = 1;
-
-    assert(fieldWidth % (cellSize + cellPadding) == 0);
-    assert(fieldHeight % (cellSize + cellPadding) == 0);
-
-    const uint16_t rowsCount = fieldHeight / (cellSize + cellPadding);
-    const uint16_t columnsCount = fieldWidth / (cellSize + cellPadding);
-
-    const uint32_t cellsPerPoint = 3; // food + cell + another cell
-    Field field { rowsCount, columnsCount };
+    Field field { RowsCount, ColumnsCount };
     Simulation simulation { field };
 
-    CellRender::Config cellRenderConfig {
-        static_cast<float>(cellPadding), static_cast<float>(cellPadding),
-        cellSize,
-        { static_cast<float>(fieldOffset), static_cast<float>(fieldOffset) },
-        { sf::Color::Magenta, sf::Color::Green, sf::Color::Black, sf::Color::Transparent }
+    WorldRender::Config renderConfig {
+        std::move(shader),
+        { sf::Color::Magenta, sf::Color::Green, sf::Color::Black, Gray },
+        CellSize
     };
-    WorldRender render { field, std::move(cellRenderConfig) };
+    WorldRender render { field, std::move(renderConfig) };
 
-    for (int x = 0; x < columnsCount; ++x) {
-        Cell cell;
-        Brain brain { cell };
-        CellInfo& info = brain.AccessInfo();
-        info.position = sf::Vector2<uint16_t>(x, 0);
-        info.type = CellType::Wall;
-        field.Create(cell);
-
-        info.position = sf::Vector2<uint16_t>(x, rowsCount - 1);
-        field.Create(cell);
-    }
-    for (int y = 1; y < rowsCount - 1; ++y) {
-        Cell cell;
-        Brain brain { cell };
-        CellInfo& info = brain.AccessInfo();
-        info.position = sf::Vector2<uint16_t>(0, y);
-        info.type = CellType::Wall;
-        field.Create(cell);
-
-        info.position = sf::Vector2<uint16_t>(columnsCount - 1, y);
-        field.Create(cell);
-    }
-
-    //        MakeTestFieldV1(field);
-    MakeTestFieldV2(field);
-
-    const uint16_t simulationTicksPerSecond = 100;
-
-    simulation.SetAutoUpdateMode(simulationTicksPerSecond);
-
-    sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Cells");
-    window.setVerticalSyncEnabled(false);
-    //    window.setFramerateLimit(60);
+    MakeTestFieldV2(field, CellsCountPercentOfLimit);
 
     sf::Clock frameClock;
     sf::Clock simulationClock;
-    const sf::Color gray { 0xCCCCCCFF };
 
     sf::Text statusText;
     statusText.setFont(defaultFont);
-    statusText.setCharacterSize(statusTextSize);
-    statusText.setPosition(fieldOffset + statusTextOffset, statusTextOffset);
+    statusText.setCharacterSize(StatusTextSize);
+    statusText.setPosition(FieldOffset + StatusTextOffset, StatusTextOffset);
 
     const auto mainCategory = common::MakeProfileCategory();
     std::string statusMessageBuffer;
-    statusMessageBuffer.reserve(200);
+    statusMessageBuffer.reserve(StatusMessageBufferLimit);
 
     sf::RenderStates rootStates;
-    rootStates.transform.translate(fieldOffset, fieldOffset);
+    rootStates.transform.translate(FieldOffset, FieldOffset);
 
     sf::Time frameElapsedTime;
 
+    float simulationTicks = 0.01f;
+    simulation.AddTicksToUpdate(simulationTicks);
+
     while (window.isOpen()) {
         common::ProfileScope frameProfileScope { "Frame", mainCategory };
+
+        bool shouldManualUpdate = false;
 
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event {};
@@ -212,18 +234,30 @@ int main(int argc, char** argv)
             // "close requested" event: we close the window
             if (event.type == sf::Event::Closed)
                 window.close();
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
+                shouldManualUpdate = true;
+            }
+        }
+
+        if (shouldManualUpdate) {
+            simulation.AddTicksToUpdate(1.0f);
+            simulation.Update(sf::Time::Zero);
         }
 
         simulationClock.restart();
-        simulation.Update(frameElapsedTime);
+        //        simulation.Update(frameElapsedTime);
         const sf::Time simulationTime = simulationClock.getElapsedTime();
-        const sf::Time tickTime = sf::seconds(simulationTime.asSeconds() / simulation.GetUpdateStatistics().processedTicks);
-        const sf::Time processorTime = sf::seconds(tickTime.asSeconds() / field.GetCellsCount());
+
+        const float downgradeCoef = simulationTime.asSeconds() / TargetSimulationTime.asSeconds();
+        if (downgradeCoef >= 1.0) {
+            simulationTicks -= SimulationTimeScalingDownCoef * downgradeCoef;
+        } else {
+            simulationTicks += SimulationTimeScalingUpCoef * (1.0f - downgradeCoef);
+        }
+        simulationTicks = std::max(simulationTicks, 0.0f);
+        //        simulation.AddTicksToUpdate(simulationTicks);
 
         const auto [frameTimeValue, frameUnit] = GatherTimeInfo(frameElapsedTime);
-        const auto [simulationTimeValue, simulationTimeUnit] = GatherTimeInfo(simulationTime);
-        const auto [tickTimeValue, tickUnit] = GatherTimeInfo(tickTime);
-        const auto [processorTimeValue, processorUnit] = GatherTimeInfo(processorTime);
 
         const float fps = frameElapsedTime != sf::Time::Zero ? 1 / frameElapsedTime.asSeconds() : 0.0f;
         const uint32_t cellsCount = field.GetCellsCount();
@@ -231,16 +265,14 @@ int main(int argc, char** argv)
 
         statusMessageBuffer.clear();
         std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
-            "FPS {:6.2f} | Frame {:4}{:2} | Simulation {:4}{:2} | Tick {:4}{:2} | Processor {:4}{:2} | Cells {:8} ({:2}%)",
+            "FPS {:6.2f} | Frame {:4}{:2} | Ticks {:4} | Cells {:8} ({:2}%)",
             fps,
             frameTimeValue, frameUnit,
-            simulationTimeValue, simulationTimeUnit,
-            tickTimeValue, tickUnit,
-            processorTimeValue, processorUnit,
+            simulation.GetUpdateStatistics().processedTicks,
             cellsCount, cellsCountPercent);
         statusText.setString(sf::String(statusMessageBuffer));
 
-        window.clear(gray);
+        window.clear(Gray);
         render.Render(window, rootStates);
         window.draw(statusText);
         window.display();

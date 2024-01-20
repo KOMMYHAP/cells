@@ -42,25 +42,28 @@ void Simulation::Tick()
         }
     });
 }
-void Simulation::SetManualUpdateMode(uint32_t ticksToUpdate)
+void Simulation::AddTicksToUpdate(float ticksToUpdate)
 {
+    assert(ticksToUpdate >= 0.0f);
     _manualMode = true;
-    _ticksToUpdate = ticksToUpdate;
+    _ticksToUpdate += ticksToUpdate;
 }
 
-void Simulation::SetAutoUpdateMode(uint32_t ticksPerSecond)
+void Simulation::SetAutoUpdateMode(float ticksPerSecond)
 {
+    assert(ticksPerSecond >= 0.0f);
     _manualMode = false;
     _ticksPerSecond = ticksPerSecond;
 }
 
 void Simulation::ManualUpdate()
 {
-    for (uint32_t i { 0 }; i < _ticksToUpdate; ++i) {
+    const uint32_t ticksToUpdate = static_cast<uint32_t>(std::floor(_ticksToUpdate));
+    for (uint32_t i { 0 }; i < ticksToUpdate; ++i) {
         Tick();
     }
-    _statistics.processedTicks = _ticksToUpdate;
-    _ticksToUpdate = 0;
+    _statistics.processedTicks = ticksToUpdate;
+    _ticksToUpdate -= static_cast<float>(ticksToUpdate);
 }
 
 void Simulation::AutoUpdate(sf::Time elapsedTime)
@@ -74,7 +77,7 @@ void Simulation::AutoUpdate(sf::Time elapsedTime)
         return;
     }
 
-    const float processedTime = ticksToProcess / static_cast<float>(_ticksPerSecond);
+    const float processedTime = ticksToProcess / _ticksPerSecond;
     _elapsedTime -= sf::seconds(processedTime);
 
     _ticksToUpdate = ticksToProcess;

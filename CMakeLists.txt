@@ -10,4 +10,3 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(external)
 add_subdirectory(sources)
-add_subdirectory(tests)

@@ -1,26 +1,29 @@
 #pragma once
-
 #include "cell_render.h"
 #include "field/field.h"
+#include <filesystem>
 
 enum class CellType : uint8_t;
 
 class WorldRender {
 public:
-    WorldRender(Field& field, CellRender::Config cellRenderConfig);
+    struct Config {
+        std::unique_ptr<sf::Shader> fragmentShader;
+        std::vector<sf::Color> colors;
+        uint8_t cellSize;
+    };
+
+    WorldRender(Field& field, Config && config);
 
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 
 private:
-    void ProcessCellByPosition(const CellId id, const CellPosition& position);
     void ProcessCellByData(const Cell& cell);
     sf::Color GetColor(CellType type) const;
 
     const Field& _field;
-    CellRender _cellRender;
-    CellRender::Config _config;
+    Config _config;
     sf::Texture _texture;
-    sf::RectangleShape _shape;
-    sf::Shader _shader;
     std::vector<uint32_t> _textureData;
+    sf::VertexBuffer _vertexBuffer;
 };
