@@ -40,6 +40,20 @@ void Simulation::Tick()
         case CellType::Dummy:
             break;
         }
+
+        const auto& info = brain.GetInfo();
+        if (info.type != CellType::Unit) {
+            return;
+        }
+        int16_t pixelX = info.position.x * 8;
+        int16_t pixelY = info.position.y * 8;
+        int16_t cellX = info.position.x;
+        int16_t cellY = info.position.y;
+        std::cout << std::format("pixel position({}, {})", pixelX, pixelY) << std::endl;
+        std::cout << std::format("cell position({}, {})", cellX, cellY) << std::endl;
+        std::cout << std::format("pixel uv({}, {})", (float)pixelX / _field.GetColumnsCount() / 8, (float)pixelY / _field.GetRowsCount() / 8) << std::endl;
+        std::cout << std::format("cell uv({}, {})", (float)cellX / _field.GetColumnsCount(), (float)cellY / _field.GetRowsCount()) << std::endl;
+        std::cout << std::endl;
     });
 }
 void Simulation::AddTicksToUpdate(float ticksToUpdate)

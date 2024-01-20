@@ -75,7 +75,8 @@ void MakeTestFieldV2(Field& field, uint8_t percent)
     }
     std::shuffle(positions.begin(), positions.end(), randomEngine);
 
-    const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
+//    const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
+    const auto countLimit = 1;
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const uint8_t moveCommandOffset = uniformDist(randomEngine);
@@ -220,7 +221,7 @@ int main(int argc, char** argv)
 
     sf::Time frameElapsedTime;
 
-    float simulationTicks = 0.01f;
+    float simulationTicks = 0.0f;
     simulation.AddTicksToUpdate(simulationTicks);
 
     while (window.isOpen()) {
