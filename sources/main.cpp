@@ -97,28 +97,6 @@ auto GatherTimeInfo(sf::Time time)
     return std::make_tuple(tickTimeValue, tickUnit);
 }
 
-std::optional<std::filesystem::path> ParseSandboxDirectory(int argc, char** argv)
-{
-    std::string_view helpMessage = "Please specify path to sandbox using --sandbox $directory";
-
-    if (argc != 3) {
-        std::cerr << helpMessage << std::endl;
-        return {};
-    }
-    if (std::string_view(argv[1]) != "--sandbox") {
-        std::cerr << helpMessage << std::endl;
-        return {};
-    }
-    std::error_code ec;
-    std::filesystem::path sandbox { argv[2] };
-    if (!is_directory(sandbox, ec)) {
-        std::cerr << std::format("Sandbox must be a directory: error code {}", ec.message()) << std::endl;
-        return {};
-    }
-
-    return std::move(sandbox);
-}
-
 int main(int argc, char** argv)
 {
     const std::string_view FontArgument = "--font";
@@ -189,6 +167,7 @@ int main(int argc, char** argv)
 
     sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(false);
+    window.setFramerateLimit(60);
 
     Field field { RowsCount, ColumnsCount };
 

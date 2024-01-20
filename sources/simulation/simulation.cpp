@@ -53,7 +53,7 @@ void Simulation::ProcessTick()
         }
     });
 
-    _tickCounter.AddSample(clock.getElapsedTime());
+    _tickCounter.AddSample(clock.getElapsedTime().asSeconds());
 }
 
 void Simulation::SetManualMode()

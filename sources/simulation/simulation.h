@@ -1,6 +1,6 @@
 #pragma once
 
-#include "time_counter.h"
+#include "sample_counter.h"
 
 class Field;
 
@@ -16,7 +16,7 @@ public:
     void Tick();
     void Ticks(uint32_t ticks);
 
-    sf::Time GetTickTime() const { return _tickCounter.GetMedianTime(); }
+    sf::Time GetTickTime() const { return sf::seconds(_tickCounter.CalcMedian()); }
 
 private:
     void ProcessTick();
@@ -28,7 +28,9 @@ private:
     };
 
     Field& _field;
-    common::TimeCounter _tickCounter;
+
+    using TimeCounter = common::SampleCounter<float, 100>;
+    TimeCounter _tickCounter;
 
     std::optional<RuntimeParams> _autoModeParams;
 };
