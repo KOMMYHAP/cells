@@ -23,15 +23,6 @@ WorldRender::WorldRender(Field& field, Config&& config)
     }
 
     _config.fragmentShader->setUniform("texture", _texture);
-    _config.fragmentShader->setUniform("fieldResolution", sf::Vector2f { pixelsWidth, pixelsHeight });
-    _config.fragmentShader->setUniform("cellsResolution", sf::Vector2f { (float)cellsWidth, (float)cellsHeight });
-    _config.fragmentShader->setUniform("cellSize", static_cast<int>(_config.cellSize));
-
-    std::cout << std::format("pixels ({}, {})", pixelsWidth, pixelsHeight) << std::endl;
-    std::cout << std::format("cells ({}, {})", cellsWidth, cellsHeight) << std::endl;
-    std::cout << std::format("pixel uv step ({}, {})", 1.0f / pixelsWidth, 1.0f / pixelsHeight) << std::endl;
-    std::cout << std::format("cell uv step ({}, {})", 1.0f / cellsWidth, 1.0f / cellsHeight) << std::endl;
-    std::cout << std::endl;
 
     _textureData.resize(cellsWidth * cellsHeight);
 

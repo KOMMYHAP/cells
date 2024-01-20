@@ -75,8 +75,7 @@ void MakeTestFieldV2(Field& field, uint8_t percent)
     }
     std::shuffle(positions.begin(), positions.end(), randomEngine);
 
-//    const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
-    const auto countLimit = 1;
+    const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const uint8_t moveCommandOffset = uniformDist(randomEngine);
@@ -125,10 +124,10 @@ int main(int argc, char** argv)
     const std::string_view FontArgument = "--font";
     const std::string_view FragmentShaderArgument = "--fragment-shader";
 
-    const sf::Time TargetSimulationTime = sf::milliseconds(30);
+    const sf::Time TargetSimulationTime = sf::milliseconds(15);
     const float SimulationTimeScalingUpCoef = 0.5f;
     const float SimulationTimeScalingDownCoef = 1.0f;
-    const uint8_t CellsCountPercentOfLimit = 5;
+    const uint8_t CellsCountPercentOfLimit = 80;
 
     const uint16_t ScreenWidth = 800;
     const uint16_t ScreenHeight = 600;
@@ -227,26 +226,15 @@ int main(int argc, char** argv)
     while (window.isOpen()) {
         common::ProfileScope frameProfileScope { "Frame", mainCategory };
 
-        bool shouldManualUpdate = false;
-
-        // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event {};
         while (window.pollEvent(event)) {
-            // "close requested" event: we close the window
-            if (event.type == sf::Event::Closed)
+            if (event.type == sf::Event::Closed) {
                 window.close();
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-                shouldManualUpdate = true;
             }
         }
 
-        if (shouldManualUpdate) {
-            simulation.AddTicksToUpdate(1.0f);
-            simulation.Update(sf::Time::Zero);
-        }
-
         simulationClock.restart();
-        //        simulation.Update(frameElapsedTime);
+        simulation.Update(frameElapsedTime);
         const sf::Time simulationTime = simulationClock.getElapsedTime();
 
         const float downgradeCoef = simulationTime.asSeconds() / TargetSimulationTime.asSeconds();
@@ -256,7 +244,7 @@ int main(int argc, char** argv)
             simulationTicks += SimulationTimeScalingUpCoef * (1.0f - downgradeCoef);
         }
         simulationTicks = std::max(simulationTicks, 0.0f);
-        //        simulation.AddTicksToUpdate(simulationTicks);
+        simulation.AddTicksToUpdate(simulationTicks);
 
         const auto [frameTimeValue, frameUnit] = GatherTimeInfo(frameElapsedTime);
 
