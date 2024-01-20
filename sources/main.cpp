@@ -124,9 +124,8 @@ int main(int argc, char** argv)
     const std::string_view FontArgument = "--font";
     const std::string_view FragmentShaderArgument = "--fragment-shader";
 
-    const sf::Time TargetSimulationTime = sf::milliseconds(15);
-    const float SimulationTimeScalingUpCoef = 0.5f;
-    const float SimulationTimeScalingDownCoef = 1.0f;
+    const float TargetTicksPerSeconds = 1.0f;
+    const sf::Time TargetSimulationTime = sf::milliseconds(30);
     const uint8_t CellsCountPercentOfLimit = 80;
 
     const uint16_t ScreenWidth = 800;
@@ -192,7 +191,9 @@ int main(int argc, char** argv)
     window.setVerticalSyncEnabled(false);
 
     Field field { RowsCount, ColumnsCount };
+
     Simulation simulation { field };
+    simulation.SetAutoMode(TargetTicksPerSeconds, TargetSimulationTime);
 
     WorldRender::Config renderConfig {
         std::move(shader),
@@ -220,9 +221,6 @@ int main(int argc, char** argv)
 
     sf::Time frameElapsedTime;
 
-    float simulationTicks = 0.0f;
-    simulation.AddTicksToUpdate(simulationTicks);
-
     while (window.isOpen()) {
         common::ProfileScope frameProfileScope { "Frame", mainCategory };
 
@@ -233,18 +231,7 @@ int main(int argc, char** argv)
             }
         }
 
-        simulationClock.restart();
-        simulation.Update(frameElapsedTime);
-        const sf::Time simulationTime = simulationClock.getElapsedTime();
-
-        const float downgradeCoef = simulationTime.asSeconds() / TargetSimulationTime.asSeconds();
-        if (downgradeCoef >= 1.0) {
-            simulationTicks -= SimulationTimeScalingDownCoef * downgradeCoef;
-        } else {
-            simulationTicks += SimulationTimeScalingUpCoef * (1.0f - downgradeCoef);
-        }
-        simulationTicks = std::max(simulationTicks, 0.0f);
-        simulation.AddTicksToUpdate(simulationTicks);
+        const uint32_t elapsedTicks = simulation.Run(frameElapsedTime);
 
         const auto [frameTimeValue, frameUnit] = GatherTimeInfo(frameElapsedTime);
 
@@ -257,7 +244,7 @@ int main(int argc, char** argv)
             "FPS {:6.2f} | Frame {:4}{:2} | Ticks {:4} | Cells {:8} ({:2}%)",
             fps,
             frameTimeValue, frameUnit,
-            simulation.GetUpdateStatistics().processedTicks,
+            elapsedTicks,
             cellsCount, cellsCountPercent);
         statusText.setString(sf::String(statusMessageBuffer));
 

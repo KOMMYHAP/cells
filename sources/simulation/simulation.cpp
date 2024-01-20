@@ -10,20 +10,26 @@ Simulation::Simulation(Field& field)
 {
 }
 
-void Simulation::Update(sf::Time elapsedTime)
+void Simulation::Tick()
 {
-    common::ProfileScope updateProfileScope { "Update", SimulationProfileCategory };
+    Ticks(1);
+}
 
-    if (_manualMode) {
-        ManualUpdate();
-    } else {
-        AutoUpdate(elapsedTime);
+void Simulation::Ticks(uint32_t ticks)
+{
+    if (_tickCounter.IsFull()) {
+        _tickCounter.Reset();
+    }
+
+    for (uint32_t i { 0 }; i < ticks; ++i) {
+        ProcessTick();
     }
 }
 
-void Simulation::Tick()
+void Simulation::ProcessTick()
 {
     common::ProfileScope tickProfileScope { "Tick", SimulationProfileCategory };
+    sf::Clock clock;
 
     _field.IterateByData([this](const CellId id, Cell& cell) {
         Brain brain { cell };
@@ -46,45 +52,44 @@ void Simulation::Tick()
             return;
         }
     });
-}
-void Simulation::AddTicksToUpdate(float ticksToUpdate)
-{
-    assert(ticksToUpdate >= 0.0f);
-    _manualMode = true;
-    _ticksToUpdate += ticksToUpdate;
+
+    _tickCounter.AddSample(clock.getElapsedTime());
 }
 
-void Simulation::SetAutoUpdateMode(float ticksPerSecond)
+void Simulation::SetManualMode()
 {
-    assert(ticksPerSecond >= 0.0f);
-    _manualMode = false;
-    _ticksPerSecond = ticksPerSecond;
+    _autoModeParams.reset();
 }
 
-void Simulation::ManualUpdate()
+void Simulation::SetAutoMode(float ticksPerSecond, sf::Time limitSimulationTime)
 {
-    const uint32_t ticksToUpdate = static_cast<uint32_t>(std::floor(_ticksToUpdate));
-    for (uint32_t i { 0 }; i < ticksToUpdate; ++i) {
-        Tick();
-    }
-    _statistics.processedTicks = ticksToUpdate;
-    _ticksToUpdate -= static_cast<float>(ticksToUpdate);
+    assert(ticksPerSecond > 0.0f && limitSimulationTime.asSeconds() > 0.0f);
+    _autoModeParams.emplace(ticksPerSecond, limitSimulationTime, 0.0f);
 }
 
-void Simulation::AutoUpdate(sf::Time elapsedTime)
+uint32_t Simulation::Run(sf::Time elapsedTime)
 {
-    _elapsedTime += elapsedTime;
-
-    const float ticksPerDiff = _elapsedTime.asSeconds() * _ticksPerSecond;
-    const uint32_t ticksToProcess = std::floor(ticksPerDiff);
-
-    if (ticksToProcess == 0) {
-        return;
+    if (!_autoModeParams.has_value()) {
+        return 0;
     }
 
-    const float processedTime = ticksToProcess / _ticksPerSecond;
-    _elapsedTime -= sf::seconds(processedTime);
+    RuntimeParams& params = *_autoModeParams;
+    const sf::Time tickTime = GetTickTime();
+    const bool tickTimeReady = _tickCounter.IsReady();
 
-    _ticksToUpdate = ticksToProcess;
-    ManualUpdate();
+    const float elapsedTicks = tickTimeReady ? elapsedTime / tickTime : 1.0f;
+    const float maximumElapsedTicks = params.ticksPerSecond * elapsedTime.asSeconds();
+    params.ticksToProcess += std::min(elapsedTicks, maximumElapsedTicks);
+
+    const float maximumTicks = tickTimeReady ? params.limitSimulationTime / tickTime : 1.0f;
+
+    const float ticksToProcess = floor(std::min(params.ticksToProcess, maximumTicks));
+    const uint32_t ticks = static_cast<uint32_t>(ticksToProcess);
+    if (ticks == 0) {
+        return 0;
+    }
+
+    Ticks(ticks);
+    params.ticksToProcess -= ticksToProcess;
+    return ticks;
 }

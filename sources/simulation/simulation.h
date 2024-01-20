@@ -1,31 +1,34 @@
 #pragma once
 
+#include "time_counter.h"
+
 class Field;
 
 class Simulation {
 public:
     Simulation(Field& field);
 
-    void AddTicksToUpdate(float ticksToUpdate);
-    void SetAutoUpdateMode(float ticksPerSecond);
+    void SetAutoMode(float ticksPerSecond, sf::Time limitSimulationTime);
+    void SetManualMode();
 
-    void Update(sf::Time elapsedTime);
-
-    struct Statistics {
-        uint32_t processedTicks { 0 };
-    };
-    const Statistics& GetUpdateStatistics() const { return _statistics; }
-
-private:
-    void ManualUpdate();
-    void AutoUpdate(sf::Time elapsedTime);
+    uint32_t Run(sf::Time elapsedTime);
 
     void Tick();
+    void Ticks(uint32_t ticks);
+
+    sf::Time GetTickTime() const { return _tickCounter.GetMedianTime(); }
+
+private:
+    void ProcessTick();
+
+    struct RuntimeParams {
+        float ticksPerSecond { 0.0f };
+        sf::Time limitSimulationTime;
+        float ticksToProcess { 0.0f };
+    };
 
     Field& _field;
-    sf::Time _elapsedTime;
-    bool _manualMode { true };
-    float _ticksPerSecond { 0.0f };
-    float _ticksToUpdate { 0.0f };
-    Statistics _statistics;
+    common::TimeCounter _tickCounter;
+
+    std::optional<RuntimeParams> _autoModeParams;
 };

@@ -281,7 +281,7 @@
 #error C++ versions less than C++14 are not supported.
 #endif
 
-// MSVC >= 19.11 (VS 2017 Update 3) supports __has_include.
+// MSVC >= 19.11 (VS 2017 Run 3) supports __has_include.
 #ifdef __has_include
 #define GTEST_INTERNAL_HAS_INCLUDE __has_include
 #else
