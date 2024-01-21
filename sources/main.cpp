@@ -11,11 +11,11 @@
 #include "brain/brain_processor.h"
 #include "command_line.h"
 #include "field/field.h"
+#include "field_render.h"
 #include "processor/memory.h"
 #include "processor/processor_control_block.h"
 #include "profile/profile.h"
 #include "simulation.h"
-#include "world_render.h"
 
 void signalHandler(int signal)
 {
@@ -174,12 +174,12 @@ int main(int argc, char** argv)
     Simulation simulation { field };
     simulation.SetAutoMode(TargetTicksPerSeconds, TargetSimulationTime);
 
-    WorldRender::Config renderConfig {
+    FieldRender::Config renderConfig {
         std::move(shader),
         { sf::Color::Magenta, sf::Color::Green, sf::Color::Black, Gray },
         CellSize
     };
-    WorldRender render { field, std::move(renderConfig) };
+    FieldRender render { field, std::move(renderConfig) };
 
     MakeTestFieldV2(field, CellsCountPercentOfLimit);
 

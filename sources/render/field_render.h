@@ -3,7 +3,7 @@
 
 enum class CellType : uint8_t;
 
-class WorldRender {
+class FieldRender {
 public:
     struct Config {
         std::unique_ptr<sf::Shader> fragmentShader;
@@ -11,7 +11,7 @@ public:
         uint8_t cellSize;
     };
 
-    WorldRender(Field& field, Config && config);
+    FieldRender(Field& field, Config && config);
 
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 

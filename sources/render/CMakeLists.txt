@@ -9,14 +9,14 @@ find_package(SFML 2.6.1 EXACT REQUIRED graphics window)
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        world_render.cpp
+        field_render.cpp
         render_pch.h
 )
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        world_render.h
+        field_render.h
         render_profile_category.h
 )
 

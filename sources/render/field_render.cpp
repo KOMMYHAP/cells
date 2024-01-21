@@ -1,9 +1,9 @@
-#include "world_render.h"
+#include "field_render.h"
 #include "brain/brain.h"
 #include "brain/brain_packed_data.h"
 #include "render_profile_category.h"
 
-WorldRender::WorldRender(Field& field, Config&& config)
+FieldRender::FieldRender(Field& field, Config&& config)
     : _field(field)
     , _config(std::move(config))
     , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
@@ -44,7 +44,7 @@ WorldRender::WorldRender(Field& field, Config&& config)
     }
 }
 
-void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
+void FieldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
 {
     common::ProfileScope renderScope("Render", RenderProfileCategory);
 
@@ -60,7 +60,7 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     target.draw(_vertexBuffer, states);
 }
 
-sf::Color WorldRender::GetColor(CellType type) const
+sf::Color FieldRender::GetColor(CellType type) const
 {
     switch (type) {
     case CellType::Unit:
@@ -77,7 +77,7 @@ sf::Color WorldRender::GetColor(CellType type) const
     }
 }
 
-void WorldRender::ProcessCellByData(const Cell& cell)
+void FieldRender::ProcessCellByData(const Cell& cell)
 {
     ConstBrain brain { cell };
     const CellInfo& info = brain.GetInfo();
