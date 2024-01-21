@@ -10,7 +10,6 @@ find_package(SFML 2.6.1 EXACT REQUIRED graphics window)
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         world_render.cpp
-        cell_render.cpp
         render_pch.h
 )
 
@@ -18,7 +17,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         world_render.h
-        cell_render.h
         render_profile_category.h
 )
 
