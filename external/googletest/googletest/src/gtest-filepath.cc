@@ -168,7 +168,7 @@ size_t FilePath::CalculateRootLength() const {
              !IsPathSeparator(*(s + 2))) {
     // Move past the "\\" prefix in a UNC path like "\\Server\Share\Folder"
     s += 2;
-    // Skip 2 components and their following separators ("Server\" and "Share\")
+    // Skip 2 systems and their following separators ("Server\" and "Share\")
     for (int i = 0; i < 2; ++i) {
       while (s != end) {
         bool stop = IsPathSeparator(*s);

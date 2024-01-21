@@ -9,12 +9,13 @@ find_package(SFML 2.6.1 EXACT REQUIRED system)
 
 # add sub sources
 add_subdirectory(brain)
-add_subdirectory(field)
+add_subdirectory(systems)
 
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         simulation.cpp
+        world.cpp
         simulation_pch.h
 )
 
@@ -22,6 +23,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         simulation.h
+        world.h
         simulation_profile_category.h
 )
 

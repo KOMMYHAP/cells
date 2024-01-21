@@ -10,7 +10,6 @@
 #include "brain/brain.h"
 #include "brain/brain_processor.h"
 #include "command_line.h"
-#include "field/field.h"
 #include "field_render.h"
 #include "processor/memory.h"
 #include "processor/processor_control_block.h"
@@ -25,11 +24,10 @@ void signalHandler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
-Cell CreatePatrolUnit(uint8_t offset, const CellPosition& position, const uint16_t moveCommandsCount)
+Cell CreatePatrolUnit(uint8_t offset, const uint16_t moveCommandsCount)
 {
     Cell cell = BrainProcessor::MakeDefaultUnit();
     Brain brain { cell };
-    brain.AccessInfo().position = position;
 
     Memory memory = brain.AccessMemory();
     BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();
@@ -48,28 +46,16 @@ Cell CreatePatrolUnit(uint8_t offset, const CellPosition& position, const uint16
     return cell;
 }
 
-void MakeTestFieldV1(Field& field)
-{
-    const uint16_t moveCommandsCount = std::min<uint16_t>(field.GetColumnsCount() - 3, 50);
-    const uint16_t patrolCellToCreate = field.GetRowsCount() - 2;
-    for (int i = 0; i < patrolCellToCreate; ++i) {
-        const uint8_t moveCommandOffset = i % moveCommandsCount;
-        const int16_t patrolCellInitialPos = i + 1;
-        const Cell& cell = CreatePatrolUnit(moveCommandOffset, { patrolCellInitialPos, patrolCellInitialPos }, moveCommandsCount);
-        field.Create(cell);
-    }
-}
-
-void MakeTestFieldV2(Field& field, uint8_t percent)
+void MakeTestField(World& world, uint8_t percent)
 {
     std::default_random_engine randomEngine;
-    const uint16_t moveCommandsCount = std::min<uint16_t>(field.GetColumnsCount() - 3, 50);
+    const uint16_t moveCommandsCount = std::min<uint16_t>(world.GetWidth() - 3, 50);
     std::uniform_int_distribution<uint16_t> uniformDist(0, moveCommandsCount - 1);
 
     std::vector<sf::Vector2<int16_t>> positions;
-    positions.reserve(field.GetColumnsCount() * field.GetRowsCount());
-    for (int16_t x { 0 }; x < field.GetColumnsCount(); ++x) {
-        for (int16_t y { 0 }; y < field.GetRowsCount(); ++y) {
+    positions.reserve(world.GetCapacity());
+    for (int16_t x { 0 }; x < world.GetWidth(); ++x) {
+        for (int16_t y { 0 }; y < world.GetHeight(); ++y) {
             positions.emplace_back(x, y);
         }
     }
@@ -79,8 +65,12 @@ void MakeTestFieldV2(Field& field, uint8_t percent)
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const uint8_t moveCommandOffset = uniformDist(randomEngine);
-        const Cell& cell = CreatePatrolUnit(moveCommandOffset, position, moveCommandsCount);
-        field.Create(cell);
+        const Cell& cell = CreatePatrolUnit(moveCommandOffset, moveCommandsCount);
+        const CellId id = world.idSystem.Create();
+        assert(id != CellId::Invalid);
+        world.brainSystem.Create(id, cell);
+        world.positionSystem.Move(id, position);
+        world.typeSystem.Set(id, CellType::Unit);
     }
 }
 
@@ -169,19 +159,19 @@ int main(int argc, char** argv)
     window.setVerticalSyncEnabled(false);
     window.setFramerateLimit(60);
 
-    Field field { RowsCount, ColumnsCount };
+    World world { ColumnsCount, RowsCount };
 
-    Simulation simulation { field };
+    Simulation simulation { world };
     simulation.SetAutoMode(TargetTicksPerSeconds, TargetSimulationTime);
 
-    FieldRender::Config renderConfig {
+    WorldRender::Config renderConfig {
         std::move(shader),
         { sf::Color::Magenta, sf::Color::Green, sf::Color::Black, Gray },
         CellSize
     };
-    FieldRender render { field, std::move(renderConfig) };
+    WorldRender render { world, std::move(renderConfig) };
 
-    MakeTestFieldV2(field, CellsCountPercentOfLimit);
+    MakeTestField(world, CellsCountPercentOfLimit);
 
     sf::Clock frameClock;
     sf::Clock simulationClock;
@@ -223,7 +213,7 @@ int main(int argc, char** argv)
 
             ticksCounter.AddSample(fps * elapsedTicks);
 
-            const uint32_t cellsCount = field.GetCellsCount();
+            const uint32_t cellsCount = world.idSystem.GetCellsCount();
             const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
 
             statusMessageBuffer.clear();

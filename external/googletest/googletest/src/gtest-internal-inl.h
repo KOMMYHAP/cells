@@ -944,7 +944,7 @@ class GTEST_API_ UnitTestImpl {
   TimeInMillis elapsed_time_;
 
 #ifdef GTEST_HAS_DEATH_TEST
-  // The decomposed components of the gtest_internal_run_death_test flag,
+  // The decomposed systems of the gtest_internal_run_death_test flag,
   // parsed when RUN_ALL_TESTS is called.
   std::unique_ptr<InternalRunDeathTestFlag> internal_run_death_test_flag_;
   std::unique_ptr<internal::DeathTestFactory> death_test_factory_;

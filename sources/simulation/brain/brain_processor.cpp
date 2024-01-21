@@ -1,9 +1,9 @@
 #include "brain_processor.h"
 #include "brain.h"
+#include "flags.h"
 #include "processor/processor_control_block.h"
-#include "simulation_profile_category.h"
 
-static bool TryApplyDirection(CellPosition& position, const Field& field, Direction direction)
+static bool TryApplyDirection(CellPosition& position, const World& world, Direction direction)
 {
     switch (direction) {
     case Direction::Left:
@@ -13,7 +13,7 @@ static bool TryApplyDirection(CellPosition& position, const Field& field, Direct
         }
         break;
     case Direction::Right:
-        if (position.x + 1 < field.GetColumnsCount()) {
+        if (position.x + 1 < world.GetWidth()) {
             position.x += 1;
             return true;
         }
@@ -25,7 +25,7 @@ static bool TryApplyDirection(CellPosition& position, const Field& field, Direct
         }
         break;
     case Direction::Down:
-        if (position.y + 1 < field.GetRowsCount()) {
+        if (position.y + 1 < world.GetHeight()) {
             position.y += 1;
             return true;
         }
@@ -35,29 +35,9 @@ static bool TryApplyDirection(CellPosition& position, const Field& field, Direct
     return false;
 }
 
-template <class T>
-static bool HasFlag(T value, T flag)
-{
-    const auto v = static_cast<std::underlying_type_t<T>>(value);
-    const auto f = static_cast<std::underlying_type_t<T>>(flag);
-    return (v & f) == f;
-}
-
-template <class T>
-static void SetFlag(T& value, T flag, bool enabled = true)
-{
-    const auto v = static_cast<std::underlying_type_t<T>>(value);
-    const auto f = static_cast<std::underlying_type_t<T>>(flag);
-    if (enabled) {
-        value = static_cast<T>(v | f);
-    } else {
-        value = static_cast<T>(v & (!f));
-    }
-}
-
-BrainProcessor::BrainProcessor(CellId cellId, Brain& brain, Field& field)
+BrainProcessor::BrainProcessor(CellId cellId, Brain& brain, World& world)
     : _brain(brain)
-    , _field(field)
+    , _world(world)
     , _cellId(cellId)
 {
 }
@@ -70,7 +50,7 @@ void BrainProcessor::Process()
         return;
     }
     BrainControlBlock& controlBlock = brainData.Get<BrainControlBlock>();
-    if (HasFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange)) {
+    if (common::HasFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange)) {
         return;
     }
 
@@ -78,7 +58,7 @@ void BrainProcessor::Process()
 
     constexpr int extraCommandsPerTickLimit = 1;
     for (int i = 0; i < extraCommandsPerTickLimit; ++i) {
-        if (HasFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne)) {
+        if (common::HasFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne)) {
             ProcessCommand();
         }
     }
@@ -88,7 +68,6 @@ Cell BrainProcessor::MakeDefaultUnit()
 {
     Cell defaultUnitCell;
     Brain brain { defaultUnitCell };
-    brain.AccessInfo().type = CellType::Unit;
 
     Memory memory = brain.AccessMemory();
     if (!memory.HasBytes(sizeof(BrainControlBlock) + sizeof(CommandParam) * 2)) {
@@ -99,7 +78,7 @@ Cell BrainProcessor::MakeDefaultUnit()
     BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();
     controlBlock = BrainControlBlock {};
     controlBlock.commandOffset = 0;
-    controlBlock.flags = CommandControlFlags::None;
+    controlBlock.flags = static_cast<uint8_t>(CommandControlFlags::None);
 
     memory.Write(ProcessorInstruction::Jump, CommandParam { 0 });
 
@@ -111,17 +90,17 @@ void BrainProcessor::ProcessCommand()
     Memory memory = _brain.AccessMemory();
     BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();
 
-    SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne, false);
-    SetFlag(controlBlock.flags, CommandControlFlags::OutOfField, false);
+    common::ResetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne);
+    common::ResetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
 
     if (!memory.HasBytes(controlBlock.nextCommand)) {
-        SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
+        common::SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
         return;
     }
     memory.Move(controlBlock.nextCommand);
 
     if (!memory.HasBytes<UnitCommand>()) {
-        SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
+        common::SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
         return;
     }
     const auto param = memory.Get<CommandParam>();
@@ -161,15 +140,15 @@ void BrainProcessor::ProcessSystemCommand(BrainControlBlock& controlBlock, Memor
         //    } break;
     case ProcessorInstruction::Jump: {
         if (!brainData.HasBytes<CommandParam>()) {
-            SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
+            common::SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
         const auto destination = brainData.Get<CommandParam>();
         controlBlock.nextCommand = destination.value;
-        SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne);
+        common::SetFlag(controlBlock.flags, CommandControlFlags::ExecuteYetAnotherOne);
     } break;
     default: {
-        SetFlag(controlBlock.flags, CommandControlFlags::InvalidCommand);
+        common::SetFlag(controlBlock.flags, CommandControlFlags::InvalidCommand);
         break;
     }
     }
@@ -180,40 +159,39 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
     switch (command) {
     case UnitCommand::Move: {
         if (!brainData.HasBytes<Direction>()) {
-            SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
+            common::SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
         const auto direction = brainData.Get<Direction>();
         auto nextPosition = _brain.AccessInfo().position;
-        const bool applied = TryApplyDirection(nextPosition, _field, direction);
+        const bool applied = TryApplyDirection(nextPosition, _world, direction);
         if (applied) {
-            const CellId id = _field.Find(nextPosition);
+            const CellId id = _world.positionSystem.Find(nextPosition);
             if (id == CellId::Invalid) {
-                _field.Move(_cellId, nextPosition);
+                _world.positionSystem.Move(_cellId, nextPosition);
             }
         } else {
-            SetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
+            common::SetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
         }
 
         controlBlock.nextCommand += 2;
     } break;
     case UnitCommand::Look: {
         if (!brainData.HasBytes<Direction>()) {
-            SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
+            common::SetFlag(controlBlock.flags, CommandControlFlags::CommandOutOfRange);
             break;
         }
         const auto direction = brainData.Get<Direction>();
         auto position = _brain.AccessInfo().position;
-        const bool applied = TryApplyDirection(position, _field, direction);
+        const bool applied = TryApplyDirection(position, _world, direction);
         CellType type = CellType::Dummy;
         if (applied) {
-            const CellId id = _field.Find(position);
+            const CellId id = _world.positionSystem.Find(position);
             if (id != CellId::Invalid) {
-                const Cell& cell = _field.Get(id);
-                type = ConstBrain(cell).GetInfo().type;
+                type = _world.typeSystem.Get(id);
             }
         } else {
-            SetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
+            common::SetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
         }
 
         controlBlock.r1 = static_cast<std::underlying_type_t<CellType>>(type);

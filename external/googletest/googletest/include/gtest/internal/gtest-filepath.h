@@ -185,7 +185,7 @@ class GTEST_API_ FilePath {
   // user error or as a result of some scripts or APIs that generate a pathname
   // with a trailing separator. On other platforms the same API or script
   // may NOT generate a pathname with a trailing "/". Then elsewhere that
-  // pathname may have another "/" and pathname components added to it,
+  // pathname may have another "/" and pathname systems added to it,
   // without checking for the separator already being there.
   // The script language and operating system may allow paths like "foo//bar"
   // but some of the functions in FilePath will not handle that correctly. In

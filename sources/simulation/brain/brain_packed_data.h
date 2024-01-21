@@ -46,6 +46,6 @@ struct BrainControlBlock {
     uint8_t commandOffset;
     uint8_t nextCommand;
     uint8_t r1;
-    CommandControlFlags flags;
+    uint8_t flags;
 };
 #pragma pack(pop)

@@ -1,9 +1,7 @@
 #pragma once
-#include "field/field.h"
+#include "world.h"
 
-enum class CellType : uint8_t;
-
-class FieldRender {
+class WorldRender {
 public:
     struct Config {
         std::unique_ptr<sf::Shader> fragmentShader;
@@ -11,15 +9,15 @@ public:
         uint8_t cellSize;
     };
 
-    FieldRender(Field& field, Config && config);
+    WorldRender(World& world, Config&& config);
 
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 
 private:
-    void ProcessCellByData(const Cell& cell);
+    void ProcessCell(CellId id);
     sf::Color GetColor(CellType type) const;
 
-    const Field& _field;
+    World& _world;
     Config _config;
     sf::Texture _texture;
     std::vector<uint32_t> _textureData;

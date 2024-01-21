@@ -1,15 +1,14 @@
 #include "field_render.h"
-#include "brain/brain.h"
-#include "brain/brain_packed_data.h"
 #include "render_profile_category.h"
+#include <brain/brain.h>
 
-FieldRender::FieldRender(Field& field, Config&& config)
-    : _field(field)
+WorldRender::WorldRender(World& world, Config&& config)
+    : _world(world)
     , _config(std::move(config))
     , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
 {
-    const uint16_t cellsWidth = _field.GetColumnsCount();
-    const uint16_t cellsHeight = _field.GetRowsCount();
+    const uint16_t cellsWidth = _world.GetWidth();
+    const uint16_t cellsHeight = _world.GetHeight();
 
     const auto pixelsWidth = static_cast<float>(cellsWidth * _config.cellSize);
     const auto pixelsHeight = static_cast<float>(cellsHeight * _config.cellSize);
@@ -44,15 +43,15 @@ FieldRender::FieldRender(Field& field, Config&& config)
     }
 }
 
-void FieldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
+void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
 {
     common::ProfileScope renderScope("Render", RenderProfileCategory);
 
     const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
     std::fill(_textureData.begin(), _textureData.end(), clearColor);
 
-    _field.IterateByData([this](const CellId /*id*/, const Cell& cell) {
-        ProcessCellByData(cell);
+    _world.idSystem.Iterate([this](const CellId id) {
+        ProcessCell(id);
     });
     _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
 
@@ -60,7 +59,7 @@ void FieldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     target.draw(_vertexBuffer, states);
 }
 
-sf::Color FieldRender::GetColor(CellType type) const
+sf::Color WorldRender::GetColor(CellType type) const
 {
     switch (type) {
     case CellType::Unit:
@@ -77,12 +76,13 @@ sf::Color FieldRender::GetColor(CellType type) const
     }
 }
 
-void FieldRender::ProcessCellByData(const Cell& cell)
+void WorldRender::ProcessCell(CellId id)
 {
+    const Cell& cell = _world.brainSystem.Get(id);
     ConstBrain brain { cell };
     const CellInfo& info = brain.GetInfo();
 
-    const uint16_t width = _field.GetColumnsCount();
+    const uint16_t width = _world.GetWidth();
     uint32_t& pixel = _textureData[info.position.y * width + info.position.x];
 
     const CellType cellType = brain.GetInfo().type;

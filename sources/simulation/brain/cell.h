@@ -10,5 +10,5 @@ constexpr auto CellIdToInt(CellId id) { return static_cast<std::underlying_type_
 
 struct Cell {
     static constexpr uint8_t brainSize = 255;
-    std::byte brain[brainSize] {};
+    std::byte brain[brainSize];
 };

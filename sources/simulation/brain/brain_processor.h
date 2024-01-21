@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../field/field.h"
 #include "brain_packed_data.h"
 #include "cell.h"
+#include "world.h"
 
 enum class ProcessorInstruction : uint8_t;
 class Brain;
@@ -10,7 +10,7 @@ class Memory;
 
 class BrainProcessor {
 public:
-    BrainProcessor(CellId cellId, Brain& brain, Field& field);
+    BrainProcessor(CellId cellId, Brain& brain, World& world);
 
     static Cell MakeDefaultUnit();
 
@@ -22,6 +22,6 @@ private:
     void ProcessUnitCommand(BrainControlBlock& controlBlock, Memory brainData, UnitCommand command);
 
     Brain& _brain;
-    Field& _field;
+    World& _world;
     const CellId _cellId;
 };

@@ -502,7 +502,7 @@ namespace PixEventsLegacy
         // Xbox and Windows store different types of events for context events.
         // On Xbox these include a context argument, while on Windows they do
         // not. It is important not to change the event types used on the
-        // Windows version as there are OS components (eg debug layer & DRED)
+        // Windows version as there are OS systems (eg debug layer & DRED)
         // that decode event structs.
 #ifdef PIX_XBOX
         static constexpr PIXEventType GpuBeginOnContext() { return PIXEvent_BeginEvent_OnContext_VarArgs; }

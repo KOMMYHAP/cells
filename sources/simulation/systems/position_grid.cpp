@@ -1,17 +1,16 @@
-#include "field_grid.h"
+#include "position_grid.h"
 #include "brain/brain.h"
-#include "field.h"
 
 /// Maybe try quadtree later this: https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
 
-FieldGrid::FieldGrid(uint32_t cellsInRow, uint32_t cellsInColumn)
+PositionGrid::PositionGrid(uint32_t cellsInRow, uint32_t cellsInColumn)
     : _cellsInRow(cellsInRow)
     , _cellsInColumn(cellsInColumn)
 {
     _grid.resize(_cellsInRow * _cellsInColumn, CellId::Invalid);
 }
 
-void FieldGrid::Add(const CellPosition& position, CellId id)
+void PositionGrid::Add(CellId id, const CellPosition& position)
 {
     const uint32_t index = TryGetGridIndex(position);
     if (index == InvalidGridIndex) {
@@ -21,7 +20,7 @@ void FieldGrid::Add(const CellPosition& position, CellId id)
     _grid[index] = id;
 }
 
-void FieldGrid::Remove(const CellPosition& position, CellId id)
+void PositionGrid::Remove(CellId id, const CellPosition& position)
 {
     const uint32_t index = TryGetGridIndex(position);
     if (index == InvalidGridIndex) {
@@ -31,7 +30,7 @@ void FieldGrid::Remove(const CellPosition& position, CellId id)
     _grid[index] = CellId::Invalid;
 }
 
-CellId FieldGrid::Find(const CellPosition& position) const
+CellId PositionGrid::Find(const CellPosition& position) const
 {
     const uint32_t index = TryGetGridIndex(position);
     if (index != InvalidGridIndex) {
@@ -40,7 +39,7 @@ CellId FieldGrid::Find(const CellPosition& position) const
     return CellId::Invalid;
 }
 
-uint32_t FieldGrid::TryGetGridIndex(const CellPosition& position) const
+uint32_t PositionGrid::TryGetGridIndex(const CellPosition& position) const
 {
     const uint32_t index = position.y * _cellsInRow + position.x;
     if (index < _grid.size()) {

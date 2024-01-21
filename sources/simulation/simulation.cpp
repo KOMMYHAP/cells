@@ -1,11 +1,10 @@
 #include "simulation.h"
 #include "brain/brain.h"
 #include "brain/brain_processor.h"
-#include "field/field.h"
 #include "simulation_profile_category.h"
 
-Simulation::Simulation(Field& field)
-    : _field(field)
+Simulation::Simulation(World& world)
+    : _world(world)
 {
 }
 
@@ -30,12 +29,13 @@ void Simulation::ProcessTick()
     common::ProfileScope tickProfileScope { "Tick", SimulationProfileCategory };
     sf::Clock clock;
 
-    _field.IterateByData([this](const CellId id, Cell& cell) {
+    _world.idSystem.Iterate([this](const CellId id) {
+        Cell& cell = _world.brainSystem.Modify(id);
         Brain brain { cell };
 
         switch (brain.GetInfo().type) {
         case CellType::Unit: {
-            BrainProcessor processor { id, brain, _field };
+            BrainProcessor processor { id, brain, _world };
             processor.Process();
         } break;
         case CellType::Food:

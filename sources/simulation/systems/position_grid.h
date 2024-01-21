@@ -2,16 +2,14 @@
 
 #include "brain/cell.h"
 
-class Field;
-
-class FieldGrid {
+class PositionGrid {
 public:
-    FieldGrid(uint32_t cellsInRow, uint32_t cellsInColumn);
+    PositionGrid(uint32_t cellsInRow, uint32_t cellsInColumn);
 
     CellId Find(const CellPosition& position) const;
 
-    void Add(const CellPosition& position, CellId id);
-    void Remove(const CellPosition& position, CellId id);
+    void Add(CellId id, const CellPosition& position);
+    void Remove(CellId id, const CellPosition& position);
 
 private:
     inline static constexpr uint32_t InvalidGridIndex = std::numeric_limits<uint32_t>::max();
