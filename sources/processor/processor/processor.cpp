@@ -50,10 +50,22 @@ void Processor::ProcessInstruction(ProcessorContext& context)
             break;
         }
     } break;
-    case ProcessorInstruction::Decrement:
-        break;
-    case ProcessorInstruction::Increment:
-        break;
+    case ProcessorInstruction::Add: {
+        const auto [success, registerIdx, value] = context.TryReadMemory<uint8_t, uint8_t>();
+        if (!success) {
+            break;
+        }
+        const auto [registerRead, registerData] = context.ReadRegistry(registerIdx);
+        if (!registerRead) {
+            break;
+        }
+        const uint8_t newValue = static_cast<uint8_t>(registerData) + value;
+        [[maybe_unused]] const bool registerWrite = context.WriteRegistry(registerIdx, static_cast<std::byte>(newValue));
+        assert(registerWrite);
+        if (!context.MoveCommandPointer(3)) {
+            break;
+        }
+    } break;
     case ProcessorInstruction::Jump:
         break;
     case ProcessorInstruction::JumpIfEqual:
