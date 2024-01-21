@@ -6,6 +6,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         type_system.cpp
         id_system.cpp
         simulation_virtual_machine.cpp
+        cell_factory.cpp
 )
 
 
@@ -17,4 +18,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         brain_system.h
         type_system.h
         simulation_virtual_machine.h
+        cell_factory.h
 )

@@ -8,7 +8,6 @@ class BrainSystem {
 public:
     BrainSystem(uint32_t capacity);
 
-    void Create(CellId id, const CellBrain& cell);
     CellBrain& Access(CellId id);
     const CellBrain& Get(CellId id) const;
 

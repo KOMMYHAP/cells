@@ -1,6 +1,7 @@
 #pragma once
 
 #include "systems/brain_system.h"
+#include "systems/cell_factory.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
 #include "systems/simulation_virtual_machine.h"
@@ -14,14 +15,15 @@ public:
     uint16_t GetHeight() const { return _height; }
     uint32_t GetCapacity() const { return GetWidth() * GetHeight(); }
 
-public:
-    SimulationVirtualMachine virtualMachine;
-    BrainSystem brainSystem;
-    PositionSystem positionSystem;
-    IdSystem idSystem;
-    TypeSystem typeSystem;
-
 private:
     uint16_t _width { 0 };
     uint16_t _height { 0 };
+
+public:
+    BrainSystem brainSystem;
+    TypeSystem typeSystem;
+    SimulationVirtualMachine virtualMachine;
+    PositionSystem positionSystem;
+    IdSystem idSystem;
+    CellFactory cellFactory;
 };

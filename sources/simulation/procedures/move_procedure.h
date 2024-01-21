@@ -13,7 +13,7 @@ enum class MoveDirection : uint8_t {
 
 class MoveProcedure final : public ProcedureBase {
 public:
-    MoveProcedure(PositionSystem& positionSystem);
+    MoveProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem);
 
     void Execute(ProcedureContext& context) override;
 
@@ -21,5 +21,5 @@ private:
     CellPosition TryApplyDirection(CellPosition position, MoveDirection direction);
 
     PositionSystem& _positionSystem;
-    SimulationVirtualMachine& _simulationVirtualMachine;
+    const SimulationVirtualMachine& _vm;
 };

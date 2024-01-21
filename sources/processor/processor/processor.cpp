@@ -27,6 +27,9 @@ void Processor::ProcessInstruction(ProcessorContext& context)
 
     switch (instruction) {
     case ProcessorInstruction::Nope:
+        if (!context.MoveCommandPointer(1)) {
+            break;
+        }
         break;
     case ProcessorInstruction::Write: {
         const auto [success, registerIdx, data] = context.TryReadMemory<uint8_t, std::byte>();

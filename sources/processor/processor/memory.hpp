@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Details {
+namespace details {
 
 template <class Unit>
 bool MemoryBase<Unit>::HasBytes(uint8_t count) const
@@ -9,7 +9,7 @@ bool MemoryBase<Unit>::HasBytes(uint8_t count) const
 }
 
 template <class Unit>
-template <class... Ts>
+template <MemoryType... Ts>
 bool MemoryBase<Unit>::HasBytes() const
 {
     constexpr uint8_t bytes = (sizeof(Ts) + ...);
@@ -19,18 +19,18 @@ bool MemoryBase<Unit>::HasBytes() const
 template <class Unit>
 void MemoryBase<Unit>::Move(uint8_t offset)
 {
-    memory = memory.subspan(offset);
+    _memory = _memory.subspan(offset);
 }
 
 template <class Unit>
-template <class T>
+template <MemoryType T>
 void MemoryBase<Unit>::Move()
 {
     Move(sizeof(T));
 }
 
 template <class Unit>
-template <class T>
+template <MemoryType T>
 T MemoryBase<Unit>::Read()
 {
     const T value = Peek<T>();
@@ -39,7 +39,7 @@ T MemoryBase<Unit>::Read()
 }
 
 template <class Unit>
-template <class... Ts>
+template <MemoryType... Ts>
 std::tuple<bool, Ts...> MemoryBase<Unit>::TryRead()
 {
     if (!HasBytes<Ts...>()) {
@@ -49,37 +49,37 @@ std::tuple<bool, Ts...> MemoryBase<Unit>::TryRead()
 }
 
 template <class Unit>
-template <class T>
+template <MemoryType T>
 T MemoryBase<Unit>::Peek()
 {
     assert(HasBytes<T>());
-    return *reinterpret_cast<const T*>(memory.data());
+    return *reinterpret_cast<const T*>(_memory.data());
 }
 
 template <class Unit>
 MemoryBase<Unit>::MemoryBase(std::span<Unit> memory)
-    : memory(memory)
+    : _memory(memory)
 {
 }
 
 template <class Unit>
-std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t bytesCount) const
+std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t offset) const
 {
-    return memory.subspan(0, bytesCount);
+    return _memory.subspan(offset);
 }
 
 }
 
-template <class T>
+template <details::MemoryType T>
 T& Memory::Access()
 {
     assert(HasBytes<T>());
-    T& value = *reinterpret_cast<T*>(memory.data());
+    T& value = *reinterpret_cast<std::decay_t<T>*>(_memory.data());
     Move<T>();
     return value;
 }
 
-template <class... Ts>
+template <details::MemoryType... Ts>
 std::tuple<bool, Ts*...> Memory::TryAccess()
 {
     if (!HasBytes<Ts...>()) {
@@ -92,24 +92,22 @@ std::tuple<bool, Ts*...> Memory::TryAccess()
 template <class... Args>
 void Memory::Write(Args&&... args)
 {
-    if constexpr (sizeof...(args) > 0) {
-        ((WriteOne(std::forward<Args>(args))), ...);
-    }
+    static_assert(sizeof...(args) > 0, "Usage: memory.Write(ProcessorInstruction::Jump, std::byte{42});");
+    (WriteOne(std::forward<Args>(args)), ...);
 }
 
 template <class... Args>
 bool Memory::TryWrite(Args&&... args)
 {
-    if (!HasBytes<Args...>()) {
+    if (!HasBytes<std::decay_t<Args>...>()) {
         return false;
     }
     Write(std::forward<Args>(args)...);
     return true;
 }
 
-template <class T>
-void Memory::WriteOne(T&& data)
+template <class Arg>
+void Memory::WriteOne(Arg&& data)
 {
-    static_assert(sizeof(T) == 1);
-    Access<T>() = std::forward<T>(data);
+    Access<std::decay_t<Arg>>() = std::forward<Arg>(data);
 }

@@ -1,6 +1,4 @@
 #include "simulation.h"
-#include "brain/__brain.h"
-#include "brain/brain_processor.h"
 #include "simulation_profile_category.h"
 
 Simulation::Simulation(World& world)

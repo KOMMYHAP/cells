@@ -1,5 +1,4 @@
 #include "position_grid.h"
-#include "brain/__brain.h"
 
 /// Maybe try quadtree later this: https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
 

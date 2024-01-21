@@ -83,7 +83,7 @@ std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
 
 bool ProcessorContext::RunProcedure(ProcedureId id)
 {
-    const ProcedureInfo* info = _procedureTable.FindProcedure(id);
+    const ProcedureTableEntry* info = _procedureTable.FindProcedure(id);
     if (!info) {
         SetState(ProcessorState::UnknownProcedure);
         return false;
@@ -99,15 +99,4 @@ bool ProcessorContext::RunProcedure(ProcedureId id)
     ProcedureContext procedureContext { *this, registryMemory };
     info->procedure->Execute(procedureContext);
     return true;
-}
-
-template <class... Ts>
-std::tuple<bool, Ts...> ProcessorContext::TryReadMemory()
-{
-    const auto result = GetMemory().TryRead<Ts...>();
-    const bool success = std::get<0>(result);
-    if (!success) {
-        SetState(ProcessorState::MemoryCorrupted);
-    }
-    return result;
 }

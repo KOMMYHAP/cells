@@ -19,13 +19,13 @@ enum class ProcessorFlags : uint8_t {
     Greater = 1 << 3
 };
 
-constexpr uint8_t ProcessRegistryCount = 3;
+constexpr uint8_t ProcessRegistryCount = 6;
 
 #pragma pack(push, 1)
 struct ProcessorControlBlock {
-    uint8_t state = static_cast<uint8_t>(ProcessorState::Good);
-    uint8_t flags = static_cast<uint8_t>(ProcessorFlags::None);
-    uint8_t nextCommand { 0 };
-    std::array<std::byte, ProcessRegistryCount> registry {};
+    uint8_t state;
+    uint8_t flags;
+    uint8_t nextCommand;
+    std::array<std::byte, ProcessRegistryCount> registry;
 };
 #pragma pack(pop)

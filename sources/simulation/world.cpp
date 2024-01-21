@@ -1,12 +1,14 @@
 #include "world.h"
 
 World::World(uint32_t width, uint32_t height)
-    : virtualMachine(brainSystem, typeSystem)
+    : _width(width)
+    , _height(height)
     , brainSystem(width * height)
+    , typeSystem(width * height)
+    , virtualMachine(brainSystem, typeSystem)
     , positionSystem(width, height)
     , idSystem(width * height)
-    , typeSystem(width * height)
-    , _width(width)
-    , _height(height)
+    , cellFactory(virtualMachine, brainSystem)
 {
+    virtualMachine.CreateProcedures(*this);
 }

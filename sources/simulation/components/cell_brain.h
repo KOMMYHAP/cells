@@ -1,6 +1,7 @@
 #pragma once
 
+inline static constexpr uint8_t CellBrainLimit = 255;
+
 struct CellBrain {
-    inline static constexpr uint8_t Size = 255;
-    std::byte data[Size];
+    std::byte data[CellBrainLimit];
 };

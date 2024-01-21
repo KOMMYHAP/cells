@@ -5,13 +5,6 @@ BrainSystem::BrainSystem(uint32_t capacity)
 {
 }
 
-void BrainSystem::Create(CellId id, const CellBrain& cell)
-{
-    const auto index = CellIdToInt(id);
-    assert(index <= _cells.size());
-    _cells[index] = cell;
-}
-
 CellBrain& BrainSystem::Access(CellId id)
 {
     const auto index = CellIdToInt(id);

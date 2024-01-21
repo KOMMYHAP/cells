@@ -1,9 +1,9 @@
 #include "procedure_table.h"
 
-ProcedureId ProcedureTable::RegisterProcedure(const ProcedureInfo& info)
+ProcedureId ProcedureTable::RegisterProcedure(const ProcedureTableEntry& info)
 {
-    ProcedureId id = _nextId;
-    if (id == ProcedureId::Invalid) {
+    ProcedureId procedureId = _nextId;
+    if (procedureId == ProcedureId::Invalid) {
         return ProcedureId::Invalid;
     }
 
@@ -14,24 +14,24 @@ ProcedureId ProcedureTable::RegisterProcedure(const ProcedureInfo& info)
         return ProcedureId::Invalid;
     }
 
-    const auto _id = static_cast<uint8_t>(id);
-    _procedures[_id] = info;
-    _nextId = static_cast<ProcedureId>(_id + 1);
-    return id;
+    const auto id = static_cast<uint8_t>(procedureId);
+    _procedures[id] = info;
+    _nextId = static_cast<ProcedureId>(id + 1);
+    return procedureId;
 }
 
-const ProcedureInfo* ProcedureTable::FindProcedure(ProcedureId id) const
+const ProcedureTableEntry* ProcedureTable::FindProcedure(ProcedureId procedureId) const
 {
-    if (id == ProcedureId::Invalid) {
+    if (procedureId == ProcedureId::Invalid) {
         return nullptr;
     }
 
-    const auto _id = static_cast<uint8_t>(id);
-    if (_procedures.size() >= _id) {
+    const auto id = static_cast<uint8_t>(procedureId);
+    if (_procedures.size() >= id) {
         return nullptr;
     }
 
-    const ProcedureInfo* info = &_procedures[_id];
+    const ProcedureTableEntry* info = &_procedures[id];
     if (!info->IsValid()) {
         return nullptr;
     }

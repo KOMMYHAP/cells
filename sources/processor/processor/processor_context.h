@@ -36,4 +36,3 @@ private:
 };
 
 #include "processor_context.hpp"
-#include "processor_state.h"

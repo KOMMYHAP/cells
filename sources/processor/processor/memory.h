@@ -1,51 +1,52 @@
 #pragma once
 
-#include <span>
+namespace details {
 
-namespace Details {
+template <class T>
+concept MemoryType = !std::is_reference_v<T> && !std::is_pointer_v<T>;
 
 template <class Unit>
 class MemoryBase {
 public:
     MemoryBase(std::span<Unit> memory);
 
-    template <class T>
+    template <MemoryType T>
     T Read();
 
-    template <class... Ts>
+    template <MemoryType... Ts>
     std::tuple<bool, Ts...> TryRead();
 
-    template <class T>
+    template <MemoryType T>
     T Peek();
 
-    template <class T>
+    template <MemoryType T>
     void Move();
 
     void Move(uint8_t offset);
 
-    uint8_t Size() const { return memory.size(); }
+    uint8_t Size() const { return _memory.size(); }
 
-    template <class... Ts>
+    template <MemoryType... Ts>
     bool HasBytes() const;
 
     bool HasBytes(uint8_t count) const;
 
-    std::span<Unit> MakeSubSpan(uint8_t bytesCount) const;
+    std::span<Unit> MakeSubSpan(uint8_t offset) const;
 
 protected:
-    std::span<Unit> memory;
+    std::span<Unit> _memory;
 };
 
 }
 
-class Memory : public Details::MemoryBase<std::byte> {
+class Memory : public details::MemoryBase<std::byte> {
 public:
     Memory(std::span<std::byte> memory);
 
-    template <class T>
+    template <details::MemoryType T>
     T& Access();
 
-    template <class... Ts>
+    template <details::MemoryType... Ts>
     std::tuple<bool, Ts*...> TryAccess();
 
     template <class... Args>
@@ -55,11 +56,11 @@ public:
     bool TryWrite(Args&&... args);
 
 private:
-    template <class T>
-    void WriteOne(T&& data);
+    template <class Arg>
+    void WriteOne(Arg&& data);
 };
 
-class ConstMemory : public Details::MemoryBase<const std::byte> {
+class ConstMemory : public details::MemoryBase<const std::byte> {
 public:
     ConstMemory(std::span<std::byte> memory);
     ConstMemory(std::span<const std::byte> memory);

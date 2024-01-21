@@ -1,6 +1,12 @@
 #include "move_procedure.h"
 #include "systems/position_system.h"
 
+MoveProcedure::MoveProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem)
+    : _positionSystem(positionSystem)
+    , _vm(vm)
+{
+}
+
 void MoveProcedure::Execute(ProcedureContext& context)
 {
     const auto [readArgs, direction] = context.TryReadArgs<MoveDirection>();
@@ -8,7 +14,7 @@ void MoveProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    const CellId id = _simulationVirtualMachine.GetRunningCellId();
+    const CellId id = _vm.GetRunningCellId();
     const CellPosition position = _positionSystem.Get(id);
     const CellPosition newPosition = TryApplyDirection(position, direction);
     if (newPosition == InvalidCellPosition) {

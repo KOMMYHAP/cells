@@ -17,7 +17,7 @@ public:
     Sample CalcMedian() const;
 
 private:
-    std::array<Sample, SamplesLimit> _samples;
+    std::array<Sample, SamplesLimit> _samples {};
     uint16_t _availableSamplesCount { 0 };
     uint16_t _currentSample { 0 };
 };

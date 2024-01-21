@@ -3,7 +3,7 @@
 #include "processor/memory.h"
 #include "processor/processor_state.h"
 
-struct ProcedureInfo;
+struct ProcedureTableEntry;
 class ProcessorContext;
 enum class ProcessorState : uint8_t;
 
@@ -26,7 +26,8 @@ private:
     ProcessorContext& _processorContext;
 };
 
-struct ProcedureBase {
+class ProcedureBase {
+public:
     virtual ~ProcedureBase() = default;
     virtual void Execute(ProcedureContext& context) = 0;
 };

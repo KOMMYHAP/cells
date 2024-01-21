@@ -7,13 +7,11 @@
 
 #include "basic_defines.h"
 
-#include "brain/brain_processor.h"
 #include "breakpoint.h"
 #include "command_line.h"
-#include "processor/memory.h"
-#include "processor/processor_control_block.h"
 #include "profile/profile.h"
 #include "simulation.h"
+#include "world.h"
 #include "world_render.h"
 
 const std::string_view FontArgument = "--font";
@@ -50,32 +48,10 @@ void SignalHandler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
-CellBrain CreatePatrolUnit(uint8_t offset, const uint16_t moveCommandsCount)
-{
-    CellBrain cell {};
-    Memory memory { cell.data };
-
-    auto& controlBlock = memory.Access<BrainControlBlock>();
-
-    constexpr auto moveCommandSize = static_cast<uint8_t>(sizeof(CommandParam) + sizeof(Direction));
-    controlBlock.nextCommand = offset * moveCommandSize;
-
-    for (int i = 0; i < moveCommandsCount; ++i) {
-        memory.Write(UnitCommand::Move, Direction::Right);
-    }
-    for (int i = 0; i < moveCommandsCount; ++i) {
-        memory.Write(UnitCommand::Move, Direction::Left);
-    }
-    memory.Write(ProcessorInstruction::Jump, CommandParam { 0 });
-
-    return cell;
-}
-
 void MakeTestField(World& world, uint8_t percent)
 {
     std::default_random_engine randomEngine;
-    const uint16_t moveCommandsCount = std::min<uint16_t>(world.GetWidth() - 3, 50);
-    std::uniform_int_distribution<uint16_t> uniformDist(0, moveCommandsCount - 1);
+    const uint16_t moveCommandsCount = std::min<uint16_t>(world.GetWidth(), 10);
 
     std::vector<sf::Vector2<int16_t>> positions;
     positions.reserve(world.GetCapacity());
@@ -89,13 +65,11 @@ void MakeTestField(World& world, uint8_t percent)
     const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
 
     for (const auto& position : std::span(positions).first(countLimit)) {
-        const uint8_t moveCommandOffset = uniformDist(randomEngine);
-        const CellBrain& cell = CreatePatrolUnit(moveCommandOffset, moveCommandsCount);
         const CellId id = world.idSystem.Create();
         assert(id != CellId::Invalid);
-        world.brainSystem.Create(id, cell);
         world.positionSystem.Move(id, position);
         world.typeSystem.Set(id, CellType::Unit);
+        world.cellFactory.MakePatrolUnit(id, moveCommandsCount);
     }
 }
 

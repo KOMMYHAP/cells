@@ -97,7 +97,7 @@ static const UINT64 PIXEventsBlockEndMarker     = 0x00000000000FFF80;
 
 // V2 events
 
-// Bits 00..06 (7 bits) - Size in QWORDS
+// Bits 00..06 (7 bits) - CellBrainLimit in QWORDS
 static const UINT64 PIXEventsSizeWriteMask      = 0x000000000000007F;
 static const UINT64 PIXEventsSizeBitShift       = 0;
 static const UINT64 PIXEventsSizeReadMask       = PIXEventsSizeWriteMask << PIXEventsSizeBitShift;

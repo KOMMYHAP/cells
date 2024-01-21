@@ -8,7 +8,6 @@ find_package(SFML 2.6.1 EXACT REQUIRED system)
 
 
 # add sub sources
-add_subdirectory(brain)
 add_subdirectory(components)
 add_subdirectory(systems)
 add_subdirectory(procedures)
