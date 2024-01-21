@@ -1,7 +1,5 @@
 #pragma once
-#include "cell_render.h"
 #include "field/field.h"
-#include <filesystem>
 
 enum class CellType : uint8_t;
 

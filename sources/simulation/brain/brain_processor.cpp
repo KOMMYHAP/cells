@@ -3,7 +3,7 @@
 #include "processor/processor_control_block.h"
 #include "simulation_profile_category.h"
 
-static bool TryApplyDirection(CellPosition& position, const CellPosition& limits, Direction direction)
+static bool TryApplyDirection(CellPosition& position, const Field& field, Direction direction)
 {
     switch (direction) {
     case Direction::Left:
@@ -13,7 +13,7 @@ static bool TryApplyDirection(CellPosition& position, const CellPosition& limits
         }
         break;
     case Direction::Right:
-        if (position.x + 1 < limits.x) {
+        if (position.x + 1 < field.GetColumnsCount()) {
             position.x += 1;
             return true;
         }
@@ -25,7 +25,7 @@ static bool TryApplyDirection(CellPosition& position, const CellPosition& limits
         }
         break;
     case Direction::Down:
-        if (position.y + 1 < limits.y) {
+        if (position.y + 1 < field.GetRowsCount()) {
             position.y += 1;
             return true;
         }
@@ -185,7 +185,7 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
         }
         const auto direction = brainData.Get<Direction>();
         auto nextPosition = _brain.AccessInfo().position;
-        const bool applied = TryApplyDirection(nextPosition, _field.GetPositionLimits(), direction);
+        const bool applied = TryApplyDirection(nextPosition, _field, direction);
         if (applied) {
             const CellId id = _field.Find(nextPosition);
             if (id == CellId::Invalid) {
@@ -204,7 +204,7 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
         }
         const auto direction = brainData.Get<Direction>();
         auto position = _brain.AccessInfo().position;
-        const bool applied = TryApplyDirection(position, _field.GetPositionLimits(), direction);
+        const bool applied = TryApplyDirection(position, _field, direction);
         CellType type = CellType::Dummy;
         if (applied) {
             const CellId id = _field.Find(position);

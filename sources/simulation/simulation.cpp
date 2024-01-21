@@ -2,7 +2,6 @@
 #include "brain/brain.h"
 #include "brain/brain_processor.h"
 #include "field/field.h"
-#include "field/field_iterator.h"
 #include "simulation_profile_category.h"
 
 Simulation::Simulation(Field& field)

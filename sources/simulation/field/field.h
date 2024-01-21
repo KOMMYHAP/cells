@@ -13,7 +13,6 @@ public:
     CellId Find(const CellPosition& position) const;
     void Remove(CellId id);
 
-    CellPosition GetPositionLimits() const { return { static_cast<int16_t>(GetColumnsCount() - 1), static_cast<int16_t>(GetRowsCount() - 1) }; }
     uint16_t GetRowsCount() const { return _cellRows; }
     uint16_t GetColumnsCount() const { return _cellColumns; }
 

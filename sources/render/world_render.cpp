@@ -1,6 +1,6 @@
 #include "world_render.h"
+#include "brain/brain.h"
 #include "brain/brain_packed_data.h"
-#include "field/field_iterator.h"
 #include "render_profile_category.h"
 
 WorldRender::WorldRender(Field& field, Config&& config)
