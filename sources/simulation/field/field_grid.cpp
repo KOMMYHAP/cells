@@ -1,4 +1,4 @@
-#include "field_search_proxy.h"
+#include "field_grid.h"
 #include "brain/brain.h"
 #include "field.h"
 
@@ -9,13 +9,6 @@ FieldGrid::FieldGrid(uint32_t cellsInRow, uint32_t cellsInColumn)
     , _cellsInColumn(cellsInColumn)
 {
     _grid.resize(_cellsInRow * _cellsInColumn, CellId::Invalid);
-}
-
-std::span<const CellId> FieldGrid::FindAll(const CellPosition& position, uint32_t /*searchSizeLimit*/) const
-{
-    static std::vector<CellId> stub { 1, CellId::Invalid };
-    stub[0] = Find(position);
-    return std::span(stub);
 }
 
 void FieldGrid::Add(const CellPosition& position, CellId id)

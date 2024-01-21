@@ -90,10 +90,6 @@ void Field::Remove(CellId id)
     _freeIds.push_back(id);
 }
 
-std::span<const CellId> Field::FindAll(const CellPosition& position, uint32_t searchSizeLimit /*= std::numeric_limits<uint32_t>::max()*/) const
-{
-    return _grid.FindAll(position, searchSizeLimit);
-}
 
 uint32_t Field::GetCellsCount() const
 {

@@ -1,6 +1,6 @@
 #pragma once
 #include "brain/cell.h"
-#include "field_search_proxy.h"
+#include "field_grid.h"
 
 class Field {
     friend class FieldIterator;
@@ -13,7 +13,6 @@ public:
     void Move(CellId id, const CellPosition& position);
     const Cell& Get(CellId id) const;
     Cell& Modify(CellId id);
-    std::span<const CellId> FindAll(const CellPosition& position, uint32_t searchSizeLimit = std::numeric_limits<uint32_t>::max()) const;
     CellId Find(const CellPosition& position) const;
     void Remove(CellId id);
 
@@ -22,12 +21,6 @@ public:
     uint16_t GetColumnsCount() const { return _cellColumns; }
 
     uint32_t GetCellsCount() const;
-
-    template <class Func>
-    void IterateByPositions(Func&& func) const
-    {
-        _grid.ViewAllCell(std::forward<Func>(func));
-    }
 
     template <class Func>
         requires std::invocable<Func, CellId, const Cell&>
