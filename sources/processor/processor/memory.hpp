@@ -7,11 +7,13 @@ bool MemoryBase<Unit>::HasBytes(uint8_t count) const
 {
     return Size() >= count;
 }
+
 template <class Unit>
-template <class T>
+template <class... Ts>
 bool MemoryBase<Unit>::HasBytes() const
 {
-    return HasBytes(sizeof(T));
+    constexpr uint8_t bytes = (sizeof(Ts) + ...);
+    return HasBytes(bytes);
 }
 
 template <class Unit>
@@ -29,16 +31,16 @@ void MemoryBase<Unit>::Move()
 
 template <class Unit>
 template <class T>
-const T& MemoryBase<Unit>::Read()
+T MemoryBase<Unit>::Read()
 {
-    const T& value = Peek<T>();
+    const T value = Peek<T>();
     Move<T>();
     return value;
 }
 
 template <class Unit>
 template <class T>
-const T& MemoryBase<Unit>::Peek()
+T MemoryBase<Unit>::Peek()
 {
     assert(HasBytes<T>());
     return *reinterpret_cast<const T*>(memory.data());
@@ -51,7 +53,7 @@ MemoryBase<Unit>::MemoryBase(std::span<Unit> memory)
 }
 
 template <class Unit>
-std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t bytesCount)
+std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t bytesCount) const
 {
     return memory.subspan(0, bytesCount);
 }

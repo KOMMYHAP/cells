@@ -2,12 +2,12 @@
 #include "processor/processor.h"
 #include "processor/processor_control_block.h"
 
-#include <windows.h>
-#include <debugapi.h>
-
-static void DebugInvalidCommandTrap()
+static void DebugBadProcessorState(ProcessorState state)
 {
-    DebugBreak();
+    if (state == ProcessorState::Good) {
+        return;
+    }
+    int breakOnMe { 42 };
 }
 
 bool VirtualMachine::RegisterProcedure(std::unique_ptr<ProcedureBase> procedure, uint8_t inputArgs, uint8_t outputArgs)
@@ -35,7 +35,7 @@ std::optional<ProcessorContext> VirtualMachine::MakeProcessorContext(Memory memo
         memory
     };
 
-    context.SetInvalidCommandTrap(&DebugInvalidCommandTrap);
+    context.SetStateWatcher(&DebugBadProcessorState);
 
     return context;
 }

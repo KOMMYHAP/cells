@@ -10,10 +10,10 @@ public:
     MemoryBase(std::span<Unit> memory);
 
     template <class T>
-    const T& Read();
+    T Read();
 
     template <class T>
-    const T& Peek();
+    T Peek();
 
     template <class T>
     void Move();
@@ -22,12 +22,12 @@ public:
 
     uint8_t Size() const { return memory.size(); }
 
-    template <class T>
+    template <class... Ts>
     bool HasBytes() const;
 
     bool HasBytes(uint8_t count) const;
 
-    std::span<Unit> MakeSubSpan(uint8_t bytesCount);
+    std::span<Unit> MakeSubSpan(uint8_t bytesCount) const;
 
 protected:
     std::span<Unit> memory;
@@ -52,7 +52,9 @@ private:
 
 class ConstMemory : public Details::MemoryBase<const std::byte> {
 public:
+    ConstMemory(std::span<std::byte> memory);
     ConstMemory(std::span<const std::byte> memory);
 };
+
 
 #include "memory.hpp"

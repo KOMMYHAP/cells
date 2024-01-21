@@ -94,10 +94,10 @@ int main(int argc, char** argv)
 
     const float TargetTicksPerSeconds = 1.f;
     const sf::Time TargetSimulationTime = sf::seconds(1.0f / TargetTicksPerSeconds);
-    const uint8_t CellsCountPercentOfLimit = 80;
+    const uint8_t CellsCountPercentOfLimit = 10;
 
-    const uint16_t ScreenWidth = 1800;
-    const uint16_t ScreenHeight = 1000;
+    const uint16_t ScreenWidth = 800;
+    const uint16_t ScreenHeight = 600;
 
     const uint16_t FieldOffset = 20;
     const uint16_t FieldWidth = ScreenWidth - 2 * FieldOffset;
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     assert(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
 
     const uint16_t CellPadding = 0;
-    const uint16_t CellSize = 1;
+    const uint16_t CellSize = 8;
 
     assert(FieldWidth % (CellSize + CellPadding) == 0);
     assert(FieldHeight % (CellSize + CellPadding) == 0);
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 
     sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(false);
-    //    window.setFramerateLimit(60);
+    window.setFramerateLimit(60);
 
     World world { ColumnsCount, RowsCount };
 

@@ -8,7 +8,7 @@ ProcedureContext::ProcedureContext(ProcessorContext& context, const Memory& memo
 {
 }
 
-void ProcedureContext::MarkInvalid()
+void ProcedureContext::SetState(ProcessorState state)
 {
-    _processorContext.SetFlag(ProcessorFlags::InvalidCommand);
+    _processorContext.SetState(state);
 }

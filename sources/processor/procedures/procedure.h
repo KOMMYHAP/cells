@@ -1,6 +1,7 @@
 #pragma once
 
 #include "processor/memory.h"
+#include "processor/processor_control_block.h"
 
 struct ProcedureInfo;
 class ProcessorContext;
@@ -12,7 +13,7 @@ public:
     const Memory& GetMemory() const { return _memory; }
     Memory& AccessMemory() { return _memory; }
 
-    void MarkInvalid();
+    void SetState(ProcessorState state);
 
 private:
     ProcessorContext& _processorContext;
