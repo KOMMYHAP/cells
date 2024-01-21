@@ -3,6 +3,9 @@
 enum class ProcessorState : unsigned char {
     Good,
     InvalidCommand,
+    StackOverflow,
+    StackUnderflow,
+    StackCorrupted,
     MemoryCorrupted,
     UnknownProcedure,
 };

@@ -19,14 +19,14 @@ const CellBrain& BrainSystem::Get(CellId id) const
     return _cells[index];
 }
 
-Memory BrainSystem::AccessMemory(CellId id)
+ProcessorMemory BrainSystem::AccessMemory(CellId id)
 {
     CellBrain& cell = Access(id);
-    return Memory(std::span(cell.data));
+    return ProcessorMemory(std::span(cell.data));
 }
 
-ConstMemory BrainSystem::GetMemory(CellId id) const
+ProcessorConstMemory BrainSystem::GetMemory(CellId id) const
 {
     const CellBrain& cell = Get(id);
-    return ConstMemory(std::span(cell.data));
+    return ProcessorConstMemory(std::span(cell.data));
 }

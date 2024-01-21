@@ -3,7 +3,7 @@
 #include "flags.h"
 #include "processor_state.h"
 
-ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const Memory& memory)
+ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory)
     : _procedureTable(procedureTable)
     , _controlBlock(controlBlock)
     , _memory(memory)
@@ -57,11 +57,6 @@ bool ProcessorContext::MoveCommandPointer(uint8_t offset)
     return SetCommandPointer(_controlBlock.nextCommand + offset);
 }
 
-ConstMemory ProcessorContext::GetMemory() const
-{
-    return _memory.MakeSubSpan(_controlBlock.nextCommand);
-}
-
 bool ProcessorContext::WriteRegistry(uint8_t index, std::byte data)
 {
     if (index >= _controlBlock.registry.size()) {
@@ -89,14 +84,64 @@ bool ProcessorContext::RunProcedure(ProcedureId id)
         return false;
     }
 
-    const uint8_t argsCount = info->inputArgsCount + info->outputArgsCount;
-    if (argsCount >= _controlBlock.registry.size()) {
+    const uint8_t inputArgsCount = info->inputArgsCount;
+    const uint8_t outputArgsCount = info->outputArgsCount;
+    const uint8_t initialStackOffset = _controlBlock.stackOffset;
+
+    if (initialStackOffset < inputArgsCount) {
         SetState(ProcessorState::InvalidCommand);
         return false;
     }
 
-    Memory registryMemory { std::span(_controlBlock.registry.begin(), _controlBlock.registry.begin() + argsCount) };
-    ProcedureContext procedureContext { *this, registryMemory };
+    ProcessorStack stackMemory = AccessStack();
+    ProcedureContext procedureContext { *this, stackMemory, inputArgsCount, outputArgsCount };
     info->procedure->Execute(procedureContext);
+
+    uint8_t expectedStackOffset = 0;
+    if (outputArgsCount > inputArgsCount) {
+        expectedStackOffset = initialStackOffset + (outputArgsCount - inputArgsCount);
+    } else {
+        expectedStackOffset = initialStackOffset - (inputArgsCount - outputArgsCount);
+    }
+
+    if (expectedStackOffset != _controlBlock.stackOffset) {
+        // todo: do we need a mechanism to rollback side effect of procedure?
+        SetState(ProcessorState::StackCorrupted);
+        return false;
+    }
+
     return true;
+}
+
+bool ProcessorContext::PushStack(std::byte data)
+{
+    const bool success = AccessStack().TryPush(data);
+    if (!success) {
+        SetState(ProcessorState::StackOverflow);
+    }
+    return success;
+}
+
+std::pair<bool, std::byte> ProcessorContext::PopStack()
+{
+    const auto [success, data] = AccessStack().TryPop<std::byte>();
+    if (!success) {
+        SetState(ProcessorState::StackUnderflow);
+    }
+    return { success, data };
+}
+
+ProcessorControlBlockGuard ProcessorContext::MakeGuard()
+{
+    return { _controlBlock };
+}
+
+ProcessorStack ProcessorContext::AccessStack()
+{
+    return ProcessorStack(std::span(_controlBlock.stack), _controlBlock.stackOffset);
+}
+
+ProcessorMemory ProcessorContext::AccessMemory()
+{
+    return _memory.MakeSubSpan(_controlBlock.nextCommand);
 }

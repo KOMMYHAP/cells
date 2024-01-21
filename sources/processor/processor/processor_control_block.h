@@ -9,7 +9,9 @@ enum class ProcessorInstruction : uint8_t {
     Add,
     Jump,
     JumpIfEqual,
-    Call,
+    Call, ///< Procedure arguments are passed on the stack
+    PushStack,
+    PopStack
 };
 
 enum class ProcessorFlags : uint8_t {
@@ -19,7 +21,8 @@ enum class ProcessorFlags : uint8_t {
     Greater = 1 << 3
 };
 
-constexpr uint8_t ProcessRegistryCount = 6;
+constexpr uint8_t ProcessRegistryCount = 4;
+constexpr uint8_t ProcessStackSize = 5;
 
 #pragma pack(push, 1)
 struct ProcessorControlBlock {
@@ -27,5 +30,7 @@ struct ProcessorControlBlock {
     uint8_t flags;
     uint8_t nextCommand;
     std::array<std::byte, ProcessRegistryCount> registry;
+    uint8_t stackOffset;
+    std::array<std::byte, ProcessStackSize> stack;
 };
 #pragma pack(pop)

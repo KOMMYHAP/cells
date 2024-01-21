@@ -1,22 +1,40 @@
 #pragma once
 
-template <class... Ts>
-bool ProcedureContext::TryWriteResult(Ts&&... args)
+template <MemoryType... Ts>
+std::tuple<bool, Ts...> ProcedureContext::TryPopArgs()
 {
-    const bool success = _memory.TryWrite(std::forward<Ts>(args)...);
-    if (!success) {
-        SetState(ProcessorState::MemoryCorrupted);
+    if (sizeof...(Ts) > _restInputArgs) {
+        SetState(ProcessorState::InvalidCommand);
+        return { false, Ts {}... };
     }
-    return success;
+
+    _restInputArgs -= sizeof...(Ts);
+
+    const auto result = _stack.TryPop<Ts...>();
+    const bool success = std::get<0>(result);
+    if (!success) {
+        SetState(ProcessorState::StackUnderflow);
+    }
+    return result;
 }
 
 template <class... Ts>
-std::tuple<bool, Ts...> ProcedureContext::TryReadArgs()
+    requires(MemoryType<std::decay_t<Ts>> && ...)
+bool ProcedureContext::TryPushResult(Ts&&... ts)
 {
-    const auto result = _memory.TryRead<Ts...>();
-    const bool success = std::get<0>(result);
-    if (!success) {
-        SetState(ProcessorState::MemoryCorrupted);
+    if (_restInputArgs != 0) {
+        SetState(ProcessorState::InvalidCommand);
+        return false;
     }
-    return result;
+    if (sizeof...(Ts) > _restOutputArgs) {
+        SetState(ProcessorState::InvalidCommand);
+        return false;
+    }
+    _restOutputArgs -= sizeof...(Ts);
+
+    const bool success = _stack.TryPush(std::forward<Ts>(ts)...);
+    if (!success) {
+        SetState(ProcessorState::StackOverflow);
+    }
+    return success;
 }

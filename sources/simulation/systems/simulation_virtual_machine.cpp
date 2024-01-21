@@ -54,7 +54,7 @@ void SimulationVirtualMachine::Run(CellId id)
         return;
     }
 
-    Memory memory = _brainSystem.AccessMemory(id);
+    ProcessorMemory memory = _brainSystem.AccessMemory(id);
     _runningCellId = id;
     _virtualMachine.Run(memory);
     _runningCellId = CellId::Invalid;
@@ -67,7 +67,7 @@ void SimulationVirtualMachine::CreateProcedures(World& world)
     // Please, if you register new command, follow the declaration order of ProcedureType.
     // See more in SimulationVirtualMachine::GetProcedureId.
 
-    impl.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 2, 0, "move", world.virtualMachine, world.positionSystem);
+    impl.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", world.virtualMachine, world.positionSystem);
 }
 
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const

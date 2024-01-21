@@ -3,7 +3,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         processor.cpp
         processor_context.cpp
         processor_control_block.cpp
-        memory.cpp
+        processor_control_block_guard.cpp
 )
 
 
@@ -14,6 +14,10 @@ target_sources(${PROJECT_NAME} PUBLIC
         processor_context.hpp
         processor_state.h
         processor_control_block.h
-        memory.h
-        memory.hpp
+        processor_control_block_guard.h
+        processor_memory.h
+        processor_memory.hpp
+        processor_stack.h
+        processor_stack.hpp
+        processor_memory_type.h
 )

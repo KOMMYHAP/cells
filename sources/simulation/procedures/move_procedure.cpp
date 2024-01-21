@@ -9,7 +9,7 @@ MoveProcedure::MoveProcedure(const SimulationVirtualMachine& vm, PositionSystem&
 
 void MoveProcedure::Execute(ProcedureContext& context)
 {
-    const auto [readArgs, direction] = context.TryReadArgs<MoveDirection>();
+    const auto [readArgs, direction] = context.TryPopArgs<MoveDirection>();
     if (!readArgs) {
         return;
     }

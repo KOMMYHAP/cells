@@ -1,14 +1,16 @@
 #pragma once
 
-#include "memory.h"
 #include "procedures/procedure_table.h"
 #include "processor_control_block.h"
+#include "processor_control_block_guard.h"
+#include "processor_memory.h"
 #include "processor_state.h"
 
 class ProcessorContext {
 public:
-    ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const Memory& memory);
+    ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory);
 
+    ProcessorControlBlockGuard MakeGuard();
     bool RunProcedure(ProcedureId id);
 
     template <class... Ts>
@@ -25,13 +27,16 @@ public:
 
     bool WriteRegistry(uint8_t index, std::byte data);
     std::pair<bool, std::byte> ReadRegistry(uint8_t index);
+    bool PushStack(std::byte data);
+    std::pair<bool, std::byte> PopStack();
 
 private:
-    ConstMemory GetMemory() const;
+    ProcessorMemory AccessMemory();
+    ProcessorStack AccessStack();
 
     ProcessorControlBlock& _controlBlock;
     const ProcedureTable& _procedureTable;
-    Memory _memory;
+    ProcessorMemory _memory;
     const std::function<void(ProcessorState)>& _watcher;
 };
 

@@ -25,11 +25,14 @@ void Processor::ProcessInstruction(ProcessorContext& context)
         return;
     }
 
+    ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
+
     switch (instruction) {
     case ProcessorInstruction::Nope:
         if (!context.MoveCommandPointer(1)) {
             break;
         }
+        controlBlockGuard.Submit();
         break;
     case ProcessorInstruction::Write: {
         const auto [success, registerIdx, data] = context.TryReadMemory<uint8_t, std::byte>();
@@ -42,6 +45,7 @@ void Processor::ProcessInstruction(ProcessorContext& context)
         if (!context.MoveCommandPointer(3)) {
             break;
         }
+        controlBlockGuard.Submit();
     } break;
     case ProcessorInstruction::Compare: {
         const auto [success, registerIdx, valueToTest] = context.TryReadMemory<uint8_t, std::byte>();
@@ -58,6 +62,7 @@ void Processor::ProcessInstruction(ProcessorContext& context)
         if (!context.MoveCommandPointer(3)) {
             break;
         }
+        controlBlockGuard.Submit();
     } break;
     case ProcessorInstruction::Add: {
         const auto [success, registerIdx, value] = context.TryReadMemory<uint8_t, uint8_t>();
@@ -69,11 +74,13 @@ void Processor::ProcessInstruction(ProcessorContext& context)
             break;
         }
         const uint8_t newValue = static_cast<uint8_t>(registerData) + value;
-        [[maybe_unused]] const bool registerWrite = context.WriteRegistry(registerIdx, static_cast<std::byte>(newValue));
-        assert(registerWrite);
+        if (!context.WriteRegistry(registerIdx, static_cast<std::byte>(newValue))) {
+            break;
+        }
         if (!context.MoveCommandPointer(3)) {
             break;
         }
+        controlBlockGuard.Submit();
     } break;
     case ProcessorInstruction::Jump: {
         const auto [success, commandPosition] = context.TryReadMemory<uint8_t>();
@@ -83,6 +90,7 @@ void Processor::ProcessInstruction(ProcessorContext& context)
         if (!context.SetCommandPointer(commandPosition)) {
             break;
         }
+        controlBlockGuard.Submit();
     } break;
     case ProcessorInstruction::JumpIfEqual: {
         const auto [success, commandPosition] = context.TryReadMemory<uint8_t>();
@@ -98,6 +106,7 @@ void Processor::ProcessInstruction(ProcessorContext& context)
                 break;
             }
         }
+        controlBlockGuard.Submit();
     } break;
     case ProcessorInstruction::Call: {
         const auto [success, procedureIdx] = context.TryReadMemory<ProcedureId>();
@@ -110,10 +119,40 @@ void Processor::ProcessInstruction(ProcessorContext& context)
         if (!context.MoveCommandPointer(2)) {
             break;
         }
+        controlBlockGuard.Submit();
+    } break;
+    case ProcessorInstruction::PushStack: {
+        const auto [success, data] = context.TryReadMemory<std::byte>();
+        if (!success) {
+            break;
+        }
+        context.PushStack(data);
+        if (!context.MoveCommandPointer(2)) {
+            break;
+        }
+        controlBlockGuard.Submit();
+    } break;
+    case ProcessorInstruction::PopStack: {
+        const auto [readSuccess, destinationRegistryIdx] = context.TryReadMemory<uint8_t>();
+        if (!readSuccess) {
+            break;
+        }
+        const auto [popSuccess, data] = context.PopStack();
+        if (!popSuccess) {
+            break;
+        }
+        if (!context.WriteRegistry(destinationRegistryIdx, data)) {
+            break;
+        }
+        if (!context.MoveCommandPointer(2)) {
+            break;
+        }
+        controlBlockGuard.Submit();
     } break;
     default:
         assert(false);
         context.SetState(ProcessorState::InvalidCommand);
+        controlBlockGuard.Submit();
         break;
     }
 }

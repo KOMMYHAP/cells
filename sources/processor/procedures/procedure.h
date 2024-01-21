@@ -1,6 +1,6 @@
 #pragma once
 
-#include "processor/memory.h"
+#include "processor/processor_stack.h"
 #include "processor/processor_state.h"
 
 struct ProcedureTableEntry;
@@ -9,21 +9,24 @@ enum class ProcessorState : uint8_t;
 
 class ProcedureContext {
 public:
-    ProcedureContext(ProcessorContext& context, const Memory& memory);
+    ProcedureContext(ProcessorContext& context, ProcessorStack stack, uint8_t inputArgs, uint8_t outputArgs);
+
+    template <MemoryType... Ts>
+    std::tuple<bool, Ts...> TryPopArgs();
 
     template <class... Ts>
-    std::tuple<bool, Ts...> TryReadArgs();
-
-    template <class... Ts>
-    bool TryWriteResult(Ts&&... args);
+        requires(MemoryType<std::decay_t<Ts>> && ...)
+    bool TryPushResult(Ts&&... ts);
 
     void NotifyInvalidCommand();
 
 private:
     void SetState(ProcessorState state);
 
-    Memory _memory;
+    ProcessorStack _stack;
     ProcessorContext& _processorContext;
+    uint8_t _restInputArgs { 0 };
+    uint8_t _restOutputArgs { 0 };
 };
 
 class ProcedureBase {

@@ -53,7 +53,9 @@ template <MemoryType T>
 T MemoryBase<Unit>::Peek()
 {
     assert(HasBytes<T>());
-    return *reinterpret_cast<const T*>(_memory.data());
+    T value;
+    memcpy(&value, _memory.data(), sizeof(T));
+    return value;
 }
 
 template <class Unit>
@@ -70,17 +72,32 @@ std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t offset) const
 
 }
 
-template <details::MemoryType T>
-T& Memory::Access()
+inline ProcessorMemory::ProcessorMemory(std::span<std::byte> memory)
+    : MemoryBase(memory)
 {
-    assert(HasBytes<T>());
-    T& value = *reinterpret_cast<std::decay_t<T>*>(_memory.data());
-    Move<T>();
-    return value;
 }
 
-template <details::MemoryType... Ts>
-std::tuple<bool, Ts*...> Memory::TryAccess()
+inline ProcessorConstMemory::ProcessorConstMemory(std::span<std::byte> memory)
+    : MemoryBase(memory)
+{
+}
+
+inline ProcessorConstMemory::ProcessorConstMemory(std::span<const std::byte> memory)
+    : MemoryBase(memory)
+{
+}
+
+template <MemoryType T>
+T& ProcessorMemory::Access()
+{
+    assert(HasBytes<T>());
+    T* value = new (_memory.data()) T;
+    Move<T>();
+    return *value;
+}
+
+template <MemoryType... Ts>
+std::tuple<bool, Ts*...> ProcessorMemory::TryAccess()
 {
     if (!HasBytes<Ts...>()) {
         return { false, static_cast<Ts*>(nullptr)... };
@@ -89,25 +106,28 @@ std::tuple<bool, Ts*...> Memory::TryAccess()
     return { true, &Access<Ts>()... };
 }
 
-template <class... Args>
-void Memory::Write(Args&&... args)
+template <class... Ts>
+    requires(MemoryType<std::decay_t<Ts>> && ...)
+void ProcessorMemory::Write(Ts&&... ts)
 {
-    static_assert(sizeof...(args) > 0, "Usage: memory.Write(ProcessorInstruction::Jump, std::byte{42});");
-    (WriteOne(std::forward<Args>(args)), ...);
+    static_assert(sizeof...(ts) > 0, "Usage: memory.Write(ProcessorInstruction::Jump, std::byte{42});");
+    (WriteOne(std::forward<Ts>(ts)), ...);
 }
 
-template <class... Args>
-bool Memory::TryWrite(Args&&... args)
+template <class... Ts>
+    requires(MemoryType<std::decay_t<Ts>> && ...)
+bool ProcessorMemory::TryWrite(Ts&&... ts)
 {
-    if (!HasBytes<std::decay_t<Args>...>()) {
+    if (!HasBytes<std::decay_t<Ts>...>()) {
         return false;
     }
-    Write(std::forward<Args>(args)...);
+    Write(std::forward<Ts>(ts)...);
     return true;
 }
 
-template <class Arg>
-void Memory::WriteOne(Arg&& data)
+template <class T>
+    requires MemoryType<std::decay_t<T>>
+void ProcessorMemory::WriteOne(T&& data)
 {
-    Access<std::decay_t<Arg>>() = std::forward<Arg>(data);
+    Access<std::decay_t<T>>() = std::forward<T>(data);
 }

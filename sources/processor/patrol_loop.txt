@@ -28,3 +28,5 @@ TODO:
 Move processor's context to separate memory view?
 Extract unit's logic outside of processor?
 How to process interuption like invalid command?
+
+ProcessorRegistryGuard to rollback registry write if instruction failed.

@@ -6,6 +6,8 @@ static_assert(ProcessRegistryCount >= ProcedureInputArgsCountLimit + ProcedureOu
     "Register overflow! Processor use registries to pass args to or obtain args from procedure");
 
 static_assert(std::is_trivial_v<ProcessorControlBlock>, "As part of memory view ProcessorControlBlock must be trivial");
+static_assert(std::is_trivial_v<ProcessorInstruction>, "As part of memory view ProcessorInstruction must be trivial");
+static_assert(std::is_trivial_v<ProcessorFlags>, "As part of memory view ProcessorFlags must be trivial");
 
 VirtualMachine::VirtualMachine(ProcessorStateWatcher processorStateWatcher, uint8_t systemInstructionPerStep)
     : _systemInstructionPerStep(systemInstructionPerStep)
@@ -20,7 +22,7 @@ ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t 
     return id;
 }
 
-void VirtualMachine::Run(Memory memory)
+void VirtualMachine::Run(ProcessorMemory memory)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     if (!controlBlockRead) {

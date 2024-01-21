@@ -1,9 +1,11 @@
 #include "procedure.h"
 #include "processor/processor.h"
 
-ProcedureContext::ProcedureContext(ProcessorContext& context, const Memory& memory)
+ProcedureContext::ProcedureContext(ProcessorContext& context, ProcessorStack stack, uint8_t inputArgs, uint8_t outputArgs)
     : _processorContext(context)
-    , _memory(memory)
+    , _stack(stack)
+    , _restInputArgs(inputArgs)
+    , _restOutputArgs(outputArgs)
 {
 }
 

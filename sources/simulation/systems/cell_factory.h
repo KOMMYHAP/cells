@@ -13,7 +13,7 @@ public:
     bool MakePatrolUnit(CellId id, uint16_t length);
 
 private:
-    bool InitMemory(Memory& memory);
+    bool InitMemory(ProcessorMemory& memory);
 
     SimulationVirtualMachine& _vm;
     BrainSystem& _brainSystem;

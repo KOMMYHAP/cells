@@ -1,9 +1,8 @@
 #pragma once
 
-namespace details {
+#include "processor_memory_type.h"
 
-template <class T>
-concept MemoryType = !std::is_reference_v<T> && !std::is_pointer_v<T>;
+namespace details {
 
 template <class Unit>
 class MemoryBase {
@@ -39,31 +38,34 @@ protected:
 
 }
 
-class Memory : public details::MemoryBase<std::byte> {
+class ProcessorMemory : public details::MemoryBase<std::byte> {
 public:
-    Memory(std::span<std::byte> memory);
+    ProcessorMemory(std::span<std::byte> memory);
 
-    template <details::MemoryType T>
+    template <MemoryType T>
     T& Access();
 
-    template <details::MemoryType... Ts>
+    template <MemoryType... Ts>
     std::tuple<bool, Ts*...> TryAccess();
 
-    template <class... Args>
-    void Write(Args&&... args);
+    template <class... Ts>
+        requires(MemoryType<std::decay_t<Ts>> && ...)
+    void Write(Ts&&... ts);
 
-    template <class... Args>
-    bool TryWrite(Args&&... args);
+    template <class... Ts>
+        requires(MemoryType<std::decay_t<Ts>> && ...)
+    bool TryWrite(Ts&&... ts);
 
 private:
     template <class Arg>
+        requires MemoryType<std::decay_t<Arg>>
     void WriteOne(Arg&& data);
 };
 
-class ConstMemory : public details::MemoryBase<const std::byte> {
+class ProcessorConstMemory : public details::MemoryBase<const std::byte> {
 public:
-    ConstMemory(std::span<std::byte> memory);
-    ConstMemory(std::span<const std::byte> memory);
+    ProcessorConstMemory(std::span<std::byte> memory);
+    ProcessorConstMemory(std::span<const std::byte> memory);
 };
 
-#include "memory.hpp"
+#include "processor_memory.hpp"
