@@ -5,14 +5,14 @@
 #include "world.h"
 
 enum class ProcessorInstruction : uint8_t;
-class Brain;
+class CellBrain;
 class Memory;
 
 class BrainProcessor {
 public:
-    BrainProcessor(CellId cellId, Brain& brain, World& world);
+    BrainProcessor(CellId cellId, CellBrain& brain, World& world);
 
-    static Brain MakeDefaultUnit();
+    static CellBrain MakeDefaultUnit();
 
     void Process();
 
@@ -21,7 +21,7 @@ private:
     void ProcessSystemCommand(BrainControlBlock& controlBlock, Memory brainData, ProcessorInstruction command);
     void ProcessUnitCommand(BrainControlBlock& controlBlock, Memory brainData, UnitCommand command);
 
-    Brain& _brain;
+    CellBrain& _brain;
     World& _world;
     const CellId _id;
 };

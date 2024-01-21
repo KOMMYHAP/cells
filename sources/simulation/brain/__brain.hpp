@@ -11,7 +11,7 @@
 //template <class Unit>
 //ConstMemory BrainBase<Unit>::GetMemory() const
 //{
-//    const auto memory = std::span { std::as_const(_cell).data, std::as_const(_cell).data + Brain::Size };
+//    const auto memory = std::span { std::as_const(_cell).data, std::as_const(_cell).data + CellBrain::Size };
 //    return ConstMemory { memory };
 //}
 //

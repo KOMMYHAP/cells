@@ -8,13 +8,13 @@ class BrainSystem {
 public:
     BrainSystem(uint32_t capacity);
 
-    void Create(CellId id, const Brain& cell);
-    Brain& Access(CellId id);
-    const Brain& Get(CellId id) const;
+    void Create(CellId id, const CellBrain& cell);
+    CellBrain& Access(CellId id);
+    const CellBrain& Get(CellId id) const;
 
     Memory AccessMemory(CellId id);
     ConstMemory GetMemory(CellId id) const;
 
 private:
-    std::vector<Brain> _cells;
+    std::vector<CellBrain> _cells;
 };

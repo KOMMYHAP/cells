@@ -19,16 +19,16 @@
 //
 // }
 //
-// class Brain : public Details::BrainBase<Brain> {
+// class CellBrain : public Details::BrainBase<CellBrain> {
 // public:
-//     Brain(Brain& cell);
+//     CellBrain(CellBrain& cell);
 //
 //     Memory AccessMemory();
 // };
 //
-// class ConstBrain : public Details::BrainBase<const Brain> {
+// class ConstBrain : public Details::BrainBase<const CellBrain> {
 // public:
-//     ConstBrain(const Brain& cell);
+//     ConstBrain(const CellBrain& cell);
 // };
 //
 // #include "brain.hpp"

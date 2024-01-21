@@ -35,7 +35,7 @@
 //    return false;
 //}
 //
-//BrainProcessor::BrainProcessor(CellId cellId, Brain& data, World& world)
+//BrainProcessor::BrainProcessor(CellId cellId, CellBrain& data, World& world)
 //    : _brain(data)
 //    , _world(world)
 //    , _id(cellId)
@@ -64,15 +64,15 @@
 //    }
 //}
 //
-//Brain BrainProcessor::MakeDefaultUnit()
+//CellBrain BrainProcessor::MakeDefaultUnit()
 //{
-//    Brain defaultUnitCell;
-//    Brain data { defaultUnitCell };
+//    CellBrain defaultUnitCell;
+//    CellBrain data { defaultUnitCell };
 //
 //    Memory memory = data.AccessMemory();
 //    if (!memory.HasBytes(sizeof(BrainControlBlock) + sizeof(CommandParam) * 2)) {
 //        assert(false);
-//        return Brain();
+//        return CellBrain();
 //    }
 //
 //    BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();

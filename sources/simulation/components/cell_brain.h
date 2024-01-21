@@ -1,6 +1,6 @@
 #pragma once
 
-struct Brain {
+struct CellBrain {
     inline static constexpr uint8_t Size = 255;
     std::byte data[Size];
 };

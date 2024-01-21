@@ -5,21 +5,21 @@ BrainSystem::BrainSystem(uint32_t capacity)
 {
 }
 
-void BrainSystem::Create(CellId id, const Brain& cell)
+void BrainSystem::Create(CellId id, const CellBrain& cell)
 {
     const auto index = CellIdToInt(id);
     assert(index <= _cells.size());
     _cells[index] = cell;
 }
 
-Brain& BrainSystem::Access(CellId id)
+CellBrain& BrainSystem::Access(CellId id)
 {
     const auto index = CellIdToInt(id);
     assert(index <= _cells.size());
     return _cells[index];
 }
 
-const Brain& BrainSystem::Get(CellId id) const
+const CellBrain& BrainSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
     assert(index <= _cells.size());
@@ -28,12 +28,12 @@ const Brain& BrainSystem::Get(CellId id) const
 
 Memory BrainSystem::AccessMemory(CellId id)
 {
-    Brain& cell = Access(id);
+    CellBrain& cell = Access(id);
     return Memory(std::span(cell.data));
 }
 
 ConstMemory BrainSystem::GetMemory(CellId id) const
 {
-    const Brain& cell = Get(id);
+    const CellBrain& cell = Get(id);
     return ConstMemory(std::span(cell.data));
 }

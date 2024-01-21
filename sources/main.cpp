@@ -24,9 +24,9 @@ void signalHandler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
-Brain CreatePatrolUnit(uint8_t offset, const uint16_t moveCommandsCount)
+CellBrain CreatePatrolUnit(uint8_t offset, const uint16_t moveCommandsCount)
 {
-    Brain cell {};
+    CellBrain cell {};
     Memory memory { cell.data };
 
     BrainControlBlock& controlBlock = memory.Access<BrainControlBlock>();
@@ -64,7 +64,7 @@ void MakeTestField(World& world, uint8_t percent)
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const uint8_t moveCommandOffset = uniformDist(randomEngine);
-        const Brain& cell = CreatePatrolUnit(moveCommandOffset, moveCommandsCount);
+        const CellBrain& cell = CreatePatrolUnit(moveCommandOffset, moveCommandsCount);
         const CellId id = world.idSystem.Create();
         assert(id != CellId::Invalid);
         world.brainSystem.Create(id, cell);

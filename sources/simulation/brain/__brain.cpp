@@ -3,18 +3,18 @@
 //#include "cell.h"
 //#include "processor/memory.h"
 //
-//Brain::Brain(Brain& cell)
+//CellBrain::CellBrain(CellBrain& cell)
 //    : BrainBase(cell)
 //{
 //}
 //
-//Memory Brain::AccessMemory()
+//Memory CellBrain::AccessMemory()
 //{
-//    const auto memory = std::span { _cell.data, _cell.data + Brain::Size };
+//    const auto memory = std::span { _cell.data, _cell.data + CellBrain::Size };
 //    return Memory { memory };
 //}
 //
-//ConstBrain::ConstBrain(const Brain& cell)
+//ConstBrain::ConstBrain(const CellBrain& cell)
 //    : BrainBase(cell)
 //{
 //}
