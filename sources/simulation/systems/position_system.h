@@ -1,5 +1,7 @@
 #pragma once
-#include "brain/cell.h"
+
+#include "cell_id.h"
+#include "cell_position.h"
 #include "position_grid.h"
 
 class PositionSystem {

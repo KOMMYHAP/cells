@@ -1,5 +1,7 @@
 #pragma once
 
+#include "processor_state.h"
+
 enum class ProcessorInstruction : uint8_t {
     Nope,
     Write,
@@ -8,13 +10,6 @@ enum class ProcessorInstruction : uint8_t {
     Jump,
     JumpIfEqual,
     Call,
-};
-
-enum class ProcessorState : uint8_t {
-    Good,
-    InvalidCommand,
-    MemoryCorrupted,
-    UnknownProcedure,
 };
 
 enum class ProcessorFlags : uint8_t {

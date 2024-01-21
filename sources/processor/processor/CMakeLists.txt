@@ -11,6 +11,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 target_sources(${PROJECT_NAME} PUBLIC
         processor.h
         processor_context.h
+        processor_state.h
         processor_control_block.h
         memory.h
         memory.hpp

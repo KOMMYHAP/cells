@@ -9,4 +9,6 @@ public:
 
 private:
     void ProcessInstruction(ProcessorContext& context);
+
+    uint8_t _systemInstructionToPerform;
 };

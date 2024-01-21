@@ -7,7 +7,7 @@
 
 #include "basicdefs.h"
 
-#include "brain/brain.h"
+#include "brain/__brain.h"
 #include "brain/brain_processor.h"
 #include "command_line.h"
 #include "processor/memory.h"
@@ -24,13 +24,12 @@ void signalHandler(int signal)
     std::_Exit(EXIT_FAILURE);
 }
 
-Cell CreatePatrolUnit(uint8_t offset, const uint16_t moveCommandsCount)
+Brain CreatePatrolUnit(uint8_t offset, const uint16_t moveCommandsCount)
 {
-    Cell cell = BrainProcessor::MakeDefaultUnit();
-    Brain brain { cell };
+    Brain cell {};
+    Memory memory { cell.data };
 
-    Memory memory = brain.AccessMemory();
-    BrainControlBlock& controlBlock = memory.Get<BrainControlBlock>();
+    BrainControlBlock& controlBlock = memory.Access<BrainControlBlock>();
 
     constexpr uint8_t moveCommandSize = static_cast<uint8_t>(sizeof(CommandParam) + sizeof(Direction));
     controlBlock.nextCommand = offset * moveCommandSize;
@@ -65,7 +64,7 @@ void MakeTestField(World& world, uint8_t percent)
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const uint8_t moveCommandOffset = uniformDist(randomEngine);
-        const Cell& cell = CreatePatrolUnit(moveCommandOffset, moveCommandsCount);
+        const Brain& cell = CreatePatrolUnit(moveCommandOffset, moveCommandsCount);
         const CellId id = world.idSystem.Create();
         assert(id != CellId::Invalid);
         world.brainSystem.Create(id, cell);

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "brain/cell.h"
+#include "cell_id.h"
+#include "cell_position.h"
 
 class PositionGrid {
 public:

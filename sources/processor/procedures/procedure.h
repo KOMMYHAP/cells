@@ -1,35 +1,21 @@
 #pragma once
 
 #include "processor/memory.h"
-#include "processor/processor_control_block.h"
+#include "processor/processor_state.h"
 
 struct ProcedureInfo;
 class ProcessorContext;
+enum class ProcessorState : uint8_t;
 
 class ProcedureContext {
 public:
     ProcedureContext(ProcessorContext& context, const Memory& memory);
 
     template <class... Ts>
-    std::tuple<bool, Ts...> TryReadArgs()
-    {
-        const auto result = _memory.TryRead<Ts...>();
-        const bool success = std::get<0>(result);
-        if (!success) {
-            SetState(ProcessorState::MemoryCorrupted);
-        }
-        return result;
-    }
+    std::tuple<bool, Ts...> TryReadArgs();
 
     template <class... Ts>
-    bool TryWriteResult(Ts&&... args)
-    {
-        const bool success = _memory.TryWrite(std::forward<Ts>(args)...);
-        if (!success) {
-            SetState(ProcessorState::MemoryCorrupted);
-        }
-        return success;
-    }
+    bool TryWriteResult(Ts&&... args);
 
 private:
     void SetState(ProcessorState state);
@@ -42,3 +28,5 @@ struct ProcedureBase {
     virtual ~ProcedureBase() = default;
     virtual void Execute(ProcedureContext& context) = 0;
 };
+
+#include "procedure.hpp"

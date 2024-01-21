@@ -1,6 +1,6 @@
 #pragma once
 
-#include "brain/cell.h"
+#include "cell_id.h"
 
 class IdSystem {
 public:

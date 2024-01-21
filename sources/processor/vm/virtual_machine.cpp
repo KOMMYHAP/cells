@@ -1,6 +1,7 @@
 #include "virtual_machine.h"
 #include "processor/processor.h"
 #include "processor/processor_control_block.h"
+#include "processor/processor_state.h"
 
 static void DebugBadProcessorState(ProcessorState state)
 {

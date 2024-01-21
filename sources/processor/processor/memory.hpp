@@ -111,5 +111,5 @@ template <class T>
 void Memory::WriteOne(T&& data)
 {
     static_assert(sizeof(T) == 1);
-    Get<T>() = std::forward<T>(data);
+    Access<T>() = std::forward<T>(data);
 }

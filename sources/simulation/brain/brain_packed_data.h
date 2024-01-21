@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cell.h"
+#include "brain.h"
 
 constexpr uint8_t SystemCommandCount = 10;
 
@@ -23,13 +23,6 @@ enum class Direction : uint8_t {
     Right,
     Up,
     Down,
-};
-
-enum class CellType : uint8_t {
-    Unit,
-    Food,
-    Wall,
-    Dummy
 };
 
 #pragma pack(push, 1)

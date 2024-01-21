@@ -8,5 +8,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         procedure.h
+        procedure.hpp
         procedure_table.h
 )

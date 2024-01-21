@@ -1,5 +1,5 @@
 #include "simulation.h"
-#include "brain/brain.h"
+#include "brain/__brain.h"
 #include "brain/brain_processor.h"
 #include "simulation_profile_category.h"
 
@@ -30,22 +30,12 @@ void Simulation::ProcessTick()
     sf::Clock clock;
 
     _world.idSystem.Iterate([this](const CellId id) {
-        Cell& cell = _world.brainSystem.Modify(id);
         const CellType type = _world.typeSystem.Get(id);
-        Brain brain { cell };
-
-        switch (type) {
-        case CellType::Unit: {
-            BrainProcessor processor { id, brain, _world };
-            processor.Process();
-        } break;
-        case CellType::Food:
-            break;
-        case CellType::Wall:
-            break;
-        case CellType::Dummy:
-            break;
+        if (type != CellType::Unit) {
+            return;
         }
+        Memory memory = _world.brainSystem.AccessMemory(id);
+        _world.virtualMachine.Run(memory);
     });
 
     _tickCounter.AddSample(clock.getElapsedTime().asSeconds());

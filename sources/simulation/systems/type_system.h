@@ -1,7 +1,7 @@
 #pragma once
 
-#include "brain/brain_packed_data.h"
-#include "brain/cell.h"
+#include "cell_id.h"
+#include "cell_type.h"
 
 class TypeSystem {
 public:

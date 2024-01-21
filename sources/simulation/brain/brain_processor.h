@@ -1,7 +1,7 @@
 #pragma once
 
+#include "brain.h"
 #include "brain_packed_data.h"
-#include "cell.h"
 #include "world.h"
 
 enum class ProcessorInstruction : uint8_t;
@@ -12,7 +12,7 @@ class BrainProcessor {
 public:
     BrainProcessor(CellId cellId, Brain& brain, World& world);
 
-    static Cell MakeDefaultUnit();
+    static Brain MakeDefaultUnit();
 
     void Process();
 

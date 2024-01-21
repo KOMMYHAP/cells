@@ -1,6 +1,6 @@
 #include "world_render.h"
 #include "render_profile_category.h"
-#include <brain/brain.h>
+#include <brain/__brain.h>
 
 WorldRender::WorldRender(World& world, Config&& config)
     : _world(world)

@@ -1,6 +1,7 @@
 #include "processor_context.h"
 
 #include "flags.h"
+#include "processor_state.h"
 
 ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, ProcessorControlBlock& controlBlock, const Memory& memory)
     : _procedureTable(procedureTable)

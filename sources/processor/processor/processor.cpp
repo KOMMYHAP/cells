@@ -1,5 +1,11 @@
 #include "processor.h"
 #include "processor_profile_category.h"
+#include "processor_state.h"
+
+Processor::Processor(uint8_t systemInstructionToPerform)
+    : _systemInstructionToPerform(systemInstructionToPerform)
+{
+}
 
 void Processor::Execute(ProcessorContext& context)
 {
