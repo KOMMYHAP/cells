@@ -3,9 +3,6 @@
 #include "field_grid.h"
 
 class Field {
-    friend class FieldIterator;
-    friend class ConstFieldIterator;
-
 public:
     Field(uint16_t cellsInColumn, uint16_t cellsInRow);
 
