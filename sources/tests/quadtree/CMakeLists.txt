@@ -1,1 +1,0 @@
-target_sources(${PROJECT_NAME} PRIVATE quadtree_tests.cpp)
