@@ -50,8 +50,8 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
     std::fill(_textureData.begin(), _textureData.end(), clearColor);
 
-    _world.positionSystem.Iterate([this](const CellPosition& position) {
-        ProcessCell(position);
+    _world.idSystem.Iterate([this](const CellId id) {
+        ProcessCell(id);
     });
     _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
 
@@ -76,13 +76,16 @@ sf::Color WorldRender::GetColor(CellType type) const
     }
 }
 
-void WorldRender::ProcessCell(const CellPosition& position)
+void WorldRender::ProcessCell(CellId id)
 {
-    const CellId id = _world.positionSystem.Find(position);
+    const CellPosition position = _world.positionSystem.Get(id);
+    if (position == PositionSystem::InvalidPosition) {
+        return;
+    }
 
     const uint16_t width = _world.GetWidth();
     uint32_t& pixel = _textureData[position.y * width + position.x];
 
-    const CellType cellType = id != CellId::Invalid ? _world.typeSystem.Get(id) : CellType::Dummy;
+    const CellType cellType = _world.typeSystem.Get(id);
     pixel = GetColor(cellType).toInteger();
 }

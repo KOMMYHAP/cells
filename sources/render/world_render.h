@@ -14,7 +14,7 @@ public:
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 
 private:
-    void ProcessCell(const CellPosition &position);
+    void ProcessCell(CellId id);
     sf::Color GetColor(CellType type) const;
 
     World& _world;
