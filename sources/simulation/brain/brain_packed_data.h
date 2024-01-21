@@ -1,6 +1,6 @@
 #pragma once
 
-#include "brain.h"
+#include "components/cell_brain.h"
 
 constexpr uint8_t SystemCommandCount = 10;
 

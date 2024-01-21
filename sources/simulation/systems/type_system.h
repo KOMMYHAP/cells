@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cell_id.h"
-#include "cell_type.h"
+#include "components/cell_id.h"
+#include "components/cell_type.h"
 
 class TypeSystem {
 public:

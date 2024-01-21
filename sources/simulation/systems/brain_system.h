@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cell_id.h"
-#include "brain/brain.h"
+#include "components/cell_brain.h"
+#include "components/cell_id.h"
 #include "processor/memory.h"
 
 class BrainSystem {

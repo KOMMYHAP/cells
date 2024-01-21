@@ -1,7 +1,7 @@
 #pragma once
 
-#include "brain.h"
 #include "brain_packed_data.h"
+#include "components/cell_brain.h"
 #include "world.h"
 
 enum class ProcessorInstruction : uint8_t;

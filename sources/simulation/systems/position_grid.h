@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cell_id.h"
-#include "cell_position.h"
+#include "components/cell_id.h"
+#include "components/cell_position.h"
 
 class PositionGrid {
 public:

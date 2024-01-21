@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cell_id.h"
+#include "components/cell_id.h"
 
 class IdSystem {
 public:
