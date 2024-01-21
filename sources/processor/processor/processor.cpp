@@ -66,12 +66,42 @@ void Processor::ProcessInstruction(ProcessorContext& context)
             break;
         }
     } break;
-    case ProcessorInstruction::Jump:
-        break;
-    case ProcessorInstruction::JumpIfEqual:
-        break;
-    case ProcessorInstruction::Call:
-        break;
+    case ProcessorInstruction::Jump: {
+        const auto [success, commandPosition] = context.TryReadMemory<uint8_t>();
+        if (!success) {
+            break;
+        }
+        if (!context.SetCommandPointer(commandPosition)) {
+            break;
+        }
+    } break;
+    case ProcessorInstruction::JumpIfEqual: {
+        const auto [success, commandPosition] = context.TryReadMemory<uint8_t>();
+        if (!success) {
+            break;
+        }
+        if (context.HasFlag(ProcessorFlags::Equal)) {
+            if (!context.SetCommandPointer(commandPosition)) {
+                break;
+            }
+        } else {
+            if (!context.MoveCommandPointer(2)) {
+                break;
+            }
+        }
+    } break;
+    case ProcessorInstruction::Call: {
+        const auto [success, procedureIdx] = context.TryReadMemory<ProcedureId>();
+        if (!success) {
+            break;
+        }
+        if (!context.RunProcedure(procedureIdx)) {
+            break;
+        }
+        if (!context.MoveCommandPointer(2)) {
+            break;
+        }
+    } break;
     default:
         assert(false);
         context.SetState(ProcessorState::InvalidCommand);

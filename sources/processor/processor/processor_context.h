@@ -8,8 +8,9 @@ class ProcessorContext {
 public:
     ProcessorContext(const ProcedureTable& procedureTable, ProcessorControlBlock& controlBlock, const Memory& memory);
 
-    std::optional<ProcedureContext> MakeProcedureContext(ProcedureId id);
+    bool RunProcedure(ProcedureId id);
 
+    ConstMemory GetMemory() const;
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();
     bool SetCommandPointer(uint8_t nextCommand);
@@ -27,8 +28,6 @@ public:
     std::pair<bool, std::byte> ReadRegistry(uint8_t index);
 
 private:
-    ConstMemory GetMemory() const;
-
     ProcessorControlBlock& _controlBlock;
     const ProcedureTable& _procedureTable;
     Memory _memory;

@@ -12,6 +12,9 @@ public:
     template <class T>
     T Read();
 
+    template <class... Ts>
+    std::tuple<bool, Ts...> TryRead();
+
     template <class T>
     T Peek();
 
@@ -45,6 +48,9 @@ public:
     template <class... Args>
     void Write(Args&&... args);
 
+    template <class... Args>
+    bool TryWrite(Args&&... args);
+
 private:
     template <class T>
     void WriteOne(T&& data);
@@ -55,6 +61,5 @@ public:
     ConstMemory(std::span<std::byte> memory);
     ConstMemory(std::span<const std::byte> memory);
 };
-
 
 #include "memory.hpp"

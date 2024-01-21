@@ -24,25 +24,6 @@ void ProcessorContext::ResetFlag(ProcessorFlags flag)
     common::ResetFlag(_controlBlock.flags, flag);
 }
 
-std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(ProcedureId id)
-{
-    const ProcedureInfo* info = _procedureTable.FindProcedure(id);
-    if (!info) {
-        SetState(ProcessorState::UnknownProcedure);
-        return {};
-    }
-
-    const uint8_t argsCount = info->inputArgsCount + info->outputArgsCount;
-    const uint8_t bytesRequired = argsCount * ProcessorUnitSize;
-    if (!_memory.HasBytes(bytesRequired)) {
-        SetState(ProcessorState::MemoryCorrupted);
-        return {};
-    }
-
-    const Memory memory = _memory.MakeSubSpan(bytesRequired);
-    return ProcedureContext(*this, memory);
-}
-
 bool ProcessorContext::IsState(ProcessorState state) const
 {
     return _controlBlock.state == static_cast<uint8_t>(state);
@@ -101,4 +82,36 @@ std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
         return { false, std::byte {} };
     }
     return { true, _controlBlock.registry[index] };
+}
+
+bool ProcessorContext::RunProcedure(ProcedureId id)
+{
+    const ProcedureInfo* info = _procedureTable.FindProcedure(id);
+    if (!info) {
+        SetState(ProcessorState::UnknownProcedure);
+        return false;
+    }
+
+    const uint8_t argsCount = info->inputArgsCount + info->outputArgsCount;
+    const uint8_t bytesRequired = argsCount * ProcessorUnitSize;
+    if (argsCount >= _controlBlock.registry.size()) {
+        SetState(ProcessorState::InvalidCommand);
+        return false;
+    }
+
+    Memory registryMemory { std::span(_controlBlock.registry.begin(), _controlBlock.registry.begin() + bytesRequired) };
+    ProcedureContext procedureContext { *this, registryMemory };
+    info->procedure->Execute(procedureContext);
+    return true;
+}
+
+template <class... Ts>
+std::tuple<bool, Ts...> ProcessorContext::TryReadMemory()
+{
+    const auto result = GetMemory().TryRead<Ts...>();
+    const bool success = std::get<0>(result);
+    if (!success) {
+        SetState(ProcessorState::MemoryCorrupted);
+    }
+    return result;
 }

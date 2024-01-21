@@ -39,6 +39,16 @@ T MemoryBase<Unit>::Read()
 }
 
 template <class Unit>
+template <class... Ts>
+std::tuple<bool, Ts...> MemoryBase<Unit>::TryRead()
+{
+    if (!HasBytes<Ts...>()) {
+        return { false, Ts {}... };
+    }
+    return { true, Read<Ts>()... };
+}
+
+template <class Unit>
 template <class T>
 T MemoryBase<Unit>::Peek()
 {
@@ -75,6 +85,16 @@ void Memory::Write(Args&&... args)
     if constexpr (sizeof...(args) > 0) {
         ((WriteOne(std::forward<Args>(args))), ...);
     }
+}
+
+template <class... Args>
+bool Memory::TryWrite(Args&&... args)
+{
+    if (!HasBytes<Args...>()) {
+        return false;
+    }
+    Write(std::forward<Args>(args)...);
+    return true;
 }
 
 template <class T>
