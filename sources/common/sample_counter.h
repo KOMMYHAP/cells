@@ -9,16 +9,17 @@ public:
     void AddSample(Sample sample);
     void Reset();
 
-    bool IsEmpty() const { return _samplesCount == 0; }
-    bool IsReady() const { return _samplesCount > 0; }
-    bool IsFull() const { return _samplesCount == SamplesLimit; }
+    bool IsEmpty() const { return _availableSamplesCount == 0; }
+    bool IsReady() const { return _availableSamplesCount > 0; }
+    bool IsFull() const { return _currentSample == SamplesLimit; }
 
     Sample CalcAverage() const;
     Sample CalcMedian() const;
 
 private:
     std::array<Sample, SamplesLimit> _samples;
-    uint16_t _samplesCount { 0 };
+    uint16_t _availableSamplesCount { 0 };
+    uint16_t _currentSample { 0 };
 };
 
 }

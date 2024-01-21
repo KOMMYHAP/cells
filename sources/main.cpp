@@ -103,8 +103,8 @@ int main(int argc, char** argv)
     const std::string_view FragmentShaderArgument = "--fragment-shader";
 
     const float TargetTicksPerSeconds = 1.0f;
-    const sf::Time TargetSimulationTime = sf::milliseconds(30);
-    const uint8_t CellsCountPercentOfLimit = 80;
+    const sf::Time TargetSimulationTime = sf::seconds(1.0f / TargetTicksPerSeconds);
+    const uint8_t CellsCountPercentOfLimit = 30;
 
     const uint16_t ScreenWidth = 800;
     const uint16_t ScreenHeight = 600;
@@ -198,7 +198,10 @@ int main(int argc, char** argv)
     sf::RenderStates rootStates;
     rootStates.transform.translate(FieldOffset, FieldOffset);
 
-    sf::Time frameElapsedTime;
+    sf::Time frameElapsedTime = sf::milliseconds(15);
+
+    common::SampleCounter<float, 99> frameTimeCounter;
+    common::SampleCounter<uint32_t, 99> ticksCounter;
 
     while (window.isOpen()) {
         common::ProfileScope frameProfileScope { "Frame", mainCategory };
@@ -212,20 +215,26 @@ int main(int argc, char** argv)
 
         const uint32_t elapsedTicks = simulation.Run(frameElapsedTime);
 
-        const auto [frameTimeValue, frameUnit] = GatherTimeInfo(frameElapsedTime);
+        {
+            frameTimeCounter.AddSample(frameElapsedTime.asSeconds());
+            sf::Time frameTime = sf::seconds(frameTimeCounter.CalcMedian());
+            const auto [frameTimeValue, frameUnit] = GatherTimeInfo(frameTime);
+            const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
-        const float fps = frameElapsedTime != sf::Time::Zero ? 1 / frameElapsedTime.asSeconds() : 0.0f;
-        const uint32_t cellsCount = field.GetCellsCount();
-        const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(field.GetCellsCount()) / (field.GetColumnsCount() * field.GetRowsCount()) * 100.0f);
+            ticksCounter.AddSample(fps * elapsedTicks);
 
-        statusMessageBuffer.clear();
-        std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
-            "FPS {:6.2f} | Frame {:4}{:2} | Ticks {:4} | Cells {:8} ({:2}%)",
-            fps,
-            frameTimeValue, frameUnit,
-            elapsedTicks,
-            cellsCount, cellsCountPercent);
-        statusText.setString(sf::String(statusMessageBuffer));
+            const uint32_t cellsCount = field.GetCellsCount();
+            const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
+
+            statusMessageBuffer.clear();
+            std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
+                "FPS {:4} | Frame {:4}{:2} | Ticks/sec {:3} | Cells {:8} ({:2}%)",
+                fps,
+                frameTimeValue, frameUnit,
+                ticksCounter.CalcAverage(),
+                cellsCount, cellsCountPercent);
+            statusText.setString(sf::String(statusMessageBuffer));
+        }
 
         window.clear(Gray);
         render.Render(window, rootStates);
