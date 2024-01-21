@@ -38,7 +38,7 @@ static bool TryApplyDirection(CellPosition& position, const World& world, Direct
 BrainProcessor::BrainProcessor(CellId cellId, Brain& brain, World& world)
     : _brain(brain)
     , _world(world)
-    , _cellId(cellId)
+    , _id(cellId)
 {
 }
 
@@ -163,12 +163,12 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
             break;
         }
         const auto direction = brainData.Get<Direction>();
-        auto nextPosition = _brain.AccessInfo().position;
+        auto nextPosition = _world.positionSystem.Get(_id);
         const bool applied = TryApplyDirection(nextPosition, _world, direction);
         if (applied) {
             const CellId id = _world.positionSystem.Find(nextPosition);
             if (id == CellId::Invalid) {
-                _world.positionSystem.Move(_cellId, nextPosition);
+                _world.positionSystem.Move(_id, nextPosition);
             }
         } else {
             common::SetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
@@ -182,7 +182,7 @@ void BrainProcessor::ProcessUnitCommand(BrainControlBlock& controlBlock, Memory 
             break;
         }
         const auto direction = brainData.Get<Direction>();
-        auto position = _brain.AccessInfo().position;
+        auto position = _world.positionSystem.Get(_id);
         const bool applied = TryApplyDirection(position, _world, direction);
         CellType type = CellType::Dummy;
         if (applied) {

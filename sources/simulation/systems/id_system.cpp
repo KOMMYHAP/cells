@@ -1,6 +1,7 @@
 #include "id_system.h"
 
 IdSystem::IdSystem(uint32_t capacity)
+    : _capacity(capacity)
 {
     _freeIds.resize(capacity);
     for (auto it = _freeIds.rbegin(); it != _freeIds.rend(); ++it) {

@@ -23,5 +23,5 @@ private:
 
     Brain& _brain;
     World& _world;
-    const CellId _cellId;
+    const CellId _id;
 };

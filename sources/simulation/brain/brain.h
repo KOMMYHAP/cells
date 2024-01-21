@@ -11,7 +11,6 @@ class BrainBase {
 public:
     BrainBase(Unit& cell);
 
-    const CellInfo& GetInfo() const;
     ConstMemory GetMemory() const;
 
 protected:
@@ -24,7 +23,6 @@ class Brain : public Details::BrainBase<Cell> {
 public:
     Brain(Cell& cell);
 
-    CellInfo& AccessInfo();
     Memory AccessMemory();
 };
 

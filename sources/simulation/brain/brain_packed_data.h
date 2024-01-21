@@ -33,11 +33,6 @@ enum class CellType : uint8_t {
 };
 
 #pragma pack(push, 1)
-struct CellInfo {
-    CellType type;
-    CellPosition position;
-};
-
 struct CommandParam {
     uint8_t value;
 };

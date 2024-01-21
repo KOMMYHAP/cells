@@ -3,11 +3,11 @@
 
 /// Maybe try quadtree later this: https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
 
-PositionGrid::PositionGrid(uint32_t cellsInRow, uint32_t cellsInColumn)
-    : _cellsInRow(cellsInRow)
-    , _cellsInColumn(cellsInColumn)
+PositionGrid::PositionGrid(uint32_t width, uint32_t height)
+    : _width(width)
+    , _height(height)
 {
-    _grid.resize(_cellsInRow * _cellsInColumn, CellId::Invalid);
+    _grid.resize(_width * _height, CellId::Invalid);
 }
 
 void PositionGrid::Add(CellId id, const CellPosition& position)
@@ -41,7 +41,7 @@ CellId PositionGrid::Find(const CellPosition& position) const
 
 uint32_t PositionGrid::TryGetGridIndex(const CellPosition& position) const
 {
-    const uint32_t index = position.y * _cellsInRow + position.x;
+    const uint32_t index = position.y * _width + position.x;
     if (index < _grid.size()) {
         return index;
     }

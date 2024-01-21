@@ -31,9 +31,10 @@ void Simulation::ProcessTick()
 
     _world.idSystem.Iterate([this](const CellId id) {
         Cell& cell = _world.brainSystem.Modify(id);
+        const CellType type = _world.typeSystem.Get(id);
         Brain brain { cell };
 
-        switch (brain.GetInfo().type) {
+        switch (type) {
         case CellType::Unit: {
             BrainProcessor processor { id, brain, _world };
             processor.Process();
@@ -44,11 +45,6 @@ void Simulation::ProcessTick()
             break;
         case CellType::Dummy:
             break;
-        }
-
-        const auto& info = brain.GetInfo();
-        if (info.type != CellType::Unit) {
-            return;
         }
     });
 

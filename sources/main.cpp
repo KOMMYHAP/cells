@@ -10,11 +10,11 @@
 #include "brain/brain.h"
 #include "brain/brain_processor.h"
 #include "command_line.h"
-#include "field_render.h"
 #include "processor/memory.h"
 #include "processor/processor_control_block.h"
 #include "profile/profile.h"
 #include "simulation.h"
+#include "world_render.h"
 
 void signalHandler(int signal)
 {

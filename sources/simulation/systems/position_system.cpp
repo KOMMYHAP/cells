@@ -22,7 +22,7 @@ void PositionSystem::Move(CellId id, const CellPosition& position)
     _grid.Add(id, position);
 }
 
-const CellPosition& PositionSystem::GetPosition(CellId id) const
+const CellPosition& PositionSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
     assert(index <= _positions.size());

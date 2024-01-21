@@ -1,4 +1,4 @@
-#include "field_render.h"
+#include "world_render.h"
 #include "render_profile_category.h"
 #include <brain/brain.h>
 
@@ -50,8 +50,8 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
     std::fill(_textureData.begin(), _textureData.end(), clearColor);
 
-    _world.idSystem.Iterate([this](const CellId id) {
-        ProcessCell(id);
+    _world.positionSystem.Iterate([this](const CellPosition& position) {
+        ProcessCell(position);
     });
     _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
 
@@ -76,15 +76,13 @@ sf::Color WorldRender::GetColor(CellType type) const
     }
 }
 
-void WorldRender::ProcessCell(CellId id)
+void WorldRender::ProcessCell(const CellPosition& position)
 {
-    const Cell& cell = _world.brainSystem.Get(id);
-    ConstBrain brain { cell };
-    const CellInfo& info = brain.GetInfo();
+    const CellId id = _world.positionSystem.Find(position);
 
     const uint16_t width = _world.GetWidth();
-    uint32_t& pixel = _textureData[info.position.y * width + info.position.x];
+    uint32_t& pixel = _textureData[position.y * width + position.x];
 
-    const CellType cellType = brain.GetInfo().type;
+    const CellType cellType = id != CellId::Invalid ? _world.typeSystem.Get(id) : CellType::Dummy;
     pixel = GetColor(cellType).toInteger();
 }

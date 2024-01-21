@@ -10,8 +10,14 @@ public:
 
     inline const static CellPosition InvalidPosition { std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::max() };
 
-    const CellPosition& GetPosition(CellId id) const;
+    const CellPosition& Get(CellId id) const;
     CellId Find(const CellPosition& position) const;
+
+    template <class Func>
+    void Iterate(Func&& func)
+    {
+        _grid.Iterate(std::forward<Func>(func));
+    }
 
 private:
     std::vector<CellPosition> _positions;
