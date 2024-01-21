@@ -34,8 +34,22 @@ void Processor::ProcessInstruction(ProcessorContext& context)
             break;
         }
     } break;
-    case ProcessorInstruction::Compare:
-        break;
+    case ProcessorInstruction::Compare: {
+        const auto [success, registerIdx, valueToTest] = context.TryReadMemory<uint8_t, std::byte>();
+        if (!success) {
+            break;
+        }
+        const auto [registerRead, registerData] = context.ReadRegistry(registerIdx);
+        if (!registerRead) {
+            break;
+        }
+        const ProcessorFlags compareFlag = registerData == valueToTest ? ProcessorFlags::Equal : registerData < valueToTest ? ProcessorFlags::Less
+                                                                                                                            : ProcessorFlags::Greater;
+        context.SetFlag(compareFlag);
+        if (!context.MoveCommandPointer(3)) {
+            break;
+        }
+    } break;
     case ProcessorInstruction::Decrement:
         break;
     case ProcessorInstruction::Increment:
