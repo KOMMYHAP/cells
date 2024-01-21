@@ -93,13 +93,12 @@ bool ProcessorContext::RunProcedure(ProcedureId id)
     }
 
     const uint8_t argsCount = info->inputArgsCount + info->outputArgsCount;
-    const uint8_t bytesRequired = argsCount * ProcessorUnitSize;
     if (argsCount >= _controlBlock.registry.size()) {
         SetState(ProcessorState::InvalidCommand);
         return false;
     }
 
-    Memory registryMemory { std::span(_controlBlock.registry.begin(), _controlBlock.registry.begin() + bytesRequired) };
+    Memory registryMemory { std::span(_controlBlock.registry.begin(), _controlBlock.registry.begin() + argsCount) };
     ProcedureContext procedureContext { *this, registryMemory };
     info->procedure->Execute(procedureContext);
     return true;

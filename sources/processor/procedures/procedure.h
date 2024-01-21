@@ -39,5 +39,6 @@ private:
 };
 
 struct ProcedureBase {
+    virtual ~ProcedureBase() = default;
     virtual void Execute(ProcedureContext& context) = 0;
 };

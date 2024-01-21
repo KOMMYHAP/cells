@@ -10,6 +10,11 @@ static void DebugBadProcessorState(ProcessorState state)
     int breakOnMe { 42 };
 }
 
+VirtualMachine::VirtualMachine(uint8_t systemInstructionPerStep)
+    : _systemInstructionPerStep(systemInstructionPerStep)
+{
+}
+
 bool VirtualMachine::RegisterProcedure(std::unique_ptr<ProcedureBase> procedure, uint8_t inputArgs, uint8_t outputArgs)
 {
     ProcedureInfo info = ProcedureInfo { inputArgs, outputArgs, procedure.get() };
@@ -21,21 +26,21 @@ bool VirtualMachine::RegisterProcedure(std::unique_ptr<ProcedureBase> procedure,
     return true;
 }
 
-std::optional<ProcessorContext> VirtualMachine::MakeProcessorContext(Memory memory)
+void VirtualMachine::Run(Memory memory)
 {
-    if (!memory.HasBytes<ProcessorControlBlock>()) {
-        return {};
+    const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
+    if (!controlBlockRead) {
+        assert(false);
+        return;
     }
-
-    auto& controlBlock = memory.Get<ProcessorControlBlock>();
 
     ProcessorContext context {
         _procedureTable,
-        controlBlock,
+        *controlBlock,
         memory
     };
-
     context.SetStateWatcher(&DebugBadProcessorState);
 
-    return context;
+    Processor processor { _systemInstructionPerStep };
+    processor.Execute(context);
 }

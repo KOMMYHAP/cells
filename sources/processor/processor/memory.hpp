@@ -71,12 +71,22 @@ std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t bytesCount) const
 }
 
 template <class T>
-T& Memory::Get()
+T& Memory::Access()
 {
     assert(HasBytes<T>());
     T& value = *reinterpret_cast<T*>(memory.data());
     Move<T>();
     return value;
+}
+
+template <class... Ts>
+std::tuple<bool, Ts*...> Memory::TryAccess()
+{
+    if (!HasBytes<Ts...>()) {
+        return { false, static_cast<Ts*>(nullptr)... };
+    }
+
+    return { true, &Access<Ts>()... };
 }
 
 template <class... Args>

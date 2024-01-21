@@ -43,7 +43,10 @@ public:
     Memory(std::span<std::byte> memory);
 
     template <class T>
-    T& Get();
+    T& Access();
+
+    template <class... Ts>
+    std::tuple<bool, Ts*...> TryAccess();
 
     template <class... Args>
     void Write(Args&&... args);

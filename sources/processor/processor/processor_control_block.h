@@ -1,8 +1,5 @@
 #pragma once
 
-
-constexpr uint8_t ProcessorUnitSize = 1;
-
 enum class ProcessorInstruction : uint8_t {
     Nope,
     Write,
