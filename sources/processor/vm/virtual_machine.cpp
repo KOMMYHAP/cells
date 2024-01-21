@@ -3,16 +3,9 @@
 #include "processor/processor_control_block.h"
 #include "processor/processor_state.h"
 
-static void DebugBadProcessorState(ProcessorState state)
-{
-    if (state == ProcessorState::Good) {
-        return;
-    }
-    int breakOnMe { 42 };
-}
-
-VirtualMachine::VirtualMachine(uint8_t systemInstructionPerStep)
+VirtualMachine::VirtualMachine(ProcessorStateWatcher processorStateWatcher, uint8_t systemInstructionPerStep)
     : _systemInstructionPerStep(systemInstructionPerStep)
+    , _processorStateWatcher(std::move(processorStateWatcher))
 {
 }
 
@@ -37,11 +30,10 @@ void VirtualMachine::Run(Memory memory)
 
     ProcessorContext context {
         _procedureTable,
+        _processorStateWatcher,
         *controlBlock,
-        memory
+        memory,
     };
-    context.SetStateWatcher(&DebugBadProcessorState);
-
     Processor processor { _systemInstructionPerStep };
     processor.Execute(context);
 }

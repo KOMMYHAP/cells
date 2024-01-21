@@ -5,7 +5,7 @@
 namespace common {
 
 enum class ProfileCategory : uint8_t {
-    INVALID = std::numeric_limits<uint8_t>::max()
+    Invalid = std::numeric_limits<uint8_t>::max()
 };
 
 namespace details {

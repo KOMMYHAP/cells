@@ -17,6 +17,8 @@ public:
     template <class... Ts>
     bool TryWriteResult(Ts&&... args);
 
+    void NotifyInvalidCommand();
+
 private:
     void SetState(ProcessorState state);
 

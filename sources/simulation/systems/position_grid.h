@@ -5,12 +5,15 @@
 
 class PositionGrid {
 public:
-    PositionGrid(uint32_t width, uint32_t height);
+    PositionGrid(uint16_t width, uint16_t height);
 
     CellId Find(const CellPosition& position) const;
 
     void Add(CellId id, const CellPosition& position);
     void Remove(CellId id, const CellPosition& position);
+
+    uint16_t GetWidth() const { return _width; }
+    uint16_t GetHeight() const { return _height; }
 
     template <class Func>
         requires std::invocable<Func, CellPosition>
@@ -28,7 +31,7 @@ private:
 
     uint32_t TryGetGridIndex(const CellPosition& position) const;
 
-    const uint32_t _width;
-    const uint32_t _height;
+    const uint16_t _width;
+    const uint16_t _height;
     std::vector<CellId> _grid;
 };

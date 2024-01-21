@@ -3,10 +3,11 @@
 #include "flags.h"
 #include "processor_state.h"
 
-ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, ProcessorControlBlock& controlBlock, const Memory& memory)
+ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const Memory& memory)
     : _procedureTable(procedureTable)
     , _controlBlock(controlBlock)
     , _memory(memory)
+    , _watcher(stateWatcher)
 {
 }
 
@@ -36,11 +37,6 @@ void ProcessorContext::SetState(ProcessorState state)
     if (_watcher) {
         _watcher(state);
     }
-}
-
-void ProcessorContext::SetStateWatcher(std::function<void(ProcessorState)> watcher)
-{
-    _watcher = std::move(watcher);
 }
 
 bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)

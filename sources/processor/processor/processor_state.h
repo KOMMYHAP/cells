@@ -6,3 +6,5 @@ enum class ProcessorState : unsigned char {
     MemoryCorrupted,
     UnknownProcedure,
 };
+
+using ProcessorStateWatcher = std::function<void(ProcessorState)>;

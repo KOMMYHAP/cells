@@ -30,12 +30,7 @@ void Simulation::ProcessTick()
     sf::Clock clock;
 
     _world.idSystem.Iterate([this](const CellId id) {
-        const CellType type = _world.typeSystem.Get(id);
-        if (type != CellType::Unit) {
-            return;
-        }
-        Memory memory = _world.brainSystem.AccessMemory(id);
-        _world.virtualMachine.Run(memory);
+        _world.virtualMachine.Run(id);
     });
 
     _tickCounter.AddSample(clock.getElapsedTime().asSeconds());

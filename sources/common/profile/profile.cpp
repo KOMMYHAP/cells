@@ -23,7 +23,7 @@ namespace common {
 ProfileCategory MakeProfileCategory()
 {
     static ProfileCategory nextCategory { 0 };
-    if (nextCategory == ProfileCategory::INVALID) {
+    if (nextCategory == ProfileCategory::Invalid) {
         return nextCategory;
     }
 

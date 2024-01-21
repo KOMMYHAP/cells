@@ -38,7 +38,7 @@
 //BrainProcessor::BrainProcessor(CellId cellId, CellBrain& data, World& world)
 //    : _brain(data)
 //    , _world(world)
-//    , _id(cellId)
+//    , _runningCellId(cellId)
 //{
 //}
 //
@@ -163,12 +163,12 @@
 //            break;
 //        }
 //        const auto direction = brainData.Get<Direction>();
-//        auto nextPosition = _world.positionSystem.Get(_id);
+//        auto nextPosition = _world.positionSystem.Get(_runningCellId);
 //        const bool applied = TryApplyDirection(nextPosition, _world, direction);
 //        if (applied) {
 //            const CellId id = _world.positionSystem.Find(nextPosition);
 //            if (id == CellId::Invalid) {
-//                _world.positionSystem.Move(_id, nextPosition);
+//                _world.positionSystem.Move(_runningCellId, nextPosition);
 //            }
 //        } else {
 //            common::SetFlag(controlBlock.flags, CommandControlFlags::OutOfField);
@@ -182,7 +182,7 @@
 //            break;
 //        }
 //        const auto direction = brainData.Get<Direction>();
-//        auto position = _world.positionSystem.Get(_id);
+//        auto position = _world.positionSystem.Get(_runningCellId);
 //        const bool applied = TryApplyDirection(position, _world, direction);
 //        CellType type = CellType::Dummy;
 //        if (applied) {

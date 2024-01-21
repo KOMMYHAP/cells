@@ -10,8 +10,6 @@ public:
 
     void Move(CellId id, const CellPosition& position);
 
-    inline const static CellPosition InvalidPosition { std::numeric_limits<int16_t>::max(), std::numeric_limits<int16_t>::max() };
-
     const CellPosition& Get(CellId id) const;
     CellId Find(const CellPosition& position) const;
 
@@ -20,6 +18,9 @@ public:
     {
         _grid.Iterate(std::forward<Func>(func));
     }
+
+    uint16_t GetWidth() const { return _grid.GetWidth(); }
+    uint16_t GetHeight() const { return _grid.GetHeight(); }
 
 private:
     std::vector<CellPosition> _positions;

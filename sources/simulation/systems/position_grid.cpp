@@ -3,7 +3,7 @@
 
 /// Maybe try quadtree later this: https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
 
-PositionGrid::PositionGrid(uint32_t width, uint32_t height)
+PositionGrid::PositionGrid(uint16_t width, uint16_t height)
     : _width(width)
     , _height(height)
 {

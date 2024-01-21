@@ -3,8 +3,8 @@
 #include "systems/brain_system.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
+#include "systems/simulation_virtual_machine.h"
 #include "systems/type_system.h"
-#include "vm/virtual_machine.h"
 
 class World {
 public:
@@ -15,7 +15,7 @@ public:
     uint32_t GetCapacity() const { return GetWidth() * GetHeight(); }
 
 public:
-    VirtualMachine virtualMachine;
+    SimulationVirtualMachine virtualMachine;
     BrainSystem brainSystem;
     PositionSystem positionSystem;
     IdSystem idSystem;

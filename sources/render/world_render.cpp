@@ -1,6 +1,5 @@
 #include "world_render.h"
 #include "render_profile_category.h"
-#include <brain/__brain.h>
 
 WorldRender::WorldRender(World& world, Config&& config)
     : _world(world)
@@ -79,7 +78,7 @@ sf::Color WorldRender::GetColor(CellType type) const
 void WorldRender::ProcessCell(CellId id)
 {
     const CellPosition position = _world.positionSystem.Get(id);
-    if (position == PositionSystem::InvalidPosition) {
+    if (position == InvalidCellPosition) {
         return;
     }
 

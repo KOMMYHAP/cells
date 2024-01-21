@@ -12,16 +12,18 @@ target_sources(${PROJECT_NAME} PRIVATE
         flags.cpp
         command_line.cpp
         sample_counter.cpp
+        breakpoint.cpp
 )
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        basicdefs.h
+        basic_defines.h
         flags.h
         command_line.h
         sample_counter.h
         sample_counter.hpp
+        breakpoint.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

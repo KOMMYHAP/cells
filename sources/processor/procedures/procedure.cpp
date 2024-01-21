@@ -11,3 +11,8 @@ void ProcedureContext::SetState(ProcessorState state)
 {
     _processorContext.SetState(state);
 }
+
+void ProcedureContext::NotifyInvalidCommand()
+{
+    SetState(ProcessorState::InvalidCommand);
+}
