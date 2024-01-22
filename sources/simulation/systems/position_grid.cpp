@@ -2,6 +2,8 @@
 
 /// Maybe try quadtree later this: https://stackoverflow.com/questions/41946007/efficient-and-well-explained-implementation-of-a-quadtree-for-2d-collision-det
 
+constexpr uint32_t InvalidGridIndex = std::numeric_limits<uint32_t>::max();
+
 PositionGrid::PositionGrid(uint16_t width, uint16_t height)
     : _width(width)
     , _height(height)

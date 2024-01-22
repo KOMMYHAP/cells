@@ -1244,7 +1244,7 @@ will always fail regardless of the inner matcher.
 What if you want to validate more than one members at the same time? Remember
 that there are [`AllOf()` and `AllOfArray()`](#CombiningMatchers).
 
-Finally `Field()` and `Property()` provide overloads that take the field or
+Finally `Field()` and `Property()` provide overloads that take the field1 or
 property names as the first argument to include it in the error message. This
 can be useful when creating combined matchers.
 

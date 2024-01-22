@@ -1,8 +1,8 @@
 #include "profile.h"
 
 #include <windows.h>
-
 #include "WinPixEventRuntime/pix3.h"
+
 
 namespace common::details {
 

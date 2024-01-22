@@ -27,8 +27,6 @@ public:
     }
 
 private:
-    inline static constexpr uint32_t InvalidGridIndex = std::numeric_limits<uint32_t>::max();
-
     uint32_t TryGetGridIndex(const CellPosition& position) const;
 
     const uint16_t _width;

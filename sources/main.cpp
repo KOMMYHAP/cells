@@ -40,14 +40,6 @@ const uint16_t ColumnsCount = FieldWidth / (CellSize + CellPadding);
 const sf::Color Gray { 0xCCCCCCFF };
 const uint16_t StatusMessageBufferLimit = 200;
 
-void SignalHandler(int signal)
-{
-    if (signal == SIGABRT) {
-        common::Breakpoint();
-    }
-    std::_Exit(EXIT_FAILURE);
-}
-
 void MakeTestField(World& world, uint8_t percent)
 {
     std::default_random_engine randomEngine;
@@ -87,6 +79,8 @@ auto GatherTimeInfo(sf::Time time)
 
 int main(int argc, char** argv)
 {
+    common::EnableBreakpointOnAssert(true);
+
     assert(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
     assert(FieldWidth % (CellSize + CellPadding) == 0);
     assert(FieldHeight % (CellSize + CellPadding) == 0);

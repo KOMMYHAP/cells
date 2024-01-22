@@ -6,7 +6,7 @@ enum class ProcessorState : unsigned char {
     StackOverflow,
     StackUnderflow,
     StackCorrupted,
-    MemoryCorrupted,
+    OutOfMemory,
     UnknownProcedure,
 };
 

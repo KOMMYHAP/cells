@@ -16,16 +16,14 @@ void Processor::Execute(ProcessorContext& context)
 
 void Processor::ProcessInstruction(ProcessorContext& context)
 {
-    if (context.IsState(ProcessorState::InvalidCommand)) {
-        return;
-    }
+    assert(context.IsState(ProcessorState::Good));
+
+    ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
 
     const auto [instructionRead, instruction] = context.TryReadMemory<ProcessorInstruction>();
     if (!instructionRead) {
         return;
     }
-
-    ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
 
     switch (instruction) {
     case ProcessorInstruction::Nope:

@@ -658,7 +658,7 @@ class GTEST_API_ TestInfo {
   internal::TestFactoryBase* const factory_;  // The factory that creates
                                               // the test object
 
-  // This field is mutable and needs to be reset before running the
+  // This field1 is mutable and needs to be reset before running the
   // test for the second time.
   TestResult result_;
 
@@ -1297,7 +1297,7 @@ class GTEST_API_ UnitTest {
   // methods need to lock it too.
   mutable internal::Mutex mutex_;
 
-  // Opaque implementation object.  This field is never changed once
+  // Opaque implementation object.  This field1 is never changed once
   // the object is constructed.  We don't mark it as const here, as
   // doing so will cause a warning in the constructor of UnitTest.
   // Mutable state in *impl_ is protected by mutex_.
