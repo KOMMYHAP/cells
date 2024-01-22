@@ -19,7 +19,7 @@ const std::string_view FragmentShaderArgument = "--fragment-shader";
 
 const float TargetTicksPerSeconds = 1.f;
 const sf::Time TargetSimulationTime = sf::seconds(1.0f / TargetTicksPerSeconds);
-const uint8_t CellsCountPercentOfLimit = 10;
+const uint8_t CellsCountPercentOfLimit = 20;
 
 const uint16_t ScreenWidth = 800;
 const uint16_t ScreenHeight = 600;
@@ -51,7 +51,7 @@ void SignalHandler(int signal)
 void MakeTestField(World& world, uint8_t percent)
 {
     std::default_random_engine randomEngine;
-    const uint16_t moveCommandsCount = std::min<uint16_t>(world.GetWidth(), 10);
+    const uint16_t moveCommandsCount = std::min<uint16_t>(world.GetWidth(), 3);
 
     std::vector<sf::Vector2<int16_t>> positions;
     positions.reserve(world.GetCapacity());
@@ -66,7 +66,6 @@ void MakeTestField(World& world, uint8_t percent)
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const CellId id = world.idSystem.Create();
-        assert(id != CellId::Invalid);
         world.positionSystem.Move(id, position);
         world.typeSystem.Set(id, CellType::Unit);
         world.cellFactory.MakePatrolUnit(id, moveCommandsCount);

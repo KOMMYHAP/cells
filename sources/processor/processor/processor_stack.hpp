@@ -23,9 +23,9 @@ template <MemoryType T>
 T ProcessorStack::Pop()
 {
     assert(CanPop<std::decay_t<T>>());
+    _offset -= sizeof(T);
     T value;
     memcpy(&value, &_buffer[_offset], sizeof(T));
-    _offset -= sizeof(T);
     return value;
 }
 
