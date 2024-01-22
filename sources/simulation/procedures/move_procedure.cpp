@@ -18,7 +18,11 @@ void MoveProcedure::Execute(ProcedureContext& context)
     const CellPosition position = _positionSystem.Get(id);
     const CellPosition newPosition = TryApplyDirection(position, direction);
     if (newPosition == InvalidCellPosition) {
-        context.NotifyInvalidCommand();
+        return;
+    }
+
+    const CellId anotherCell = _positionSystem.Find(newPosition);
+    if (anotherCell != CellId::Invalid) {
         return;
     }
 

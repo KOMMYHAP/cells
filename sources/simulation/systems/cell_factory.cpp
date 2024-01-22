@@ -20,10 +20,12 @@ bool CellFactory::MakePatrolUnit(CellId id, uint16_t length)
     const ProcedureId move = _vm.GetProcedureId(ProcedureType::Move);
 
     for (int i = 0; i < length; ++i) {
-        memory.Write(move, MoveDirection::Right);
+        memory.Write(ProcessorInstruction::PushStack, MoveDirection::Right);
+        memory.Write(ProcessorInstruction::Call, move);
     }
     for (int i = 0; i < length; ++i) {
-        memory.Write(move, MoveDirection::Left);
+        memory.Write(ProcessorInstruction::PushStack, MoveDirection::Left);
+        memory.Write(ProcessorInstruction::Call, move);
     }
     memory.Write(ProcessorInstruction::Jump, std::byte { 0 });
 

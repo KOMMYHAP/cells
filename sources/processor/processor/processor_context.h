@@ -31,12 +31,10 @@ public:
     std::pair<bool, std::byte> PopStack();
 
 private:
-    ProcessorMemory AccessMemory();
-    ProcessorStack AccessStack();
-
     ProcessorControlBlock& _controlBlock;
     const ProcedureTable& _procedureTable;
     ProcessorMemory _memory;
+    ProcessorStack _stack;
     const std::function<void(ProcessorState)>& _watcher;
 };
 

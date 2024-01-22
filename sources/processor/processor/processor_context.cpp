@@ -6,8 +6,9 @@
 ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory)
     : _procedureTable(procedureTable)
     , _controlBlock(controlBlock)
-    , _memory(memory)
+    , _memory(memory.MakeSubSpan(_controlBlock.nextCommand))
     , _watcher(stateWatcher)
+    , _stack(_controlBlock.stack, _controlBlock.stackOffset)
 {
 }
 
@@ -93,8 +94,7 @@ bool ProcessorContext::RunProcedure(ProcedureId id)
         return false;
     }
 
-    ProcessorStack stackMemory = AccessStack();
-    ProcedureContext procedureContext { *this, stackMemory, inputArgsCount, outputArgsCount };
+    ProcedureContext procedureContext { *this, _stack, inputArgsCount, outputArgsCount };
     info->procedure->Execute(procedureContext);
 
     uint8_t expectedStackOffset = 0;
@@ -115,7 +115,7 @@ bool ProcessorContext::RunProcedure(ProcedureId id)
 
 bool ProcessorContext::PushStack(std::byte data)
 {
-    const bool success = AccessStack().TryPush(data);
+    const bool success = _stack.TryPush(data);
     if (!success) {
         SetState(ProcessorState::StackOverflow);
     }
@@ -124,7 +124,7 @@ bool ProcessorContext::PushStack(std::byte data)
 
 std::pair<bool, std::byte> ProcessorContext::PopStack()
 {
-    const auto [success, data] = AccessStack().TryPop<std::byte>();
+    const auto [success, data] = _stack.TryPop<std::byte>();
     if (!success) {
         SetState(ProcessorState::StackUnderflow);
     }
@@ -134,14 +134,4 @@ std::pair<bool, std::byte> ProcessorContext::PopStack()
 ProcessorControlBlockGuard ProcessorContext::MakeGuard()
 {
     return { _controlBlock };
-}
-
-ProcessorStack ProcessorContext::AccessStack()
-{
-    return ProcessorStack(std::span(_controlBlock.stack), _controlBlock.stackOffset);
-}
-
-ProcessorMemory ProcessorContext::AccessMemory()
-{
-    return _memory.MakeSubSpan(_controlBlock.nextCommand);
 }

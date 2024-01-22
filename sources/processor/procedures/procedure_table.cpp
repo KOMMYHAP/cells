@@ -27,7 +27,7 @@ const ProcedureTableEntry* ProcedureTable::FindProcedure(ProcedureId procedureId
     }
 
     const auto id = static_cast<uint8_t>(procedureId);
-    if (_procedures.size() >= id) {
+    if (id >= _procedures.size()) {
         return nullptr;
     }
 
