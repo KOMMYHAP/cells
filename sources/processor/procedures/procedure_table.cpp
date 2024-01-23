@@ -7,10 +7,10 @@ ProcedureId ProcedureTable::RegisterProcedure(const ProcedureTableEntry& info)
         return ProcedureId::Invalid;
     }
 
-    if (info.inputArgsCount >= ProcedureInputArgsCountLimit) {
+    if (info.inputArgsCount > ProcedureInputArgsCountLimit) {
         return ProcedureId::Invalid;
     }
-    if (info.outputArgsCount >= ProcedureOutputArgsCountLimit) {
+    if (info.outputArgsCount > ProcedureOutputArgsCountLimit) {
         return ProcedureId::Invalid;
     }
 

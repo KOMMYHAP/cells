@@ -4,7 +4,7 @@ template <MemoryType... Ts>
 std::tuple<bool, Ts...> ProcedureContext::TryPopArgs()
 {
     if (sizeof...(Ts) > _restInputArgs) {
-        SetState(ProcessorState::InvalidCommand);
+        SetState(ProcessorState::ProcedureTooMuchInputRequested);
         return { false, Ts {}... };
     }
 
@@ -23,11 +23,11 @@ template <class... Ts>
 bool ProcedureContext::TryPushResult(Ts&&... ts)
 {
     if (_restInputArgs != 0) {
-        SetState(ProcessorState::InvalidCommand);
+        SetState(ProcessorState::ProcedureIgnoreInput);
         return false;
     }
     if (sizeof...(Ts) > _restOutputArgs) {
-        SetState(ProcessorState::InvalidCommand);
+        SetState(ProcessorState::ProcedureTooMuchOutput);
         return false;
     }
     _restOutputArgs -= sizeof...(Ts);

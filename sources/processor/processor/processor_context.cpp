@@ -43,6 +43,7 @@ void ProcessorContext::SetState(ProcessorState state)
 bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
 {
     if (!_memory.HasBytes(nextCommand)) {
+        SetState(ProcessorState::OutOfMemory);
         return false;
     }
     _controlBlock.nextCommand = nextCommand;
@@ -52,7 +53,7 @@ bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
 bool ProcessorContext::MoveCommandPointer(uint8_t offset)
 {
     if (_controlBlock.nextCommand + offset <= _controlBlock.nextCommand) {
-        SetState(ProcessorState::InvalidCommand);
+        SetState(ProcessorState::OutOfMemory);
         return false;
     }
     return SetCommandPointer(_controlBlock.nextCommand + offset);
@@ -61,7 +62,7 @@ bool ProcessorContext::MoveCommandPointer(uint8_t offset)
 bool ProcessorContext::WriteRegistry(uint8_t index, std::byte data)
 {
     if (index >= _controlBlock.registry.size()) {
-        SetState(ProcessorState::InvalidCommand);
+        SetState(ProcessorState::InvalidInstruction);
         return false;
     }
     _controlBlock.registry[index] = data;
@@ -71,7 +72,7 @@ bool ProcessorContext::WriteRegistry(uint8_t index, std::byte data)
 std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
 {
     if (index >= _controlBlock.registry.size()) {
-        SetState(ProcessorState::InvalidCommand);
+        SetState(ProcessorState::InvalidInstruction);
         return { false, std::byte {} };
     }
     return { true, _controlBlock.registry[index] };
@@ -85,31 +86,28 @@ bool ProcessorContext::RunProcedure(ProcedureId id)
         return false;
     }
 
-    const uint8_t inputArgsCount = info->inputArgsCount;
-    const uint8_t outputArgsCount = info->outputArgsCount;
+    uint8_t inputArgsCount = info->inputArgsCount;
+    uint8_t outputArgsCount = info->outputArgsCount;
     const uint8_t initialStackOffset = _controlBlock.stackOffset;
 
     if (initialStackOffset < inputArgsCount) {
-        SetState(ProcessorState::InvalidCommand);
+        SetState(ProcessorState::ProcedureMissingInput);
         return false;
     }
 
     ProcedureContext procedureContext { *this, _stack, inputArgsCount, outputArgsCount };
     info->procedure->Execute(procedureContext);
-
-    uint8_t expectedStackOffset = 0;
-    if (outputArgsCount > inputArgsCount) {
-        expectedStackOffset = initialStackOffset + (outputArgsCount - inputArgsCount);
-    } else {
-        expectedStackOffset = initialStackOffset - (inputArgsCount - outputArgsCount);
-    }
-
-    if (expectedStackOffset != _controlBlock.stackOffset) {
-        // todo: do we need a mechanism to rollback side effect of procedure?
-        SetState(ProcessorState::StackCorrupted);
+    if (!IsState(ProcessorState::Good)) {
         return false;
     }
-
+    if (inputArgsCount != 0) {
+        SetState(ProcessorState::ProcedureIgnoreInput);
+        return false;
+    }
+    if (outputArgsCount != 0) {
+        SetState(ProcessorState::ProcedureMissingOutput);
+        return false;
+    }
     return true;
 }
 

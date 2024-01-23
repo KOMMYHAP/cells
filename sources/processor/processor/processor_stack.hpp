@@ -11,7 +11,7 @@ inline bool ProcessorStack::CanPop(uint8_t count) const
 }
 
 template <MemoryType... Ts>
-std::pair<bool, Ts...> ProcessorStack::TryPop()
+std::tuple<bool, Ts...> ProcessorStack::TryPop()
 {
     if (!CanPop<Ts...>()) {
         return { false, Ts {}... };
@@ -22,7 +22,7 @@ std::pair<bool, Ts...> ProcessorStack::TryPop()
 template <MemoryType T>
 T ProcessorStack::Pop()
 {
-    assert(CanPop<std::decay_t<T>>());
+    assert(CanPop<T>());
     _offset -= sizeof(T);
     T value;
     memcpy(&value, &_buffer[_offset], sizeof(T));

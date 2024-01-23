@@ -160,5 +160,5 @@ TEST_F(ProcessorFixture, Processor_PopStackToInvalidRegister)
         auto _ = MakeScopeWithoutAssert();
         Tick();
     }
-    ASSERT_EQ(GetLastProcessorState(), ProcessorState::InvalidCommand);
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::InvalidInstruction);
 }

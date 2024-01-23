@@ -18,7 +18,7 @@ public:
     bool TryPush(Ts&&... ts);
 
     template <MemoryType... Ts>
-    std::pair<bool, Ts...> TryPop();
+    std::tuple<bool, Ts...> TryPop();
 
     template <MemoryType... Ts>
     bool CanPush() const;

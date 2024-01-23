@@ -148,9 +148,7 @@ void Processor::ProcessInstruction(ProcessorContext& context)
         controlBlockGuard.Submit();
     } break;
     default:
-        assert(false);
-        context.SetState(ProcessorState::InvalidCommand);
-        controlBlockGuard.Submit();
+        context.SetState(ProcessorState::InvalidInstruction);
         break;
     }
 }

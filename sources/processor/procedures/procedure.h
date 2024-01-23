@@ -9,7 +9,7 @@ enum class ProcessorState : uint8_t;
 
 class ProcedureContext {
 public:
-    ProcedureContext(ProcessorContext& context, ProcessorStack stack, uint8_t inputArgs, uint8_t outputArgs);
+    ProcedureContext(ProcessorContext& context, ProcessorStack stack, uint8_t& inputArgs, uint8_t& outputArgs);
 
     template <MemoryType... Ts>
     std::tuple<bool, Ts...> TryPopArgs();
@@ -18,15 +18,15 @@ public:
         requires(MemoryType<std::decay_t<Ts>> && ...)
     bool TryPushResult(Ts&&... ts);
 
-    void NotifyInvalidCommand();
+    void Invalidate();
 
 private:
     void SetState(ProcessorState state);
 
     ProcessorStack _stack;
     ProcessorContext& _processorContext;
-    uint8_t _restInputArgs { 0 };
-    uint8_t _restOutputArgs { 0 };
+    uint8_t& _restInputArgs;
+    uint8_t& _restOutputArgs;
 };
 
 class ProcedureBase {

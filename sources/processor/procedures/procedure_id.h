@@ -1,5 +1,7 @@
 #pragma once
 
+inline constexpr uint8_t ProcedureTableLimit = 32;
+
 enum class ProcedureId : uint8_t {
-    Invalid = std::numeric_limits<uint8_t>::max()
+    Invalid = ProcedureTableLimit
 };

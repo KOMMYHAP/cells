@@ -2,10 +2,15 @@
 
 enum class ProcessorState : unsigned char {
     Good,
-    InvalidCommand,
+    InvalidInstruction,
+    InvalidProcedure,
+    ProcedureMissingInput,
+    ProcedureTooMuchInputRequested,
+    ProcedureIgnoreInput,
+    ProcedureMissingOutput,
+    ProcedureTooMuchOutput,
     StackOverflow,
     StackUnderflow,
-    StackCorrupted,
     OutOfMemory,
     UnknownProcedure,
 };

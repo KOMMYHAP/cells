@@ -5,7 +5,6 @@
 
 inline constexpr uint8_t ProcedureInputArgsCountLimit = 2;
 inline constexpr uint8_t ProcedureOutputArgsCountLimit = 1;
-inline constexpr uint8_t ProcedureTableLimit = 32;
 
 struct ProcedureTableEntry {
     bool IsValid() const { return procedure != nullptr; }
