@@ -87,12 +87,6 @@ int main(int argc, char** argv)
 
     common::CommandLine commandLine { argc, argv };
 
-    auto previousHandler = std::signal(SIGABRT, SignalHandler);
-    if (previousHandler == SIG_ERR) {
-        std::cerr << "Failed to set signal handler for SIGABRT" << std::endl;
-        return -1;
-    }
-
     HRESULT hr = SetThreadDescription(GetCurrentThread(), L"main");
     if (FAILED(hr)) {
         std::cerr << "Failed to set name for main thread" << std::endl;
