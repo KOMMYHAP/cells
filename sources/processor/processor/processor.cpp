@@ -2,6 +2,8 @@
 #include "processor_profile_category.h"
 #include "processor_state.h"
 
+#include "instructions/instruction_nope.h"
+
 Processor::Processor(uint8_t systemInstructionToPerform)
     : _systemInstructionToPerform(systemInstructionToPerform)
 {
