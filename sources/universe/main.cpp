@@ -1,6 +1,3 @@
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-
 #include <windows.h>
 
 #include <processthreadsapi.h>
@@ -11,8 +8,7 @@
 #include "command_line.h"
 #include "profile/profile.h"
 #include "simulation.h"
-#include "world.h"
-#include "world_render.h"
+#include "world_white.h"
 
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -39,31 +35,6 @@ const uint16_t ColumnsCount = FieldWidth / (CellSize + CellPadding);
 
 const sf::Color Gray { 0xCCCCCCFF };
 const uint16_t StatusMessageBufferLimit = 200;
-
-void MakeTestField(World& world, uint8_t percent)
-{
-    std::default_random_engine randomEngine;
-    const uint16_t moveCommandsCount = std::min<uint16_t>(world.positionSystem.GetWidth(), 3);
-
-    std::vector<sf::Vector2<int16_t>> positions;
-    positions.reserve(world.idSystem.GetCellsCountLimit());
-    for (uint16_t x { 0 }; x < world.positionSystem.GetWidth(); ++x) {
-        for (uint16_t y { 0 }; y < world.positionSystem.GetHeight(); ++y) {
-            positions.emplace_back(x, y);
-        }
-    }
-    std::shuffle(positions.begin(), positions.end(), randomEngine);
-
-    const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(percent) / 100)));
-//    const auto countLimit = 1;
-
-    for (const auto& position : std::span(positions).first(countLimit)) {
-        const CellId id = world.idSystem.Create();
-        world.positionSystem.Set(id, position);
-        world.typeSystem.Set(id, CellType::Unit);
-        world.cellFactory.MakePatrolUnit(id, moveCommandsCount);
-    }
-}
 
 auto GetTimeInfo(sf::Time time)
 {
@@ -120,19 +91,13 @@ int main(int argc, char** argv)
     window.setVerticalSyncEnabled(false);
     window.setFramerateLimit(60);
 
-    World world { ColumnsCount, RowsCount };
+    WorldWhite::Config worldWhiteConfig {
+        ColumnsCount, RowsCount, CellSize, 20, std::move(shader)
+    };
+    WorldWhite world { std::move(worldWhiteConfig) };
 
     Simulation simulation { world };
     simulation.SetAutoMode(TargetTicksPerSeconds, TargetSimulationTime);
-
-    WorldRender::Config renderConfig {
-        std::move(shader),
-        { sf::Color::Magenta, sf::Color::Green, sf::Color::Black, Gray },
-        CellSize
-    };
-    WorldRender render { world, std::move(renderConfig) };
-
-    MakeTestField(world, CellsCountPercentOfLimit);
 
     sf::Clock frameClock;
     sf::Clock simulationClock;
@@ -152,7 +117,6 @@ int main(int argc, char** argv)
     sf::Time frameElapsedTime = sf::milliseconds(15);
 
     common::SampleCounter<float, 99> frameTimeCounter;
-    common::SampleCounter<uint32_t, 99> ticksCounter;
 
     while (window.isOpen()) {
         common::ProfileScope frameProfileScope { "Frame", mainCategory };
@@ -164,7 +128,7 @@ int main(int argc, char** argv)
             }
         }
 
-        const uint32_t elapsedTicks = simulation.Run(frameElapsedTime);
+        simulation.Run(frameElapsedTime);
 
         {
             frameTimeCounter.AddSample(frameElapsedTime.asSeconds());
@@ -172,23 +136,20 @@ int main(int argc, char** argv)
             const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
             const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
-            ticksCounter.AddSample(fps * elapsedTicks);
-
-            const uint32_t cellsCount = world.idSystem.GetCellsCount();
+            const uint32_t cellsCount = world.GetCellsCount();
             const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
 
             statusMessageBuffer.clear();
             std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
-                "FPS {:4} | Frame {:4}{:2} | Ticks/sec {:3} | Cells {:8} ({:2}%)",
+                "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%)",
                 fps,
                 frameTimeValue, frameUnit,
-                ticksCounter.CalcAverage(),
                 cellsCount, cellsCountPercent);
             statusText.setString(sf::String(statusMessageBuffer));
         }
 
         window.clear(Gray);
-        render.Render(window, rootStates);
+        world.Render(window, rootStates);
         window.draw(statusText);
         window.display();
 

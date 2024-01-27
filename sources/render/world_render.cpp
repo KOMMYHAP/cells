@@ -1,13 +1,18 @@
 #include "world_render.h"
 #include "render_profile_category.h"
+#include "systems/id_system.h"
+#include "systems/position_system.h"
+#include "systems/type_system.h"
 
-WorldRender::WorldRender(World& world, Config&& config)
-    : _world(world)
-    , _config(std::move(config))
+WorldRender::WorldRender(Config&& config, PositionSystem& positionSystem, IdSystem& idSystem, TypeSystem& typeSystem)
+    : _config(std::move(config))
     , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
+    , _positionSystem(positionSystem)
+    , _idSystem(idSystem)
+    , _typeSystem(typeSystem)
 {
-    const uint16_t cellsWidth = _world.positionSystem.GetWidth();
-    const uint16_t cellsHeight = _world.positionSystem.GetHeight();
+    const uint16_t cellsWidth = _positionSystem.GetWidth();
+    const uint16_t cellsHeight = _positionSystem.GetHeight();
 
     const auto pixelsWidth = static_cast<float>(cellsWidth * _config.cellSize);
     const auto pixelsHeight = static_cast<float>(cellsHeight * _config.cellSize);
@@ -20,6 +25,7 @@ WorldRender::WorldRender(World& world, Config&& config)
         assert(false);
     }
 
+    // todo: do we need fragment shader at all?
     _config.fragmentShader->setUniform("texture", _texture);
 
     _textureData.resize(cellsWidth * cellsHeight);
@@ -49,7 +55,7 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
     std::fill(_textureData.begin(), _textureData.end(), clearColor);
 
-    _world.idSystem.Iterate([this](const CellId id) {
+    _idSystem.Iterate([this](const CellId id) {
         ProcessCell(id);
     });
     _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
@@ -77,14 +83,13 @@ sf::Color WorldRender::GetColor(CellType type) const
 
 void WorldRender::ProcessCell(CellId id)
 {
-    const CellPosition position = _world.positionSystem.Get(id);
-    if (position == InvalidCellPosition) {
-        return;
-    }
+    const CellPosition position = _positionSystem.Get(id);
+    const uint16_t width = _positionSystem.GetWidth();
+    const auto pixelIndex = position.y * width + position.x;
+    assert(pixelIndex < _textureData.size());
 
-    const uint16_t width = _world.positionSystem.GetWidth();
+    const CellType cellType = _typeSystem.Get(id);
+
     uint32_t& pixel = _textureData[position.y * width + position.x];
-
-    const CellType cellType = _world.typeSystem.Get(id);
     pixel = GetColor(cellType).toInteger();
 }

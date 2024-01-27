@@ -16,7 +16,7 @@ add_subdirectory(procedures)
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         simulation.cpp
-        world.cpp
+        world_interface.h
         simulation_pch.h
 )
 
@@ -24,7 +24,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         simulation.h
-        world.h
         simulation_profile_category.h
 )
 

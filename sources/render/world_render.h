@@ -1,5 +1,11 @@
 #pragma once
-#include "world.h"
+
+#include "components/cell_id.h"
+#include "components/cell_type.h"
+
+class PositionSystem;
+class IdSystem;
+class TypeSystem;
 
 class WorldRender {
 public:
@@ -9,7 +15,7 @@ public:
         uint8_t cellSize;
     };
 
-    WorldRender(World& world, Config&& config);
+    WorldRender(Config&& config, PositionSystem& positionSystem, IdSystem& idSystem, TypeSystem& typeSystem);
 
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 
@@ -17,9 +23,12 @@ private:
     void ProcessCell(CellId id);
     sf::Color GetColor(CellType type) const;
 
-    World& _world;
     Config _config;
     sf::Texture _texture;
     std::vector<uint32_t> _textureData;
     sf::VertexBuffer _vertexBuffer;
+
+    PositionSystem& _positionSystem;
+    IdSystem& _idSystem;
+    TypeSystem& _typeSystem;
 };

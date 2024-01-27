@@ -7,7 +7,6 @@
 class BrainSystem;
 class HealthSystem;
 class TypeSystem;
-class World;
 
 struct SimulationProcedureInfo {
     std::string name;
@@ -18,9 +17,19 @@ struct SimulationProcedureInfo {
 
 class SimulationVirtualMachine {
 public:
-    SimulationVirtualMachine(BrainSystem& brainSystem, TypeSystem& typeSystem, HealthSystem& healthSystem);
+    struct Config {
+        BrainSystem& brainSystem;
+        TypeSystem& typeSystem;
+        HealthSystem& healthSystem;
+        uint8_t systemInstructionPerStep;
+        ProcessorStateWatcher processorStateWatcher;
+    };
 
-    void CreateProcedures(World& world);
+    SimulationVirtualMachine(Config && config);
+
+    template <class Procedure, class... Args>
+    void RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args);
+
     void Run(CellId id);
 
     CellId GetRunningCellId() const { return _runningCellId; }
@@ -28,14 +37,10 @@ public:
     const SimulationProcedureInfo* FindProcedureInfo(ProcedureType type) const;
 
 private:
-    struct Impl;
-
     struct ProcedureData {
         SimulationProcedureInfo info;
         std::unique_ptr<ProcedureBase> procedure;
     };
-
-    static ProcessorStateWatcher MakeSimulationWatcher(SimulationVirtualMachine* simulationVm);
 
     VirtualMachine _virtualMachine;
     BrainSystem& _brainSystem;
@@ -43,4 +48,7 @@ private:
     HealthSystem& _healthSystem;
     CellId _runningCellId;
     std::vector<ProcedureData> _procedureDataList;
+    std::vector<ProcedureId> _procedureTypeMapping;
 };
+
+#include "simulation_virtual_machine.hpp"

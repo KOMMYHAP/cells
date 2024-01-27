@@ -21,6 +21,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         type_system.h
         health_system.h
         simulation_virtual_machine.h
+        simulation_virtual_machine.hpp
         spawn_system.h
         graveyard_system.h
 )

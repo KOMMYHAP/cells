@@ -1,7 +1,8 @@
 #include "simulation.h"
 #include "simulation_profile_category.h"
+#include "world_interface.h"
 
-Simulation::Simulation(World& world)
+Simulation::Simulation(WorldInterface& world)
     : _world(world)
 {
 }

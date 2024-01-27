@@ -1,11 +1,12 @@
 #pragma once
 
 #include "sample_counter.h"
-#include "world.h"
+
+class WorldInterface;
 
 class Simulation {
 public:
-    Simulation(World& world);
+    Simulation(WorldInterface& world);
 
     void SetAutoMode(float ticksPerSecond, sf::Time limitSimulationTime);
     void SetManualMode();
@@ -26,7 +27,7 @@ private:
         float ticksToProcess { 0.0f };
     };
 
-    World& _world;
+    WorldInterface& _world;
 
     using TimeCounter = common::SampleCounter<float, 100>;
     TimeCounter _tickCounter;

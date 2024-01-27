@@ -1,39 +1,16 @@
 #include "simulation_virtual_machine.h"
-#include <procedures/move_procedure.h>
+#include "components/cell_health.h"
+#include "systems/brain_system.h"
+#include "systems/health_system.h"
+#include "systems/type_system.h"
 
-#include "brain_system.h"
-#include "type_system.h"
-#include "world.h"
-
-constexpr uint8_t SystemInstructionPerStep { 8 };
-
-struct SimulationVirtualMachine::Impl {
-    SimulationVirtualMachine& super;
-
-    template <class Procedure, class... Args>
-    void RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
-    {
-        auto procedure = std::make_unique<Procedure>(std::forward<Args>(args)...);
-        const auto procedureId = super._virtualMachine.RegisterProcedure(procedure.get(), inputCount, outputCount);
-        if (procedureId == ProcedureId::Invalid) {
-            assert(false);
-            return;
-        }
-
-        const auto index = static_cast<uint16_t>(procedureId);
-        assert(super._procedureDataList[index].procedure == nullptr);
-
-        SimulationProcedureInfo info { std::move(name), inputCount, outputCount, type };
-        super._procedureDataList[index] = ProcedureData { std::move(info), std::move(procedure) };
-    }
-};
-
-SimulationVirtualMachine::SimulationVirtualMachine(BrainSystem& brainSystem, TypeSystem& typeSystem, HealthSystem& healthSystem)
-    : _virtualMachine(MakeSimulationWatcher(this), SystemInstructionPerStep)
-    , _brainSystem(brainSystem)
-    , _typeSystem(typeSystem)
+SimulationVirtualMachine::SimulationVirtualMachine(Config&& config)
+    : _virtualMachine(std::move(config.processorStateWatcher), config.systemInstructionPerStep)
+    , _brainSystem(config.brainSystem)
+    , _typeSystem(config.typeSystem)
     , _procedureDataList(ProcedureTableLimit)
-    , _healthSystem(healthSystem)
+    , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
+    , _healthSystem(config.healthSystem)
 {
 }
 
@@ -45,20 +22,11 @@ void SimulationVirtualMachine::Run(CellId id)
     _runningCellId = CellId::Invalid;
 }
 
-void SimulationVirtualMachine::CreateProcedures(World& world)
-{
-    Impl impl { *this };
-
-    // Please, if you register new command, follow the declaration order of ProcedureType.
-    // See more in SimulationVirtualMachine::GetProcedureId.
-
-    impl.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", world.simulationVm, world.positionSystem);
-}
-
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const
 {
-    // A little hack here: we suppose that ProcedureId maps to ProcedureType exactly (1 to 1) to O(1) access to procedure info.
-    return static_cast<ProcedureId>(type);
+    const auto index = static_cast<uint8_t>(type);
+    assert(index < _procedureTypeMapping.size());
+    return _procedureTypeMapping[index];
 }
 
 const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(ProcedureType type) const
@@ -78,17 +46,4 @@ const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(Proce
     }
 
     return &info.info;
-}
-
-ProcessorStateWatcher SimulationVirtualMachine::MakeSimulationWatcher(SimulationVirtualMachine* simulationVm)
-{
-    return [simulationVm](ProcessorState state) {
-        if (state == ProcessorState::Good) {
-            return;
-        }
-
-        // Cell's brain has illegal instruction, make insult as punishment
-        const CellId id = simulationVm->_runningCellId;
-        simulationVm->_healthSystem.Set(id, CellHealth::Zero);
-    };
 }

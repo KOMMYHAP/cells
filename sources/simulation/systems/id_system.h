@@ -17,6 +17,9 @@ public:
     void Iterate(Func&& func)
     {
         for (uint32_t idx { 0 }; idx < _capacity; ++idx) {
+            if (!_validCells[idx]) {
+                continue;
+            }
             const CellId id = static_cast<CellId>(idx);
             func(id);
         }
@@ -26,6 +29,7 @@ private:
     CellId MakeNextId();
 
     uint32_t _capacity { 0 };
+    std::vector<bool> _validCells;
     std::vector<CellId> _freeIds;
     CellId _nextId { 0 };
 };
