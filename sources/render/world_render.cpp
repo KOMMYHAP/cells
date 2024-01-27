@@ -21,11 +21,7 @@ WorldRender::WorldRender(Config&& config, PositionSystem& positionSystem, IdSyst
         assert(false);
     }
 
-    if (!_config.fragmentShader->isAvailable()) {
-        assert(false);
-    }
-
-    // todo: do we need fragment shader at all?
+    // We need shader only for custom texture now
     _config.fragmentShader->setUniform("texture", _texture);
 
     _textureData.resize(cellsWidth * cellsHeight);
