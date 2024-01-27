@@ -25,7 +25,7 @@ public:
     void Tick() override;
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 
-    uint32_t GetCellsCount() const { return idSystem.GetCellsCount(); }
+    uint32_t GetCellsCount() const { return _idSystem.GetCellsCount(); }
 
 private:
     static WorldRender::Config MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader);
@@ -34,13 +34,13 @@ private:
     void RegisterProcedures();
     void MakeTestField(uint8_t fullnessPercent);
 
-    IdSystem idSystem;
-    BrainSystem brainSystem;
-    TypeSystem typeSystem;
-    PositionSystem positionSystem;
-    SpawnSystem cellFactory;
-    GraveyardSystem graveyardSystem;
-    HealthSystem healthSystem;
-    SimulationVirtualMachine simulationVm;
+    IdSystem _idSystem;
+    BrainSystem _brainSystem;
+    TypeSystem _typeSystem;
+    PositionSystem _positionSystem;
+    SpawnSystem _cellFactory;
+    GraveyardSystem _graveyardSystem;
+    HealthSystem _healthSystem;
+    SimulationVirtualMachine _simulationVm;
     WorldRender _render;
 };

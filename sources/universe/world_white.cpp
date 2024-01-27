@@ -5,15 +5,15 @@
 #include "procedures/move_procedure.h"
 
 WorldWhite::WorldWhite(Config&& config)
-    : idSystem(config.width * config.height)
-    , brainSystem(idSystem.GetCellsCountLimit())
-    , typeSystem(idSystem.GetCellsCountLimit())
-    , positionSystem(config.width, config.height)
-    , cellFactory(simulationVm, brainSystem)
-    , graveyardSystem(idSystem.GetCellsCountLimit(), idSystem, typeSystem, positionSystem)
-    , healthSystem(idSystem.GetCellsCountLimit(), graveyardSystem)
-    , simulationVm(MakeSimulationVmConfig(this))
-    , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), positionSystem, idSystem, typeSystem)
+    : _idSystem(config.width * config.height)
+    , _brainSystem(_idSystem.GetCellsCountLimit())
+    , _typeSystem(_idSystem.GetCellsCountLimit())
+    , _positionSystem(config.width, config.height)
+    , _cellFactory(_simulationVm, _brainSystem)
+    , _graveyardSystem(_idSystem.GetCellsCountLimit(), _idSystem, _typeSystem, _positionSystem)
+    , _healthSystem(_idSystem.GetCellsCountLimit(), _graveyardSystem)
+    , _simulationVm(MakeSimulationVmConfig(this))
+    , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
 {
     RegisterProcedures();
     MakeTestField(config.fullnessPercent);
@@ -22,17 +22,17 @@ WorldWhite::WorldWhite(Config&& config)
 void WorldWhite::Tick()
 {
     // Process brain of each cell.
-    idSystem.Iterate([this](const CellId id) {
-        simulationVm.Run(id);
+    _idSystem.Iterate([this](const CellId id) {
+        _simulationVm.Run(id);
     });
 
     // Cleanup world systems from dead cells.
-    graveyardSystem.Cleanup();
+    _graveyardSystem.Cleanup();
 }
 
 void WorldWhite::RegisterProcedures()
 {
-    simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", simulationVm, positionSystem);
+    _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _simulationVm, _positionSystem);
 }
 
 WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader)
@@ -49,12 +49,12 @@ WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_
 void WorldWhite::MakeTestField(uint8_t fullnessPercent)
 {
     std::default_random_engine randomEngine;
-    const uint16_t moveCommandsCount = std::min<uint16_t>(positionSystem.GetWidth(), 3);
+    const uint16_t moveCommandsCount = std::min<uint16_t>(_positionSystem.GetWidth(), 3);
 
     std::vector<sf::Vector2<int16_t>> positions;
-    positions.reserve(idSystem.GetCellsCountLimit());
-    for (uint16_t x { 0 }; x < positionSystem.GetWidth(); ++x) {
-        for (uint16_t y { 0 }; y < positionSystem.GetHeight(); ++y) {
+    positions.reserve(_idSystem.GetCellsCountLimit());
+    for (uint16_t x { 0 }; x < _positionSystem.GetWidth(); ++x) {
+        for (uint16_t y { 0 }; y < _positionSystem.GetHeight(); ++y) {
             positions.emplace_back(x, y);
         }
     }
@@ -64,10 +64,10 @@ void WorldWhite::MakeTestField(uint8_t fullnessPercent)
     //    const auto countLimit = 1;
 
     for (const auto& position : std::span(positions).first(countLimit)) {
-        const CellId id = idSystem.Create();
-        positionSystem.Set(id, position);
-        typeSystem.Set(id, CellType::Unit);
-        cellFactory.MakePatrolUnit(id, moveCommandsCount);
+        const CellId id = _idSystem.Create();
+        _positionSystem.Set(id, position);
+        _typeSystem.Set(id, CellType::Unit);
+        _cellFactory.MakePatrolUnit(id, moveCommandsCount);
     }
 }
 
@@ -84,13 +84,13 @@ SimulationVirtualMachine::Config WorldWhite::MakeSimulationVmConfig(WorldWhite* 
         }
 
         // Cell's brain has illegal instruction, make insult as punishment
-        const CellId id = world->simulationVm.GetRunningCellId();
-        world->healthSystem.Set(id, CellHealth::Zero);
+        const CellId id = world->_simulationVm.GetRunningCellId();
+        world->_healthSystem.Set(id, CellHealth::Zero);
     };
     return {
-        world->brainSystem,
-        world->typeSystem,
-        world->healthSystem,
+        world->_brainSystem,
+        world->_typeSystem,
+        world->_healthSystem,
         8,
         std::move(watcher)
     };
