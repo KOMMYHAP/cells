@@ -4,5 +4,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         cell_id.h
         cell_position.h
         cell_type.h
+        cell_age.h
+        cell_health.h
         procedure_type.h
 )

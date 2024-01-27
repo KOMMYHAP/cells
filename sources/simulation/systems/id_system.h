@@ -7,6 +7,7 @@ public:
     IdSystem(uint32_t capacity);
 
     uint32_t GetCellsCount() const { return _capacity - _freeIds.size(); }
+    uint32_t GetCellsCountLimit() const { return _capacity; }
 
     CellId Create();
     void Remove(CellId id);

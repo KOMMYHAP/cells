@@ -6,8 +6,8 @@ WorldRender::WorldRender(World& world, Config&& config)
     , _config(std::move(config))
     , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
 {
-    const uint16_t cellsWidth = _world.GetWidth();
-    const uint16_t cellsHeight = _world.GetHeight();
+    const uint16_t cellsWidth = _world.positionSystem.GetWidth();
+    const uint16_t cellsHeight = _world.positionSystem.GetHeight();
 
     const auto pixelsWidth = static_cast<float>(cellsWidth * _config.cellSize);
     const auto pixelsHeight = static_cast<float>(cellsHeight * _config.cellSize);
@@ -82,7 +82,7 @@ void WorldRender::ProcessCell(CellId id)
         return;
     }
 
-    const uint16_t width = _world.GetWidth();
+    const uint16_t width = _world.positionSystem.GetWidth();
     uint32_t& pixel = _textureData[position.y * width + position.x];
 
     const CellType cellType = _world.typeSystem.Get(id);

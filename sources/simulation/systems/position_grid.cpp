@@ -11,7 +11,7 @@ PositionGrid::PositionGrid(uint16_t width, uint16_t height)
     _grid.resize(_width * _height, CellId::Invalid);
 }
 
-void PositionGrid::Add(CellId id, const CellPosition& position)
+void PositionGrid::Add(CellId id, CellPosition position)
 {
     const uint32_t index = TryGetGridIndex(position);
     if (index == InvalidGridIndex) {
@@ -21,7 +21,7 @@ void PositionGrid::Add(CellId id, const CellPosition& position)
     _grid[index] = id;
 }
 
-void PositionGrid::Remove(CellId id, const CellPosition& position)
+void PositionGrid::Remove(CellId id, CellPosition position)
 {
     const uint32_t index = TryGetGridIndex(position);
     if (index == InvalidGridIndex) {
@@ -31,7 +31,7 @@ void PositionGrid::Remove(CellId id, const CellPosition& position)
     _grid[index] = CellId::Invalid;
 }
 
-CellId PositionGrid::Find(const CellPosition& position) const
+CellId PositionGrid::Find(CellPosition position) const
 {
     const uint32_t index = TryGetGridIndex(position);
     if (index != InvalidGridIndex) {
@@ -40,7 +40,7 @@ CellId PositionGrid::Find(const CellPosition& position) const
     return CellId::Invalid;
 }
 
-uint32_t PositionGrid::TryGetGridIndex(const CellPosition& position) const
+uint32_t PositionGrid::TryGetGridIndex(CellPosition position) const
 {
     const uint32_t index = position.y * _width + position.x;
     if (index < _grid.size()) {

@@ -94,3 +94,13 @@ const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(Proce
 
     return &info.info;
 }
+
+ProcessorStateWatcher SimulationVirtualMachine::MakeSimulationWatcher(SimulationVirtualMachine* simulationVm)
+{
+    return [simulationVm](ProcessorState state) {
+        if (state == ProcessorState::Good) {
+            return;
+        }
+        common::Breakpoint();
+    };
+}

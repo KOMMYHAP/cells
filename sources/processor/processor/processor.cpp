@@ -11,10 +11,21 @@ void Processor::Execute(ProcessorContext& context)
 {
     common::ProfileScope processorProfileScope { "Processor", ProcessorProfileCategory };
 
-    ProcessInstruction(context);
+    for (int i = 0; i < _systemInstructionToPerform + 1; ++i) {
+        auto mbInstruction = ProcessInstruction(context);
+        if (!mbInstruction.has_value()) {
+            // no completed instruction
+            break;
+        }
+        const ProcessorInstruction completedInstruction = *mbInstruction;
+        if (completedInstruction == ProcessorInstruction::Call) {
+            // one heavy instruction per execution is enough
+            break;
+        }
+    }
 }
 
-void Processor::ProcessInstruction(ProcessorContext& context)
+std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorContext& context)
 {
     assert(context.IsState(ProcessorState::Good));
 
@@ -22,7 +33,7 @@ void Processor::ProcessInstruction(ProcessorContext& context)
 
     const auto [instructionRead, instruction] = context.TryReadMemory<ProcessorInstruction>();
     if (!instructionRead) {
-        return;
+        return {};
     }
 
     switch (instruction) {
@@ -151,4 +162,10 @@ void Processor::ProcessInstruction(ProcessorContext& context)
         context.SetState(ProcessorState::InvalidInstruction);
         break;
     }
+
+    if (controlBlockGuard.ShouldRollback()) {
+        return {};
+    }
+
+    return instruction;
 }

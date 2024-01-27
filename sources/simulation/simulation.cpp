@@ -26,11 +26,7 @@ void Simulation::ProcessTick()
 {
     common::ProfileScope tickProfileScope { "Tick", SimulationProfileCategory };
     sf::Clock clock;
-
-    _world.idSystem.Iterate([this](const CellId id) {
-        _world.virtualMachine.Run(id);
-    });
-
+    _world.Tick();
     _tickCounter.AddSample(clock.getElapsedTime().asSeconds());
 }
 

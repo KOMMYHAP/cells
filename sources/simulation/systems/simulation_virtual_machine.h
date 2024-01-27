@@ -34,6 +34,8 @@ private:
         std::unique_ptr<ProcedureBase> procedure;
     };
 
+    static ProcessorStateWatcher MakeSimulationWatcher(SimulationVirtualMachine* simulationVm);
+
     VirtualMachine _virtualMachine;
     BrainSystem& _brainSystem;
     TypeSystem& _typeSystem;

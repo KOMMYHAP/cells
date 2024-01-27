@@ -6,6 +6,7 @@ public:
     ProcessorControlBlockGuard(ProcessorControlBlock& controlBlock);
     ~ProcessorControlBlockGuard();
 
+    bool ShouldRollback() const { return _shouldRollback; }
     void Submit();
 
 private:

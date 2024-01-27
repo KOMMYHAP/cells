@@ -2,7 +2,7 @@
 #include "processor/processor.h"
 #include "processor/processor_control_block.h"
 
-static_assert(ProcessorRegistryCount >= ProcedureInputArgsCountLimit + ProcedureOutputArgsCountLimit,
+static_assert(ProcessorStackSize >= std::max(ProcedureInputArgsCountLimit, ProcedureOutputArgsCountLimit),
     "Register overflow! Processor use registries to pass args to or obtain args from procedure");
 
 static_assert(std::is_trivial_v<ProcessorControlBlock>, "As part of memory view ProcessorControlBlock must be trivial");

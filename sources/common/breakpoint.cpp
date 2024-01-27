@@ -4,7 +4,7 @@ namespace {
 
 void SignalHandler(int signal)
 {
-    if (signal == SIGABRT) {
+    if (signal == SIGINT) {
         common::Breakpoint();
     }
     std::quick_exit(EXIT_FAILURE);
@@ -22,9 +22,9 @@ void Breakpoint()
 void EnableBreakpointOnAssert(bool value)
 {
     if (value) {
-        std::signal(SIGABRT, &SignalHandler);
+        std::signal(SIGINT, &SignalHandler);
     } else {
-        std::signal(SIGABRT, SIG_DFL);
+        std::signal(SIGINT, SIG_DFL);
     }
 }
 

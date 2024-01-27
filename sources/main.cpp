@@ -43,12 +43,12 @@ const uint16_t StatusMessageBufferLimit = 200;
 void MakeTestField(World& world, uint8_t percent)
 {
     std::default_random_engine randomEngine;
-    const uint16_t moveCommandsCount = std::min<uint16_t>(world.GetWidth(), 3);
+    const uint16_t moveCommandsCount = std::min<uint16_t>(world.positionSystem.GetWidth(), 3);
 
     std::vector<sf::Vector2<int16_t>> positions;
-    positions.reserve(world.GetCapacity());
-    for (uint16_t x { 0 }; x < world.GetWidth(); ++x) {
-        for (uint16_t y { 0 }; y < world.GetHeight(); ++y) {
+    positions.reserve(world.idSystem.GetCellsCountLimit());
+    for (uint16_t x { 0 }; x < world.positionSystem.GetWidth(); ++x) {
+        for (uint16_t y { 0 }; y < world.positionSystem.GetHeight(); ++y) {
             positions.emplace_back(x, y);
         }
     }
@@ -58,13 +58,13 @@ void MakeTestField(World& world, uint8_t percent)
 
     for (const auto& position : std::span(positions).first(countLimit)) {
         const CellId id = world.idSystem.Create();
-        world.positionSystem.Move(id, position);
+        world.positionSystem.Set(id, position);
         world.typeSystem.Set(id, CellType::Unit);
         world.cellFactory.MakePatrolUnit(id, moveCommandsCount);
     }
 }
 
-auto GatherTimeInfo(sf::Time time)
+auto GetTimeInfo(sf::Time time)
 {
     const std::string_view tickUnit = time.asMilliseconds() >= 1000 ? "s"
         : time.asMicroseconds() >= 1000                             ? "ms"
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
         {
             frameTimeCounter.AddSample(frameElapsedTime.asSeconds());
             sf::Time frameTime = sf::seconds(frameTimeCounter.CalcMedian());
-            const auto [frameTimeValue, frameUnit] = GatherTimeInfo(frameTime);
+            const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
             const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
             ticksCounter.AddSample(fps * elapsedTicks);

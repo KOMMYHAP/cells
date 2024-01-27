@@ -8,7 +8,7 @@ public:
     void Execute(ProcessorContext& context);
 
 private:
-    void ProcessInstruction(ProcessorContext& context);
+    std::optional<ProcessorInstruction> ProcessInstruction(ProcessorContext& context);
 
     uint8_t _systemInstructionToPerform;
 };

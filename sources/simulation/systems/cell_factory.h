@@ -1,10 +1,10 @@
 #pragma once
 
-#include "brain_system.h"
 #include "components/cell_id.h"
 
 class SimulationVirtualMachine;
 class BrainSystem;
+class ProcessorMemory;
 
 class CellFactory {
 public:
