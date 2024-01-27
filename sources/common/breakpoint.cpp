@@ -2,11 +2,17 @@
 
 namespace {
 
-void SignalHandler(int signal)
+extern "C" using SignalHandlerType = void(*)(int);
+
+static SignalHandlerType _defaultSignalHandler;
+
+void DebugBreakpointAssertHandler(int signal)
 {
-    if (signal == SIGINT) {
-        common::Breakpoint();
+    if (signal != SIGABRT) {
+        _defaultSignalHandler(signal);
+        return;
     }
+    common::Breakpoint();
     std::quick_exit(EXIT_FAILURE);
 }
 
@@ -22,9 +28,9 @@ void Breakpoint()
 void EnableBreakpointOnAssert(bool value)
 {
     if (value) {
-        std::signal(SIGINT, &SignalHandler);
+        _defaultSignalHandler = std::signal(SIGABRT, &DebugBreakpointAssertHandler);
     } else {
-        std::signal(SIGINT, SIG_DFL);
+        std::signal(SIGABRT, _defaultSignalHandler);
     }
 }
 
