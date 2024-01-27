@@ -18,7 +18,7 @@ public:
         requires(MemoryType<std::decay_t<Ts>> && ...)
     bool TryPushResult(Ts&&... ts);
 
-    void Invalidate();
+    void MarkProcedureAsInvalid();
 
 private:
     void SetState(ProcessorState state);

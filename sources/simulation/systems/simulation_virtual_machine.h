@@ -5,6 +5,7 @@
 #include "vm/virtual_machine.h"
 
 class BrainSystem;
+class HealthSystem;
 class TypeSystem;
 class World;
 
@@ -17,7 +18,7 @@ struct SimulationProcedureInfo {
 
 class SimulationVirtualMachine {
 public:
-    SimulationVirtualMachine(BrainSystem& brainSystem, TypeSystem& typeSystem);
+    SimulationVirtualMachine(BrainSystem& brainSystem, TypeSystem& typeSystem, HealthSystem& healthSystem);
 
     void CreateProcedures(World& world);
     void Run(CellId id);
@@ -39,6 +40,7 @@ private:
     VirtualMachine _virtualMachine;
     BrainSystem& _brainSystem;
     TypeSystem& _typeSystem;
+    HealthSystem& _healthSystem;
     CellId _runningCellId;
     std::vector<ProcedureData> _procedureDataList;
 };

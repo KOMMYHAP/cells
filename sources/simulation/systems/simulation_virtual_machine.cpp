@@ -2,21 +2,10 @@
 #include <procedures/move_procedure.h>
 
 #include "brain_system.h"
-#include "breakpoint.h"
 #include "type_system.h"
 #include "world.h"
 
 constexpr uint8_t SystemInstructionPerStep { 8 };
-
-static ProcessorStateWatcher MakeInvalidStateTrap()
-{
-    return [](ProcessorState state) {
-        if (state == ProcessorState::Good) {
-            return;
-        }
-        common::Breakpoint();
-    };
-}
 
 struct SimulationVirtualMachine::Impl {
     SimulationVirtualMachine& super;
@@ -39,11 +28,12 @@ struct SimulationVirtualMachine::Impl {
     }
 };
 
-SimulationVirtualMachine::SimulationVirtualMachine(BrainSystem& brainSystem, TypeSystem& typeSystem)
-    : _virtualMachine(MakeInvalidStateTrap(), SystemInstructionPerStep)
+SimulationVirtualMachine::SimulationVirtualMachine(BrainSystem& brainSystem, TypeSystem& typeSystem, HealthSystem& healthSystem)
+    : _virtualMachine(MakeSimulationWatcher(this), SystemInstructionPerStep)
     , _brainSystem(brainSystem)
     , _typeSystem(typeSystem)
     , _procedureDataList(ProcedureTableLimit)
+    , _healthSystem(healthSystem)
 {
 }
 
@@ -101,6 +91,9 @@ ProcessorStateWatcher SimulationVirtualMachine::MakeSimulationWatcher(Simulation
         if (state == ProcessorState::Good) {
             return;
         }
-        common::Breakpoint();
+
+        // Cell's brain has illegal instruction, make insult as punishment
+        const CellId id = simulationVm->_runningCellId;
+        simulationVm->_healthSystem.Set(id, CellHealth::Zero);
     };
 }

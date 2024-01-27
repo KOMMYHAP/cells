@@ -19,9 +19,9 @@ public:
     IdSystem idSystem;
     BrainSystem brainSystem;
     TypeSystem typeSystem;
-    SimulationVirtualMachine virtualMachine;
     PositionSystem positionSystem;
     CellFactory cellFactory;
     GraveyardSystem graveyardSystem;
     HealthSystem healthSystem;
+    SimulationVirtualMachine virtualMachine;
 };

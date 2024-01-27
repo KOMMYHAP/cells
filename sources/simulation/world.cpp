@@ -6,11 +6,11 @@ World::World(uint32_t width, uint32_t height)
     : idSystem(width * height)
     , brainSystem(idSystem.GetCellsCountLimit())
     , typeSystem(idSystem.GetCellsCountLimit())
-    , virtualMachine(brainSystem, typeSystem)
     , positionSystem(width, height)
     , cellFactory(virtualMachine, brainSystem)
     , graveyardSystem(idSystem.GetCellsCountLimit(), idSystem, typeSystem, positionSystem)
     , healthSystem(idSystem.GetCellsCountLimit(), graveyardSystem)
+    , virtualMachine(brainSystem, typeSystem, healthSystem)
 {
     virtualMachine.CreateProcedures(*this);
 }

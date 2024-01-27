@@ -14,7 +14,7 @@ void ProcedureContext::SetState(ProcessorState state)
     _processorContext.SetState(state);
 }
 
-void ProcedureContext::Invalidate()
+void ProcedureContext::MarkProcedureAsInvalid()
 {
     SetState(ProcessorState::InvalidProcedure);
 }
