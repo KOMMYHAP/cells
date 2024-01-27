@@ -15,10 +15,7 @@ public:
     CellId Find(CellPosition position) const;
 
     template <class Func>
-    void Iterate(Func&& func)
-    {
-        _grid.Iterate(std::forward<Func>(func));
-    }
+    void Iterate(Func&& func);
 
     auto GetWidth() const { return _grid.GetWidth(); }
     auto GetHeight() const { return _grid.GetHeight(); }
@@ -34,3 +31,5 @@ private:
     std::vector<CellPosition> _positions;
     PositionGrid _grid;
 };
+
+#include "position_system.hpp"

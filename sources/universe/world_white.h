@@ -11,7 +11,7 @@
 #include "world_interface.h"
 #include "world_render.h"
 
-class WorldWhite : public WorldInterface {
+class WorldWhite final : public WorldInterface {
 public:
     struct Config {
         uint32_t width;

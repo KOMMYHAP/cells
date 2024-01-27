@@ -20,14 +20,7 @@ public:
 
     template <class Func>
         requires std::invocable<Func, CellPosition>
-    void Iterate(Func&& func)
-    {
-        for (int16_t y { 0 }; y < _height; ++y) {
-            for (int16_t x { 0 }; x < _width; ++x) {
-                func(CellPosition { x, y });
-            }
-        }
-    }
+    void Iterate(Func&& func);
 
 private:
     uint32_t TryGetGridIndex(CellPosition position) const;
@@ -36,3 +29,5 @@ private:
     const PositionType _height;
     std::vector<CellId> _grid;
 };
+
+#include "position_grid.hpp"

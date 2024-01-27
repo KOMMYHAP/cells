@@ -15,10 +15,10 @@ const std::string_view FragmentShaderArgument = "--fragment-shader";
 
 const float TargetTicksPerSeconds = 1.f;
 const sf::Time TargetSimulationTime = sf::seconds(1.0f / TargetTicksPerSeconds);
-const uint8_t CellsCountPercentOfLimit = 20;
+const uint8_t CellsCountPercentOfLimit = 80;
 
-const uint16_t ScreenWidth = 800;
-const uint16_t ScreenHeight = 600;
+const uint16_t ScreenWidth = 1800;
+const uint16_t ScreenHeight = 1000;
 
 const uint16_t FieldOffset = 20;
 const uint16_t FieldWidth = ScreenWidth - 2 * FieldOffset;
@@ -28,7 +28,7 @@ const uint16_t StatusTextOffset = 5;
 const uint16_t StatusTextSize = 10;
 
 const uint16_t CellPadding = 0;
-const uint16_t CellSize = 8;
+const uint16_t CellSize = 1;
 
 const uint16_t RowsCount = FieldHeight / (CellSize + CellPadding);
 const uint16_t ColumnsCount = FieldWidth / (CellSize + CellPadding);
@@ -89,10 +89,10 @@ int main(int argc, char** argv)
 
     sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(false);
-    window.setFramerateLimit(60);
+//    window.setFramerateLimit(60);
 
     WorldWhite::Config worldWhiteConfig {
-        ColumnsCount, RowsCount, CellSize, 20, std::move(shader)
+        ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader)
     };
     WorldWhite world { std::move(worldWhiteConfig) };
 

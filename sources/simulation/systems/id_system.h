@@ -14,16 +14,7 @@ public:
 
     template <class Func>
         requires std::invocable<Func, CellId>
-    void Iterate(Func&& func)
-    {
-        for (uint32_t idx { 0 }; idx < _capacity; ++idx) {
-            if (!_validCells[idx]) {
-                continue;
-            }
-            const CellId id = static_cast<CellId>(idx);
-            func(id);
-        }
-    }
+    void Iterate(Func&& func);
 
 private:
     CellId MakeNextId();
@@ -33,3 +24,5 @@ private:
     std::vector<CellId> _freeIds;
     CellId _nextId { 0 };
 };
+
+#include "id_system.hpp"
