@@ -15,7 +15,7 @@ public:
     void Tick();
     void Ticks(uint32_t ticks);
 
-    sf::Time GetTickTime() const { return sf::seconds(_tickCounter.CalcMedian()); }
+    sf::Time GetTickTime() const;
 
 private:
     void ProcessTick();

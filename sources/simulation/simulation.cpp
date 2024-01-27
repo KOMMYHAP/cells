@@ -67,3 +67,8 @@ uint32_t Simulation::Run(sf::Time elapsedTime)
     params.ticksToProcess -= ticksToProcess;
     return ticks;
 }
+
+sf::Time Simulation::GetTickTime() const
+{
+    return sf::microseconds(10);
+}
