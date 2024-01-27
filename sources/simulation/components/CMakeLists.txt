@@ -8,3 +8,8 @@ target_sources(${PROJECT_NAME} PUBLIC
         cell_health.h
         procedure_type.h
 )
+
+# add sources
+target_sources(${PROJECT_NAME} PRIVATE
+        cell_position.cpp
+)

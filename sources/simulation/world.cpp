@@ -1,24 +1,25 @@
 #include "world.h"
 
-static_assert(std::is_signed_v<decltype(CellPosition::x)> && std::is_signed_v<decltype(CellPosition::x)>, "For vector math operations signed type is required");
-
 World::World(uint32_t width, uint32_t height)
     : idSystem(width * height)
     , brainSystem(idSystem.GetCellsCountLimit())
     , typeSystem(idSystem.GetCellsCountLimit())
     , positionSystem(width, height)
-    , cellFactory(virtualMachine, brainSystem)
+    , cellFactory(simulationVm, brainSystem)
     , graveyardSystem(idSystem.GetCellsCountLimit(), idSystem, typeSystem, positionSystem)
     , healthSystem(idSystem.GetCellsCountLimit(), graveyardSystem)
-    , virtualMachine(brainSystem, typeSystem, healthSystem)
+    , simulationVm(brainSystem, typeSystem, healthSystem)
 {
-    virtualMachine.CreateProcedures(*this);
+    simulationVm.CreateProcedures(*this);
 }
 
 void World::Tick()
 {
+    // Process brain of each cell.
     idSystem.Iterate([this](const CellId id) {
-        virtualMachine.Run(id);
+        simulationVm.Run(id);
     });
+
+    // Cleanup world systems from dead cells.
     graveyardSystem.Cleanup();
 }

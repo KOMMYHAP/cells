@@ -1,4 +1,5 @@
-#include "cell_factory.h"
+#include "spawn_system.h"
+
 #include "components/procedure_type.h"
 #include "procedures/direction.h"
 #include "procedures/move_procedure.h"
@@ -7,13 +8,13 @@
 #include "systems/brain_system.h"
 #include "systems/simulation_virtual_machine.h"
 
-CellFactory::CellFactory(SimulationVirtualMachine& vm, BrainSystem& brainSystem)
+SpawnSystem::SpawnSystem(SimulationVirtualMachine& vm, BrainSystem& brainSystem)
     : _vm(vm)
     , _brainSystem(brainSystem)
 {
 }
 
-bool CellFactory::MakePatrolUnit(CellId id, uint16_t length)
+bool SpawnSystem::MakePatrolUnit(CellId id, uint16_t length)
 {
     ProcessorMemory memory = _brainSystem.AccessMemory(id);
     if (!InitMemory(memory)) {
@@ -35,7 +36,7 @@ bool CellFactory::MakePatrolUnit(CellId id, uint16_t length)
     return true;
 }
 
-bool CellFactory::InitMemory(ProcessorMemory& memory)
+bool SpawnSystem::InitMemory(ProcessorMemory& memory)
 {
     ProcessorControlBlock controlBlock {
         static_cast<uint8_t>(ProcessorState::Good),

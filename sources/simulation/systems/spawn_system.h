@@ -6,9 +6,9 @@ class SimulationVirtualMachine;
 class BrainSystem;
 class ProcessorMemory;
 
-class CellFactory {
+class SpawnSystem {
 public:
-    CellFactory(SimulationVirtualMachine& vm, BrainSystem& brainSystem);
+    SpawnSystem(SimulationVirtualMachine& vm, BrainSystem& brainSystem);
 
     bool MakePatrolUnit(CellId id, uint16_t length);
 
