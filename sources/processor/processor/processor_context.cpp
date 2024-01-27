@@ -6,10 +6,14 @@
 ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory)
     : _procedureTable(procedureTable)
     , _controlBlock(controlBlock)
-    , _memory(memory.MakeSubSpan(_controlBlock.nextCommand))
+    , _initialMemory(memory)
+    , _memory(_initialMemory)
     , _watcher(stateWatcher)
     , _stack(_controlBlock.stack, _controlBlock.stackOffset)
 {
+    if (!SetCommandPointer(_controlBlock.nextCommand)) {
+        assert(false);
+    }
 }
 
 bool ProcessorContext::HasFlag(ProcessorFlags flag) const
@@ -42,11 +46,12 @@ void ProcessorContext::SetState(ProcessorState state)
 
 bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
 {
-    if (!_memory.HasBytes(nextCommand)) {
+    if (!_initialMemory.HasBytes(nextCommand)) {
         SetState(ProcessorState::OutOfMemory);
         return false;
     }
     _controlBlock.nextCommand = nextCommand;
+    _memory = ProcessorMemory { _initialMemory.MakeSubSpan(_controlBlock.nextCommand) };
     return true;
 }
 

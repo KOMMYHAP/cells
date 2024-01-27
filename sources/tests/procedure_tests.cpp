@@ -327,7 +327,7 @@ TEST_F(ProcedureFixture, Rollback_InvalidCommandInProcedure)
 {
     auto procedure = std::make_unique<TestProcedure>();
     procedure->func = [&](ProcedureContext& context) {
-        context.Invalidate();
+        context.MarkProcedureAsInvalid();
         context.TryPushResult(std::byte { 42 });
     };
 

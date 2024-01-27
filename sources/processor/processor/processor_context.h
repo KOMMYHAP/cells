@@ -15,6 +15,7 @@ public:
 
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();
+
     bool SetCommandPointer(uint8_t nextCommand);
     bool MoveCommandPointer(uint8_t offset);
 
@@ -33,6 +34,7 @@ public:
 private:
     ProcessorControlBlock& _controlBlock;
     const ProcedureTable& _procedureTable;
+    const ProcessorMemory _initialMemory;
     ProcessorMemory _memory;
     ProcessorStack _stack;
     const std::function<void(ProcessorState)>& _watcher;

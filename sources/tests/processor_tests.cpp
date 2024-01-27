@@ -49,10 +49,15 @@ public:
         _vm->Run({ _memoryBuffer });
     }
 
+    void MakeVmWithCustomSystemInstructionPerTick(uint8_t count)
+    {
+        _vm = MakeVm(count);
+    }
+
 protected:
     virtual void SetUp()
     {
-        _vm = std::make_unique<VirtualMachine>(MakeKiller(), 1);
+        _vm = MakeVm(1);
         MakeMemory(255);
 
         ProcessorMemory rawMemory { _memoryBuffer };
@@ -65,6 +70,11 @@ protected:
     }
 
 private:
+    std::unique_ptr<VirtualMachine> MakeVm(uint8_t systemInstructionPerTick)
+    {
+        return std::make_unique<VirtualMachine>(MakeKiller(), systemInstructionPerTick);
+    }
+
     ProcessorStateWatcher MakeKiller()
     {
         return [this](ProcessorState state) {
@@ -161,4 +171,33 @@ TEST_F(ProcessorFixture, Processor_PopStackToInvalidRegister)
         Tick();
     }
     ASSERT_EQ(GetLastProcessorState(), ProcessorState::InvalidInstruction);
+}
+
+TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick)
+{
+    MakeVmWithCustomSystemInstructionPerTick(2);
+
+    auto accessor = GetMemory();
+    accessor.Write(ProcessorInstruction::PushStack, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PushStack, std::byte { 24 });
+
+    ASSERT_EQ(AccessControlBlock().stackOffset, 0);
+    Tick();
+    ASSERT_EQ(AccessControlBlock().stackOffset, 2);
+}
+
+TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick_WithJump)
+{
+    MakeVmWithCustomSystemInstructionPerTick(3);
+
+    auto accessor = GetMemory();
+    accessor.Write(ProcessorInstruction::PushStack, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
+    accessor.Write(ProcessorInstruction::Nope);
+
+    ASSERT_EQ(AccessControlBlock().stackOffset, 0);
+    ASSERT_EQ(AccessControlBlock().nextCommand, 0);
+    Tick();
+    ASSERT_EQ(AccessControlBlock().stackOffset, 2);
+    ASSERT_EQ(AccessControlBlock().nextCommand, 2);
 }

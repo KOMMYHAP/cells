@@ -5,13 +5,14 @@
 Processor::Processor(uint8_t systemInstructionToPerform)
     : _systemInstructionToPerform(systemInstructionToPerform)
 {
+    assert(_systemInstructionToPerform > 0);
 }
 
 void Processor::Execute(ProcessorContext& context)
 {
     common::ProfileScope processorProfileScope { "Processor", ProcessorProfileCategory };
 
-    for (int i = 0; i < _systemInstructionToPerform + 1; ++i) {
+    for (int i = 0; i < _systemInstructionToPerform; ++i) {
         auto mbInstruction = ProcessInstruction(context);
         if (!mbInstruction.has_value()) {
             // no completed instruction
