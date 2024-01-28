@@ -5,7 +5,6 @@ option(ENABLE_PROFILE "Enable profiling" OFF)
 add_subdirectory(profile)
 
 
-
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         common_pch.h
@@ -13,6 +12,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         command_line.cpp
         sample_counter.cpp
         breakpoint.cpp
+        random.cpp
 )
 
 
@@ -24,6 +24,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         sample_counter.h
         sample_counter.hpp
         breakpoint.h
+        random.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

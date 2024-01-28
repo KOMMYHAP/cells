@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "procedures/move_procedure.h"
+#include "random.h"
 
 WorldWhite::WorldWhite(Config&& config)
     : _idSystem(config.width * config.height)
@@ -48,7 +49,6 @@ WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_
 
 void WorldWhite::MakeTestField(uint8_t fullnessPercent)
 {
-    std::default_random_engine randomEngine;
     const uint16_t moveCommandsCount = std::min<uint16_t>(_positionSystem.GetWidth(), 3);
 
     std::vector<sf::Vector2<int16_t>> positions;
@@ -58,7 +58,7 @@ void WorldWhite::MakeTestField(uint8_t fullnessPercent)
             positions.emplace_back(x, y);
         }
     }
-    std::shuffle(positions.begin(), positions.end(), randomEngine);
+    std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
 
     const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(fullnessPercent) / 100)));
     //    const auto countLimit = 1;

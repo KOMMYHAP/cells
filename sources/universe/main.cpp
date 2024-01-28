@@ -7,6 +7,7 @@
 #include "breakpoint.h"
 #include "command_line.h"
 #include "profile/profile.h"
+#include "random.h"
 #include "simulation.h"
 #include "world_white.h"
 
@@ -49,8 +50,20 @@ auto GetTimeInfo(sf::Time time)
     return std::make_tuple(tickTimeValue, tickUnit);
 }
 
+struct CommonInitializationGuard {
+    CommonInitializationGuard()
+    {
+        common::InitRandom("42");
+    }
+    ~CommonInitializationGuard()
+    {
+        common::TermRandom();
+    }
+};
+
 int main(int argc, char** argv)
 {
+    CommonInitializationGuard commonInitializationGuard {};
     common::EnableBreakpointOnAssert(true);
 
     assert(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);

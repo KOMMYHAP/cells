@@ -2,8 +2,8 @@
 
 enum class ProcessorInstruction : uint8_t {
     Nope,
-    WriteRegistryValue, // write value to specified registry
-    WriteRegistryRegistry, // write value to specified registry
+    WriteRegistryValue,
+    WriteRegistryRegistry,
     CompareRegistryRegistry,
     CompareRegistryValue,
     AddRegistryValue,
