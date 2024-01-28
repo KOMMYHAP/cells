@@ -2,7 +2,7 @@
 #include "processor_profile_category.h"
 #include "processor_state.h"
 
-#include "instructions/instruction_nope.h"
+#include "instructions/nope.h"
 
 Processor::Processor(uint8_t systemInstructionToPerform)
     : _systemInstructionToPerform(systemInstructionToPerform)
@@ -30,6 +30,8 @@ void Processor::Execute(ProcessorContext& context)
 
 std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorContext& context)
 {
+    using namespace processor::instructions;
+
     assert(context.IsState(ProcessorState::Good));
 
     ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
@@ -41,7 +43,10 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
 
     switch (instruction) {
     case ProcessorInstruction::Nope:
-        if (!context.MoveCommandPointer(1)) {
+        if (!Nope::Execute(context)) {
+            break;
+        }
+        if (!context.MoveCommandPointer(Nope::registerInCount)) {
             break;
         }
         controlBlockGuard.Submit();

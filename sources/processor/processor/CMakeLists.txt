@@ -6,7 +6,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         processor_context.cpp
         processor_control_block.cpp
         processor_control_block_guard.cpp
-        processor_instruction.cpp
+        processor_instruction_visitor.cpp
 )
 
 
@@ -23,5 +23,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         processor_stack.h
         processor_stack.hpp
         processor_memory_type.h
-        processor_instruction.h
+        processor_instruction_concept.h
+        processor_instruction_visitor.h
 )

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "instructions/instructions.h"
+#include "processor/instructions/instruction_list.h"
 #include "processor_state.h"
 
 enum class ProcessorFlags : uint8_t {

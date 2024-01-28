@@ -18,6 +18,16 @@ OFFSET 		COMMAND 	ARGS
 39			NOPE
 
 
+0           WRITE       $registry_0, 200
+3           WRITE       $registry_1, 300
+6           CALL        $procedure_go
+8           SUB         $registry_1
+10          JNE         3
+12          SUB         $registry_0
+14          JNE         0
+16          NOPE
+
+
 TODO:
 1. WRITE
 2. CMP
