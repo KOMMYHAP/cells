@@ -1,4 +1,5 @@
 #include "processor/processor_control_block.h"
+#include "processor/processor_instruction.h"
 #include "vm/virtual_machine.h"
 
 namespace {
@@ -223,10 +224,10 @@ TEST_F(ProcedureFixture, Procedure_In1_Out0)
     }
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
     accessor.Write(ProcessorInstruction::Call, id);
-    Tick();
     accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
+    Tick();
     Tick();
     Tick();
     ASSERT_EQ(counter, 1);
@@ -313,7 +314,7 @@ TEST_F(ProcedureFixture, Procedure_In1_Out1)
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 1, 1);
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
     accessor.Write(ProcessorInstruction::Call, id);
     Tick();
     Tick();
@@ -356,7 +357,7 @@ TEST_F(ProcedureFixture, Rollback_IgnoredInput)
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 1, 0);
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 1 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     Tick();
     accessor.Write(ProcessorInstruction::Call, id);
     TestRollback(ProcessorState::ProcedureIgnoreInput);
@@ -372,7 +373,7 @@ TEST_F(ProcedureFixture, Rollback_TooMuchInputRequested)
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 1, 0);
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 1 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     Tick();
     accessor.Write(ProcessorInstruction::Call, id);
     TestRollback(ProcessorState::ProcedureTooMuchInputRequested);

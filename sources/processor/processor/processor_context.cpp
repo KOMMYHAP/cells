@@ -138,3 +138,8 @@ ProcessorControlBlockGuard ProcessorContext::MakeGuard()
 {
     return { _controlBlock };
 }
+
+void ProcessorContext::SetFlag(ProcessorFlags flag, bool value)
+{
+    value ? SetFlag(flag) : ResetFlag(flag);
+}

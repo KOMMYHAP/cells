@@ -1,8 +1,7 @@
 #include "processor.h"
+#include "processor_instruction.h"
 #include "processor_profile_category.h"
 #include "processor_state.h"
-
-#include "instructions/nope.h"
 
 Processor::Processor(uint8_t systemInstructionToPerform)
     : _systemInstructionToPerform(systemInstructionToPerform)
@@ -30,150 +29,284 @@ void Processor::Execute(ProcessorContext& context)
 
 std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorContext& context)
 {
-    using namespace processor::instructions;
-
     assert(context.IsState(ProcessorState::Good));
 
     ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
 
-    const auto [instructionRead, instruction] = context.TryReadMemory<ProcessorInstruction>();
+    const auto [instructionRead, rawInstruction] = context.TryReadMemory<uint8_t>();
     if (!instructionRead) {
         return {};
     }
+    const auto instruction = static_cast<ProcessorInstruction>(rawInstruction);
 
-    switch (instruction) {
-    case ProcessorInstruction::Nope:
-        if (!Nope::Execute(context)) {
-            break;
+    switch (static_cast<ProcessorInstruction>(instruction)) {
+        /// instructions with two operands:
+    case ProcessorInstruction::WriteRegistryRegistry:
+    case ProcessorInstruction::CompareRegistryRegistry:
+    case ProcessorInstruction::AddRegistryRegistry:
+    case ProcessorInstruction::SubtractRegistryRegistry:
+    case ProcessorInstruction::WriteRegistryValue:
+    case ProcessorInstruction::CompareRegistryValue:
+    case ProcessorInstruction::AddRegistryValue:
+    case ProcessorInstruction::SubtractRegistryValue: {
+        const auto [memoryReadSuccess, arg1, arg2] = context.TryReadMemory<uint8_t, uint8_t>();
+        if (!memoryReadSuccess) {
+            return {};
         }
-        if (!context.MoveCommandPointer(Nope::registerInCount)) {
-            break;
+        const TwoOperandsContext instructionContext {
+            instruction,
+            arg1,
+            arg2,
+        };
+        if (!ProcessTwoOperands(instructionContext, context)) {
+            return {};
         }
-        controlBlockGuard.Submit();
-        break;
-    case ProcessorInstruction::Write: {
-        const auto [success, registerIdx, data] = context.TryReadMemory<uint8_t, std::byte>();
-        if (!success) {
-            break;
-        }
-        if (!context.WriteRegistry(registerIdx, data)) {
-            break;
-        }
-        if (!context.MoveCommandPointer(3)) {
-            break;
-        }
-        controlBlockGuard.Submit();
     } break;
-    case ProcessorInstruction::Compare: {
-        const auto [success, registerIdx, valueToTest] = context.TryReadMemory<uint8_t, std::byte>();
-        if (!success) {
-            break;
-        }
-        const auto [registerRead, registerData] = context.ReadRegistry(registerIdx);
-        if (!registerRead) {
-            break;
-        }
-        const ProcessorFlags compareFlag = registerData == valueToTest ? ProcessorFlags::Equal : registerData < valueToTest ? ProcessorFlags::Less
-                                                                                                                            : ProcessorFlags::Greater;
-        context.SetFlag(compareFlag);
-        if (!context.MoveCommandPointer(3)) {
-            break;
-        }
-        controlBlockGuard.Submit();
-    } break;
-    case ProcessorInstruction::Add: {
-        const auto [success, registerIdx, value] = context.TryReadMemory<uint8_t, uint8_t>();
-        if (!success) {
-            break;
-        }
-        const auto [registerRead, registerData] = context.ReadRegistry(registerIdx);
-        if (!registerRead) {
-            break;
-        }
-        const uint8_t newValue = static_cast<uint8_t>(registerData) + value;
-        if (!context.WriteRegistry(registerIdx, static_cast<std::byte>(newValue))) {
-            break;
-        }
-        if (!context.MoveCommandPointer(3)) {
-            break;
-        }
-        controlBlockGuard.Submit();
-    } break;
-    case ProcessorInstruction::Jump: {
-        const auto [success, commandPosition] = context.TryReadMemory<uint8_t>();
-        if (!success) {
-            break;
-        }
-        if (!context.SetCommandPointer(commandPosition)) {
-            break;
-        }
-        controlBlockGuard.Submit();
-    } break;
-    case ProcessorInstruction::JumpIfEqual: {
-        const auto [success, commandPosition] = context.TryReadMemory<uint8_t>();
-        if (!success) {
-            break;
-        }
-        if (context.HasFlag(ProcessorFlags::Equal)) {
-            if (!context.SetCommandPointer(commandPosition)) {
-                break;
-            }
-        } else {
-            if (!context.MoveCommandPointer(2)) {
-                break;
-            }
-        }
-        controlBlockGuard.Submit();
-    } break;
+
+        /// instructions with one operand:
+    case ProcessorInstruction::PushStackRegistry:
+    case ProcessorInstruction::PushStackValue:
+    case ProcessorInstruction::PopStackRegistry:
+    case ProcessorInstruction::Jump:
+    case ProcessorInstruction::JumpIfEqual:
+    case ProcessorInstruction::JumpIfNotEqual:
+    case ProcessorInstruction::JumpIfLess:
+    case ProcessorInstruction::JumpIfLessEqual:
+    case ProcessorInstruction::JumpIfGreater:
+    case ProcessorInstruction::JumpIfGreaterEqual:
     case ProcessorInstruction::Call: {
-        const auto [success, procedureIdx] = context.TryReadMemory<ProcedureId>();
-        if (!success) {
-            break;
+        const auto [memoryReadSuccess, arg] = context.TryReadMemory<uint8_t>();
+        if (!memoryReadSuccess) {
+            return {};
         }
-        if (!context.RunProcedure(procedureIdx)) {
-            break;
+        OneOperandContext instructionContext {
+            instruction,
+            arg,
+        };
+        if (!ProcessOneOperand(instructionContext, context)) {
+            return {};
         }
-        if (!context.MoveCommandPointer(2)) {
-            break;
-        }
-        controlBlockGuard.Submit();
     } break;
-    case ProcessorInstruction::PushStack: {
-        const auto [success, data] = context.TryReadMemory<std::byte>();
-        if (!success) {
-            break;
-        }
-        context.PushStack(data);
-        if (!context.MoveCommandPointer(2)) {
-            break;
-        }
-        controlBlockGuard.Submit();
-    } break;
-    case ProcessorInstruction::PopStack: {
-        const auto [readSuccess, destinationRegistryIdx] = context.TryReadMemory<uint8_t>();
-        if (!readSuccess) {
-            break;
-        }
-        const auto [popSuccess, data] = context.PopStack();
-        if (!popSuccess) {
-            break;
-        }
-        if (!context.WriteRegistry(destinationRegistryIdx, data)) {
-            break;
-        }
-        if (!context.MoveCommandPointer(2)) {
-            break;
-        }
-        controlBlockGuard.Submit();
-    } break;
-    default:
-        context.SetState(ProcessorState::InvalidInstruction);
-        break;
-    }
 
-    if (controlBlockGuard.ShouldRollback()) {
+        /// instructions without operand:
+    case ProcessorInstruction::Nope:
+        if (!context.MoveCommandPointer(1)) {
+            return {};
+        }
+        break;
+    default:
+    case ProcessorInstruction::LastProcessorInstruction:
+        context.SetState(ProcessorState::InvalidInstruction);
         return {};
     }
 
+    controlBlockGuard.Submit();
     return instruction;
+}
+
+bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, ProcessorContext& context)
+{
+    /// Data extraction
+    const uint8_t destinationIdx = instructionContext.operand1;
+    uint8_t sourceData { 0 };
+    const auto [destinationReadSuccess, destinationRawData] = context.ReadRegistry(instructionContext.operand1);
+    if (!destinationReadSuccess) {
+        return false;
+    }
+    const auto destinationData = static_cast<uint8_t>(destinationRawData);
+    switch (instructionContext.instruction) {
+    case ProcessorInstruction::WriteRegistryRegistry:
+    case ProcessorInstruction::CompareRegistryRegistry:
+    case ProcessorInstruction::AddRegistryRegistry:
+    case ProcessorInstruction::SubtractRegistryRegistry: {
+        const auto [sourceReadSuccess, sourceRegistryData] = context.ReadRegistry(instructionContext.operand2);
+        if (!sourceReadSuccess) {
+            return false;
+        }
+        sourceData = static_cast<uint8_t>(sourceRegistryData);
+    } break;
+
+    case ProcessorInstruction::WriteRegistryValue:
+    case ProcessorInstruction::CompareRegistryValue:
+    case ProcessorInstruction::AddRegistryValue:
+    case ProcessorInstruction::SubtractRegistryValue: {
+        const auto [sourceReadSuccess, sourceValueData] = context.TryReadMemory<uint8_t>();
+        if (!sourceReadSuccess) {
+            return false;
+        }
+        sourceData = sourceValueData;
+    } break;
+    default:
+        break;
+    }
+
+    /// Data consumption
+    uint8_t destinationNewData { 0 };
+    switch (instructionContext.instruction) {
+    case ProcessorInstruction::WriteRegistryValue:
+    case ProcessorInstruction::WriteRegistryRegistry:
+        destinationNewData = sourceData;
+        break;
+    case ProcessorInstruction::CompareRegistryValue:
+    case ProcessorInstruction::CompareRegistryRegistry:
+        destinationNewData = destinationData;
+        break;
+    case ProcessorInstruction::AddRegistryValue:
+    case ProcessorInstruction::AddRegistryRegistry:
+        destinationNewData = destinationData + sourceData;
+        break;
+    case ProcessorInstruction::SubtractRegistryValue:
+    case ProcessorInstruction::SubtractRegistryRegistry: {
+        destinationNewData = destinationData - sourceData;
+    } break;
+    default:
+        break;
+    }
+    switch (instructionContext.instruction) {
+    case ProcessorInstruction::CompareRegistryValue:
+    case ProcessorInstruction::CompareRegistryRegistry:
+    case ProcessorInstruction::AddRegistryValue:
+    case ProcessorInstruction::AddRegistryRegistry:
+    case ProcessorInstruction::SubtractRegistryValue:
+    case ProcessorInstruction::SubtractRegistryRegistry: {
+        const FlagsContext flagsContext {
+            instructionContext.instruction,
+            destinationData,
+            sourceData
+        };
+        UpdateFlags(flagsContext, context);
+    } break;
+    default:
+        break;
+    }
+
+    if (!context.WriteRegistry(destinationIdx, std::byte { destinationNewData })) {
+        return false;
+    }
+
+    if (!context.MoveCommandPointer(1 /* instruction */ + 2 /* operand */)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContext, ProcessorContext& context)
+{
+    /// Data extraction
+    uint8_t sourceData { instructionContext.operand1 };
+
+    switch (instructionContext.instruction) {
+    case ProcessorInstruction::PushStackRegistry:
+    case ProcessorInstruction::PopStackRegistry: {
+        const auto [destinationReadSuccess, sourceRegistryData] = context.ReadRegistry(instructionContext.operand1);
+        if (!destinationReadSuccess) {
+            return false;
+        }
+        sourceData = static_cast<uint8_t>(sourceRegistryData);
+    } break;
+    default:
+        break;
+    }
+
+    /// Data consumption
+    switch (instructionContext.instruction) {
+    case ProcessorInstruction::PushStackRegistry:
+    case ProcessorInstruction::PushStackValue:
+        if (!context.PushStack(std::byte { sourceData })) {
+            return false;
+        }
+        break;
+    case ProcessorInstruction::PopStackRegistry: {
+        const auto [popSuccess, data] = context.PopStack();
+        if (!popSuccess) {
+            return false;
+        }
+        const uint8_t registryDestinationIdx = instructionContext.operand1;
+        if (!context.WriteRegistry(registryDestinationIdx, data)) {
+            return false;
+        }
+    } break;
+    case ProcessorInstruction::Call: {
+        const auto procedureIdx = static_cast<ProcedureId>(instructionContext.operand1);
+        if (!context.RunProcedure(procedureIdx)) {
+            return false;
+        }
+    } break;
+
+        /// https://www.felixcloutier.com/x86/jcc
+    case ProcessorInstruction::JumpIfEqual: {
+        const bool shouldJump = context.HasFlag(ProcessorFlags::Zero);
+        if (!shouldJump) {
+            break;
+        }
+    }
+    case ProcessorInstruction::JumpIfNotEqual: {
+        const bool shouldJump = !context.HasFlag(ProcessorFlags::Zero);
+        if (!shouldJump) {
+            break;
+        }
+    }
+    case ProcessorInstruction::JumpIfLess: {
+        const bool shouldJump = context.HasFlag(ProcessorFlags::Sign) != context.HasFlag(ProcessorFlags::Overflow);
+        if (!shouldJump) {
+            break;
+        }
+    }
+    case ProcessorInstruction::JumpIfLessEqual: {
+        const bool shouldJump = context.HasFlag(ProcessorFlags::Zero) || context.HasFlag(ProcessorFlags::Sign) != context.HasFlag(ProcessorFlags::Overflow);
+        if (!shouldJump) {
+            break;
+        }
+    }
+    case ProcessorInstruction::JumpIfGreater: {
+        const bool shouldJump = context.HasFlag(ProcessorFlags::Zero) && context.HasFlag(ProcessorFlags::Sign) == context.HasFlag(ProcessorFlags::Overflow);
+        if (!shouldJump) {
+            break;
+        }
+    }
+    case ProcessorInstruction::JumpIfGreaterEqual: {
+        const bool shouldJump = context.HasFlag(ProcessorFlags::Sign) == context.HasFlag(ProcessorFlags::Overflow);
+        if (!shouldJump) {
+            break;
+        }
+    }
+    case ProcessorInstruction::Jump: {
+        const uint8_t commandPointer = instructionContext.operand1;
+        return context.SetCommandPointer(commandPointer);
+    }
+    default:
+        // Unknown instruction. Seems like a new instruction was added to ProcessInstruction, but wasn't processed here.
+        assert(false);
+        return false;
+    }
+
+    return context.MoveCommandPointer(1 /* instruction */ + 1 /* operand */);
+}
+
+void Processor::UpdateFlags(FlagsContext flagsContext, ProcessorContext& context)
+{
+    int result { 0 };
+    switch (flagsContext.instruction) {
+    case ProcessorInstruction::CompareRegistryValue:
+    case ProcessorInstruction::CompareRegistryRegistry:
+    case ProcessorInstruction::SubtractRegistryValue:
+    case ProcessorInstruction::SubtractRegistryRegistry:
+        result = flagsContext.operand1 - flagsContext.operand2;
+        break;
+    case ProcessorInstruction::AddRegistryValue:
+    case ProcessorInstruction::AddRegistryRegistry:
+        result = flagsContext.operand1 + flagsContext.operand2;
+        break;
+    default:
+        // unknown instruction
+        assert(false);
+        return;
+    }
+
+    context.SetFlag(ProcessorFlags::Zero, result == 0);
+    context.SetFlag(ProcessorFlags::Carry, result >= 0 && result <= 255);
+    context.SetFlag(ProcessorFlags::Overflow, !(result >= -128 && result <= 127));
+    context.SetFlag(ProcessorFlags::Sign, result > 0);
+    context.SetFlag(ProcessorFlags::Parity, result % 2 == 0);
 }

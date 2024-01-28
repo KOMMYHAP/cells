@@ -20,6 +20,7 @@ public:
     bool MoveCommandPointer(uint8_t offset);
 
     bool HasFlag(ProcessorFlags flag) const;
+    void SetFlag(ProcessorFlags flag, bool value);
     void SetFlag(ProcessorFlags flag);
     void ResetFlag(ProcessorFlags flag);
 

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "processor/instructions/instruction_list.h"
 #include "processor_state.h"
 
 enum class ProcessorFlags : uint8_t {
-    None = 1 << 0,
-    Equal = 1 << 1,
-    Less = 1 << 2,
-    Greater = 1 << 3
+    Zero = 1 << 0,
+    Sign = 1 << 1,
+    Overflow = 1 << 2,
+    Carry = 1 << 3,
+    Parity = 1 << 4
 };
 
 constexpr uint8_t ProcessorRegistryCount = 4;

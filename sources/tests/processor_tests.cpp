@@ -1,4 +1,5 @@
 #include "processor/processor_control_block.h"
+#include "processor/processor_instruction.h"
 #include "vm/virtual_machine.h"
 
 namespace {
@@ -134,9 +135,9 @@ TEST_F(ProcessorFixture, Processor_StackOverflow)
 {
     auto accessor = GetMemory();
     for (uint8_t i = 0; i < ProcessorStackSize; ++i) {
-        accessor.Write(ProcessorInstruction::PushStack, std::byte { 1 });
+        accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     }
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 1 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
 
     for (uint8_t i = 0; i < ProcessorStackSize; ++i) {
         Tick();
@@ -151,7 +152,7 @@ TEST_F(ProcessorFixture, Processor_StackOverflow)
 TEST_F(ProcessorFixture, Processor_StackUnderflow)
 {
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PopStack, std::uint8_t { 0 });
+    accessor.Write(ProcessorInstruction::PopStackRegistry, std::uint8_t { 0 });
     {
         auto _ = MakeScopeWithoutAssert();
         Tick();
@@ -162,8 +163,8 @@ TEST_F(ProcessorFixture, Processor_StackUnderflow)
 TEST_F(ProcessorFixture, Processor_PopStackToInvalidRegister)
 {
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 42 });
-    accessor.Write(ProcessorInstruction::PopStack, std::uint8_t { ProcessorRegistryCount });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PopStackRegistry, std::uint8_t { ProcessorRegistryCount });
 
     Tick();
     {
@@ -178,8 +179,8 @@ TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick)
     MakeVmWithCustomSystemInstructionPerTick(2);
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 42 });
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 24 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 24 });
 
     ASSERT_EQ(AccessControlBlock().stackOffset, 0);
     Tick();
@@ -191,7 +192,7 @@ TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick_WithJump)
     MakeVmWithCustomSystemInstructionPerTick(3);
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStack, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
     accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
     accessor.Write(ProcessorInstruction::Nope);
 
