@@ -54,7 +54,7 @@ bool SpawnSystem::MakeRandomUnit(CellId id, uint16_t lengthBytes)
     {
         using Step = uint64_t;
         std::uniform_int_distribution<Step> distribution {};
-        for (; it != end; it += sizeof(Step)) {
+        for (; it < end; it += sizeof(Step)) {
             const Step value = distribution(common::GetRandomEngine());
             void* destination = it;
             const void* source = &value;
@@ -62,10 +62,10 @@ bool SpawnSystem::MakeRandomUnit(CellId id, uint16_t lengthBytes)
         }
     }
     {
-        using Unit = uint16_t; // minimal available
+        using RandomUnit = uint16_t; // minimal available in uniform_int_distribution
         using Step = uint8_t;
         std::uniform_int_distribution<RandomUnit> distribution {};
-        for (; it != end; ++it) {
+        for (; it < end; ++it) {
             const Step value = distribution(common::GetRandomEngine()) % sizeof(Step);
             void* destination = it;
             const void* source = &value;

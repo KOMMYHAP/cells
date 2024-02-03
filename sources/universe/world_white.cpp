@@ -17,7 +17,8 @@ WorldWhite::WorldWhite(Config&& config)
     , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
 {
     RegisterProcedures();
-    MakeTestField(config.fullnessPercent);
+    //    MakePatrolUnits(config.fullnessPercent);
+    MakeRandomField(config.fullnessPercent);
 }
 
 void WorldWhite::Tick()
@@ -47,23 +48,14 @@ WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_
     };
 }
 
-void WorldWhite::MakeTestField(uint8_t fullnessPercent)
+void WorldWhite::MakePatrolUnits(uint8_t fullnessPercent)
 {
     const uint16_t moveCommandsCount = std::min<uint16_t>(_positionSystem.GetWidth(), 3);
-
-    std::vector<sf::Vector2<int16_t>> positions;
-    positions.reserve(_idSystem.GetCellsCountLimit());
-    for (uint16_t x { 0 }; x < _positionSystem.GetWidth(); ++x) {
-        for (uint16_t y { 0 }; y < _positionSystem.GetHeight(); ++y) {
-            positions.emplace_back(x, y);
-        }
-    }
-    std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
-
-    const auto countLimit = static_cast<uint32_t>(std::round(positions.size() * (static_cast<float>(fullnessPercent) / 100)));
+    const auto countLimit = static_cast<uint32_t>(_idSystem.GetCellsCountLimit() * (static_cast<float>(fullnessPercent) / 100));
     //    const auto countLimit = 1;
+    std::vector<CellPosition> positions = GenerateRandomPositions(countLimit);
 
-    for (const auto& position : std::span(positions).first(countLimit)) {
+    for (const CellPosition& position : positions) {
         const CellId id = _idSystem.Create();
         _positionSystem.Set(id, position);
         _typeSystem.Set(id, CellType::Unit);
@@ -94,4 +86,47 @@ SimulationVirtualMachine::Config WorldWhite::MakeSimulationVmConfig(WorldWhite* 
         8,
         std::move(watcher)
     };
+}
+
+void WorldWhite::MakeRandomField(uint8_t fullnessPercent)
+{
+    const uint16_t moveCommandsCount = std::min<uint16_t>(_positionSystem.GetWidth(), 3);
+    const auto countLimit = static_cast<uint32_t>(_idSystem.GetCellsCountLimit() * (static_cast<float>(fullnessPercent) / 100));
+    //    const auto countLimit = 1;
+    std::vector<CellPosition> positions = GenerateRandomPositions(countLimit);
+
+    for (const CellPosition& position : positions) {
+        const CellId id = _idSystem.Create();
+        _positionSystem.Set(id, position);
+        _typeSystem.Set(id, CellType::Unit);
+        _cellFactory.MakeRandomUnit(id, moveCommandsCount);
+    }
+}
+
+std::vector<CellPosition> WorldWhite::GenerateRandomPositions(uint16_t limit) const
+{
+    std::vector<CellPosition> positions;
+    if (limit == 0) {
+        return positions;
+    }
+
+    positions.reserve(limit);
+    for (int16_t y { 0 }; y < _positionSystem.GetHeight(); ++y) {
+        for (int16_t x { 0 }; x < _positionSystem.GetWidth(); ++x) {
+            const CellPosition position { x, y };
+            const CellId id = _positionSystem.Find(position);
+            if (id != CellId::Invalid) {
+                continue;
+            }
+            positions.emplace_back(position);
+            if (positions.size() >= limit) {
+                break;
+            }
+        }
+        if (positions.size() >= limit) {
+            break;
+        }
+    }
+    std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
+    return positions;
 }

@@ -32,7 +32,10 @@ private:
     static SimulationVirtualMachine::Config MakeSimulationVmConfig(WorldWhite* world);
 
     void RegisterProcedures();
-    void MakeTestField(uint8_t fullnessPercent);
+
+    std::vector<CellPosition> GenerateRandomPositions(uint16_t limit) const;
+    void MakePatrolUnits(uint8_t fullnessPercent);
+    void MakeRandomField(uint8_t fullnessPercent);
 
     IdSystem _idSystem;
     BrainSystem _brainSystem;
