@@ -11,6 +11,7 @@ public:
     SpawnSystem(SimulationVirtualMachine& vm, BrainSystem& brainSystem);
 
     bool MakePatrolUnit(CellId id, uint16_t length);
+    bool MakeRandomUnit(CellId id, uint16_t lengthBytes);
 
 private:
     bool InitMemory(ProcessorMemory& memory);

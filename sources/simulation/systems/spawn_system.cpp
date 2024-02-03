@@ -5,6 +5,7 @@
 #include "processor/processor_control_block.h"
 #include "processor/processor_instruction.h"
 #include "processor/processor_memory.h"
+#include "random.h"
 #include "systems/brain_system.h"
 #include "systems/simulation_virtual_machine.h"
 
@@ -32,6 +33,45 @@ bool SpawnSystem::MakePatrolUnit(CellId id, uint16_t length)
         memory.Write(ProcessorInstruction::Call, move);
     }
     memory.Write(ProcessorInstruction::Jump, std::byte { 0 });
+
+    return true;
+}
+
+bool SpawnSystem::MakeRandomUnit(CellId id, uint16_t lengthBytes)
+{
+    ProcessorMemory memory = _brainSystem.AccessMemory(id);
+    if (!InitMemory(memory)) {
+        return false;
+    }
+    if (lengthBytes > CellBrainLimit) {
+        return false;
+    }
+    std::span<std::byte> rawBrain = memory.MakeSubSpan(0);
+    std::byte* begin = rawBrain.data();
+    std::byte* end = rawBrain.data() + rawBrain.size();
+    std::byte* it = begin;
+
+    {
+        using Step = uint64_t;
+        std::uniform_int_distribution<Step> distribution {};
+        for (; it != end; it += sizeof(Step)) {
+            const Step value = distribution(common::GetRandomEngine());
+            void* destination = it;
+            const void* source = &value;
+            std::memcpy(destination, source, sizeof(Step));
+        }
+    }
+    {
+        using Unit = uint16_t; // minimal available
+        using Step = uint8_t;
+        std::uniform_int_distribution<RandomUnit> distribution {};
+        for (; it != end; ++it) {
+            const Step value = distribution(common::GetRandomEngine()) % sizeof(Step);
+            void* destination = it;
+            const void* source = &value;
+            std::memcpy(destination, source, sizeof(Step));
+        }
+    }
 
     return true;
 }
