@@ -2,14 +2,8 @@
 #include "processor/processor_control_block.h"
 #include "processor/processor_memory.h"
 
-CrossoverAlgorithm::CrossoverAlgorithm(uint8_t kPoints)
-    : _kPoints(kPoints)
-{
-}
 CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBrain& parentRight)
 {
-    // todo: check, test, refactor
-
     ProcessorConstMemory memoryLeft { parentLeft.data };
     if (!memoryLeft.HasBytes<ProcessorControlBlock>()) {
         assert(false);
@@ -26,7 +20,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
     memoryRight.Move<ProcessorControlBlock>();
     auto blobRight = memoryRight.MakeSubSpan(0);
 
-    const uint8_t point = 10;
+    const uint8_t point = _point;
 
     CellBrain brain {};
     ProcessorMemory memory { brain.data };
@@ -45,6 +39,11 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
     }
     auto blobOut = memory.MakeSubSpan(0);
     std::memcpy(blobOut.data(), blobLeft.data(), point);
-    std::memcpy(blobOut.data() + point, blobRight.data(), blobOut.size() - point);
+    std::memcpy(blobOut.data() + point, blobRight.data() + point, blobOut.size() - point);
     return brain;
+}
+
+CrossoverAlgorithm::CrossoverAlgorithm(uint8_t point)
+     :_point(point)
+{
 }
