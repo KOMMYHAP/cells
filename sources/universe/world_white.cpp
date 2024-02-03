@@ -3,22 +3,20 @@
 #include <SFML/Graphics.hpp>
 
 #include "procedures/move_procedure.h"
-#include "random.h"
 
 WorldWhite::WorldWhite(Config&& config)
     : _idSystem(config.width * config.height)
     , _brainSystem(_idSystem.GetCellsCountLimit())
     , _typeSystem(_idSystem.GetCellsCountLimit())
     , _positionSystem(config.width, config.height)
-    , _cellFactory(_simulationVm, _brainSystem)
     , _graveyardSystem(_idSystem.GetCellsCountLimit(), _idSystem, _typeSystem, _positionSystem)
     , _healthSystem(_idSystem.GetCellsCountLimit(), _graveyardSystem)
     , _simulationVm(MakeSimulationVmConfig(this))
+    , _cellFactory(_simulationVm, _brainSystem)
+    , _spawnSystem(MakeSpawnSystemConfig(config.fullnessPercent, SpawnSystem::Policy::RandomUnit))
     , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
 {
     RegisterProcedures();
-    //    MakePatrolUnits(config.fullnessPercent);
-    MakeRandomField(config.fullnessPercent);
 }
 
 void WorldWhite::Tick()
@@ -30,6 +28,9 @@ void WorldWhite::Tick()
 
     // Cleanup world systems from dead cells.
     _graveyardSystem.Cleanup();
+
+    // Spawn more cells.
+    _spawnSystem.Tick();
 }
 
 void WorldWhite::RegisterProcedures()
@@ -46,21 +47,6 @@ WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_
         { sf::Color::Magenta, sf::Color::Green, sf::Color::Black, gray },
         static_cast<uint8_t>(cellSize)
     };
-}
-
-void WorldWhite::MakePatrolUnits(uint8_t fullnessPercent)
-{
-    const uint16_t moveCommandsCount = std::min<uint16_t>(_positionSystem.GetWidth(), 3);
-    const auto countLimit = static_cast<uint32_t>(_idSystem.GetCellsCountLimit() * (static_cast<float>(fullnessPercent) / 100));
-    //    const auto countLimit = 1;
-    std::vector<CellPosition> positions = GenerateRandomPositions(countLimit);
-
-    for (const CellPosition& position : positions) {
-        const CellId id = _idSystem.Create();
-        _positionSystem.Set(id, position);
-        _typeSystem.Set(id, CellType::Unit);
-        _cellFactory.MakePatrolUnit(id, moveCommandsCount);
-    }
 }
 
 void WorldWhite::Render(sf::RenderTarget& target, sf::RenderStates states)
@@ -88,45 +74,15 @@ SimulationVirtualMachine::Config WorldWhite::MakeSimulationVmConfig(WorldWhite* 
     };
 }
 
-void WorldWhite::MakeRandomField(uint8_t fullnessPercent)
+SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent, SpawnSystem::Policy policy)
 {
-    const uint16_t moveCommandsCount = std::min<uint16_t>(_positionSystem.GetWidth(), 3);
-    const auto countLimit = static_cast<uint32_t>(_idSystem.GetCellsCountLimit() * (static_cast<float>(fullnessPercent) / 100));
-    //    const auto countLimit = 1;
-    std::vector<CellPosition> positions = GenerateRandomPositions(countLimit);
-
-    for (const CellPosition& position : positions) {
-        const CellId id = _idSystem.Create();
-        _positionSystem.Set(id, position);
-        _typeSystem.Set(id, CellType::Unit);
-        _cellFactory.MakeRandomUnit(id, moveCommandsCount);
-    }
-}
-
-std::vector<CellPosition> WorldWhite::GenerateRandomPositions(uint16_t limit) const
-{
-    std::vector<CellPosition> positions;
-    if (limit == 0) {
-        return positions;
-    }
-
-    positions.reserve(limit);
-    for (int16_t y { 0 }; y < _positionSystem.GetHeight(); ++y) {
-        for (int16_t x { 0 }; x < _positionSystem.GetWidth(); ++x) {
-            const CellPosition position { x, y };
-            const CellId id = _positionSystem.Find(position);
-            if (id != CellId::Invalid) {
-                continue;
-            }
-            positions.emplace_back(position);
-            if (positions.size() >= limit) {
-                break;
-            }
-        }
-        if (positions.size() >= limit) {
-            break;
-        }
-    }
-    std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
-    return positions;
+    const auto targetPopulationSize = static_cast<uint32_t>(round(fullnessPercent * static_cast<float>(_idSystem.GetCellsCountLimit()) / 100.0f));
+    return {
+        _cellFactory,
+        _positionSystem,
+        _idSystem,
+        _typeSystem,
+        targetPopulationSize,
+        policy
+    };
 }

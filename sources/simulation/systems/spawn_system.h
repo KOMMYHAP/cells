@@ -1,21 +1,37 @@
 #pragma once
 
-#include "components/cell_id.h"
-
-class SimulationVirtualMachine;
-class BrainSystem;
-class ProcessorMemory;
+class PositionSystem;
+class CellFactory;
+class IdSystem;
+class TypeSystem;
+enum class CellId : uint32_t;
 
 class SpawnSystem {
 public:
-    SpawnSystem(SimulationVirtualMachine& vm, BrainSystem& brainSystem);
+    enum class Policy {
+        PatrolUnit,
+        RandomUnit
+    };
+    struct Config {
+        CellFactory& factory;
+        PositionSystem& positionSystem;
+        IdSystem& idSystem;
+        TypeSystem& typeSystem;
+        uint32_t targetPopulationSize;
+        Policy policy;
+    };
+    SpawnSystem(Config&& config);
 
-    bool MakePatrolUnit(CellId id, uint16_t length);
-    bool MakeRandomUnit(CellId id, uint16_t lengthBytes);
+    void Tick();
 
 private:
-    bool InitMemory(ProcessorMemory& memory);
+    void SpawnN(uint32_t cellsCount);
+    bool SpawnUnit(CellId id);
 
-    SimulationVirtualMachine& _vm;
-    BrainSystem& _brainSystem;
+    CellFactory& _factory;
+    PositionSystem& _positionSystem;
+    IdSystem& _idSystem;
+    TypeSystem& _typeSystem;
+    uint32_t _targetPopulationSize { 0 };
+    Policy _spawnPolicy { Policy::RandomUnit };
 };

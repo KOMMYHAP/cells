@@ -2,10 +2,11 @@
 
 #include "components/cell_id.h"
 #include "components/cell_position.h"
-#include "position_grid.h"
 #include "procedures/direction.h"
 
 class PositionSystem {
+    using PositionType = decltype(CellPosition::x);
+
 public:
     PositionSystem(uint32_t width, uint32_t height);
 
@@ -15,10 +16,13 @@ public:
     CellId Find(CellPosition position) const;
 
     template <class Func>
-    void Iterate(Func&& func);
+        requires std::invocable<Func, CellPosition>
+    void Iterate(Func&& func) const;
 
-    auto GetWidth() const { return _grid.GetWidth(); }
-    auto GetHeight() const { return _grid.GetHeight(); }
+    std::vector<CellPosition> CollectFreePositions() const;
+
+    auto GetWidth() const { return _width; }
+    auto GetHeight() const { return _height; }
 
     bool IsNeighbourFor(CellId lhs, CellId rhs) const;
     bool IsNeighbourFor(CellPosition lhs, CellPosition rhs) const;
@@ -28,8 +32,14 @@ private:
     void Move(CellId id, CellPosition nextPosition);
     void Reset(CellId id);
 
+    uint32_t ToGridIndex(CellPosition position) const;
+    uint32_t TryGetGridIndex(CellPosition position) const;
+
+    const PositionType _width;
+    const PositionType _height;
+
     std::vector<CellPosition> _positions;
-    PositionGrid _grid;
+    std::vector<CellId> _grid;
 };
 
 #include "position_system.hpp"

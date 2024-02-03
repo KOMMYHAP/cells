@@ -1,90 +1,59 @@
 #include "spawn_system.h"
 
-#include "components/procedure_type.h"
-#include "procedures/direction.h"
-#include "processor/processor_control_block.h"
-#include "processor/processor_instruction.h"
-#include "processor/processor_memory.h"
+#include "components/cell_brain.h"
+#include "components/cell_id.h"
+#include "components/cell_type.h"
 #include "random.h"
-#include "systems/brain_system.h"
-#include "systems/simulation_virtual_machine.h"
+#include "systems/cell_factory.h"
+#include "systems/id_system.h"
+#include "systems/position_system.h"
+#include "systems/type_system.h"
 
-SpawnSystem::SpawnSystem(SimulationVirtualMachine& vm, BrainSystem& brainSystem)
-    : _vm(vm)
-    , _brainSystem(brainSystem)
+SpawnSystem::SpawnSystem(SpawnSystem::Config&& config)
+    : _factory(config.factory)
+    , _positionSystem(config.positionSystem)
+    , _targetPopulationSize(config.targetPopulationSize)
+    , _idSystem(config.idSystem)
+    , _typeSystem(config.typeSystem)
+    , _spawnPolicy(config.policy)
 {
 }
 
-bool SpawnSystem::MakePatrolUnit(CellId id, uint16_t length)
+void SpawnSystem::Tick()
 {
-    ProcessorMemory memory = _brainSystem.AccessMemory(id);
-    if (!InitMemory(memory)) {
-        return false;
+    if (_idSystem.GetCellsCount() >= _targetPopulationSize) {
+        return;
     }
 
-    const ProcedureId move = _vm.GetProcedureId(ProcedureType::Move);
-
-    for (int i = 0; i < length; ++i) {
-        memory.Write(ProcessorInstruction::PushStackValue, Direction::Right);
-        memory.Write(ProcessorInstruction::Call, move);
-    }
-    for (int i = 0; i < length; ++i) {
-        memory.Write(ProcessorInstruction::PushStackValue, Direction::Left);
-        memory.Write(ProcessorInstruction::Call, move);
-    }
-    memory.Write(ProcessorInstruction::Jump, std::byte { 0 });
-
-    return true;
+    SpawnN(_targetPopulationSize - _idSystem.GetCellsCount());
 }
 
-bool SpawnSystem::MakeRandomUnit(CellId id, uint16_t lengthBytes)
+void SpawnSystem::SpawnN(uint32_t cellsCount)
 {
-    ProcessorMemory memory = _brainSystem.AccessMemory(id);
-    if (!InitMemory(memory)) {
-        return false;
-    }
-    if (lengthBytes > CellBrainLimit) {
-        return false;
-    }
-    std::span<std::byte> rawBrain = memory.MakeSubSpan(0);
-    std::byte* begin = rawBrain.data();
-    std::byte* end = rawBrain.data() + rawBrain.size();
-    std::byte* it = begin;
-
-    {
-        using Step = uint64_t;
-        std::uniform_int_distribution<Step> distribution {};
-        for (; it < end; it += sizeof(Step)) {
-            const Step value = distribution(common::GetRandomEngine());
-            void* destination = it;
-            const void* source = &value;
-            std::memcpy(destination, source, sizeof(Step));
-        }
-    }
-    {
-        using RandomUnit = uint16_t; // minimal available in uniform_int_distribution
-        using Step = uint8_t;
-        std::uniform_int_distribution<RandomUnit> distribution {};
-        for (; it < end; ++it) {
-            const Step value = distribution(common::GetRandomEngine()) % sizeof(Step);
-            void* destination = it;
-            const void* source = &value;
-            std::memcpy(destination, source, sizeof(Step));
-        }
+    std::vector<CellPosition> positions = _positionSystem.CollectFreePositions();
+    std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
+    if (positions.size() > cellsCount) {
+        positions.resize(cellsCount);
     }
 
-    return true;
+    for (const CellPosition& position : positions) {
+        const CellId id = _idSystem.Create();
+        _positionSystem.Set(id, position);
+        _typeSystem.Set(id, CellType::Unit);
+
+        const bool created = SpawnUnit(id);
+        assert(created);
+    }
 }
 
-bool SpawnSystem::InitMemory(ProcessorMemory& memory)
+bool SpawnSystem::SpawnUnit(CellId id)
 {
-    ProcessorControlBlock controlBlock {
-        static_cast<uint8_t>(ProcessorState::Good),
-        static_cast<uint8_t>(0),
-        0,
-        {},
-        0,
-        {}
-    };
-    return memory.TryWrite(controlBlock);
+    if (_spawnPolicy == Policy::RandomUnit) {
+        return _factory.MakeRandomUnit(id, CellBrainLimit);
+    }
+    if (_spawnPolicy == Policy::PatrolUnit) {
+        const uint16_t moveCommandsCount = std::min<uint16_t>(_positionSystem.GetWidth(), 3);
+        return _factory.MakePatrolUnit(id, moveCommandsCount);
+    }
+    return false;
 }

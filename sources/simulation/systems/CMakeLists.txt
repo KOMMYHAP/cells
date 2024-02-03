@@ -1,7 +1,6 @@
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         position_system.cpp
-        position_grid.cpp
         brain_system.cpp
         type_system.cpp
         health_system.cpp
@@ -9,6 +8,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         simulation_virtual_machine.cpp
         spawn_system.cpp
         graveyard_system.cpp
+        cell_factory.cpp
 )
 
 
@@ -16,8 +16,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 target_sources(${PROJECT_NAME} PUBLIC
         position_system.h
         position_system.hpp
-        position_grid.h
-        position_grid.hpp
         id_system.h
         id_system.hpp
         brain_system.h
@@ -27,4 +25,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         simulation_virtual_machine.hpp
         spawn_system.h
         graveyard_system.h
+        cell_factory.h
 )

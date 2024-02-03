@@ -1,6 +1,7 @@
 #pragma once
 
 #include "systems/brain_system.h"
+#include "systems/cell_factory.h"
 #include "systems/graveyard_system.h"
 #include "systems/health_system.h"
 #include "systems/id_system.h"
@@ -29,21 +30,19 @@ public:
 
 private:
     static WorldRender::Config MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader);
+    SpawnSystem::Config MakeSpawnSystemConfig(float fullnessPercent, SpawnSystem::Policy policy);
     static SimulationVirtualMachine::Config MakeSimulationVmConfig(WorldWhite* world);
 
     void RegisterProcedures();
-
-    std::vector<CellPosition> GenerateRandomPositions(uint16_t limit) const;
-    void MakePatrolUnits(uint8_t fullnessPercent);
-    void MakeRandomField(uint8_t fullnessPercent);
 
     IdSystem _idSystem;
     BrainSystem _brainSystem;
     TypeSystem _typeSystem;
     PositionSystem _positionSystem;
-    SpawnSystem _cellFactory;
     GraveyardSystem _graveyardSystem;
     HealthSystem _healthSystem;
     SimulationVirtualMachine _simulationVm;
+    CellFactory _cellFactory;
+    SpawnSystem _spawnSystem;
     WorldRender _render;
 };
