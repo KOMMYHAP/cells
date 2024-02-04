@@ -1,7 +1,5 @@
 #include "world_white.h"
 
-#include <SFML/Graphics.hpp>
-
 #include "procedures/move_procedure.h"
 
 WorldWhite::WorldWhite(Config&& config)
@@ -12,11 +10,15 @@ WorldWhite::WorldWhite(Config&& config)
     , _graveyardSystem(_idSystem.GetCellsCountLimit(), _idSystem, _typeSystem, _positionSystem)
     , _healthSystem(_idSystem.GetCellsCountLimit(), _graveyardSystem)
     , _simulationVm(MakeSimulationVmConfig(this))
-    , _cellFactory(_simulationVm, _brainSystem)
-    , _spawnSystem(MakeSpawnSystemConfig(config.fullnessPercent, SpawnSystem::Policy::RandomUnit))
+    , _spawnSystem(MakeSpawnSystemConfig(config.fullnessPercent))
     , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
+    , _selectionSystem(_brainSystem, _idSystem, 1, 10)
+    , _patrolCellFactory(_simulationVm, 10)
+    , _randomCellFactory()
 {
     RegisterProcedures();
+
+    _spawnSystem.SetCellFactory(_randomCellFactory);
 }
 
 void WorldWhite::Tick()
@@ -29,8 +31,18 @@ void WorldWhite::Tick()
     // Cleanup world systems from dead cells.
     _graveyardSystem.Cleanup();
 
-    // Spawn more cells.
-    _spawnSystem.Tick();
+    // Spawn more if needed
+    const uint32_t aliveCellsCount = _idSystem.GetCellsCount();
+    if (aliveCellsCount == 0) {
+        _selectionSystem.Restart();
+        Respawn();
+    } else {
+        SelectionSystem::Result selectionResult = _selectionSystem.TickGeneration();
+        if (selectionResult.shouldRespawn) {
+            _spawnSystem.SetCellFactory(*selectionResult.cellFactory);
+            Respawn();
+        }
+    }
 }
 
 void WorldWhite::RegisterProcedures()
@@ -74,15 +86,24 @@ SimulationVirtualMachine::Config WorldWhite::MakeSimulationVmConfig(WorldWhite* 
     };
 }
 
-SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent, SpawnSystem::Policy policy)
+SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent)
 {
     const auto targetPopulationSize = static_cast<uint32_t>(round(fullnessPercent * static_cast<float>(_idSystem.GetCellsCountLimit()) / 100.0f));
     return {
-        _cellFactory,
         _positionSystem,
         _idSystem,
         _typeSystem,
+        _brainSystem,
         targetPopulationSize,
-        policy
     };
+}
+
+void WorldWhite::Respawn()
+{
+    _idSystem.Iterate([&](const CellId id) {
+        _graveyardSystem.Bury(id);
+    });
+    _graveyardSystem.Cleanup();
+
+    _spawnSystem.TryToSpawn();
 }

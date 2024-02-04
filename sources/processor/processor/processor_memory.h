@@ -30,7 +30,7 @@ public:
 
     bool HasBytes(uint8_t count) const;
 
-    std::span<Unit> MakeSubSpan(uint8_t offset) const;
+    std::span<Unit> MakeSpan(uint8_t offset = 0) const;
 
 protected:
     std::span<Unit> _memory;

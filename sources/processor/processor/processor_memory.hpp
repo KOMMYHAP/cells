@@ -66,7 +66,7 @@ MemoryBase<Unit>::MemoryBase(std::span<Unit> memory)
 }
 
 template <class Unit>
-std::span<Unit> MemoryBase<Unit>::MakeSubSpan(uint8_t offset) const
+std::span<Unit> MemoryBase<Unit>::MakeSpan(uint8_t offset /*= 0*/) const
 {
     return _memory.subspan(offset);
 }

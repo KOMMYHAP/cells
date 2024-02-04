@@ -25,7 +25,7 @@ void Simulation::Ticks(uint32_t ticks)
 
 void Simulation::ProcessTick()
 {
-    common::ProfileScope tickProfileScope { "Tick", SimulationProfileCategory };
+    common::ProfileScope tickProfileScope { "TickGeneration", SimulationProfileCategory };
     sf::Clock clock;
     _world.Tick();
     _tickCounter.AddSample(clock.getElapsedTime().asSeconds());

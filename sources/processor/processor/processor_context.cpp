@@ -51,7 +51,7 @@ bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
         return false;
     }
     _controlBlock.nextCommand = nextCommand;
-    _memory = ProcessorMemory { _initialMemory.MakeSubSpan(_controlBlock.nextCommand) };
+    _memory = ProcessorMemory { _initialMemory.MakeSpan(_controlBlock.nextCommand) };
     return true;
 }
 

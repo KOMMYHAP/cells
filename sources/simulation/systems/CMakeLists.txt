@@ -8,7 +8,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         simulation_virtual_machine.cpp
         spawn_system.cpp
         graveyard_system.cpp
-        cell_factory.cpp
+        selection_system.cpp
 )
 
 
@@ -25,5 +25,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         simulation_virtual_machine.hpp
         spawn_system.h
         graveyard_system.h
-        cell_factory.h
+        selection_system.h
 )

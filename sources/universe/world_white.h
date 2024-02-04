@@ -1,11 +1,13 @@
 #pragma once
 
+#include "cell_factories/patrol_cell_factory.h"
+#include "cell_factories/random_cell_factory.h"
 #include "systems/brain_system.h"
-#include "systems/cell_factory.h"
 #include "systems/graveyard_system.h"
 #include "systems/health_system.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
+#include "systems/selection_system.h"
 #include "systems/simulation_virtual_machine.h"
 #include "systems/spawn_system.h"
 #include "systems/type_system.h"
@@ -30,10 +32,11 @@ public:
 
 private:
     static WorldRender::Config MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader);
-    SpawnSystem::Config MakeSpawnSystemConfig(float fullnessPercent, SpawnSystem::Policy policy);
+    SpawnSystem::Config MakeSpawnSystemConfig(float fullnessPercent);
     static SimulationVirtualMachine::Config MakeSimulationVmConfig(WorldWhite* world);
 
     void RegisterProcedures();
+    void Respawn();
 
     IdSystem _idSystem;
     BrainSystem _brainSystem;
@@ -42,7 +45,10 @@ private:
     GraveyardSystem _graveyardSystem;
     HealthSystem _healthSystem;
     SimulationVirtualMachine _simulationVm;
-    CellFactory _cellFactory;
     SpawnSystem _spawnSystem;
     WorldRender _render;
+    SelectionSystem _selectionSystem;
+
+    PatrolCellFactory _patrolCellFactory;
+    RandomCellFactory _randomCellFactory;
 };

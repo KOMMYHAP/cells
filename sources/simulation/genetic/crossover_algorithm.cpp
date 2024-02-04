@@ -10,7 +10,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
         return {};
     }
     memoryLeft.Move<ProcessorControlBlock>();
-    auto blobLeft = memoryLeft.MakeSubSpan(0);
+    auto blobLeft = memoryLeft.MakeSpan(0);
 
     ProcessorConstMemory memoryRight { parentRight.data };
     if (!memoryRight.HasBytes<ProcessorControlBlock>()) {
@@ -18,7 +18,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
         return {};
     }
     memoryRight.Move<ProcessorControlBlock>();
-    auto blobRight = memoryRight.MakeSubSpan(0);
+    auto blobRight = memoryRight.MakeSpan(0);
 
     const uint8_t point = _point;
 
@@ -37,7 +37,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
         assert(false);
         return {};
     }
-    auto blobOut = memory.MakeSubSpan(0);
+    auto blobOut = memory.MakeSpan(0);
     std::memcpy(blobOut.data(), blobLeft.data(), point);
     std::memcpy(blobOut.data() + point, blobRight.data() + point, blobOut.size() - point);
     return brain;

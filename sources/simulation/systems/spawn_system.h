@@ -1,37 +1,36 @@
 #pragma once
 
 class PositionSystem;
-class CellFactory;
+class BrainSystem;
 class IdSystem;
 class TypeSystem;
+class ICellFactory;
 enum class CellId : uint32_t;
 
 class SpawnSystem {
 public:
-    enum class Policy {
-        PatrolUnit,
-        RandomUnit
-    };
     struct Config {
-        CellFactory& factory;
         PositionSystem& positionSystem;
         IdSystem& idSystem;
         TypeSystem& typeSystem;
-        uint32_t targetPopulationSize;
-        Policy policy;
+        BrainSystem& brainSystem;
+        uint32_t populationSize;
     };
     SpawnSystem(Config&& config);
 
-    void Tick();
+    void TryToSpawn();
+    void SetCellFactory(ICellFactory& factory);
 
 private:
     void SpawnN(uint32_t cellsCount);
     bool SpawnUnit(CellId id);
 
-    CellFactory& _factory;
+    void DebugDumpAliveCells();
+
     PositionSystem& _positionSystem;
     IdSystem& _idSystem;
     TypeSystem& _typeSystem;
+    BrainSystem& _brainSystem;
+    ICellFactory* _cellFactory { nullptr };
     uint32_t _targetPopulationSize { 0 };
-    Policy _spawnPolicy { Policy::RandomUnit };
 };
