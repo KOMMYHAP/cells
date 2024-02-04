@@ -44,4 +44,5 @@ void GraveyardSystem::Cleanup()
     }
 
     _graveyard.clear();
+    std::fill(_graveyardFlags.begin(), _graveyardFlags.end(), false);
 }
