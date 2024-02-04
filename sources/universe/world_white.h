@@ -16,12 +16,17 @@
 
 class WorldWhite final : public WorldInterface {
 public:
+    enum class SpawnPolicy {
+        Random,
+        Patrol
+    };
     struct Config {
         uint32_t width;
         uint32_t height;
         uint32_t cellSize;
         uint8_t fullnessPercent;
         std::unique_ptr<sf::Shader> shader;
+        SpawnPolicy spawnPolicy { SpawnPolicy::Patrol };
     };
     WorldWhite(Config&& config);
 
@@ -51,4 +56,5 @@ private:
 
     PatrolCellFactory _patrolCellFactory;
     RandomCellFactory _randomCellFactory;
+    ICellFactory* _defaultCellFactory{nullptr};
 };

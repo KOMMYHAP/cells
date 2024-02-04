@@ -12,13 +12,22 @@ WorldWhite::WorldWhite(Config&& config)
     , _simulationVm(MakeSimulationVmConfig(this))
     , _spawnSystem(MakeSpawnSystemConfig(config.fullnessPercent))
     , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
-    , _selectionSystem(_brainSystem, _idSystem, 1, 10)
+    , _selectionSystem(_brainSystem, _idSystem, 500, 10)
     , _patrolCellFactory(_simulationVm, 10)
     , _randomCellFactory()
 {
     RegisterProcedures();
 
-    _spawnSystem.SetCellFactory(_randomCellFactory);
+    switch (config.spawnPolicy) {
+    case SpawnPolicy::Random:
+        _defaultCellFactory = &_randomCellFactory;
+        break;
+    case SpawnPolicy::Patrol:
+        _defaultCellFactory = &_patrolCellFactory;
+        break;
+    default:
+        assert(false);
+    }
 }
 
 void WorldWhite::Tick()
@@ -35,6 +44,7 @@ void WorldWhite::Tick()
     const uint32_t aliveCellsCount = _idSystem.GetCellsCount();
     if (aliveCellsCount == 0) {
         _selectionSystem.Restart();
+        _spawnSystem.SetCellFactory(*_defaultCellFactory);
         Respawn();
     } else {
         SelectionSystem::Result selectionResult = _selectionSystem.TickGeneration();

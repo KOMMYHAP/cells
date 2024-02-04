@@ -14,7 +14,7 @@
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";
 
-const float TargetTicksPerSeconds = 1.f;
+const float TargetTicksPerSeconds = 500.f;
 const sf::Time TargetSimulationTime = sf::seconds(1.0f / TargetTicksPerSeconds);
 const uint8_t CellsCountPercentOfLimit = 20;
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     window.setFramerateLimit(60);
 
     WorldWhite::Config worldWhiteConfig {
-        ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader)
+        ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader), WorldWhite::SpawnPolicy::Random
     };
     WorldWhite world { std::move(worldWhiteConfig) };
 

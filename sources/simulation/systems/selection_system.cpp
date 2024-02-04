@@ -19,8 +19,8 @@ SelectionSystem::Result SelectionSystem::TickGeneration()
     Result result;
     result.shouldRespawn = false;
 
-    if (_currentTick < _waitingForTicks) {
-        _currentTick += 1;
+    _currentTick = (_currentTick + 1) % _waitingForTicks;
+    if (_currentTick != 0) {
         return result;
     }
 
@@ -54,6 +54,7 @@ void SelectionSystem::MakeNextGeneration()
 
     _selectionPresetFactory.SetPreset(std::move(childBrains));
     AddHistoryRecord(std::move(parentBrains));
+    _currentGeneration += 1;
 }
 
 void SelectionSystem::Restart()
