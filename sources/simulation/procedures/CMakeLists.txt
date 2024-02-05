@@ -4,6 +4,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         consume_procedure.cpp
         reproduction_procedure.cpp
         look_procedure.cpp
+        direction.cpp
 )
 
 

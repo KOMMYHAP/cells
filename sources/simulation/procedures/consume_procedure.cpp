@@ -15,8 +15,13 @@ ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& vm, PositionS
 
 void ConsumeProcedure::Execute(ProcedureContext& context)
 {
-    const auto [readArgs, direction] = context.TryPopArgs<Direction>();
+    const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
+        return;
+    }
+    Direction direction;
+    if (!TryParse(rawDirection, direction)) {
+        context.MarkProcedureAsInvalid();
         return;
     }
 

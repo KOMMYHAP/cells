@@ -13,8 +13,13 @@ LookProcedure::LookProcedure(const SimulationVirtualMachine& vm, PositionSystem&
 
 void LookProcedure::Execute(ProcedureContext& context)
 {
-    const auto [readArgs, direction] = context.TryPopArgs<Direction>();
+    const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
+        return;
+    }
+    Direction direction;
+    if (!TryParse(rawDirection, direction)) {
+        context.MarkProcedureAsInvalid();
         return;
     }
 

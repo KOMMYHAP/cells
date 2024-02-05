@@ -21,8 +21,13 @@ ReproductionProcedure::ReproductionProcedure(const SimulationVirtualMachine& vm,
 
 void ReproductionProcedure::Execute(ProcedureContext& context)
 {
-    const auto [readArgs, direction] = context.TryPopArgs<Direction>();
+    const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
+        return;
+    }
+    Direction direction;
+    if (!TryParse(rawDirection, direction)) {
+        context.MarkProcedureAsInvalid();
         return;
     }
     const CellId id = _vm.GetRunningCellId();
