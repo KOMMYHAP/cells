@@ -14,7 +14,7 @@
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";
 
-const float TargetTicksPerSeconds = 500.f;
+const float TargetTicksPerSeconds = 100.f;
 const sf::Time TargetSimulationTime = sf::seconds(1.0f / TargetTicksPerSeconds);
 const uint8_t CellsCountPercentOfLimit = 20;
 

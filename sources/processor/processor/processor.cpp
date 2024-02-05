@@ -39,7 +39,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
     }
     const auto instruction = static_cast<ProcessorInstruction>(rawInstruction);
 
-    switch (static_cast<ProcessorInstruction>(instruction)) {
+    switch (instruction) {
         /// instructions with two operands:
     case ProcessorInstruction::WriteRegistryRegistry:
     case ProcessorInstruction::CompareRegistryRegistry:
@@ -90,7 +90,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
 
         /// instructions without operand:
     case ProcessorInstruction::Nope:
-        assert(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 0);
+        assert(GetProcessorInstructionDescription(instruction).argumentsCount == 0);
         if (!context.MoveCommandPointer(1)) {
             return {};
         }

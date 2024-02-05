@@ -150,3 +150,8 @@ uint32_t PositionSystem::TryGetGridIndex(CellPosition position) const
     }
     return InvalidGridIndex;
 }
+
+bool PositionSystem::IsValidPosition(CellPosition position) const
+{
+    return position.x >= 0 && position.x < GetWidth() && position.y >= 0 && position.y < GetHeight();
+}

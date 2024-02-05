@@ -7,7 +7,7 @@
 
 constexpr CellAge LimitCellAge { 100 };
 constexpr uint16_t BestCellSelectionSize { 10 };
-constexpr uint16_t SelectionEpochTicks { 500 };
+constexpr uint16_t SelectionEpochTicks { 1000 };
 
 WorldWhite::WorldWhite(Config&& config)
     : _idSystem(config.width * config.height)
@@ -22,7 +22,7 @@ WorldWhite::WorldWhite(Config&& config)
     , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
     , _selectionSystem(_brainSystem, _idSystem, SelectionEpochTicks, BestCellSelectionSize)
     , _patrolCellFactory(_simulationVm, 10)
-    , _randomCellFactory()
+    , _randomCellFactory(_simulationVm, std::optional<uint16_t>())
     , _ageSystem(_idSystem.GetCellsCountLimit(), _healthSystem)
 {
     RegisterProcedures();

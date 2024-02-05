@@ -32,6 +32,11 @@ void LookProcedure::Execute(ProcedureContext& context)
     }
 
     const CellId anotherCell = _positionSystem.Find(lookPosition);
+    if (anotherCell == CellId::Invalid) {
+        context.TryPushResult(CellType::Dummy);
+        return;
+    }
+
     const CellType anotherCellType = _typeSystem.Get(anotherCell);
     context.TryPushResult(anotherCellType);
 }

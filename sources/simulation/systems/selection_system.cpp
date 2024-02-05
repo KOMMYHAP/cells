@@ -44,7 +44,7 @@ void SelectionSystem::MakeNextGeneration()
     constexpr uint8_t crossoverPoint = 10;
     CrossoverAlgorithm crossover { crossoverPoint };
     std::vector<CellBrain> childBrains;
-    childBrains.reserve(bestCellsCount * bestCellsCount);
+    childBrains.reserve(bestCellsCount * (bestCellsCount - 1) / 2 + 1);
     for (uint32_t i = 0; i < bestCellsCount; ++i) {
         for (uint32_t j = i + 1; j < bestCellsCount; ++j) {
             const CellBrain& lhsBrain = parentBrains[i];
@@ -103,7 +103,8 @@ std::vector<CellBrain> SelectionSystem::CollectBestBrains() const
     CellBrain& brain = parentBrains[mutationIndex];
     ProcessorMemory memory { brain.data };
 
-    std::uniform_int_distribution<uint16_t> brainMutation { sizeof(ProcessorControlBlock), static_cast<uint16_t>(memory.Size() - 1) };
+    assert(static_cast<uint16_t>(memory.Size() >= sizeof(ProcessorControlBlock) + 1));
+    std::uniform_int_distribution<uint16_t> brainMutation { 0, static_cast<uint16_t>(memory.Size() - sizeof(ProcessorControlBlock) - 1) };
     const uint8_t brainMutationIndex = static_cast<uint8_t>(brainMutation(common::GetRandomEngine()));
     memory.Move(brainMutationIndex + sizeof(ProcessorControlBlock));
 

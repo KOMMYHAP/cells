@@ -28,7 +28,9 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
     const CellId id = _vm.GetRunningCellId();
 
     constexpr CellHealth healthPerAction { 5 };
-    _healthSystem.Decrement(id, healthPerAction);
+    if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
+        return;
+    }
 
     const CellPosition position = _positionSystem.Get(id);
     const CellPosition newPosition = _positionSystem.TryApplyDirection(position, direction);

@@ -26,6 +26,8 @@ public:
 
     bool IsNeighbourFor(CellId lhs, CellId rhs) const;
     bool IsNeighbourFor(CellPosition lhs, CellPosition rhs) const;
+
+    bool IsValidPosition(CellPosition position) const;
     CellPosition TryApplyDirection(CellPosition position, Direction direction) const;
 
 private:
