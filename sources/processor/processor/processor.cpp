@@ -90,6 +90,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
 
         /// instructions without operand:
     case ProcessorInstruction::Nope:
+        assert(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 0);
         if (!context.MoveCommandPointer(1)) {
             return {};
         }
@@ -106,6 +107,8 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
 
 bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, ProcessorContext& context)
 {
+    assert(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2);
+
     /// Data extraction
     const uint8_t destinationIdx = instructionContext.operand1;
     uint8_t sourceData { 0 };
@@ -193,6 +196,8 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, Proces
 
 bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContext, ProcessorContext& context)
 {
+    assert(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
+
     /// Data extraction
     uint8_t sourceData { instructionContext.operand1 };
 

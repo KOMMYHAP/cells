@@ -26,3 +26,8 @@ enum class ProcessorInstruction : uint8_t {
 
 inline constexpr uint8_t ProcessorInstructionCount = static_cast<uint8_t>(ProcessorInstruction::LastProcessorInstruction);
 
+struct ProcessorInstructionDescription {
+    uint8_t argumentsCount { 0 };
+};
+
+ProcessorInstructionDescription GetProcessorInstructionDescription(ProcessorInstruction instruction);
