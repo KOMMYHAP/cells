@@ -2,6 +2,7 @@
 
 #include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
+#include "systems/age_system.h"
 #include "systems/brain_system.h"
 #include "systems/graveyard_system.h"
 #include "systems/health_system.h"
@@ -10,8 +11,8 @@
 #include "systems/selection_system.h"
 #include "systems/simulation_virtual_machine.h"
 #include "systems/spawn_system.h"
+#include "systems/spawner.h"
 #include "systems/type_system.h"
-#include "systems/age_system.h"
 #include "world_interface.h"
 #include "world_render.h"
 
@@ -56,6 +57,7 @@ private:
     GraveyardSystem _graveyardSystem;
     HealthSystem _healthSystem;
     SimulationVirtualMachine _simulationVm;
+    Spawner _spawner;
     SpawnSystem _spawnSystem;
     WorldRender _render;
     SelectionSystem _selectionSystem;

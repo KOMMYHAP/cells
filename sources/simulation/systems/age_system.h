@@ -10,6 +10,7 @@ public:
     AgeSystem(uint32_t capacity, HealthSystem& healthSystem);
 
     void Increment(CellId id, CellAge limit);
+    void Set(CellId id, CellAge age);
     CellAge Get(CellId id) const;
 
 private:

@@ -1,24 +1,17 @@
 #include "spawn_system.h"
 
-#include "breakpoint.h"
 #include "cell_factories/cell_factory_interface.h"
-#include "components/cell_brain.h"
-#include "components/cell_id.h"
-#include "components/cell_type.h"
 #include "random.h"
-#include "systems/brain_system.h"
-#include "systems/health_system.h"
+#include "spawn_properties.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
-#include "systems/type_system.h"
+#include "systems/spawner.h"
 
 SpawnSystem::SpawnSystem(SpawnSystem::Config&& config)
     : _positionSystem(config.positionSystem)
     , _idSystem(config.idSystem)
-    , _typeSystem(config.typeSystem)
-    , _brainSystem(config.brainSystem)
-    , _healthSystem(config.healthSystem)
     , _targetPopulationSize(config.populationSize)
+    , _spawner(config.spawner)
 {
 }
 
@@ -35,53 +28,28 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
     constexpr CellHealth initialHealth { 100 };
 
     for (const CellPosition& position : positions) {
-        const CellId id = _idSystem.Create();
-        const bool wasSpawned = SpawnUnit(id);
-        if (!wasSpawned) {
-            _idSystem.Remove(id);
-            continue;
+        const auto mbBrain = TryMakeCellBrain();
+        if (!mbBrain.has_value()) {
+            break;
         }
 
-        _positionSystem.Set(id, position);
-        _typeSystem.Set(id, CellType::Unit);
-        _healthSystem.Set(id, initialHealth);
+        SpawnProperties properties;
+        properties.position = position;
+        properties.health = initialHealth;
+        properties.type = CellType::Unit;
+        properties.age = CellAge::Zero;
+        properties.brain = *mbBrain;
+
+        const CellId id = _spawner.TrySpawn(properties);
+        if (id == CellId::Invalid) {
+            break;
+        }
+
         spawnedCount += 1;
         if (spawnedCount == cellsCount) {
             break;
         }
     }
-}
-
-bool SpawnSystem::SpawnUnit(CellId id)
-{
-    if (!_cellFactory) {
-        assert(false);
-        return false;
-    }
-
-    ICellFactory::Result result = _cellFactory->Make();
-    if (result.status == ICellFactory::Status::FailedToCreate) {
-        assert(false);
-        return false;
-    }
-    if (result.status == ICellFactory::Status::TryLater) {
-        return false;
-    }
-
-    _brainSystem.Access(id) = result.brain;
-    return true;
-}
-
-void SpawnSystem::DebugDumpAliveCells()
-{
-    // debug only: at least one cell is alive!!!!!
-    std::cout << "Alive cells:\n";
-    _idSystem.Iterate([this](const CellId id) {
-        _brainSystem.DumpCellBrain(std::cout, id);
-        std::cout << "\n";
-    });
-    std::cout << std::endl;
-    common::Breakpoint();
 }
 
 void SpawnSystem::SetCellFactory(ICellFactory& factory)
@@ -97,4 +65,23 @@ void SpawnSystem::TryToSpawn()
 
     const uint32_t cellsCount = _targetPopulationSize - _idSystem.GetCellsCount();
     SpawnN(cellsCount);
+}
+
+std::optional<CellBrain> SpawnSystem::TryMakeCellBrain()
+{
+    if (!_cellFactory) {
+        assert(false);
+        return {};
+    }
+
+    ICellFactory::Result result = _cellFactory->Make();
+    if (result.status == ICellFactory::Status::FailedToCreate) {
+        assert(false);
+        return {};
+    }
+    if (result.status == ICellFactory::Status::TryLater) {
+        return {};
+    }
+
+    return result.brain;
 }

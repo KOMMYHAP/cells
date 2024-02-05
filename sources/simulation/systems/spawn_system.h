@@ -6,6 +6,8 @@ class IdSystem;
 class TypeSystem;
 class HealthSystem;
 class ICellFactory;
+class CellBrain;
+class Spawner;
 enum class CellId : uint32_t;
 
 class SpawnSystem {
@@ -13,9 +15,7 @@ public:
     struct Config {
         PositionSystem& positionSystem;
         IdSystem& idSystem;
-        TypeSystem& typeSystem;
-        BrainSystem& brainSystem;
-        HealthSystem& healthSystem;
+        Spawner& spawner;
         uint32_t populationSize;
     };
     SpawnSystem(Config&& config);
@@ -25,15 +25,11 @@ public:
 
 private:
     void SpawnN(uint32_t cellsCount);
-    bool SpawnUnit(CellId id);
-
-    void DebugDumpAliveCells();
+    std::optional<CellBrain> TryMakeCellBrain();
 
     PositionSystem& _positionSystem;
     IdSystem& _idSystem;
-    TypeSystem& _typeSystem;
-    BrainSystem& _brainSystem;
-    HealthSystem& _healthSystem;
     ICellFactory* _cellFactory { nullptr };
+    Spawner& _spawner;
     uint32_t _targetPopulationSize { 0 };
 };

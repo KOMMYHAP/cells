@@ -29,3 +29,10 @@ CellAge AgeSystem::Get(CellId id) const
     assert(index <= _ageList.size());
     return _ageList[index];
 }
+
+void AgeSystem::Set(CellId id, CellAge age)
+{
+    const auto index = CellIdToInt(id);
+    assert(index <= _ageList.size());
+    _ageList[index] = age;
+}

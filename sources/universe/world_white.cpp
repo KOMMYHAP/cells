@@ -1,7 +1,9 @@
 #include "world_white.h"
 
 #include "procedures/consume_procedure.h"
+#include "procedures/look_procedure.h"
 #include "procedures/move_procedure.h"
+#include "procedures/reproduction_procedure.h"
 
 constexpr CellAge LimitCellAge { 100 };
 constexpr uint16_t BestCellSelectionSize { 10 };
@@ -15,6 +17,7 @@ WorldWhite::WorldWhite(Config&& config)
     , _graveyardSystem(_idSystem.GetCellsCountLimit(), _idSystem, _typeSystem, _positionSystem)
     , _healthSystem(_idSystem.GetCellsCountLimit(), _graveyardSystem)
     , _simulationVm(MakeSimulationVmConfig(this))
+    , _spawner(_positionSystem, _typeSystem, _brainSystem, _healthSystem, _ageSystem, _idSystem)
     , _spawnSystem(MakeSpawnSystemConfig(config.fullnessPercent))
     , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
     , _selectionSystem(_brainSystem, _idSystem, SelectionEpochTicks, BestCellSelectionSize)
@@ -78,6 +81,8 @@ void WorldWhite::RegisterProcedures()
 {
     _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _simulationVm, _positionSystem);
     _simulationVm.RegisterProcedure<ConsumeProcedure>(ProcedureType::Consume, 1, 0, "consume", _simulationVm, _positionSystem, _healthSystem, _typeSystem);
+    _simulationVm.RegisterProcedure<LookProcedure>(ProcedureType::Look, 1, 1, "look", _simulationVm, _positionSystem, _typeSystem);
+    _simulationVm.RegisterProcedure<ReproductionProcedure>(ProcedureType::Reproduction, 1, 0, "reproduction", _simulationVm, _positionSystem, _healthSystem, _brainSystem, _typeSystem, _spawner);
 }
 
 WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader)
@@ -122,9 +127,7 @@ SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent)
     return {
         _positionSystem,
         _idSystem,
-        _typeSystem,
-        _brainSystem,
-        _healthSystem,
+        _spawner,
         targetPopulationSize,
     };
 }

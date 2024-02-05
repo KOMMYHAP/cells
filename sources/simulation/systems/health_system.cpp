@@ -68,7 +68,7 @@ CellHealth HealthSystem::Decrement(CellId id, CellHealth health)
     _healthList[index] = healthNew;
 
     BuryOnGraveyardIfNeeded(id, healthNew);
-    return static_cast<CellHealth>(healthCurrent);
+    return healthNew;
 }
 
 void HealthSystem::BuryOnGraveyardIfNeeded(CellId id, CellHealth health)
