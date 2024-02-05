@@ -45,14 +45,18 @@ void WorldWhite::Tick()
     if (aliveCellsCount == 0) {
         _selectionSystem.Restart();
         _spawnSystem.SetCellFactory(*_defaultCellFactory);
+        _statistics.generation = 0;
         Respawn();
     } else {
         SelectionSystem::Result selectionResult = _selectionSystem.TickGeneration();
         if (selectionResult.shouldRespawn) {
             _spawnSystem.SetCellFactory(*selectionResult.cellFactory);
+            _statistics.generation = selectionResult.generation;
             Respawn();
         }
     }
+
+    _statistics.cellsCount = _idSystem.GetCellsCount();
 }
 
 void WorldWhite::RegisterProcedures()

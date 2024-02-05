@@ -33,7 +33,11 @@ public:
     void Tick() override;
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 
-    uint32_t GetCellsCount() const { return _idSystem.GetCellsCount(); }
+    struct Statistics {
+        uint32_t cellsCount { 0 };
+        uint32_t generation { 0 };
+    };
+    Statistics GetStatistics() const { return _statistics; }
 
 private:
     static WorldRender::Config MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader);
@@ -56,5 +60,7 @@ private:
 
     PatrolCellFactory _patrolCellFactory;
     RandomCellFactory _randomCellFactory;
-    ICellFactory* _defaultCellFactory{nullptr};
+    ICellFactory* _defaultCellFactory { nullptr };
+
+    Statistics _statistics;
 };

@@ -149,15 +149,16 @@ int main(int argc, char** argv)
             const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
             const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
-            const uint32_t cellsCount = world.GetCellsCount();
-            const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
+            const WorldWhite::Statistics statistics = world.GetStatistics();
+            const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(statistics.cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
 
             statusMessageBuffer.clear();
             std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
-                "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%)",
+                "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%) | Generation #{:3}",
                 fps,
                 frameTimeValue, frameUnit,
-                cellsCount, cellsCountPercent);
+                statistics.cellsCount, cellsCountPercent,
+                statistics.generation);
             statusText.setString(sf::String(statusMessageBuffer));
         }
 
