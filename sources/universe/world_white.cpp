@@ -1,6 +1,11 @@
 #include "world_white.h"
 
+#include "procedures/consume_procedure.h"
 #include "procedures/move_procedure.h"
+
+constexpr CellAge LimitCellAge { 100 };
+constexpr uint16_t BestCellSelectionSize { 10 };
+constexpr uint16_t SelectionEpochTicks { 500 };
 
 WorldWhite::WorldWhite(Config&& config)
     : _idSystem(config.width * config.height)
@@ -12,9 +17,10 @@ WorldWhite::WorldWhite(Config&& config)
     , _simulationVm(MakeSimulationVmConfig(this))
     , _spawnSystem(MakeSpawnSystemConfig(config.fullnessPercent))
     , _render(MakeRenderConfig(config.cellSize, std::move(config.shader)), _positionSystem, _idSystem, _typeSystem)
-    , _selectionSystem(_brainSystem, _idSystem, 500, 10)
+    , _selectionSystem(_brainSystem, _idSystem, SelectionEpochTicks, BestCellSelectionSize)
     , _patrolCellFactory(_simulationVm, 10)
     , _randomCellFactory()
+    , _ageSystem(_idSystem.GetCellsCountLimit(), _healthSystem)
 {
     RegisterProcedures();
 
@@ -37,6 +43,14 @@ void WorldWhite::Tick()
         _simulationVm.Run(id);
     });
 
+    _idSystem.Iterate([this](const CellId id) {
+        const bool isDead = _healthSystem.IsZero(id);
+        if (isDead) {
+            return;
+        }
+        _ageSystem.Increment(id, LimitCellAge);
+    });
+
     // Cleanup world systems from dead cells.
     _graveyardSystem.Cleanup();
 
@@ -57,11 +71,13 @@ void WorldWhite::Tick()
     }
 
     _statistics.cellsCount = _idSystem.GetCellsCount();
+    _statistics.tick += 1;
 }
 
 void WorldWhite::RegisterProcedures()
 {
     _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _simulationVm, _positionSystem);
+    _simulationVm.RegisterProcedure<ConsumeProcedure>(ProcedureType::Consume, 1, 0, "consume", _simulationVm, _positionSystem, _healthSystem, _typeSystem);
 }
 
 WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader)
@@ -108,6 +124,7 @@ SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent)
         _idSystem,
         _typeSystem,
         _brainSystem,
+        _healthSystem,
         targetPopulationSize,
     };
 }

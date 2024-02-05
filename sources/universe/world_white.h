@@ -11,6 +11,7 @@
 #include "systems/simulation_virtual_machine.h"
 #include "systems/spawn_system.h"
 #include "systems/type_system.h"
+#include "systems/age_system.h"
 #include "world_interface.h"
 #include "world_render.h"
 
@@ -36,6 +37,7 @@ public:
     struct Statistics {
         uint32_t cellsCount { 0 };
         uint32_t generation { 0 };
+        uint64_t tick { 0 };
     };
     Statistics GetStatistics() const { return _statistics; }
 
@@ -57,6 +59,7 @@ private:
     SpawnSystem _spawnSystem;
     WorldRender _render;
     SelectionSystem _selectionSystem;
+    AgeSystem _ageSystem;
 
     PatrolCellFactory _patrolCellFactory;
     RandomCellFactory _randomCellFactory;

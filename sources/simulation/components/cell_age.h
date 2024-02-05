@@ -1,4 +1,5 @@
 #pragma once
 
-using CellAge = uint16_t;
-inline constexpr CellAge CellAgeLimit = 255;
+enum class CellAge : uint16_t {
+    Zero
+};

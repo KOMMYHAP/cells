@@ -25,9 +25,10 @@ public:
         ProcessorStateWatcher processorStateWatcher;
     };
 
-    SimulationVirtualMachine(Config && config);
+    SimulationVirtualMachine(Config&& config);
 
     template <class Procedure, class... Args>
+        requires std::constructible_from<Procedure, Args...>
     void RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args);
 
     void Run(CellId id);

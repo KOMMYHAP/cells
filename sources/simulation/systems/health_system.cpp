@@ -11,8 +11,8 @@ void HealthSystem::Set(CellId id, CellHealth health)
 {
     const auto index = CellIdToInt(id);
     assert(index <= _healthList.size());
-    _healthList[index] = health;
 
+    _healthList[index] = health;
     BuryOnGraveyardIfNeeded(id, health);
 }
 
@@ -27,6 +27,10 @@ CellHealth HealthSystem::Increment(CellId id, CellHealth health, CellHealth limi
 {
     const auto index = CellIdToInt(id);
     assert(index <= _healthList.size());
+
+    if (_healthList[index] == CellHealth::Zero) {
+        return CellHealth::Zero;
+    }
 
     const auto healthCurrent = static_cast<int32_t>(_healthList[index]);
     auto healthDiff = static_cast<int32_t>(health);
@@ -47,6 +51,10 @@ CellHealth HealthSystem::Decrement(CellId id, CellHealth health)
 {
     const auto index = CellIdToInt(id);
     assert(index <= _healthList.size());
+
+    if (_healthList[index] == CellHealth::Zero) {
+        return CellHealth::Zero;
+    }
 
     const auto healthCurrent = static_cast<int32_t>(_healthList[index]);
     auto healthDiff = static_cast<int32_t>(health);
@@ -70,4 +78,9 @@ void HealthSystem::BuryOnGraveyardIfNeeded(CellId id, CellHealth health)
     }
 
     _graveyardSystem.Bury(id);
+}
+
+bool HealthSystem::IsZero(CellId id) const
+{
+    return Get(id) == CellHealth::Zero;
 }

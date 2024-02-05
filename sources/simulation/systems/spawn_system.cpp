@@ -7,6 +7,7 @@
 #include "components/cell_type.h"
 #include "random.h"
 #include "systems/brain_system.h"
+#include "systems/health_system.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
 #include "systems/type_system.h"
@@ -16,6 +17,7 @@ SpawnSystem::SpawnSystem(SpawnSystem::Config&& config)
     , _idSystem(config.idSystem)
     , _typeSystem(config.typeSystem)
     , _brainSystem(config.brainSystem)
+    , _healthSystem(config.healthSystem)
     , _targetPopulationSize(config.populationSize)
 {
 }
@@ -30,6 +32,8 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
     std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
     uint32_t spawnedCount { 0 };
 
+    constexpr CellHealth initialHealth { 100 };
+
     for (const CellPosition& position : positions) {
         const CellId id = _idSystem.Create();
         const bool wasSpawned = SpawnUnit(id);
@@ -40,6 +44,7 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
 
         _positionSystem.Set(id, position);
         _typeSystem.Set(id, CellType::Unit);
+        _healthSystem.Set(id, initialHealth);
         spawnedCount += 1;
         if (spawnedCount == cellsCount) {
             break;

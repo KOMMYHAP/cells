@@ -4,6 +4,7 @@ class PositionSystem;
 class BrainSystem;
 class IdSystem;
 class TypeSystem;
+class HealthSystem;
 class ICellFactory;
 enum class CellId : uint32_t;
 
@@ -14,6 +15,7 @@ public:
         IdSystem& idSystem;
         TypeSystem& typeSystem;
         BrainSystem& brainSystem;
+        HealthSystem& healthSystem;
         uint32_t populationSize;
     };
     SpawnSystem(Config&& config);
@@ -31,6 +33,7 @@ private:
     IdSystem& _idSystem;
     TypeSystem& _typeSystem;
     BrainSystem& _brainSystem;
+    HealthSystem& _healthSystem;
     ICellFactory* _cellFactory { nullptr };
     uint32_t _targetPopulationSize { 0 };
 };

@@ -85,7 +85,6 @@ CellPosition PositionSystem::TryApplyDirection(CellPosition position, Direction 
         }
         break;
     default:
-        assert(false);
         return InvalidCellPosition;
     }
     return InvalidCellPosition;

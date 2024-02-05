@@ -17,6 +17,7 @@ public:
 
     void Set(CellId id, CellHealth health);
     CellHealth Get(CellId id) const;
+    bool IsZero(CellId id) const;
 
 private:
     void BuryOnGraveyardIfNeeded(CellId id, CellHealth health);

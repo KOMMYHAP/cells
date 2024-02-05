@@ -154,11 +154,12 @@ int main(int argc, char** argv)
 
             statusMessageBuffer.clear();
             std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
-                "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%) | Generation #{:3}",
+                "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%) | Generation #{:3} | Tick #{:9}",
                 fps,
                 frameTimeValue, frameUnit,
                 statistics.cellsCount, cellsCountPercent,
-                statistics.generation);
+                statistics.generation,
+                statistics.tick);
             statusText.setString(sf::String(statusMessageBuffer));
         }
 

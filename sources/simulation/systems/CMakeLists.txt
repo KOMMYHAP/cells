@@ -9,6 +9,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         spawn_system.cpp
         graveyard_system.cpp
         selection_system.cpp
+        age_system.cpp
 )
 
 
@@ -26,4 +27,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         spawn_system.h
         graveyard_system.h
         selection_system.h
+        age_system.h
 )
