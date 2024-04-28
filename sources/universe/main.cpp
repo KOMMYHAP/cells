@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 
     sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(false);
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(60);//
 
     WorldWhite::Config worldWhiteConfig {
         ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader), WorldWhite::SpawnPolicy::Random

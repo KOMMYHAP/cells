@@ -1,8 +1,9 @@
-add_subdirectory(itt)
-add_subdirectory(pix)
+include(FetchContent)
 
-set(BUILD_GMOCK OFF)
-set(INSTALL_GTEST OFF)
-set(GTEST_HAS_ABSL OFF)
-set(gtest_force_shared_crt ON)
-add_subdirectory(googletest)
+option(BUILD_SHARED_LIBS "Build external libraries as shared libraries?" ON)
+
+add_subdirectory(pix)
+add_subdirectory(gtest)
+add_subdirectory(imgui)
+add_subdirectory(sfml)
+add_subdirectory(imgui-sfml)

@@ -1,7 +1,13 @@
 project(cells-common)
 add_library(${PROJECT_NAME} STATIC)
 
-option(ENABLE_PROFILE "Enable profiling" OFF)
+
+option(ENABLE_ASAN "Enable ASAN?" OFF)
+if (ENABLE_ASAN)
+    target_asan_compile_options(${PROJECT_NAME})
+endif ()
+
+
 add_subdirectory(profile)
 
 
@@ -29,3 +35,4 @@ target_sources(${PROJECT_NAME} PUBLIC
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_precompile_headers(${PROJECT_NAME} PRIVATE common_pch.h)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)

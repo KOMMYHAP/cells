@@ -1,0 +1,10 @@
+function(target_asan_compile_options)
+    foreach(target ${ARGV})
+        if (MSVC)
+            target_compile_options(${target} PUBLIC /fsanitize=address)
+        elseif (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+            target_compile_options(${target} PUBLIC -fsanitize=address -fno-omit-frame-pointer)
+        endif ()
+    endforeach(target)
+
+endfunction()
