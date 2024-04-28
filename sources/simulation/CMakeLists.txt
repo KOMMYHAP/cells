@@ -2,11 +2,6 @@ project(cells-simulation)
 add_library(${PROJECT_NAME} STATIC)
 
 
-# find SFML
-set(SFML_STATIC_LIBRARIES TRUE)
-find_package(SFML 2.6.1 EXACT REQUIRED system)
-
-
 # add sub sources
 add_subdirectory(components)
 add_subdirectory(systems)

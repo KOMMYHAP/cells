@@ -2,11 +2,6 @@ project(cells-render)
 add_library(${PROJECT_NAME} STATIC)
 
 
-# add SFML
-set(SFML_STATIC_LIBRARIES TRUE)
-find_package(SFML 2.6.1 EXACT REQUIRED graphics window)
-
-
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         world_render.cpp
