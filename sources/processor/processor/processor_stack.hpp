@@ -22,7 +22,7 @@ std::tuple<bool, Ts...> ProcessorStack::TryPop()
 template <MemoryType T>
 T ProcessorStack::Pop()
 {
-    assert(CanPop<T>());
+    ASSUME(CanPop<T>());
     _offset -= sizeof(T);
     T value;
     memcpy(&value, &_buffer[_offset], sizeof(T));
@@ -33,7 +33,7 @@ template <class T>
     requires MemoryType<std::decay_t<T>>
 void ProcessorStack::Push(T&& value)
 {
-    assert(CanPush<std::decay_t<T>>());
+    ASSUME(CanPush<std::decay_t<T>>());
     new (&_buffer[_offset]) std::decay_t<T>(std::forward<T>(value));
     _offset += sizeof(T);
 }

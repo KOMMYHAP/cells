@@ -6,7 +6,7 @@
 Processor::Processor(uint8_t systemInstructionToPerform)
     : _systemInstructionToPerform(systemInstructionToPerform)
 {
-    assert(_systemInstructionToPerform > 0);
+    DEBUG_ASSERT(_systemInstructionToPerform > 0);
 }
 
 void Processor::Execute(ProcessorContext& context)
@@ -29,7 +29,7 @@ void Processor::Execute(ProcessorContext& context)
 
 std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorContext& context)
 {
-    assert(context.IsState(ProcessorState::Good));
+    ASSUME(context.IsState(ProcessorState::Good));
 
     ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
 
@@ -90,7 +90,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
 
         /// instructions without operand:
     case ProcessorInstruction::Nope:
-        assert(GetProcessorInstructionDescription(instruction).argumentsCount == 0);
+        ASSUME(GetProcessorInstructionDescription(instruction).argumentsCount == 0);
         if (!context.MoveCommandPointer(1)) {
             return {};
         }
@@ -107,7 +107,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
 
 bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, ProcessorContext& context)
 {
-    assert(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2);
+    ASSUME(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2);
 
     /// Data extraction
     const uint8_t destinationIdx = instructionContext.operand1;
@@ -196,7 +196,7 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, Proces
 
 bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContext, ProcessorContext& context)
 {
-    assert(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
+    ASSUME(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
 
     /// Data extraction
     uint8_t sourceData { instructionContext.operand1 };
@@ -281,9 +281,8 @@ bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContex
         return context.SetCommandPointer(commandPointer);
     }
     default:
-        // Unknown instruction. Seems like a new instruction was added to ProcessInstruction, but wasn't processed here.
-        assert(false);
-        return false;
+        // Seems like a new instruction was added to ProcessInstruction, but wasn't processed here.
+        UNREACHABLE("Unknown instruction", instructionContext.instruction);
     }
 
     return context.MoveCommandPointer(1 /* instruction */ + 1 /* operand */);
@@ -304,9 +303,7 @@ void Processor::UpdateFlags(FlagsContext flagsContext, ProcessorContext& context
         result = flagsContext.operand1 + flagsContext.operand2;
         break;
     default:
-        // unknown instruction
-        assert(false);
-        return;
+        UNREACHABLE("Unknown instruction", flagsContext.instruction);
     }
 
     context.SetFlag(ProcessorFlags::Zero, result == 0);

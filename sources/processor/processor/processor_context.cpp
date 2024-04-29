@@ -12,7 +12,7 @@ ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const P
     , _stack(_controlBlock.stack, _controlBlock.stackOffset)
 {
     if (!SetCommandPointer(_controlBlock.nextCommand)) {
-        assert(false);
+        UNREACHABLE("Invalid command pointer!");
     }
 }
 
