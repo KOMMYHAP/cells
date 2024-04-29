@@ -77,3 +77,6 @@
 #include <unordered_set>
 
 #include <span>
+
+// External libraries
+#include "libassert/assert.hpp"
