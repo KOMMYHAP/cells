@@ -6,7 +6,7 @@
 #include "procedures/reproduction_procedure.h"
 
 constexpr CellAge LimitCellAge { 100 };
-constexpr uint16_t BestCellSelectionSize { 10 };
+constexpr uint16_t BestCellSelectionSize { 100 };
 constexpr uint16_t SelectionEpochTicks { 1000 };
 
 WorldWhite::WorldWhite(Config&& config)
@@ -54,20 +54,7 @@ void WorldWhite::Tick()
     _graveyardSystem.Cleanup();
 
     // Spawn more if needed
-    const uint32_t aliveCellsCount = _idSystem.GetCellsCount();
-    if (aliveCellsCount == 0) {
-        _selectionSystem.Restart();
-        _spawnSystem.SetCellFactory(*_defaultCellFactory);
-        _statistics.generation = 0;
-        Respawn();
-    } else {
-        SelectionSystem::Result selectionResult = _selectionSystem.TickGeneration();
-        if (selectionResult.shouldRespawn) {
-            _spawnSystem.SetCellFactory(*selectionResult.cellFactory);
-            _statistics.generation = selectionResult.generation;
-            Respawn();
-        }
-    }
+    SpawnMoreIfNeeded();
 
     _statistics.cellsCount = _idSystem.GetCellsCount();
     _statistics.tick += 1;
@@ -108,11 +95,12 @@ SimulationVirtualMachine::Config WorldWhite::MakeSimulationVmConfig(WorldWhite* 
         const CellId id = world->_simulationVm.GetRunningCellId();
         world->_healthSystem.Set(id, CellHealth::Zero);
     };
+    constexpr uint8_t systemInstructionPerStep = 8;
     return {
         world->_brainSystem,
         world->_typeSystem,
         world->_healthSystem,
-        8,
+        systemInstructionPerStep,
         std::move(watcher)
     };
 }
@@ -126,6 +114,24 @@ SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent)
         _spawner,
         targetPopulationSize,
     };
+}
+
+void WorldWhite::SpawnMoreIfNeeded()
+{
+    const uint32_t aliveCellsCount = _idSystem.GetCellsCount();
+    if (aliveCellsCount == 0) {
+        _selectionSystem.Restart();
+        _spawnSystem.SetCellFactory(*_defaultCellFactory);
+        _statistics.generation = 0;
+        Respawn();
+    } else {
+        SelectionSystem::Result selectionResult = _selectionSystem.TickGeneration();
+        if (selectionResult.shouldRespawn) {
+            _spawnSystem.SetCellFactory(*selectionResult.cellFactory);
+            _statistics.generation = selectionResult.generation;
+            Respawn();
+        }
+    }
 }
 
 void WorldWhite::Respawn()

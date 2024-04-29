@@ -66,7 +66,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto mbFontPath = commandLine.TryFindValue(FontArgument);
+    auto mbFontPath = commandLine.FindValue(FontArgument);
     if (!mbFontPath.has_value()) {
         std::cerr << std::format("Please specify filepath to font file using {} $path", FontArgument) << std::endl;
         return -1;
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    auto mbFragmentShaderPath = commandLine.TryFindValue(FragmentShaderArgument);
+    auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
     if (!mbFragmentShaderPath.has_value()) {
         std::cerr << std::format("Please specify filepath to fragment shader using {} $path", FragmentShaderArgument) << std::endl;
         return -1;

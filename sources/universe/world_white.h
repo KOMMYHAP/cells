@@ -48,6 +48,8 @@ private:
     static SimulationVirtualMachine::Config MakeSimulationVmConfig(WorldWhite* world);
 
     void RegisterProcedures();
+
+    void SpawnMoreIfNeeded();
     void Respawn();
 
     IdSystem _idSystem;

@@ -37,25 +37,9 @@ SelectionSystem::Result SelectionSystem::TickGeneration()
 void SelectionSystem::MakeNextGeneration()
 {
     // collect best cells
-    std::vector<CellBrain> parentBrains = CollectBestBrains();
-    const uint32_t bestCellsCount = parentBrains.size();
-
-    // make descendants of best cells
-    constexpr uint8_t crossoverPoint = 10;
-    CrossoverAlgorithm crossover { crossoverPoint };
-    std::vector<CellBrain> childBrains;
-    childBrains.reserve(bestCellsCount * (bestCellsCount - 1) / 2 + 1);
-    for (uint32_t i = 0; i < bestCellsCount; ++i) {
-        for (uint32_t j = i + 1; j < bestCellsCount; ++j) {
-            const CellBrain& lhsBrain = parentBrains[i];
-            const CellBrain& rhsBrain = parentBrains[j];
-            const CellBrain childBrain = crossover.Combine(lhsBrain, rhsBrain);
-            childBrains.emplace_back(childBrain);
-        }
-    }
-
-    _selectionPresetFactory.SetPreset(std::move(childBrains));
-    AddHistoryRecord(std::move(parentBrains));
+    std::vector<CellBrain> bestBrains = CollectBestBrains();
+    _selectionPresetFactory.SetPreset(bestBrains);
+    AddHistoryRecord(std::move(bestBrains));
     _currentGeneration += 1;
 }
 
@@ -69,8 +53,8 @@ void SelectionSystem::Restart()
 
 std::vector<CellBrain> SelectionSystem::CollectBestBrains() const
 {
-    std::vector<CellBrain> parentBrains;
-    parentBrains.reserve(_bestCellsLimit);
+    std::vector<CellBrain> bestBrains;
+    bestBrains.reserve(_bestCellsLimit);
 
     std::vector<CellId> aliveCellIds;
     aliveCellIds.reserve(_idSystem.GetCellsCount());
@@ -81,38 +65,11 @@ std::vector<CellBrain> SelectionSystem::CollectBestBrains() const
     std::shuffle(aliveCellIds.begin(), aliveCellIds.end(), common::GetRandomEngine());
     const uint16_t bestCellsCount = std::min<uint16_t>(_bestCellsLimit, aliveCellIds.size());
 
-    std::ranges::transform(std::span(aliveCellIds).first(bestCellsCount), std::back_inserter(parentBrains), [&](const CellId id) {
+    std::ranges::transform(std::span(aliveCellIds).first(bestCellsCount), std::back_inserter(bestBrains), [&](const CellId id) {
         return _brainSystem.Get(id);
     });
 
-    if (bestCellsCount < _bestCellsLimit) {
-        std::vector<CellBrain> copies = parentBrains;
-        const uint32_t fullCopies = (_bestCellsLimit - bestCellsCount) / copies.size();
-        for (uint32_t copyIndex = 0; copyIndex < fullCopies; ++copyIndex) {
-            parentBrains.insert(parentBrains.end(), copies.begin(), copies.end());
-        }
-        const uint32_t restCopies = (_bestCellsLimit - bestCellsCount) - fullCopies * bestCellsCount;
-        ASSERT(restCopies < copies.size());
-        for (uint32_t i = 0; i < restCopies; ++i) {
-            parentBrains.emplace_back(copies[i]);
-        }
-    }
-
-    std::uniform_int_distribution<size_t> mutation { 0, parentBrains.size() - 1 };
-    const size_t mutationIndex = mutation(common::GetRandomEngine());
-    CellBrain& brain = parentBrains[mutationIndex];
-    ProcessorMemory memory { brain.data };
-
-    ASSERT(static_cast<uint16_t>(memory.Size() >= sizeof(ProcessorControlBlock) + 1));
-    std::uniform_int_distribution<uint16_t> brainMutation { 0, static_cast<uint16_t>(memory.Size() - sizeof(ProcessorControlBlock) - 1) };
-    const uint8_t brainMutationIndex = static_cast<uint8_t>(brainMutation(common::GetRandomEngine()));
-    memory.Move(brainMutationIndex + sizeof(ProcessorControlBlock));
-
-    std::uniform_int_distribution<uint16_t> dataMutation { 0, 255 };
-    const uint8_t data = static_cast<uint8_t>(dataMutation(common::GetRandomEngine()));
-    memory.Write(data);
-
-    return parentBrains;
+    return bestBrains;
 }
 
 void SelectionSystem::AddHistoryRecord(std::vector<CellBrain> brains)

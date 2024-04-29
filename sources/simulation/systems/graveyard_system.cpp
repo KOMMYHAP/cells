@@ -30,13 +30,13 @@ void GraveyardSystem::Cleanup()
     std::sort(_graveyard.begin(), _graveyard.end());
 
     for (const CellId id : _graveyard) {
-        // cleanup id to allow birth of a new cell
+        // cleanup id system to allow birth of a new cell
         _idSystem.Remove(id);
 
-        // cleanup type to exclude cell from simulation
+        // cleanup type system to exclude cell from simulation
         _typeSystem.Set(id, CellType::Dummy);
 
-        // cleanup position to allow everyone move to owner's position
+        // cleanup position system to allow everyone move to owner's position
         _positionSystem.Set(id, InvalidCellPosition);
 
         // we can omit cleanup brain, because it required only in simulation

@@ -20,6 +20,12 @@ public:
 
     void Restart();
 
+    struct BrainSelection {
+        std::vector<CellBrain> brains;
+        uint32_t generation;
+    };
+    const std::vector<BrainSelection>& GetHistory() const { return _selectionHistory; };
+
 private:
     void MakeNextGeneration();
 
@@ -33,10 +39,6 @@ private:
     BrainSystem& _brainSystem;
     IdSystem& _idSystem;
 
-    struct BrainSelection {
-        std::vector<CellBrain> brains;
-        uint32_t generation;
-    };
     std::vector<BrainSelection> _selectionHistory;
     PresetCellFactory _selectionPresetFactory;
     const uint32_t _bestCellsLimit { 0 };
