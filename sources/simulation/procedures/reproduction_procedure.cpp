@@ -32,7 +32,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     }
     const CellId id = _vm.GetRunningCellId();
 
-    constexpr CellHealth healthPerAction { 5 };
+    constexpr CellHealth healthPerAction { 50 };
     if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
         return;
     }
@@ -58,7 +58,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    constexpr CellHealth childInitialHealth { 50 };
+    constexpr CellHealth childInitialHealth { 35 };
 
     SpawnProperties properties;
     properties.position = childPosition;

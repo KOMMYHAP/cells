@@ -49,7 +49,7 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
         _healthSystem.Decrement(anotherCell, damagePerHit);
     } else if (anotherCellType == CellType::Food) {
         constexpr CellHealth healthPerFood { 15 };
-        constexpr CellHealth limitHealthAfterFood { 75 };
+        constexpr CellHealth limitHealthAfterFood { 100 };
         _healthSystem.Increment(anotherCell, healthPerFood, limitHealthAfterFood);
     }
 }
