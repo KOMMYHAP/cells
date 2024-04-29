@@ -8,7 +8,7 @@ CommandLine::CommandLine(int argc, char** argv)
 {
 }
 
-std::optional<std::string_view> CommandLine::TryFindValue(const std::string_view key) const
+std::optional<std::string_view> CommandLine::FindValue(const std::string_view key) const
 {
     for (int i = 0; i < _argc; ++i) {
         if (_argv[i] != key) {
