@@ -10,8 +10,7 @@ public:
     void Reset();
 
     bool IsEmpty() const { return _availableSamplesCount == 0; }
-    bool IsReady() const { return _availableSamplesCount > 0; }
-    bool IsFull() const { return _currentSample == SamplesLimit; }
+    bool IsFull() const { return _availableSamplesCount == SamplesLimit; }
 
     Sample CalcAverage() const;
     Sample CalcMedian() const;

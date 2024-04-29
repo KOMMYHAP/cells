@@ -14,8 +14,7 @@
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";
 
-const float TargetTicksPerSeconds = 100.f;
-const sf::Time TargetSimulationTime = sf::seconds(1.0f / TargetTicksPerSeconds);
+const sf::Time TargetSimulationTime = sf::milliseconds(15);
 const uint8_t CellsCountPercentOfLimit = 20;
 
 const uint16_t ScreenWidth = 800;
@@ -91,7 +90,7 @@ int main(int argc, char** argv)
 
     sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(false);
-    window.setFramerateLimit(60);//
+    window.setFramerateLimit(60);
 
     WorldWhite::Config worldWhiteConfig {
         ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader), WorldWhite::SpawnPolicy::Random
@@ -99,7 +98,7 @@ int main(int argc, char** argv)
     WorldWhite world { std::move(worldWhiteConfig) };
 
     Simulation simulation { world };
-    simulation.SetAutoMode(TargetTicksPerSeconds, TargetSimulationTime);
+    simulation.SetAutoMode(TargetSimulationTime);
 
     sf::Clock frameClock;
     sf::Clock simulationClock;
@@ -118,7 +117,7 @@ int main(int argc, char** argv)
 
     sf::Time frameElapsedTime = sf::milliseconds(15);
 
-    common::SampleCounter<float, 99> frameTimeCounter;
+    common::SampleCounter<float, 10> frameTimeCounter;
 
     while (window.isOpen()) {
         common::ProfileScope frameProfileScope { "Frame", mainCategory };

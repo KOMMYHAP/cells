@@ -14,10 +14,6 @@ void Simulation::Tick()
 
 void Simulation::Ticks(uint32_t ticks)
 {
-    if (_tickCounter.IsFull()) {
-        _tickCounter.Reset();
-    }
-
     for (uint32_t i { 0 }; i < ticks; ++i) {
         ProcessTick();
     }
@@ -36,10 +32,10 @@ void Simulation::SetManualMode()
     _autoModeParams.reset();
 }
 
-void Simulation::SetAutoMode(float ticksPerSecond, sf::Time limitSimulationTime)
+void Simulation::SetAutoMode(sf::Time targetSimulationTime)
 {
-    ASSERT(ticksPerSecond > 0.0f && limitSimulationTime.asSeconds() > 0.0f);
-    _autoModeParams.emplace(ticksPerSecond, limitSimulationTime, 0.0f);
+    ASSERT(targetSimulationTime.asSeconds() > 0.0f);
+    _autoModeParams.emplace(targetSimulationTime, sf::Time::Zero);
 }
 
 uint32_t Simulation::Run(sf::Time elapsedTime)
@@ -47,29 +43,34 @@ uint32_t Simulation::Run(sf::Time elapsedTime)
     if (!_autoModeParams.has_value()) {
         return 0;
     }
+    if (!_tickCounter.IsFull()) {
+        return WarmUp();
+    }
 
     RuntimeParams& params = *_autoModeParams;
-    const sf::Time tickTime = GetTickTime();
-    const bool tickTimeReady = _tickCounter.IsReady();
 
-    const float elapsedTicks = tickTimeReady ? elapsedTime / tickTime : 1.0f;
-    const float maximumElapsedTicks = params.ticksPerSecond * elapsedTime.asSeconds();
-    params.ticksToProcess += std::min(elapsedTicks, maximumElapsedTicks);
-
-    const float maximumTicks = tickTimeReady ? params.limitSimulationTime / tickTime : 1.0f;
-
-    const float ticksToProcess = floor(std::min(params.ticksToProcess, maximumTicks));
-    const uint32_t ticks = static_cast<uint32_t>(ticksToProcess);
-    if (ticks == 0) {
+    params.availableTimeToSpent += elapsedTime;
+    if (params.availableTimeToSpent.asSeconds() < 0.0f) {
         return 0;
     }
 
-    Ticks(ticks);
-    params.ticksToProcess -= ticksToProcess;
-    return ticks;
+    const sf::Time tickTime = sf::seconds(_tickCounter.CalcMedian());
+    const float availableTicks = params.availableTimeToSpent / tickTime;
+    const float minimumTicks = 1.0f;
+    const float maximumTicks = std::max(minimumTicks, params.limitSimulationTime / tickTime);
+    const float ticksToProcess = std::clamp(availableTicks, minimumTicks, maximumTicks);
+    const uint32_t roundedTicksToProcess = static_cast<uint32_t>(ticksToProcess);
+
+    params.availableTimeToSpent -= sf::seconds(roundedTicksToProcess * tickTime.asSeconds());
+    params.availableTimeToSpent = std::min(params.availableTimeToSpent, tickTime);
+
+    Ticks(roundedTicksToProcess);
+    return roundedTicksToProcess;
 }
 
-sf::Time Simulation::GetTickTime() const
+uint32_t Simulation::WarmUp()
 {
-    return sf::microseconds(10);
+    const uint32_t ticksToWarmUp = 1;
+    Ticks(ticksToWarmUp);
+    return ticksToWarmUp;
 }
