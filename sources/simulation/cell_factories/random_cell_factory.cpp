@@ -37,7 +37,7 @@ auto RandomCellFactory::Make() -> Result
         }
 
         memory.Write(instruction);
-        assert(description.argumentsCount <= 2);
+        ASSERT(description.argumentsCount <= 2);
         if (description.argumentsCount == 2) {
             const auto [operand1, operand2] = GenerateTwoOperand(instruction);
             memory.Write(operand1, operand2);
@@ -86,8 +86,7 @@ std::tuple<std::byte, std::byte> RandomCellFactory::GenerateTwoOperand(Processor
     case ProcessorInstruction::SubtractRegistryValue:
         return { GenerateRegistryIndex(), GenerateValue() };
     default:
-        assert(false);
-        return { GenerateValue(), GenerateValue() };
+        UNREACHABLE("Unknown instruction!", hint);
     }
 }
 
@@ -123,8 +122,7 @@ std::byte RandomCellFactory::GenerateOneOperand(ProcessorInstruction hint)
     case ProcessorInstruction::Call:
         return static_cast<std::byte>(GenerateProcedureId());
     default:
-        assert(false);
-        return GenerateValue();
+        UNREACHABLE("Unknown instruction!", hint);
     }
 }
 

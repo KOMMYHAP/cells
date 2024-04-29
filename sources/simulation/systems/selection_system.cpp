@@ -92,7 +92,7 @@ std::vector<CellBrain> SelectionSystem::CollectBestBrains() const
             parentBrains.insert(parentBrains.end(), copies.begin(), copies.end());
         }
         const uint32_t restCopies = (_bestCellsLimit - bestCellsCount) - fullCopies * bestCellsCount;
-        assert(restCopies < copies.size());
+        ASSERT(restCopies < copies.size());
         for (uint32_t i = 0; i < restCopies; ++i) {
             parentBrains.emplace_back(copies[i]);
         }
@@ -103,7 +103,7 @@ std::vector<CellBrain> SelectionSystem::CollectBestBrains() const
     CellBrain& brain = parentBrains[mutationIndex];
     ProcessorMemory memory { brain.data };
 
-    assert(static_cast<uint16_t>(memory.Size() >= sizeof(ProcessorControlBlock) + 1));
+    ASSERT(static_cast<uint16_t>(memory.Size() >= sizeof(ProcessorControlBlock) + 1));
     std::uniform_int_distribution<uint16_t> brainMutation { 0, static_cast<uint16_t>(memory.Size() - sizeof(ProcessorControlBlock) - 1) };
     const uint8_t brainMutationIndex = static_cast<uint8_t>(brainMutation(common::GetRandomEngine()));
     memory.Move(brainMutationIndex + sizeof(ProcessorControlBlock));

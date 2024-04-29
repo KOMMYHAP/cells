@@ -66,9 +66,9 @@ int main(int argc, char** argv)
     CommonInitializationGuard commonInitializationGuard {};
     common::EnableBreakpointOnAssert(true);
 
-    assert(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
-    assert(FieldWidth % (CellSize + CellPadding) == 0);
-    assert(FieldHeight % (CellSize + CellPadding) == 0);
+    ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
+    ASSERT(FieldWidth % (CellSize + CellPadding) == 0);
+    ASSERT(FieldHeight % (CellSize + CellPadding) == 0);
 
     common::CommandLine commandLine { argc, argv };
 

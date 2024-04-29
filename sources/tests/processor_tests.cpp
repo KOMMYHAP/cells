@@ -79,8 +79,8 @@ private:
     ProcessorStateWatcher MakeKiller()
     {
         return [this](ProcessorState state) {
-            if (state != ProcessorState::Good && _assertOnBadState) {
-                assert(false);
+            if (_assertOnBadState) {
+                ASSERT(state != ProcessorState::Good);
             }
             _lastProcessorState = state;
         };

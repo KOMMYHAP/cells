@@ -5,18 +5,13 @@
 CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBrain& parentRight)
 {
     ProcessorConstMemory memoryLeft { parentLeft.data };
-    if (!memoryLeft.HasBytes<ProcessorControlBlock>()) {
-        assert(false);
-        return {};
-    }
+    ASSERT(memoryLeft.HasBytes<ProcessorControlBlock>());
+
     memoryLeft.Move<ProcessorControlBlock>();
     auto blobLeft = memoryLeft.MakeSpan(0);
 
     ProcessorConstMemory memoryRight { parentRight.data };
-    if (!memoryRight.HasBytes<ProcessorControlBlock>()) {
-        assert(false);
-        return {};
-    }
+    ASSERT(memoryRight.HasBytes<ProcessorControlBlock>());
     memoryRight.Move<ProcessorControlBlock>();
     auto blobRight = memoryRight.MakeSpan(0);
 
@@ -33,10 +28,8 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
         {}
     };
     const bool writeSuccess = memory.TryWrite(controlBlock);
-    if (!writeSuccess) {
-        assert(false);
-        return {};
-    }
+    ASSERT(writeSuccess);
+
     auto blobOut = memory.MakeSpan(0);
     std::memcpy(blobOut.data(), blobLeft.data(), point);
     std::memcpy(blobOut.data() + point, blobRight.data() + point, blobOut.size() - point);
@@ -44,6 +37,6 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
 }
 
 CrossoverAlgorithm::CrossoverAlgorithm(uint8_t point)
-     :_point(point)
+    : _point(point)
 {
 }

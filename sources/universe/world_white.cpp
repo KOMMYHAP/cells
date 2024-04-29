@@ -35,7 +35,7 @@ WorldWhite::WorldWhite(Config&& config)
         _defaultCellFactory = &_patrolCellFactory;
         break;
     default:
-        assert(false);
+        UNREACHABLE("Unknown spawn policy!", config.spawnPolicy);
     }
 }
 
@@ -87,7 +87,7 @@ void WorldWhite::RegisterProcedures()
 
 WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader)
 {
-    assert(cellSize < 255);
+    ASSERT(cellSize < 255);
     const sf::Color gray { 0xCCCCCCFF };
     return {
         std::move(shader),

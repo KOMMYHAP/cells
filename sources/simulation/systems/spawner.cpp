@@ -24,18 +24,14 @@ CellId Spawner::TrySpawn(const SpawnProperties& properties)
     if (id == CellId::Invalid) {
         return CellId::Invalid;
     }
+    ASSERT(properties.position != InvalidCellPosition);
+    ASSERT(properties.type != CellType::Dummy);
+    ASSERT(properties.health != CellHealth::Zero);
 
     _brainSystem.Access(id) = properties.brain;
-
-    assert(properties.position != InvalidCellPosition);
     _positionSystem.Set(id, properties.position);
-
-    assert(properties.type != CellType::Dummy);
     _typeSystem.Set(id, properties.type);
-
     _ageSystem.Set(id, properties.age);
-
-    assert(properties.health != CellHealth::Zero);
     _healthSystem.Set(id, properties.health);
     return id;
 }

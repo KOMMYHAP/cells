@@ -15,13 +15,13 @@ GraveyardSystem::GraveyardSystem(uint32_t capacity, IdSystem& idSystem, TypeSyst
 void GraveyardSystem::Bury(CellId id)
 {
     const auto index = CellIdToInt(id);
-    assert(index < _graveyardFlags.size());
+    ASSERT(index < _graveyardFlags.size());
     if (_graveyardFlags[index]) {
         return;
     }
 
     _graveyardFlags[index] = true;
-    assert(_graveyard.size() + 1 < _graveyard.capacity());
+    ASSERT(_graveyard.size() + 1 < _graveyard.capacity());
     _graveyard.push_back(id);
 }
 

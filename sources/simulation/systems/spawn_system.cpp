@@ -69,19 +69,13 @@ void SpawnSystem::TryToSpawn()
 
 std::optional<CellBrain> SpawnSystem::TryMakeCellBrain()
 {
-    if (!_cellFactory) {
-        assert(false);
-        return {};
-    }
+    ASSERT(_cellFactory);
 
     ICellFactory::Result result = _cellFactory->Make();
-    if (result.status == ICellFactory::Status::FailedToCreate) {
-        assert(false);
-        return {};
-    }
+    ASSERT((result.status != ICellFactory::Status::FailedToCreate));
+
     if (result.status == ICellFactory::Status::TryLater) {
         return {};
     }
-
     return result.brain;
 }

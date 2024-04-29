@@ -10,7 +10,7 @@ HealthSystem::HealthSystem(uint32_t capacity, GraveyardSystem& graveyardSystem)
 void HealthSystem::Set(CellId id, CellHealth health)
 {
     const auto index = CellIdToInt(id);
-    assert(index <= _healthList.size());
+    ASSERT(index <= _healthList.size());
 
     _healthList[index] = health;
     BuryOnGraveyardIfNeeded(id, health);
@@ -19,14 +19,14 @@ void HealthSystem::Set(CellId id, CellHealth health)
 CellHealth HealthSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
-    assert(index <= _healthList.size());
+    ASSERT(index <= _healthList.size());
     return _healthList[index];
 }
 
 CellHealth HealthSystem::Increment(CellId id, CellHealth health, CellHealth limit)
 {
     const auto index = CellIdToInt(id);
-    assert(index <= _healthList.size());
+    ASSERT(index <= _healthList.size());
 
     if (_healthList[index] == CellHealth::Zero) {
         return CellHealth::Zero;
@@ -50,7 +50,7 @@ CellHealth HealthSystem::Increment(CellId id, CellHealth health, CellHealth limi
 CellHealth HealthSystem::Decrement(CellId id, CellHealth health)
 {
     const auto index = CellIdToInt(id);
-    assert(index <= _healthList.size());
+    ASSERT(index <= _healthList.size());
 
     if (_healthList[index] == CellHealth::Zero) {
         return CellHealth::Zero;

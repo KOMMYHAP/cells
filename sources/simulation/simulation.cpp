@@ -38,7 +38,7 @@ void Simulation::SetManualMode()
 
 void Simulation::SetAutoMode(float ticksPerSecond, sf::Time limitSimulationTime)
 {
-    assert(ticksPerSecond > 0.0f && limitSimulationTime.asSeconds() > 0.0f);
+    ASSERT(ticksPerSecond > 0.0f && limitSimulationTime.asSeconds() > 0.0f);
     _autoModeParams.emplace(ticksPerSecond, limitSimulationTime, 0.0f);
 }
 

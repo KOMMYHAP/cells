@@ -12,15 +12,15 @@ PositionSystem::PositionSystem(uint32_t width, uint32_t height)
 
 void PositionSystem::Move(CellId id, CellPosition nextPosition)
 {
-    assert(nextPosition != InvalidCellPosition);
-    assert(Find(nextPosition) == CellId::Invalid);
+    ASSERT(nextPosition != InvalidCellPosition);
+    ASSERT(Find(nextPosition) == CellId::Invalid);
 
     const auto index = CellIdToInt(id);
-    assert(index <= _positions.size());
+    ASSERT(index <= _positions.size());
 
     const auto currentPosition = _positions[index];
     if (currentPosition != InvalidCellPosition) {
-        assert(IsNeighbourFor(currentPosition, nextPosition));
+        ASSERT(IsNeighbourFor(currentPosition, nextPosition));
         const uint32_t currentGridIndex = ToGridIndex(currentPosition);
         _grid[currentGridIndex] = CellId::Invalid;
     }
@@ -33,7 +33,7 @@ void PositionSystem::Move(CellId id, CellPosition nextPosition)
 CellPosition PositionSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
-    assert(index <= _positions.size());
+    ASSERT(index <= _positions.size());
     return _positions[index];
 }
 
@@ -49,10 +49,10 @@ CellId PositionSystem::Find(CellPosition position) const
 bool PositionSystem::IsNeighbourFor(CellId lhs, CellId rhs) const
 {
     const CellPosition lhsPosition = Get(lhs);
-    assert(lhsPosition != InvalidCellPosition);
+    ASSERT(lhsPosition != InvalidCellPosition);
 
     const CellPosition rhsPosition = Get(rhs);
-    assert(rhsPosition != InvalidCellPosition);
+    ASSERT(rhsPosition != InvalidCellPosition);
 
     return IsNeighbourFor(lhsPosition, rhsPosition);
 }
@@ -85,7 +85,7 @@ CellPosition PositionSystem::TryApplyDirection(CellPosition position, Direction 
         }
         break;
     default:
-        return InvalidCellPosition;
+        UNREACHABLE("Unknown direction!", direction);
     }
     return InvalidCellPosition;
 }
@@ -93,7 +93,7 @@ CellPosition PositionSystem::TryApplyDirection(CellPosition position, Direction 
 void PositionSystem::Reset(CellId id)
 {
     const auto positionIndex = CellIdToInt(id);
-    assert(positionIndex <= _positions.size());
+    ASSERT(positionIndex <= _positions.size());
 
     const auto position = _positions[positionIndex];
     if (position == InvalidCellPosition) {

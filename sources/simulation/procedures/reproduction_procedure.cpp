@@ -70,7 +70,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
 
 CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPosition rhs) const
 {
-    assert(_positionSystem.IsNeighbourFor(lhs, rhs));
+    ASSERT(_positionSystem.IsNeighbourFor(lhs, rhs));
 
     const int16_t fromX = std::min(lhs.x - 1, rhs.x - 1);
     const int16_t fromY = std::min(lhs.y - 1, rhs.y - 1);
@@ -94,13 +94,13 @@ CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPositio
             if (!isNeighbour) {
                 continue;
             }
-            assert(testPositionSize < testPositions.size());
+            ASSERT(testPositionSize < testPositions.size());
             testPositions[testPositionSize] = position;
             testPositionSize += 1;
         }
     }
 
-    assert(testPositionSize >= 1);
+    ASSERT(testPositionSize >= 1);
     std::uniform_int_distribution<uint16_t> offsetDistribution { 0, static_cast<uint16_t>(testPositionSize - 1) };
     const uint8_t offset = static_cast<uint8_t>(offsetDistribution(common::GetRandomEngine()));
 

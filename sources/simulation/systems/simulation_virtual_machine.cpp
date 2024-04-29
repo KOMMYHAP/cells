@@ -25,7 +25,7 @@ void SimulationVirtualMachine::Run(CellId id)
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const
 {
     const auto index = static_cast<uint8_t>(type);
-    assert(index < _procedureTypeMapping.size());
+    ASSERT(index < _procedureTypeMapping.size());
     return _procedureTypeMapping[index];
 }
 
@@ -33,11 +33,7 @@ const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(Proce
 {
     const ProcedureId procedureId = GetProcedureId(type);
     const auto id = static_cast<uint8_t>(procedureId);
-    if (id >= _procedureDataList.size()) {
-        // ProcedureType reaches ProcedureTableLimit
-        assert(false);
-        return nullptr;
-    }
+    ASSERT(id < _procedureDataList.size());
 
     auto& info = _procedureDataList[id];
     if (info.procedure == nullptr) {
