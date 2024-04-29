@@ -9,6 +9,11 @@ AgeSystem::AgeSystem(uint32_t capacity, HealthSystem& healthSystem)
 
 void AgeSystem::Increment(CellId id, CellAge limitAge)
 {
+     if (_healthSystem.IsZero(id)) {
+        // cell is dead
+        return;
+    }
+
     const auto index = CellIdToInt(id);
     ASSERT(index <= _ageList.size());
     const CellAge currentAge = _ageList[index];

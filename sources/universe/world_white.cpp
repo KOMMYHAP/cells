@@ -47,10 +47,6 @@ void WorldWhite::Tick()
     });
 
     _idSystem.Iterate([this](const CellId id) {
-        const bool isDead = _healthSystem.IsZero(id);
-        if (isDead) {
-            return;
-        }
         _ageSystem.Increment(id, LimitCellAge);
     });
 
