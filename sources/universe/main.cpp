@@ -50,21 +50,10 @@ auto GetTimeInfo(sf::Time time)
     return std::make_tuple(tickTimeValue, tickUnit);
 }
 
-struct CommonInitializationGuard {
-    CommonInitializationGuard()
-    {
-        common::InitRandom("42");
-    }
-    ~CommonInitializationGuard()
-    {
-        common::TermRandom();
-    }
-};
 
 int main(int argc, char** argv)
 {
-    CommonInitializationGuard commonInitializationGuard {};
-    common::EnableBreakpointOnAssert(true);
+    common::InitRandom("42");
 
     ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
     ASSERT(FieldWidth % (CellSize + CellPadding) == 0);
@@ -171,6 +160,8 @@ int main(int argc, char** argv)
         frameElapsedTime = frameClock.getElapsedTime();
         frameClock.restart();
     }
+
+    common::TermRandom();
 
     return 0;
 }
