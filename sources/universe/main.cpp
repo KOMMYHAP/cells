@@ -49,7 +49,6 @@ auto GetTimeInfo(sf::Time time)
     return std::make_tuple(tickTimeValue, tickUnit);
 }
 
-
 int main(int argc, char** argv)
 {
     common::InitRandom("42");
@@ -115,7 +114,7 @@ int main(int argc, char** argv)
     sf::RenderStates rootStates;
     rootStates.transform.translate(FieldOffset, FieldOffset);
 
-    sf::Time frameElapsedTime = sf::milliseconds(15);
+    sf::Time frameElapsedTime;
 
     common::SampleCounter<float, 10> frameTimeCounter;
 
