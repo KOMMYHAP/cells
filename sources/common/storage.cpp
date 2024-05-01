@@ -33,11 +33,12 @@ const std::any& Storage::Get(std::type_index index) const
     return it->second;
 }
 
-void Storage::Store(std::any item)
+std::any& Storage::Store(std::any item)
 {
     const std::type_index itemIndex { item.type() };
     ASSERT(!_items.contains(itemIndex));
-    _items[itemIndex] = std::move(item);
+    auto [it, _] = _items.emplace(itemIndex, std::move(item));
+    return it->second;
 }
 
 void Storage::Remove(std::type_index index)

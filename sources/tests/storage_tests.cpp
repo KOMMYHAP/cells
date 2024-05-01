@@ -58,6 +58,15 @@ TEST(StorageTest, TestMissingAdd_DeathTest)
     ASSERT_DEATH(createThenRemove(), "");
 }
 
+TEST(StorageTest, TestAddSameItem_DeathTest)
+{
+    auto addSameItem = []() {
+        common::Storage storage;
+        storage.Store<int>();
+        storage.Store<int>();
+    };
+    ASSERT_DEATH(addSameItem(), "");
+}
 
 TEST(StorageTest, TestMissingRemove_DeathTest)
 {
@@ -81,4 +90,21 @@ TEST(StorageTest, TestModifyItem)
     storage.Modify<int>() = 100;
     ASSERT_EQ(storage.Get<int>(), 100);
     storage.Remove<int>();
+}
+
+TEST(StorageTest, TestReferenceOnCreatedItem)
+{
+    {
+        common::Storage storage;
+        int& item = storage.Store<int>(42);
+        ASSERT_EQ(item, 42);
+        storage.Remove<int>();
+    }
+    {
+        common::Storage storage;
+        int& lhs = storage.Store<int>(42);
+        int& rhs = storage.Modify<int>();
+        ASSERT_EQ(&lhs, &rhs);
+        storage.Remove<int>();
+    }
 }

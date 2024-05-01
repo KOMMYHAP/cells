@@ -21,10 +21,13 @@ const T& Storage::Get() const
 }
 
 template <class T, class... Args>
-void Storage::Store(Args&&... args)
+T& Storage::Store(Args&&... args)
 {
     std::any item = std::make_any<T>(std::forward<Args>(args)...);
-    Store(std::move(item));
+    std::any& storedItem = Store(std::move(item));
+    T* typedItem = std::any_cast<T>(&storedItem);
+    ASSERT(typedItem);
+    return *typedItem;
 }
 
 template <class T>
