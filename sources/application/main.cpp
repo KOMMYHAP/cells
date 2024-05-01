@@ -6,10 +6,11 @@
 
 #include "breakpoint.h"
 #include "command_line.h"
+#include "main_window.h"
 #include "profile/profile.h"
 #include "random.h"
 #include "simulation.h"
-#include "world_white.h"
+#include "world.h"
 
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -47,6 +48,42 @@ auto GetTimeInfo(sf::Time time)
                                         : static_cast<float>(time.asMicroseconds());
 
     return std::make_tuple(tickTimeValue, tickUnit);
+}
+
+class LegacyUpdatable : public Updatable {
+public:
+    LegacyUpdatable(Simulation& simulation);
+    void Update(sf::Time elapsedTime) override;
+
+private:
+    Simulation& simulation;
+};
+
+void LegacyUpdatable::Update(sf::Time elapsedTime)
+{
+    simulation.Run(elapsedTime);
+}
+
+class LegacyDrawable : public Drawable {
+public:
+    LegacyDrawable(sf::RenderTarget& renderTarget, World& world);
+    void Draw() override;
+
+private:
+    sf::RenderTarget& _renderTarget;
+    World& _world;
+    sf::RenderStates _rootStates;
+};
+
+LegacyDrawable::LegacyDrawable(sf::RenderTarget& renderTarget, World& world)
+    : _renderTarget(renderTarget)
+    , _world(world)
+{
+}
+
+void LegacyDrawable::Draw()
+{
+    _world.Render(_renderTarget, _rootStates);
 }
 
 int main(int argc, char** argv)
@@ -87,17 +124,23 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    sf::RenderWindow window(sf::VideoMode(ScreenWidth, ScreenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
-    window.setVerticalSyncEnabled(false);
-    window.setFramerateLimit(60);
-
-    WorldWhite::Config worldWhiteConfig {
-        ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader), WorldWhite::SpawnPolicy::Random
+    World::Config worldConfig {
+        ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader), World::SpawnPolicy::Random
     };
-    WorldWhite world { std::move(worldWhiteConfig) };
+    World world { std::move(worldConfig) };
 
     Simulation simulation { world };
     simulation.SetAutoMode(TargetSimulationTime);
+
+    MainWindow mainWindow;
+    sf::RenderTarget* renderTarget = mainWindow.TryCreate("Cells", sf::Vector2u { ScreenWidth, ScreenHeight });
+    if (!renderTarget) {
+        PANIC("Failed to create main window!");
+        return -1;
+    }
+    MainWindow::RuntimeSetup runtimeConfig;
+
+    runtimeConfig.updatableList.push_back(&simulation);
 
     sf::Clock frameClock;
     sf::Clock simulationClock;
@@ -136,7 +179,7 @@ int main(int argc, char** argv)
             const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
             const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
-            const WorldWhite::Statistics statistics = world.GetStatistics();
+            const World::Statistics statistics = world.GetStatistics();
             const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(statistics.cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
 
             statusMessageBuffer.clear();

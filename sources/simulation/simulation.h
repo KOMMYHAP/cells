@@ -1,12 +1,13 @@
 #pragma once
 
 #include "sample_counter.h"
+#include "updatable.h"
 
-class WorldInterface;
+class World;
 
-class Simulation {
+class Simulation : public Updatable {
 public:
-    Simulation(WorldInterface& world);
+    Simulation(World& world);
 
     void SetAutoMode(sf::Time targetSimulationTime);
     void SetManualMode();
@@ -15,6 +16,10 @@ public:
 
     void Tick();
     void Ticks(uint32_t ticks);
+
+public:
+    // Simulation will be updated each frame.
+    void Update(sf::Time elapsedTime) override;
 
 private:
     void ProcessTick();
@@ -25,7 +30,7 @@ private:
         sf::Time availableTimeToSpent;
     };
 
-    WorldInterface& _world;
+    World& _world;
 
     using TimeCounter = common::SampleCounter<float, 10>;
     TimeCounter _tickCounter;

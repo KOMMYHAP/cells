@@ -1,17 +1,18 @@
-project(cells-universe)
+project(cells-application)
 add_executable(${PROJECT_NAME} main.cpp)
 
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        world_white.cpp
+        main_window.cpp
         main.cpp
+        universe_pch.h
 )
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        world_white.h
+        main_window.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -21,6 +22,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-processor
         cells-render
         cells-simulation
+        cells-application-interface
         sfml-system
 )
 

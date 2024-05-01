@@ -4,15 +4,12 @@
 #include "systems/position_system.h"
 #include "systems/type_system.h"
 
-WorldRender::WorldRender(Config&& config, PositionSystem& positionSystem, IdSystem& idSystem, TypeSystem& typeSystem)
+WorldRender::WorldRender(Config&& config)
     : _config(std::move(config))
     , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
-    , _positionSystem(positionSystem)
-    , _idSystem(idSystem)
-    , _typeSystem(typeSystem)
 {
-    const uint16_t cellsWidth = _positionSystem.GetWidth();
-    const uint16_t cellsHeight = _positionSystem.GetHeight();
+    const uint16_t cellsWidth = _config.positionSystem.GetWidth();
+    const uint16_t cellsHeight = _config.positionSystem.GetHeight();
 
     const auto pixelsWidth = static_cast<float>(cellsWidth * _config.cellSize);
     const auto pixelsHeight = static_cast<float>(cellsHeight * _config.cellSize);
@@ -47,7 +44,7 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
     std::fill(_textureData.begin(), _textureData.end(), clearColor);
 
-    _idSystem.Iterate([this](const CellId id) {
+    _config.idSystem.Iterate([this](const CellId id) {
         ProcessCell(id);
     });
     _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
@@ -74,12 +71,12 @@ sf::Color WorldRender::GetColor(CellType type) const
 
 void WorldRender::ProcessCell(CellId id)
 {
-    const CellPosition position = _positionSystem.Get(id);
-    const uint16_t width = _positionSystem.GetWidth();
+    const CellPosition position = _config.positionSystem.Get(id);
+    const uint16_t width = _config.positionSystem.GetWidth();
     const auto pixelIndex = position.y * width + position.x;
     ASSERT(pixelIndex < _textureData.size());
 
-    const CellType cellType = _typeSystem.Get(id);
+    const CellType cellType = _config.typeSystem.Get(id);
 
     uint32_t& pixel = _textureData[position.y * width + position.x];
     pixel = GetColor(cellType).toInteger();

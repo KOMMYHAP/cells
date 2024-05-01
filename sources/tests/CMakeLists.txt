@@ -5,8 +5,9 @@ add_executable(${PROJECT_NAME} main_tests.cpp tests_pch.h
         processor_memory_tests.cpp
         processor_tests.cpp
         procedure_tests.cpp
+        storage_tests.cpp
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE tests_pch.h)
-target_link_libraries(${PROJECT_NAME} PRIVATE cells-processor cells-simulation gtest)
+target_link_libraries(${PROJECT_NAME} PRIVATE cells-processor gtest)
 target_copy_required_dll(${PROJECT_NAME})

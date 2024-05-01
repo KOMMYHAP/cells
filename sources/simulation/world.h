@@ -13,10 +13,10 @@
 #include "systems/spawn_system.h"
 #include "systems/spawner.h"
 #include "systems/type_system.h"
-#include "world_interface.h"
 #include "world_render.h"
+#include "updatable.h"
 
-class WorldWhite final : public WorldInterface {
+class World {
 public:
     enum class SpawnPolicy {
         Random,
@@ -30,9 +30,9 @@ public:
         std::unique_ptr<sf::Shader> shader;
         SpawnPolicy spawnPolicy { SpawnPolicy::Patrol };
     };
-    WorldWhite(Config&& config);
+    World(Config&& config);
 
-    void Tick() override;
+    void Update(sf::Time elapsedTime);
     void Render(sf::RenderTarget& target, sf::RenderStates states);
 
     struct Statistics {
@@ -45,7 +45,7 @@ public:
 private:
     static WorldRender::Config MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader);
     SpawnSystem::Config MakeSpawnSystemConfig(float fullnessPercent);
-    static SimulationVirtualMachine::Config MakeSimulationVmConfig(WorldWhite* world);
+    static SimulationVirtualMachine::Config MakeSimulationVmConfig(World* world);
 
     void RegisterProcedures();
 

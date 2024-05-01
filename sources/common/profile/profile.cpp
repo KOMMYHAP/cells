@@ -1,8 +1,8 @@
 #include "profile.h"
 
 #include <windows.h>
-#include "WinPixEventRuntime/pix3.h"
 
+#include "WinPixEventRuntime/pix3.h"
 
 namespace common::details {
 
@@ -24,7 +24,7 @@ ProfileCategory MakeProfileCategory()
 {
     static ProfileCategory nextCategory { 0 };
     if (nextCategory == ProfileCategory::Invalid) {
-        return nextCategory;
+        return ProfileCategory::Invalid;
     }
 
     const auto value = static_cast<std::underlying_type_t<ProfileCategory>>(nextCategory);

@@ -13,7 +13,7 @@ add_subdirectory(cell_factories)
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         simulation.cpp
-        world_interface.h
+        world.cpp
         simulation_pch.h
 )
 
@@ -21,6 +21,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         simulation.h
+        world.h
         simulation_profile_category.h
 )
 
@@ -29,7 +30,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-common
         cells-processor
-        sfml-system
+        cells-application-interface
 )
 
 

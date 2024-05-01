@@ -1,4 +1,4 @@
-#include "world_white.h"
+#include "world.h"
 
 #include "procedures/consume_procedure.h"
 #include "procedures/look_procedure.h"
@@ -9,7 +9,7 @@ constexpr CellAge LimitCellAge { 100 };
 constexpr uint16_t BestCellSelectionSize { 100 };
 constexpr uint16_t SelectionEpochTicks { 1000 };
 
-WorldWhite::WorldWhite(Config&& config)
+World::World(Config&& config)
     : _idSystem(config.width * config.height)
     , _brainSystem(_idSystem.GetCellsCountLimit())
     , _typeSystem(_idSystem.GetCellsCountLimit())
@@ -39,7 +39,7 @@ WorldWhite::WorldWhite(Config&& config)
     }
 }
 
-void WorldWhite::Tick()
+void World::Tick()
 {
     // Process brain of each cell.
     _idSystem.Iterate([this](const CellId id) {
@@ -60,7 +60,7 @@ void WorldWhite::Tick()
     _statistics.tick += 1;
 }
 
-void WorldWhite::RegisterProcedures()
+void World::RegisterProcedures()
 {
     _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _simulationVm, _positionSystem);
     _simulationVm.RegisterProcedure<ConsumeProcedure>(ProcedureType::Consume, 1, 0, "consume", _simulationVm, _positionSystem, _healthSystem, _typeSystem);
@@ -68,7 +68,7 @@ void WorldWhite::RegisterProcedures()
     _simulationVm.RegisterProcedure<ReproductionProcedure>(ProcedureType::Reproduction, 1, 0, "reproduction", _simulationVm, _positionSystem, _healthSystem, _brainSystem, _typeSystem, _spawner);
 }
 
-WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader)
+WorldRender::Config World::MakeRenderConfig(uint32_t cellSize, std::unique_ptr<sf::Shader> shader)
 {
     ASSERT(cellSize < 255);
     const sf::Color gray { 0xCCCCCCFF };
@@ -79,12 +79,12 @@ WorldRender::Config WorldWhite::MakeRenderConfig(uint32_t cellSize, std::unique_
     };
 }
 
-void WorldWhite::Render(sf::RenderTarget& target, sf::RenderStates states)
+void World::Render(sf::RenderTarget& target, sf::RenderStates states)
 {
     _render.Render(target, states);
 }
 
-SimulationVirtualMachine::Config WorldWhite::MakeSimulationVmConfig(WorldWhite* world)
+SimulationVirtualMachine::Config World::MakeSimulationVmConfig(World* world)
 {
     auto watcher = [world](ProcessorState state) {
         if (state == ProcessorState::Good) {
@@ -105,7 +105,7 @@ SimulationVirtualMachine::Config WorldWhite::MakeSimulationVmConfig(WorldWhite* 
     };
 }
 
-SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent)
+SpawnSystem::Config World::MakeSpawnSystemConfig(float fullnessPercent)
 {
     const auto targetPopulationSize = static_cast<uint32_t>(round(fullnessPercent * static_cast<float>(_idSystem.GetCellsCountLimit()) / 100.0f));
     return {
@@ -116,7 +116,7 @@ SpawnSystem::Config WorldWhite::MakeSpawnSystemConfig(float fullnessPercent)
     };
 }
 
-void WorldWhite::SpawnMoreIfNeeded()
+void World::SpawnMoreIfNeeded()
 {
     const uint32_t aliveCellsCount = _idSystem.GetCellsCount();
     if (aliveCellsCount == 0) {
@@ -134,7 +134,7 @@ void WorldWhite::SpawnMoreIfNeeded()
     }
 }
 
-void WorldWhite::Respawn()
+void World::Respawn()
 {
     _idSystem.Iterate([&](const CellId id) {
         _graveyardSystem.Bury(id);
@@ -142,4 +142,8 @@ void WorldWhite::Respawn()
     _graveyardSystem.Cleanup();
 
     _spawnSystem.TryToSpawn();
+}
+
+void World::Update(sf::Time elapsedTime)
+{
 }

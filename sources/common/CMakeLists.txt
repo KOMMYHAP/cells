@@ -19,6 +19,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         sample_counter.cpp
         breakpoint.cpp
         random.cpp
+        storage.cpp
 )
 
 
@@ -31,6 +32,8 @@ target_sources(${PROJECT_NAME} PUBLIC
         sample_counter.hpp
         breakpoint.h
         random.h
+        storage.h
+        storage.hpp
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
