@@ -3,11 +3,11 @@
 #include "sample_counter.h"
 #include "updatable.h"
 
-class World;
+class BaseScript;
 
-class Simulation : public Updatable {
+class Simulation {
 public:
-    Simulation(World& world);
+    Simulation(BaseScript& tickScript);
 
     void SetAutoMode(sf::Time targetSimulationTime);
     void SetManualMode();
@@ -16,10 +16,6 @@ public:
 
     void Tick();
     void Ticks(uint32_t ticks);
-
-public:
-    // Simulation will be updated each frame.
-    void Update(sf::Time elapsedTime) override;
 
 private:
     void ProcessTick();
@@ -30,7 +26,7 @@ private:
         sf::Time availableTimeToSpent;
     };
 
-    World& _world;
+    BaseScript& _tickScript;
 
     using TimeCounter = common::SampleCounter<float, 10>;
     TimeCounter _tickCounter;

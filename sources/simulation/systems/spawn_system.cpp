@@ -6,12 +6,13 @@
 #include "systems/id_system.h"
 #include "systems/position_system.h"
 #include "systems/spawner.h"
+#include "storage.h"
 
 SpawnSystem::SpawnSystem(SpawnSystem::Config&& config)
-    : _positionSystem(config.positionSystem)
-    , _idSystem(config.idSystem)
+    : _positionSystem(&config.systems.Modify<PositionSystem>())
+    , _idSystem(&config.systems.Modify<IdSystem>())
     , _targetPopulationSize(config.populationSize)
-    , _spawner(config.spawner)
+    , _spawner(&config.systems.Modify<Spawner>())
 {
 }
 
@@ -21,7 +22,7 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
         return;
     }
 
-    std::vector<CellPosition> positions = _positionSystem.CollectFreePositions();
+    std::vector<CellPosition> positions = _positionSystem->CollectFreePositions();
     std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
     uint32_t spawnedCount { 0 };
 
@@ -40,7 +41,7 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
         properties.age = CellAge::Zero;
         properties.brain = *mbBrain;
 
-        const CellId id = _spawner.TrySpawn(properties);
+        const CellId id = _spawner->TrySpawn(properties);
         if (id == CellId::Invalid) {
             break;
         }
@@ -59,11 +60,11 @@ void SpawnSystem::SetCellFactory(ICellFactory& factory)
 
 void SpawnSystem::TryToSpawn()
 {
-    if (_idSystem.GetCellsCount() >= _targetPopulationSize) {
+    if (_idSystem->GetCellsCount() >= _targetPopulationSize) {
         return;
     }
 
-    const uint32_t cellsCount = _targetPopulationSize - _idSystem.GetCellsCount();
+    const uint32_t cellsCount = _targetPopulationSize - _idSystem->GetCellsCount();
     SpawnN(cellsCount);
 }
 

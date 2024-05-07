@@ -1,0 +1,16 @@
+#pragma once
+
+struct WorldWidgetParameters {
+    uint16_t screenWidth { 0 };
+    uint16_t screenHeight { 0 };
+
+    uint16_t fieldOffset { 0 };
+    uint16_t fieldWidth { 0 };
+    uint16_t fieldHeight { 0 };
+
+    uint16_t statusTextOffset { 0 };
+    uint16_t statusTextSize { 0 };
+
+    uint16_t cellPadding { 0 };
+    uint16_t cellSize { 0 };
+};

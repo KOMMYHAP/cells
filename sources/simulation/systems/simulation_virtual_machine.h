@@ -4,9 +4,11 @@
 #include "components/procedure_type.h"
 #include "vm/virtual_machine.h"
 
+namespace common {
+class Storage;
+}
+
 class BrainSystem;
-class HealthSystem;
-class TypeSystem;
 
 struct SimulationProcedureInfo {
     std::string name;
@@ -18,9 +20,7 @@ struct SimulationProcedureInfo {
 class SimulationVirtualMachine {
 public:
     struct Config {
-        BrainSystem& brainSystem;
-        TypeSystem& typeSystem;
-        HealthSystem& healthSystem;
+        common::Storage& systems;
         uint8_t systemInstructionPerStep;
         ProcessorStateWatcher processorStateWatcher;
     };
@@ -44,9 +44,7 @@ private:
     };
 
     VirtualMachine _virtualMachine;
-    BrainSystem& _brainSystem;
-    TypeSystem& _typeSystem;
-    HealthSystem& _healthSystem;
+    BrainSystem* _brainSystem { nullptr };
     CellId _runningCellId;
     std::vector<ProcedureData> _procedureDataList;
     std::vector<ProcedureId> _procedureTypeMapping;

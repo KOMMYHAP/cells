@@ -3,7 +3,7 @@
 namespace common {
 
 template <class T>
-T& Storage::Modify()
+T& Storage::Modify() const
 {
     Item& item = Modify(typeid(T));
     T* typedItem = boost::anys::any_cast<T>(&item);

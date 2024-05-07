@@ -24,6 +24,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-simulation
         cells-application-interface
         sfml-system
+        cells-ui
 )
 
 

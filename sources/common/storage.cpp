@@ -22,10 +22,11 @@ Storage::~Storage()
     }
 }
 
-Storage::Item& Storage::Modify(Storage::ItemType type)
+Storage::Item& Storage::Modify(Storage::ItemType type) const
 {
     ASSERT(_items.contains(type));
-    return _items[type];
+    auto it = _items.find(type);
+    return const_cast<Item&>(it->second);
 }
 
 const Storage::Item& Storage::Get(Storage::ItemType type) const

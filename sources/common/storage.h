@@ -8,7 +8,7 @@ public:
     ~Storage();
 
     template <class T>
-    T& Modify();
+    T& Modify() const;
 
     template <class T>
     const T& Get() const;
@@ -29,7 +29,7 @@ public:
     using ItemType = boost::typeindex::type_index;
     using Item = boost::anys::unique_any;
 
-    Item& Modify(ItemType type);
+    Item& Modify(ItemType type) const;
     const Item& Get(ItemType type) const;
 
     Item& Store(Item item);

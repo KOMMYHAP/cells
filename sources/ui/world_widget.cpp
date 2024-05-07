@@ -5,16 +5,13 @@
 
 WorldWidget::WorldWidget(sf::RenderTarget& renderTarget, World& world)
     : _renderTarget(renderTarget)
+    , _worldRender(world.ModifySystems().Modify<WorldRender>())
 {
-    WorldRender::Config renderConfig {
-        {},{},{},
-        world.
-    };
-    _worldRender = std::make_unique<WorldRender>(std::move(renderConfig));
 }
 
 WorldWidget::~WorldWidget() = default;
 
 void WorldWidget::Draw()
 {
+    _worldRender.Render(_renderTarget, _rootStates);
 }

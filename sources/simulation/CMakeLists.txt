@@ -21,8 +21,11 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         simulation.h
+        base_script.h
         world.h
         simulation_profile_category.h
+        world_parameters.h
+        simulation_parameters.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

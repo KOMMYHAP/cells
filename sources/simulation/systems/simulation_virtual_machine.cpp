@@ -1,22 +1,18 @@
 #include "simulation_virtual_machine.h"
-#include "components/cell_health.h"
+#include "storage.h"
 #include "systems/brain_system.h"
-#include "systems/health_system.h"
-#include "systems/type_system.h"
 
 SimulationVirtualMachine::SimulationVirtualMachine(Config&& config)
     : _virtualMachine(std::move(config.processorStateWatcher), config.systemInstructionPerStep)
-    , _brainSystem(config.brainSystem)
-    , _typeSystem(config.typeSystem)
+    , _brainSystem(&config.systems.Modify<BrainSystem>())
     , _procedureDataList(ProcedureTableLimit)
     , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
-    , _healthSystem(config.healthSystem)
 {
 }
 
 void SimulationVirtualMachine::Run(CellId id)
 {
-    ProcessorMemory memory = _brainSystem.AccessMemory(id);
+    ProcessorMemory memory = _brainSystem->AccessMemory(id);
     _runningCellId = id;
     _virtualMachine.Run(memory);
     _runningCellId = CellId::Invalid;

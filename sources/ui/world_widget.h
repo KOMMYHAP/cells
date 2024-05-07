@@ -15,5 +15,5 @@ public:
 private:
     sf::RenderTarget& _renderTarget;
     sf::RenderStates _rootStates;
-    std::unique_ptr<WorldRender> _worldRender;
+    WorldRender& _worldRender;
 };

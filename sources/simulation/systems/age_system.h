@@ -13,6 +13,8 @@ public:
     void Set(CellId id, CellAge age);
     CellAge Get(CellId id) const;
 
+    void Tick();
+
 private:
     std::vector<CellAge> _ageList;
     HealthSystem& _healthSystem;

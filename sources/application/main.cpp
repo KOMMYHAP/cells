@@ -11,6 +11,19 @@
 #include "random.h"
 #include "simulation.h"
 #include "world.h"
+#include "world_widget.h"
+
+#include "systems/age_system.h"
+#include "systems/brain_system.h"
+#include "systems/graveyard_system.h"
+#include "systems/health_system.h"
+#include "systems/id_system.h"
+#include "systems/position_system.h"
+#include "systems/selection_system.h"
+#include "systems/simulation_virtual_machine.h"
+#include "systems/spawn_system.h"
+#include "systems/spawner.h"
+#include "systems/type_system.h"
 
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -50,41 +63,6 @@ auto GetTimeInfo(sf::Time time)
     return std::make_tuple(tickTimeValue, tickUnit);
 }
 
-class LegacyUpdatable : public Updatable {
-public:
-    LegacyUpdatable(Simulation& simulation);
-    void Update(sf::Time elapsedTime) override;
-
-private:
-    Simulation& simulation;
-};
-
-void LegacyUpdatable::Update(sf::Time elapsedTime)
-{
-    simulation.Run(elapsedTime);
-}
-
-class LegacyDrawable : public Drawable {
-public:
-    LegacyDrawable(sf::RenderTarget& renderTarget, World& world);
-    void Draw() override;
-
-private:
-    sf::RenderTarget& _renderTarget;
-    World& _world;
-    sf::RenderStates _rootStates;
-};
-
-LegacyDrawable::LegacyDrawable(sf::RenderTarget& renderTarget, World& world)
-    : _renderTarget(renderTarget)
-    , _world(world)
-{
-}
-
-void LegacyDrawable::Draw()
-{
-    _world.Render(_renderTarget, _rootStates);
-}
 
 int main(int argc, char** argv)
 {
@@ -138,71 +116,77 @@ int main(int argc, char** argv)
         PANIC("Failed to create main window!");
         return -1;
     }
+
     MainWindow::RuntimeSetup runtimeConfig;
-
     runtimeConfig.updatableList.push_back(&simulation);
-
-    sf::Clock frameClock;
-    sf::Clock simulationClock;
-
-    sf::Text statusText;
-    statusText.setFont(defaultFont);
-    statusText.setCharacterSize(StatusTextSize);
-    statusText.setPosition(FieldOffset + StatusTextOffset, StatusTextOffset);
-
-    const auto mainCategory = common::MakeProfileCategory();
-    std::string statusMessageBuffer;
-    statusMessageBuffer.reserve(StatusMessageBufferLimit);
 
     sf::RenderStates rootStates;
     rootStates.transform.translate(FieldOffset, FieldOffset);
+    WorldWidget worldWidget { *renderTarget, world };
+    runtimeConfig.drawableList.push_back(&worldWidget);
 
-    sf::Time frameElapsedTime;
-
-    common::SampleCounter<float, 10> frameTimeCounter;
-
-    while (window.isOpen()) {
-        common::ProfileScope frameProfileScope { "Frame", mainCategory };
-
-        sf::Event event {};
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-            }
-        }
-
-        simulation.Run(frameElapsedTime);
-
-        {
-            frameTimeCounter.AddSample(frameElapsedTime.asSeconds());
-            sf::Time frameTime = sf::seconds(frameTimeCounter.CalcMedian());
-            const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
-            const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
-
-            const World::Statistics statistics = world.GetStatistics();
-            const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(statistics.cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
-
-            statusMessageBuffer.clear();
-            std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
-                "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%) | Generation #{:3} | Tick #{:9}",
-                fps,
-                frameTimeValue, frameUnit,
-                statistics.cellsCount, cellsCountPercent,
-                statistics.generation,
-                statistics.tick);
-            statusText.setString(sf::String(statusMessageBuffer));
-        }
-
-        window.clear(Gray);
-        world.Render(window, rootStates);
-        window.draw(statusText);
-        window.display();
-
-        frameElapsedTime = frameClock.getElapsedTime();
-        frameClock.restart();
-    }
+    mainWindow.Run(std::move(runtimeConfig));
 
     common::TermRandom();
-
     return 0;
+    //
+    //    sf::Clock frameClock;
+    //    sf::Clock simulationClock;
+    //
+    //    sf::Text statusText;
+    //    statusText.setFont(defaultFont);
+    //    statusText.setCharacterSize(StatusTextSize);
+    //    statusText.setPosition(FieldOffset + StatusTextOffset, StatusTextOffset);
+    //
+    //    const auto mainCategory = common::MakeProfileCategory();
+    //    std::string statusMessageBuffer;
+    //    statusMessageBuffer.reserve(StatusMessageBufferLimit);
+    //
+    //    sf::Time frameElapsedTime;
+    //
+    //    common::SampleCounter<float, 10> frameTimeCounter;
+    //
+    //    while (window.isOpen()) {
+    //        common::ProfileScope frameProfileScope { "Frame", mainCategory };
+    //
+    //        sf::Event event {};
+    //        while (window.pollEvent(event)) {
+    //            if (event.type == sf::Event::Closed) {
+    //                window.close();
+    //            }
+    //        }
+    //
+    //        simulation.Run(frameElapsedTime);
+    //
+    //        {
+    //            frameTimeCounter.AddSample(frameElapsedTime.asSeconds());
+    //            sf::Time frameTime = sf::seconds(frameTimeCounter.CalcMedian());
+    //            const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
+    //            const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
+    //
+    //            const World::Statistics statistics = world.GetStatistics();
+    //            const uint8_t cellsCountPercent = static_cast<uint8_t>(static_cast<float>(statistics.cellsCount) / (RowsCount * ColumnsCount) * 100.0f);
+    //
+    //            statusMessageBuffer.clear();
+    //            std::format_to_n(std::back_inserter(statusMessageBuffer), statusMessageBuffer.capacity(),
+    //                "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%) | Generation #{:3} | Tick #{:9}",
+    //                fps,
+    //                frameTimeValue, frameUnit,
+    //                statistics.cellsCount, cellsCountPercent,
+    //                statistics.generation,
+    //                statistics.tick);
+    //            statusText.setString(sf::String(statusMessageBuffer));
+    //        }
+    //
+    //        window.clear(Gray);
+    //        world.Render(window, rootStates);
+    //        window.draw(statusText);
+    //        window.display();
+    //
+    //        frameElapsedTime = frameClock.getElapsedTime();
+    //        frameClock.restart();
+    //    }
+    //
+    //
+    //    return 0;
 }
