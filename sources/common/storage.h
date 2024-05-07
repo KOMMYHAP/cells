@@ -14,6 +14,7 @@ public:
     const T& Get() const;
 
     template <class T, class... Args>
+        requires std::constructible_from<T, Args...>
     T& Store(Args&&... args);
 
     template <class T>
@@ -25,16 +26,19 @@ public:
     size_t Count() const;
 
 public:
-    std::any& Modify(std::type_index index);
-    const std::any& Get(std::type_index index) const;
+    using ItemType = boost::typeindex::type_index;
+    using Item = boost::anys::unique_any;
 
-    std::any& Store(std::any item);
-    void Remove(std::type_index index);
+    Item& Modify(ItemType type);
+    const Item& Get(ItemType type) const;
 
-    bool Has(std::type_index index) const;
+    Item& Store(Item item);
+    void Remove(ItemType index);
+
+    bool Has(ItemType index) const;
 
 private:
-    std::map<std::type_index, std::any> _items;
+    std::map<ItemType, Item> _items;
 };
 }
 

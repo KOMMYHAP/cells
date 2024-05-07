@@ -5,8 +5,8 @@ namespace common {
 template <class T>
 T& Storage::Modify()
 {
-    std::any& item = Modify(typeid(T));
-    T* typedItem = std::any_cast<T>(&item);
+    Item& item = Modify(typeid(T));
+    T* typedItem = boost::anys::any_cast<T>(&item);
     ASSERT(typedItem);
     return *typedItem;
 }
@@ -14,18 +14,19 @@ T& Storage::Modify()
 template <class T>
 const T& Storage::Get() const
 {
-    const std::any& item = Get(typeid(T));
-    const T* typedItem = std::any_cast<T>(&item);
+    const Item& item = Get(typeid(T));
+    const T* typedItem = boost::anys::any_cast<T>(&item);
     ASSERT(typedItem);
     return *typedItem;
 }
 
 template <class T, class... Args>
+    requires std::constructible_from<T, Args...>
 T& Storage::Store(Args&&... args)
 {
-    std::any item = std::make_any<T>(std::forward<Args>(args)...);
-    std::any& storedItem = Store(std::move(item));
-    T* typedItem = std::any_cast<T>(&storedItem);
+    auto item = Item(boost::anys::in_place_type_t<T>{}, std::forward<Args>(args)...);
+    Item& storedItem = Store(std::move(item));
+    T* typedItem = boost::anys::any_cast<T>(&storedItem);
     ASSERT(typedItem);
     return *typedItem;
 }

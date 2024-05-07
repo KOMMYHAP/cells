@@ -39,4 +39,7 @@ target_sources(${PROJECT_NAME} PUBLIC
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_precompile_headers(${PROJECT_NAME} PRIVATE common_pch.h)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
-target_link_libraries(${PROJECT_NAME} PUBLIC libassert::assert)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        libassert::assert
+        boost_any
+)

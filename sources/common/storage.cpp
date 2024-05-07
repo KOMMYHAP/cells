@@ -1,50 +1,52 @@
 #include "storage.h"
+#include "boost/any/unique_any.hpp"
 
 namespace common {
+    
 
-static bool StorageItemLess(const std::any& item, std::type_index index)
+static bool StorageItemLess(const Storage::Item & item, Storage::ItemType index)
 {
-    return std::type_index { item.type() } < index;
+    return Storage::ItemType { item.type() } < index;
 };
-static bool StorageItemLess(std::type_index index, const std::any& item)
+static bool StorageItemLess(Storage::ItemType index, const Storage::Item & item)
 {
-    return index < std::type_index { item.type() };
+    return index < Storage::ItemType { item.type() };
 };
 
 Storage::Storage() = default;
 
 Storage::~Storage()
 {
-    for (const std::any& item : _items) {
+    for (auto&& [type, item] : _items) {
         PANIC("You should manually remove all items from storage to ensure correct order!", item);
     }
 }
 
-std::any& Storage::Modify(std::type_index index)
+Storage::Item& Storage::Modify(Storage::ItemType type)
 {
-    ASSERT(_items.contains(index));
-    return _items[index];
+    ASSERT(_items.contains(type));
+    return _items[type];
 }
 
-const std::any& Storage::Get(std::type_index index) const
+const Storage::Item& Storage::Get(Storage::ItemType type) const
 {
-    ASSERT(_items.contains(index));
-    auto it = _items.find(index);
+    ASSERT(_items.contains(type));
+    auto it = _items.find(type);
     return it->second;
 }
 
-std::any& Storage::Store(std::any item)
+Storage::Item& Storage::Store(Storage::Item item)
 {
-    const std::type_index itemIndex { item.type() };
-    ASSERT(!_items.contains(itemIndex));
-    auto [it, _] = _items.emplace(itemIndex, std::move(item));
+    const Storage::ItemType type { item.type() };
+    ASSERT(!_items.contains(type));
+    auto [it, _] = _items.emplace(type, std::move(item));
     return it->second;
 }
 
-void Storage::Remove(std::type_index index)
+void Storage::Remove(Storage::ItemType type)
 {
-    ASSERT(_items.contains(index));
-    _items.erase(index);
+    ASSERT(_items.contains(type));
+    _items.erase(type);
 }
 
 size_t Storage::Count() const
@@ -52,9 +54,9 @@ size_t Storage::Count() const
     return _items.size();
 }
 
-bool Storage::Has(std::type_index index) const
+bool Storage::Has(Storage::ItemType type) const
 {
-    return _items.contains(index);
+    return _items.contains(type);
 }
 
 }

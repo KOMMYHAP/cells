@@ -77,5 +77,9 @@
 #include <unordered_set>
 #include <span>
 
+// Boost libraries
+#include <boost/any/unique_any.hpp>
+
+
 // External libraries
 #include "libassert/assert.hpp"

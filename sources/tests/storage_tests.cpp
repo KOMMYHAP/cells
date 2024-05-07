@@ -108,3 +108,16 @@ TEST(StorageTest, TestReferenceOnCreatedItem)
         storage.Remove<int>();
     }
 }
+
+TEST(StorageTest, TestMoveOnlyItem)
+{
+    std::unique_ptr<int> u;
+    u = std::make_unique<int>(42);
+
+    using T = std::unique_ptr<int>;
+    common::Storage storage;
+    auto& p = storage.Store<T>(std::move(u));
+    ASSERT_EQ(*p, 42);
+
+    storage.Remove<T>();
+}
