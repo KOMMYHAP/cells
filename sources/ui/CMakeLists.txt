@@ -7,7 +7,7 @@ target_sources(${PROJECT_NAME} PUBLIC
 target_sources(${PROJECT_NAME} PRIVATE
         ui_pch.h
         world_widget.h
-        world_widget_parameters.h
+        ui_layout.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

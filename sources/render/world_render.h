@@ -12,7 +12,7 @@ public:
     struct Config {
         std::unique_ptr<sf::Shader> fragmentShader;
         std::vector<sf::Color> colors;
-        uint8_t cellSize;
+        sf::Vector2u renderTargetSize;
 
         PositionSystem& positionSystem;
         IdSystem& idSystem;

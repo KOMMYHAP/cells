@@ -10,6 +10,7 @@ class Drawable;
 class Updatable;
 class Simulation;
 class SimulationScript;
+class UiLayout;
 
 class SetupScript final : public BaseScript {
 public:
@@ -20,6 +21,7 @@ public:
 
     struct Parameters {
         common::Storage systems;
+        std::unique_ptr<UiLayout> uiLayout;
         std::unique_ptr<SimulationScript> simulationScript;
         std::unique_ptr<Simulation> simulation;
     };
@@ -29,7 +31,8 @@ private:
     struct Config;
 
     Config MakeConfig();
-    std::expected<common::Storage, std::error_code> MakeSystems(const Config& config);
+    UiLayout MakeUiLayout();
+    std::expected<common::Storage, std::error_code> MakeSystems(const Config& config, const UiLayout& uiLayout);
     void SetupSystems(const common::Storage& system, const Config& config);
 
     const common::CommandLine& _commandLine;

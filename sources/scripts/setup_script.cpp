@@ -2,6 +2,7 @@
 #include "command_line.h"
 #include "storage.h"
 
+#include "ui_layout.h"
 #include "world_render.h"
 
 #include "cell_factories/patrol_cell_factory.h"
@@ -31,16 +32,9 @@ const sf::Color Gray { 0xCCCCCCFF };
 const uint16_t StatusMessageBufferLimit = 200;
 
 struct SetupScript::Config {
-    // window
-    uint16_t screenWidth { 0 };
-    uint16_t screenHeight { 0 };
-    uint16_t fieldOffset { 0 };
-    uint16_t fieldWidth { 0 };
-    uint16_t fieldHeight { 0 };
-    uint16_t statusTextOffset { 0 };
-    uint16_t statusTextSize { 0 };
-    uint16_t cellPadding { 0 };
-    uint16_t cellSize { 0 };
+    // common
+    uint16_t rowsCount { 0 };
+    uint16_t columnsCount { 0 };
 
     // simulation
     sf::Time targetSimulationTime;
@@ -70,8 +64,9 @@ SetupScript::~SetupScript() = default;
 std::expected<void, std::error_code> SetupScript::Perform()
 {
     const Config config = MakeConfig();
+    const UiLayout uiLayout = MakeUiLayout();
 
-    auto mbSystems = MakeSystems(config);
+    auto mbSystems = MakeSystems(config, uiLayout);
     if (!mbSystems) {
         return std::unexpected { mbSystems.error() };
     }
@@ -92,6 +87,7 @@ std::expected<void, std::error_code> SetupScript::Perform()
     _parameters->systems = std::move(mbSystems.value());
     _parameters->simulationScript = std::move(simulationScript);
     _parameters->simulation = std::move(simulation);
+    _parameters->uiLayout = std::make_unique<UiLayout>(uiLayout);
     return {};
 }
 
@@ -99,15 +95,8 @@ SetupScript::Config SetupScript::MakeConfig()
 {
     SetupScript::Config config;
     // window
-    config.screenWidth = 800;
-    config.screenHeight = 600;
-    config.fieldOffset = 20;
-    config.fieldWidth = config.screenWidth - 2 * config.fieldOffset;
-    config.fieldHeight = config.screenHeight - 2 * config.fieldOffset;
-    config.statusTextOffset = 5;
-    config.statusTextSize = 10;
-    config.cellPadding = 0;
-    config.cellSize = 8;
+    config.rowsCount = 100;
+    config.columnsCount = 50;
 
     // simulation
     config.targetSimulationTime = sf::milliseconds(15);
@@ -134,11 +123,8 @@ SetupScript::Parameters SetupScript::ExtractParameters()
     return parameters;
 }
 
-std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const Config& config)
+std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const Config& config, const UiLayout& uiLayout)
 {
-    const uint32_t rowsCount = config.fieldHeight / (config.cellSize + config.cellPadding);
-    const uint32_t columnsCount = config.fieldWidth / (config.cellSize + config.cellPadding);
-
     auto mbFontPath = _commandLine.FindValue(FontArgument);
     if (!mbFontPath.has_value()) {
         std::cerr << std::format("Please specify filepath to font file using {} $path", FontArgument) << std::endl;
@@ -162,10 +148,10 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
     }
 
     common::Storage systems;
-    auto& idSystem = systems.Store<IdSystem>(rowsCount * columnsCount);
+    auto& idSystem = systems.Store<IdSystem>(config.rowsCount * config.columnsCount);
     auto& brainSystem = systems.Store<BrainSystem>(idSystem.GetCellsCountLimit());
     auto& typeSystem = systems.Store<TypeSystem>(idSystem.GetCellsCountLimit());
-    auto& positionSystem = systems.Store<PositionSystem>(rowsCount, columnsCount);
+    auto& positionSystem = systems.Store<PositionSystem>(config.rowsCount, config.columnsCount);
     auto& graveyardSystem = systems.Store<GraveyardSystem>(idSystem.GetCellsCountLimit(), idSystem, typeSystem, positionSystem);
     auto& healthSystem = systems.Store<HealthSystem>(idSystem.GetCellsCountLimit(), graveyardSystem);
     /*auto& simulationVm =*/systems.Store<SimulationVirtualMachine>(brainSystem);
@@ -176,7 +162,7 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
     WorldRender::Config worldRenderConfig {
         std::move(shader),
         config.colors,
-        static_cast<uint8_t>(config.cellSize),
+        sf::Vector2u { uiLayout.fieldWidth, uiLayout.fieldHeight },
         positionSystem,
         idSystem,
         typeSystem
@@ -210,4 +196,18 @@ void SetupScript::SetupSystems(const common::Storage& system, const Config& conf
     const uint8_t moveCommandCount = 10;
     auto _patrolCellFactory = std::make_unique<PatrolCellFactory>(_simulationVm, moveCommandCount);
     auto _randomCellFactory = std::make_unique<RandomCellFactory>(_simulationVm, std::optional<uint16_t>());
+}
+
+UiLayout SetupScript::MakeUiLayout()
+{
+    UiLayout layout;
+    layout.screenWidth = 800;
+    layout.screenHeight = 600;
+    layout.fieldOffset = 20;
+    layout.fieldWidth = layout.screenWidth - 2 * layout.fieldOffset;
+    layout.fieldHeight = layout.screenHeight - 2 * layout.fieldOffset;
+    layout.statusTextOffset = 5;
+    layout.statusTextSize = 10;
+    layout.cellPadding = 0;
+    return layout;
 }

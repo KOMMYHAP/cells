@@ -1,6 +1,6 @@
 #pragma once
 
-struct WorldWidgetParameters {
+struct UiLayout {
     uint16_t screenWidth { 0 };
     uint16_t screenHeight { 0 };
 

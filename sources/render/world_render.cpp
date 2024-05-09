@@ -11,9 +11,6 @@ WorldRender::WorldRender(Config&& config)
     const uint16_t cellsWidth = _config.positionSystem.GetWidth();
     const uint16_t cellsHeight = _config.positionSystem.GetHeight();
 
-    const auto pixelsWidth = static_cast<float>(cellsWidth * _config.cellSize);
-    const auto pixelsHeight = static_cast<float>(cellsHeight * _config.cellSize);
-
     const bool textureCreated = _texture.create(cellsWidth, cellsHeight);
     ASSERT(textureCreated);
 
@@ -24,10 +21,10 @@ WorldRender::WorldRender(Config&& config)
 
     ASSERT(_vertexBuffer.isAvailable());
     std::array<sf::Vertex, 4> vertices {
-        sf::Vertex { { pixelsWidth - 1, 0.0f }, { 1.0f, 0.0f } },
+        sf::Vertex { { _config.renderTargetSize.x - 1.0f, 0.0f }, { 1.0f, 0.0f } },
         sf::Vertex { { 0.0f, 0.0f }, { 0.0f, 0.0f } },
-        sf::Vertex { { pixelsWidth - 1, pixelsHeight - 1 }, { 1.0f, 1.0f } },
-        sf::Vertex { { 0.0f, pixelsHeight - 1 }, { 0.0f, 1.0f } },
+        sf::Vertex { { _config.renderTargetSize.x - 1.0f, _config.renderTargetSize.y - 1.0f }, { 1.0f, 1.0f } },
+        sf::Vertex { { 0.0f, _config.renderTargetSize.y - 1.0f }, { 0.0f, 1.0f } },
 
     };
     const bool vertexBufferCreated = _vertexBuffer.create(vertices.size());
