@@ -24,7 +24,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         base_script.h
         world.h
         simulation_profile_category.h
-        world_parameters.h
         simulation_parameters.h
 )
 

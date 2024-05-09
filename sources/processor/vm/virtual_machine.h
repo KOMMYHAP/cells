@@ -7,9 +7,9 @@
 
 class VirtualMachine {
 public:
-    VirtualMachine(ProcessorStateWatcher processorStateWatcher, uint8_t systemInstructionPerStep);
-
     ProcedureId RegisterProcedure(ProcedureBase* procedure, uint8_t inputArgs, uint8_t outputArgs);
+    void SetWatcher(ProcessorStateWatcher watcher);
+    void SetInstructionsPerStep(uint8_t count);
 
     void Run(ProcessorMemory memory);
 

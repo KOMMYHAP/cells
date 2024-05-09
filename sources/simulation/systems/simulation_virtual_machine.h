@@ -4,32 +4,25 @@
 #include "components/procedure_type.h"
 #include "vm/virtual_machine.h"
 
-namespace common {
-class Storage;
-}
-
 class BrainSystem;
 
 struct SimulationProcedureInfo {
     std::string name;
     uint8_t inputArgsCount { 0 };
     uint8_t outputArgsCount { 0 };
-    ProcedureType type;
+    ProcedureType type { ProcedureType::LastProcedureType };
 };
 
 class SimulationVirtualMachine {
 public:
-    struct Config {
-        common::Storage& systems;
-        uint8_t systemInstructionPerStep;
-        ProcessorStateWatcher processorStateWatcher;
-    };
-
-    SimulationVirtualMachine(Config&& config);
+    SimulationVirtualMachine(BrainSystem& brainSystem);
 
     template <class Procedure, class... Args>
         requires std::constructible_from<Procedure, Args...>
     void RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args);
+
+    void SetWatcher(ProcessorStateWatcher watcher);
+    void SetInstructionsPerStep(uint8_t count);
 
     void Run(CellId id);
 
@@ -44,7 +37,7 @@ private:
     };
 
     VirtualMachine _virtualMachine;
-    BrainSystem* _brainSystem { nullptr };
+    BrainSystem& _brainSystem;
     CellId _runningCellId;
     std::vector<ProcedureData> _procedureDataList;
     std::vector<ProcedureId> _procedureTypeMapping;

@@ -76,6 +76,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <span>
+#include <expected>
 
 // Boost libraries
 #include <boost/any/unique_any.hpp>

@@ -3,7 +3,4 @@
 #include <SFML/System.hpp>
 
 #include "basic_defines.h"
-
-namespace common {
-class Storage;
-}
+#include "common_fwd.h"

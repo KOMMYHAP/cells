@@ -12,5 +12,5 @@ struct WorldWidgetParameters {
     uint16_t statusTextSize { 0 };
 
     uint16_t cellPadding { 0 };
-    uint16_t cellSize { 0 };
+    uint8_t cellSize { 0 };
 };

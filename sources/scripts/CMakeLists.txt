@@ -3,16 +3,18 @@ add_library(${PROJECT_NAME} STATIC)
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        tick_script.cpp
+        simulation_script.cpp
         setup_script.cpp
+        setup_script_errors.cpp
 )
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        tick_script.h
+        simulation_script.h
         setup_script.h
         scripts_pch.h
+        setup_script_errors.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

@@ -9,11 +9,6 @@ static_assert(std::is_trivial_v<ProcessorControlBlock>, "As part of memory view 
 static_assert(std::is_trivial_v<ProcessorInstruction>, "As part of memory view ProcessorInstruction must be trivial");
 static_assert(std::is_trivial_v<ProcessorFlags>, "As part of memory view ProcessorFlags must be trivial");
 
-VirtualMachine::VirtualMachine(ProcessorStateWatcher processorStateWatcher, uint8_t systemInstructionPerStep)
-    : _systemInstructionPerStep(systemInstructionPerStep)
-    , _processorStateWatcher(std::move(processorStateWatcher))
-{
-}
 
 ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t inputArgs, uint8_t outputArgs)
 {
@@ -35,4 +30,14 @@ void VirtualMachine::Run(ProcessorMemory memory)
     };
     Processor processor { _systemInstructionPerStep };
     processor.Execute(context);
+}
+
+void VirtualMachine::SetWatcher(ProcessorStateWatcher watcher)
+{
+    _processorStateWatcher = std::move(watcher);
+}
+
+void VirtualMachine::SetInstructionsPerStep(uint8_t count)
+{
+    _systemInstructionPerStep = count;
 }

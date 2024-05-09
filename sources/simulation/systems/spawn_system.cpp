@@ -3,16 +3,15 @@
 #include "cell_factories/cell_factory_interface.h"
 #include "random.h"
 #include "spawn_properties.h"
+#include "storage.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
 #include "systems/spawner.h"
-#include "storage.h"
 
-SpawnSystem::SpawnSystem(SpawnSystem::Config&& config)
-    : _positionSystem(&config.systems.Modify<PositionSystem>())
-    , _idSystem(&config.systems.Modify<IdSystem>())
-    , _targetPopulationSize(config.populationSize)
-    , _spawner(&config.systems.Modify<Spawner>())
+SpawnSystem::SpawnSystem(PositionSystem& positionSystem, IdSystem& idSystem, Spawner& spawner)
+    : _positionSystem(positionSystem)
+    , _idSystem(idSystem)
+    , _spawner(spawner)
 {
 }
 
@@ -22,7 +21,7 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
         return;
     }
 
-    std::vector<CellPosition> positions = _positionSystem->CollectFreePositions();
+    std::vector<CellPosition> positions = _positionSystem.CollectFreePositions();
     std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
     uint32_t spawnedCount { 0 };
 
@@ -41,7 +40,7 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
         properties.age = CellAge::Zero;
         properties.brain = *mbBrain;
 
-        const CellId id = _spawner->TrySpawn(properties);
+        const CellId id = _spawner.TrySpawn(properties);
         if (id == CellId::Invalid) {
             break;
         }
@@ -60,11 +59,11 @@ void SpawnSystem::SetCellFactory(ICellFactory& factory)
 
 void SpawnSystem::TryToSpawn()
 {
-    if (_idSystem->GetCellsCount() >= _targetPopulationSize) {
+    if (_idSystem.GetCellsCount() >= _targetPopulationSize) {
         return;
     }
 
-    const uint32_t cellsCount = _targetPopulationSize - _idSystem->GetCellsCount();
+    const uint32_t cellsCount = _targetPopulationSize - _idSystem.GetCellsCount();
     SpawnN(cellsCount);
 }
 
@@ -79,4 +78,9 @@ std::optional<CellBrain> SpawnSystem::TryMakeCellBrain()
         return {};
     }
     return result.brain;
+}
+
+void SpawnSystem::SetSpawnLimit(uint32_t populationSize)
+{
+    _targetPopulationSize = populationSize;
 }

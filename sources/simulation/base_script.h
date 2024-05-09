@@ -2,5 +2,6 @@
 
 class BaseScript {
 public:
-    virtual void Perform() = 0;
+    virtual ~BaseScript() = default;
+    virtual std::expected<void, std::error_code> Perform() = 0;
 };

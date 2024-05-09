@@ -2,9 +2,8 @@
 #include "storage.h"
 #include "systems/brain_system.h"
 
-SimulationVirtualMachine::SimulationVirtualMachine(Config&& config)
-    : _virtualMachine(std::move(config.processorStateWatcher), config.systemInstructionPerStep)
-    , _brainSystem(&config.systems.Modify<BrainSystem>())
+SimulationVirtualMachine::SimulationVirtualMachine(BrainSystem& brainSystem)
+    : _brainSystem(brainSystem)
     , _procedureDataList(ProcedureTableLimit)
     , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
 {
@@ -12,7 +11,7 @@ SimulationVirtualMachine::SimulationVirtualMachine(Config&& config)
 
 void SimulationVirtualMachine::Run(CellId id)
 {
-    ProcessorMemory memory = _brainSystem->AccessMemory(id);
+    ProcessorMemory memory = _brainSystem.AccessMemory(id);
     _runningCellId = id;
     _virtualMachine.Run(memory);
     _runningCellId = CellId::Invalid;
@@ -38,4 +37,14 @@ const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(Proce
     }
 
     return &info.info;
+}
+
+void SimulationVirtualMachine::SetWatcher(ProcessorStateWatcher watcher)
+{
+    _virtualMachine.SetWatcher(std::move(watcher));
+}
+
+void SimulationVirtualMachine::SetInstructionsPerStep(uint8_t count)
+{
+    _virtualMachine.SetInstructionsPerStep(count);
 }

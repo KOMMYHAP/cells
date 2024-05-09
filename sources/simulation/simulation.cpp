@@ -74,3 +74,8 @@ uint32_t Simulation::WarmUp()
     Ticks(ticksToWarmUp);
     return ticksToWarmUp;
 }
+
+void Simulation::Update(sf::Time elapsedTime)
+{
+    Run(elapsedTime);
+}

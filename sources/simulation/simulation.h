@@ -5,7 +5,7 @@
 
 class BaseScript;
 
-class Simulation {
+class Simulation : public Updatable {
 public:
     Simulation(BaseScript& tickScript);
 
@@ -16,6 +16,9 @@ public:
 
     void Tick();
     void Ticks(uint32_t ticks);
+
+public:
+    void Update(sf::Time elapsedTime) override;
 
 private:
     void ProcessTick();

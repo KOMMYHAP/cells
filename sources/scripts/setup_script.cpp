@@ -3,12 +3,10 @@
 #include "storage.h"
 
 #include "world_render.h"
-#include "world_render_parameters.h"
-
-#include "world_widget_parameters.h"
 
 #include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
+#include "setup_script_errors.h"
 #include "simulation_parameters.h"
 #include "systems/age_system.h"
 #include "systems/brain_system.h"
@@ -21,7 +19,10 @@
 #include "systems/spawn_system.h"
 #include "systems/spawner.h"
 #include "systems/type_system.h"
-#include "world_parameters.h"
+
+#include "simulation.h"
+#include "simulation_script.h"
+#include "updatable.h"
 
 static const std::string_view FontArgument = "--font";
 static const std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -29,74 +30,184 @@ static const std::string_view FragmentShaderArgument = "--fragment-shader";
 const sf::Color Gray { 0xCCCCCCFF };
 const uint16_t StatusMessageBufferLimit = 200;
 
-SetupScript::SetupScript(const CommandLine& commandLine)
+struct SetupScript::Config {
+    // window
+    uint16_t screenWidth { 0 };
+    uint16_t screenHeight { 0 };
+    uint16_t fieldOffset { 0 };
+    uint16_t fieldWidth { 0 };
+    uint16_t fieldHeight { 0 };
+    uint16_t statusTextOffset { 0 };
+    uint16_t statusTextSize { 0 };
+    uint16_t cellPadding { 0 };
+    uint16_t cellSize { 0 };
+
+    // simulation
+    sf::Time targetSimulationTime;
+
+    // virtual machine
+    uint8_t systemInstructionPerStep { 0 };
+
+    // spawner
+    float fullnessPercent { 0.0f };
+
+    // selection
+    CellAge limitCellAge { CellAge::Zero };
+    uint16_t bestCellSelectionSize { 0 };
+    uint16_t selectionEpochTicks { 0 };
+
+    // render
+    std::vector<sf::Color> colors;
+};
+
+SetupScript::SetupScript(const common::CommandLine& commandLine)
+    : _commandLine(commandLine)
 {
 }
 
-void SetupScript::Perform()
+SetupScript::~SetupScript() = default;
+
+std::expected<void, std::error_code> SetupScript::Perform()
 {
-    common::Storage parameters;
-    auto& worldWidgetParameters = parameters.Store<WorldWidgetParameters>();
-    worldWidgetParameters.screenWidth = 800;
-    worldWidgetParameters.screenHeight = 600;
-    worldWidgetParameters.fieldOffset = 20;
-    worldWidgetParameters.fieldWidth = worldWidgetParameters.screenWidth - 2 * worldWidgetParameters.fieldOffset;
-    worldWidgetParameters.fieldHeight = worldWidgetParameters.screenHeight - 2 * worldWidgetParameters.fieldOffset;
-    worldWidgetParameters.statusTextOffset = 5;
-    worldWidgetParameters.statusTextSize = 10;
-    worldWidgetParameters.cellPadding = 0;
-    worldWidgetParameters.cellSize = 8;
+    const Config config = MakeConfig();
 
-    const uint32_t rowsCount = worldWidgetParameters.fieldHeight / (worldWidgetParameters.cellSize + worldWidgetParameters.cellPadding);
-    const uint32_t columnsCount = worldWidgetParameters.fieldWidth / (worldWidgetParameters.cellSize + worldWidgetParameters.cellPadding);
+    auto mbSystems = MakeSystems(config);
+    if (!mbSystems) {
+        return std::unexpected { mbSystems.error() };
+    }
 
-    auto& worldRenderParameters = parameters.Store<WorldRenderParameters>();
+    SetupSystems(mbSystems.value(), config);
 
-    auto& simulationParameters = parameters.Store<SimulationParameters>();
-    simulationParameters.targetSimulationTime = sf::milliseconds(15);
-    simulationParameters.cellsCountPercentOfLimit = 20;
+    auto simulationScript = std::make_unique<SimulationScript>(mbSystems.value());
+    SimulationParameters simulationParameters;
+    simulationParameters.selectionEpochTicks = config.selectionEpochTicks;
+    simulationParameters.bestCellSelectionSize = config.bestCellSelectionSize;
+    simulationParameters.spawnPolicy = SimulationParameters::SpawnPolicy::Random;
+    simulationParameters.limitCellAge = config.limitCellAge;
+    simulationScript->SetParameters(simulationParameters);
 
-    auto& worldParameters = parameters.Store<WorldParameters>();
+    auto simulation = std::make_unique<Simulation>(*simulationScript);
 
-    common::Storage& systems = worldParameters.systems;
-    auto& _idSystem = systems.Store<IdSystem>(rowsCount * columnsCount);
-    auto& _brainSystem = systems.Store<BrainSystem>(_idSystem.GetCellsCountLimit());
-    auto& _typeSystem = systems.Store<TypeSystem>(_idSystem.GetCellsCountLimit());
-    auto& _positionSystem = systems.Store<PositionSystem>(rowsCount, columnsCount);
-    auto& _graveyardSystem = systems.Store<GraveyardSystem>(_idSystem.GetCellsCountLimit(), _idSystem, _typeSystem, _positionSystem);
-    auto& _healthSystem = systems.Store<HealthSystem>(_idSystem.GetCellsCountLimit(), _graveyardSystem);
-
-    auto watcher = [](ProcessorState state) {
-        //        if (state == ProcessorState::Good) {
-        //            return;
-        //        }
-        //
-        //        // Cell's brain has illegal instruction, make insult as punishment
-        //        const CellId id = world->GetSystems().Get<SimulationVirtualMachine>().GetRunningCellId();
-        //        world->ModifySystems().Modify<HealthSystem>().Set(id, CellHealth::Zero);
-    };
-    constexpr uint8_t systemInstructionPerStep = 8;
-    SimulationVirtualMachine::Config simulationVmConfig {
-        world->ModifySystems(),
-        systemInstructionPerStep,
-        std::move(watcher)
-    };
-    auto& _simulationVm = systems.Store<SimulationVirtualMachine>(MakeSimulationVmConfig(this));
-    auto& _ageSystem = systems.Store<AgeSystem>(_idSystem.GetCellsCountLimit(), _healthSystem);
-    auto& _spawner = systems.Store<Spawner>(_positionSystem, _typeSystem, _brainSystem, _healthSystem, _ageSystem, _idSystem);
-    auto& _spawnSystem = systems.Store<SpawnSystem>(MakeSpawnSystemConfig(config.fullnessPercent));
-    auto& _render = systems.Store<WorldRender>(MakeRenderConfig(config.cellSize, std::move(worldRenderParameters.shader)), _positionSystem, _idSystem, _typeSystem);
-    auto& _selectionSystem = systems.Store<SelectionSystem>(_brainSystem, _idSystem, SelectionEpochTicks, BestCellSelectionSize);
-    auto _patrolCellFactory = std::make_unique<PatrolCellFactory>(_simulationVm, 10);
-    auto _randomCellFactory = std::make_unique<RandomCellFactory>(_simulationVm, std::optional<uint16_t>());
-
-    _parameters = std::make_unique<common::Storage>(std::move(parameters));
+    _parameters = std::make_unique<Parameters>();
+    _parameters->systems = std::move(mbSystems.value());
+    _parameters->simulationScript = std::move(simulationScript);
+    _parameters->simulation = std::move(simulation);
+    return {};
 }
 
-common::Storage SetupScript::ExtractParameters()
+SetupScript::Config SetupScript::MakeConfig()
+{
+    SetupScript::Config config;
+    // window
+    config.screenWidth = 800;
+    config.screenHeight = 600;
+    config.fieldOffset = 20;
+    config.fieldWidth = config.screenWidth - 2 * config.fieldOffset;
+    config.fieldHeight = config.screenHeight - 2 * config.fieldOffset;
+    config.statusTextOffset = 5;
+    config.statusTextSize = 10;
+    config.cellPadding = 0;
+    config.cellSize = 8;
+
+    // simulation
+    config.targetSimulationTime = sf::milliseconds(15);
+
+    // virtual machine
+    config.systemInstructionPerStep = 8;
+
+    // spawner
+    config.fullnessPercent = 0.2f;
+
+    // selection
+    config.limitCellAge = CellAge { 100 };
+    config.bestCellSelectionSize = 100;
+    config.selectionEpochTicks = 100;
+
+    config.colors = { sf::Color::White, sf::Color::White, sf::Color::White, sf::Color::White };
+    return {};
+}
+
+SetupScript::Parameters SetupScript::ExtractParameters()
 {
     ASSERT(_parameters);
-    common::Storage systems = std::move(*_parameters);
-    _parameters.reset();
+    Parameters parameters = std::move(*_parameters);
+    return parameters;
+}
+
+std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const Config& config)
+{
+    const uint32_t rowsCount = config.fieldHeight / (config.cellSize + config.cellPadding);
+    const uint32_t columnsCount = config.fieldWidth / (config.cellSize + config.cellPadding);
+
+    auto mbFontPath = _commandLine.FindValue(FontArgument);
+    if (!mbFontPath.has_value()) {
+        std::cerr << std::format("Please specify filepath to font file using {} $path", FontArgument) << std::endl;
+        return std::unexpected { make_error_code(SetupScriptErrors::MissingArgumentFont) };
+    }
+
+    sf::Font defaultFont;
+    if (!defaultFont.loadFromFile(std::string { *mbFontPath })) {
+        return std::unexpected { make_error_code(SetupScriptErrors::InvalidFont) };
+    }
+
+    auto mbFragmentShaderPath = _commandLine.FindValue(FragmentShaderArgument);
+    if (!mbFragmentShaderPath.has_value()) {
+        std::cerr << std::format("Please specify filepath to fragment shader using {} $path", FragmentShaderArgument) << std::endl;
+        return std::unexpected { make_error_code(SetupScriptErrors::MissingArgumentShader) };
+    }
+
+    auto shader = std::make_unique<sf::Shader>();
+    if (!shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment)) {
+        return std::unexpected { make_error_code(SetupScriptErrors::InvalidShader) };
+    }
+
+    common::Storage systems;
+    auto& idSystem = systems.Store<IdSystem>(rowsCount * columnsCount);
+    auto& brainSystem = systems.Store<BrainSystem>(idSystem.GetCellsCountLimit());
+    auto& typeSystem = systems.Store<TypeSystem>(idSystem.GetCellsCountLimit());
+    auto& positionSystem = systems.Store<PositionSystem>(rowsCount, columnsCount);
+    auto& graveyardSystem = systems.Store<GraveyardSystem>(idSystem.GetCellsCountLimit(), idSystem, typeSystem, positionSystem);
+    auto& healthSystem = systems.Store<HealthSystem>(idSystem.GetCellsCountLimit(), graveyardSystem);
+    /*auto& simulationVm =*/systems.Store<SimulationVirtualMachine>(brainSystem);
+    auto& ageSystem = systems.Store<AgeSystem>(idSystem.GetCellsCountLimit(), healthSystem);
+    auto& spawner = systems.Store<Spawner>(positionSystem, typeSystem, brainSystem, healthSystem, ageSystem, idSystem);
+    /*auto& spawnSystem =*/systems.Store<SpawnSystem>(positionSystem, idSystem, spawner);
+
+    WorldRender::Config worldRenderConfig {
+        std::move(shader),
+        config.colors,
+        static_cast<uint8_t>(config.cellSize),
+        positionSystem,
+        idSystem,
+        typeSystem
+    };
+    /*auto& render =*/systems.Store<WorldRender>(std::move(worldRenderConfig));
+    /*auto& selectionSystem =*/systems.Store<SelectionSystem>(brainSystem, idSystem, config.selectionEpochTicks, config.bestCellSelectionSize);
     return systems;
+}
+
+void SetupScript::SetupSystems(const common::Storage& system, const Config& config)
+{
+    auto& _simulationVm = system.Modify<SimulationVirtualMachine>();
+    auto& _healthSystem = system.Modify<HealthSystem>();
+    auto& _spawnSystem = system.Modify<SpawnSystem>();
+    auto& _idSystem = system.Modify<IdSystem>();
+
+    _simulationVm.SetInstructionsPerStep(config.systemInstructionPerStep);
+    auto watcher = [simulationVm = &_simulationVm, healthSystem = &_healthSystem](ProcessorState state) {
+        if (state == ProcessorState::Good) {
+            return;
+        }
+        // Cell's brain has illegal instruction, make insult as punishment
+        const CellId id = simulationVm->GetRunningCellId();
+        healthSystem->Set(id, CellHealth::Zero);
+    };
+    _simulationVm.SetWatcher(std::move(watcher));
+
+    const auto targetPopulationSize = static_cast<uint32_t>(round(config.fullnessPercent * static_cast<float>(_idSystem.GetCellsCountLimit())));
+    _spawnSystem.SetSpawnLimit(targetPopulationSize);
+
+    const uint8_t moveCommandCount = 10;
+    auto _patrolCellFactory = std::make_unique<PatrolCellFactory>(_simulationVm, moveCommandCount);
+    auto _randomCellFactory = std::make_unique<RandomCellFactory>(_simulationVm, std::optional<uint16_t>());
 }
