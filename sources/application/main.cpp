@@ -1,16 +1,14 @@
-#include <windows.h>
-
-#include <processthreadsapi.h>
-
-#include "basic_defines.h"
-
 #include "breakpoint.h"
 #include "command_line.h"
 #include "main_window.h"
 #include "profile/profile.h"
 #include "random.h"
+#include "setup_script.h"
 #include "simulation.h"
+#include "simulation_script.h"
+#include "ui_layout.h"
 #include "world.h"
+#include "world_render.h"
 #include "world_widget.h"
 
 #include "systems/age_system.h"
@@ -63,66 +61,27 @@ auto GetTimeInfo(sf::Time time)
     return std::make_tuple(tickTimeValue, tickUnit);
 }
 
-
 int main(int argc, char** argv)
 {
     common::InitRandom("42");
-
-    ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
-    ASSERT(FieldWidth % (CellSize + CellPadding) == 0);
-    ASSERT(FieldHeight % (CellSize + CellPadding) == 0);
-
     common::CommandLine commandLine { argc, argv };
 
-    HRESULT hr = SetThreadDescription(GetCurrentThread(), L"main");
-    if (FAILED(hr)) {
-        std::cerr << "Failed to set name for main thread" << std::endl;
-        return -1;
-    }
-
-    auto mbFontPath = commandLine.FindValue(FontArgument);
-    if (!mbFontPath.has_value()) {
-        std::cerr << std::format("Please specify filepath to font file using {} $path", FontArgument) << std::endl;
-        return -1;
-    }
-
-    sf::Font defaultFont;
-    if (!defaultFont.loadFromFile(std::string { *mbFontPath })) {
-        return -1;
-    }
-
-    auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
-    if (!mbFragmentShaderPath.has_value()) {
-        std::cerr << std::format("Please specify filepath to fragment shader using {} $path", FragmentShaderArgument) << std::endl;
-        return -1;
-    }
-
-    auto shader = std::make_unique<sf::Shader>();
-    if (!shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment)) {
-        return -1;
-    }
-
-    World::Config worldConfig {
-        ColumnsCount, RowsCount, CellSize, CellsCountPercentOfLimit, std::move(shader), World::SpawnPolicy::Random
-    };
-    World world { std::move(worldConfig) };
-
-    Simulation simulation { world };
-    simulation.SetAutoMode(TargetSimulationTime);
+    SetupScript setupScript { commandLine };
+    auto setup = setupScript.ExtractParameters();
+    const UiLayout& uiLayout = *setup.uiLayout;
 
     MainWindow mainWindow;
-    sf::RenderTarget* renderTarget = mainWindow.TryCreate("Cells", sf::Vector2u { ScreenWidth, ScreenHeight });
+    sf::RenderTarget* renderTarget = mainWindow.TryCreate("Cells", sf::Vector2u { uiLayout.screenWidth, uiLayout.screenHeight });
     if (!renderTarget) {
         PANIC("Failed to create main window!");
         return -1;
     }
 
     MainWindow::RuntimeSetup runtimeConfig;
-    runtimeConfig.updatableList.push_back(&simulation);
+    runtimeConfig.updatableList.push_back(setup.simulation.get());
 
-    sf::RenderStates rootStates;
-    rootStates.transform.translate(FieldOffset, FieldOffset);
-    WorldWidget worldWidget { *renderTarget, world };
+    auto& worldRender = setup.systems.Modify<WorldRender>();
+    WorldWidget worldWidget { *renderTarget, worldRender, sf::Vector2f { static_cast<float>(uiLayout.fieldOffset), static_cast<float>(uiLayout.fieldOffset) } };
     runtimeConfig.drawableList.push_back(&worldWidget);
 
     mainWindow.Run(std::move(runtimeConfig));

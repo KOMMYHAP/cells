@@ -3,10 +3,11 @@
 #include "world.h"
 #include "world_render.h"
 
-WorldWidget::WorldWidget(sf::RenderTarget& renderTarget, World& world)
+WorldWidget::WorldWidget(sf::RenderTarget& renderTarget, WorldRender& worldRender, sf::Vector2f renderAreaOffset)
     : _renderTarget(renderTarget)
-    , _worldRender(world.ModifySystems().Modify<WorldRender>())
+    , _worldRender(worldRender)
 {
+    _rootStates.transform.translate(renderAreaOffset);
 }
 
 WorldWidget::~WorldWidget() = default;

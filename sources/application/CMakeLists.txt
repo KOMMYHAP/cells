@@ -6,7 +6,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE
         main_window.cpp
         main.cpp
-        universe_pch.h
+        application_pch.h
 )
 
 
@@ -25,10 +25,11 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-application-interface
         sfml-system
         cells-ui
+        cells-scripts
 )
 
 
 # add pch
-target_precompile_headers(${PROJECT_NAME} PRIVATE universe_pch.h)
+target_precompile_headers(${PROJECT_NAME} PRIVATE application_pch.h)
 
 target_copy_required_dll(${PROJECT_NAME})

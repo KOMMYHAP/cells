@@ -82,6 +82,7 @@ std::expected<void, std::error_code> SetupScript::Perform()
     simulationScript->SetParameters(simulationParameters);
 
     auto simulation = std::make_unique<Simulation>(*simulationScript);
+    simulation->SetAutoMode(config.targetSimulationTime);
 
     _parameters = std::make_unique<Parameters>();
     _parameters->systems = std::move(mbSystems.value());
@@ -209,5 +210,10 @@ UiLayout SetupScript::MakeUiLayout()
     layout.statusTextOffset = 5;
     layout.statusTextSize = 10;
     layout.cellPadding = 0;
+
+    //    ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
+    //    ASSERT(layout.fieldWidth % (CellSize + CellPadding) == 0);
+    //    ASSERT(layout.fieldHeight % (CellSize + CellPadding) == 0);
+
     return layout;
 }

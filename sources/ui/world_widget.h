@@ -7,7 +7,7 @@ class WorldRender;
 
 class WorldWidget : public Drawable {
 public:
-    WorldWidget(sf::RenderTarget& renderTarget, World& world);
+    WorldWidget(sf::RenderTarget& renderTarget, WorldRender& worldRender, sf::Vector2f renderAreaOffset);
     ~WorldWidget();
 
     void Draw() override;
