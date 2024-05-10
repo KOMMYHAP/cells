@@ -1,5 +1,5 @@
 #include "simulation_virtual_machine.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "systems/brain_system.h"
 
 SimulationVirtualMachine::SimulationVirtualMachine(BrainSystem& brainSystem)

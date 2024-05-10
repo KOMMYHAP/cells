@@ -6,29 +6,26 @@ template <class T>
 T& Storage::Modify() const
 {
     Item& item = Modify(typeid(T));
-    T* typedItem = boost::anys::any_cast<T>(&item);
-    ASSERT(typedItem);
-    return *typedItem;
+    auto* typedItem = static_cast<impl::StorageItemHolder<T>*>(item.get());
+    return typedItem->value;
 }
 
 template <class T>
 const T& Storage::Get() const
 {
     const Item& item = Get(typeid(T));
-    const T* typedItem = boost::anys::any_cast<T>(&item);
-    ASSERT(typedItem);
-    return *typedItem;
+    const auto* typedItem = static_cast<impl::StorageItemHolder<T>*>(item.get());
+    return typedItem->value;
 }
 
 template <class T, class... Args>
     requires std::constructible_from<T, Args...>
 T& Storage::Store(Args&&... args)
 {
-    auto item = Item(boost::anys::in_place_type_t<T>{}, std::forward<Args>(args)...);
-    Item& storedItem = Store(std::move(item));
-    T* typedItem = boost::anys::any_cast<T>(&storedItem);
-    ASSERT(typedItem);
-    return *typedItem;
+    auto item = std::make_unique<impl::StorageItemHolder<T>>(std::forward<Args>(args)...);
+    T& value = item->value;
+    Store(std::move(item));
+    return value;
 }
 
 template <class T>

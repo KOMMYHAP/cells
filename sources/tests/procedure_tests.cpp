@@ -95,8 +95,11 @@ public:
 protected:
     virtual void SetUp()
     {
-        _vm = std::make_unique<VirtualMachine>(MakeKiller(), 1);
+        _vm = std::make_unique<VirtualMachine>();
         vm = _vm.get();
+
+        vm->SetWatcher(MakeKiller());
+        vm->SetInstructionsPerStep(1);
         MakeMemory(255);
 
         ProcessorMemory rawMemory { _memoryBuffer };

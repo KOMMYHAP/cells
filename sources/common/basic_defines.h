@@ -22,14 +22,24 @@
 #include <cwchar>
 #include <cwctype>
 
+
 // C++
 #include <algorithm>
+#include <any>
+#include <array>
+#include <atomic>
 #include <bitset>
+#include <chrono>
 #include <complex>
+#include <condition_variable>
 #include <deque>
 #include <exception>
+#include <expected>
+#include <forward_list>
 #include <fstream>
 #include <functional>
+#include <future>
+#include <initializer_list>
 #include <iomanip>
 #include <ios>
 #include <iosfwd>
@@ -41,46 +51,32 @@
 #include <locale>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <numeric>
 #include <ostream>
 #include <queue>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <scoped_allocator>
 #include <set>
+#include <span>
 #include <sstream>
 #include <stack>
 #include <stdexcept>
 #include <streambuf>
 #include <string>
-#include <typeinfo>
-#include <utility>
-#include <valarray>
-#include <vector>
-#include <any>
-#include <array>
-#include <atomic>
-#include <chrono>
-#include <condition_variable>
-#include <forward_list>
-#include <future>
-#include <initializer_list>
-#include <mutex>
-#include <random>
-#include <ratio>
-#include <regex>
-#include <scoped_allocator>
 #include <system_error>
 #include <thread>
 #include <tuple>
-#include <typeindex>
 #include <type_traits>
+#include <typeindex>
+#include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
-#include <span>
-#include <expected>
-
-// Boost libraries
-#include <boost/any/unique_any.hpp>
-
-
+#include <utility>
+#include <valarray>
+#include <vector>
 // External libraries
 #include "libassert/assert.hpp"

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "impl/impl.h"
+
 namespace common {
 
 class Storage {
@@ -26,8 +28,8 @@ public:
     size_t Count() const;
 
 public:
-    using ItemType = boost::typeindex::type_index;
-    using Item = boost::anys::unique_any;
+    using ItemType = std::type_index;
+    using Item = std::unique_ptr<impl::StorageItemHolderBase>;
 
     Item& Modify(ItemType type) const;
     const Item& Get(ItemType type) const;

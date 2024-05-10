@@ -3,7 +3,7 @@
 #include "cell_factories/cell_factory_interface.h"
 #include "random.h"
 #include "spawn_properties.h"
-#include "storage.h"
+#include "storage/storage.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
 #include "systems/spawner.h"

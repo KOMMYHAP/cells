@@ -73,7 +73,10 @@ protected:
 private:
     std::unique_ptr<VirtualMachine> MakeVm(uint8_t systemInstructionPerTick)
     {
-        return std::make_unique<VirtualMachine>(MakeKiller(), systemInstructionPerTick);
+        auto vm = std::make_unique<VirtualMachine>();
+        vm->SetWatcher(MakeKiller());
+        vm->SetInstructionsPerStep(systemInstructionPerTick);
+        return vm;
     }
 
     ProcessorStateWatcher MakeKiller()

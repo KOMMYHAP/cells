@@ -1,6 +1,6 @@
 #include "setup_script.h"
 #include "command_line.h"
-#include "storage.h"
+#include "storage/storage.h"
 
 #include "ui_layout.h"
 #include "world_render.h"
@@ -170,7 +170,7 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
     };
     /*auto& render =*/systems.Store<WorldRender>(std::move(worldRenderConfig));
     /*auto& selectionSystem =*/systems.Store<SelectionSystem>(brainSystem, idSystem, config.selectionEpochTicks, config.bestCellSelectionSize);
-    return systems;
+    return std::move(systems);
 }
 
 void SetupScript::SetupSystems(const common::Storage& system, const Config& config)

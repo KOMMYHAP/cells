@@ -1,6 +1,6 @@
 #include "simulation_script.h"
 
-#include "storage.h"
+#include "storage/storage.h"
 
 #include "systems/age_system.h"
 #include "systems/brain_system.h"

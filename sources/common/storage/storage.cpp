@@ -1,17 +1,6 @@
-#include "storage.h"
-#include "boost/any/unique_any.hpp"
+#include "storage/storage.h"
 
 namespace common {
-    
-
-static bool StorageItemLess(const Storage::Item & item, Storage::ItemType index)
-{
-    return Storage::ItemType { item.type() } < index;
-};
-static bool StorageItemLess(Storage::ItemType index, const Storage::Item & item)
-{
-    return index < Storage::ItemType { item.type() };
-};
 
 Storage::Storage() = default;
 
@@ -38,7 +27,7 @@ const Storage::Item& Storage::Get(Storage::ItemType type) const
 
 Storage::Item& Storage::Store(Storage::Item item)
 {
-    const Storage::ItemType type { item.type() };
+    const Storage::ItemType type { item->GetTypeIndex() };
     ASSERT(!_items.contains(type));
     auto [it, _] = _items.emplace(type, std::move(item));
     return it->second;

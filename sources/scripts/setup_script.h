@@ -4,7 +4,7 @@
 #include "components/cell_age.h"
 #include "drawable.h"
 #include "setup_script_errors.h"
-#include "storage.h"
+#include "storage/storage.h"
 
 class Drawable;
 class Updatable;
