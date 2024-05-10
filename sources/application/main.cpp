@@ -1,21 +1,10 @@
 #include "breakpoint.h"
 #include "command_line.h"
 #include "common_system.h"
-#include "main_window.h"
 #include "profile/profile.h"
 #include "random.h"
-#include "scripts_system.h"
-#include "simulation.h"
-#include "ui_layout.h"
-#include "world.h"
-#include "world_render.h"
-#include "world_widget.h"
-#include <registrar/registrar.h>
-
+#include "registrar/registrar.h"
 #include "storage/storage.h"
-
-#include "setup_script.h"
-#include "simulation_script.h"
 
 #include "systems/age_system.h"
 #include "systems/brain_system.h"
@@ -28,6 +17,21 @@
 #include "systems/spawn_system.h"
 #include "systems/spawner.h"
 #include "systems/type_system.h"
+
+#include "simulation.h"
+#include "world.h"
+
+#include "main_window.h"
+#include "scripts_system.h"
+#include "ui_layout.h"
+#include "ui_system.h"
+
+#include "world_render.h"
+#include "world_widget.h"
+
+#include "main_loop.h"
+#include "setup_script.h"
+#include "simulation_script.h"
 
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -75,11 +79,17 @@ int main(int argc, char** argv)
     registrar.Register(std::make_unique<World>());
     registrar.Register(std::make_unique<UiSystem>());
 
-    const auto result = registrar.RunInit();
-    if (!result) {
-        std::cerr << std::format("Failed to initialize systems: {}") << std::endl;
+    auto mainLoop = std::make_unique<MainLoop>();
+    auto* rawMainLoop = mainLoop.get();
+    registrar.Register(std::move(mainLoop));
+
+    const auto error = registrar.RunInit();
+    if (error) {
+        std::cerr << std::format("Failed to initialize systems: {}", error.message()) << std::endl;
         return -1;
     }
+
+    rawMainLoop->Run();
 
     return 0;
     //

@@ -1,5 +1,4 @@
 #include "scripts_system.h"
-#include <world_parameters.h>
 
 #include "command_line.h"
 #include "setup_script.h"
@@ -11,26 +10,31 @@ std::error_code ScriptSystem::InitializeSystem(common::StackStorage& storage)
 {
     auto& commandLine = storage.Get<common::CommandLine>();
     SetupScript setupScript { commandLine };
-    auto result = setupScript.Perform();
-    if (!result) {
-        return result;
+    const auto error = setupScript.Perform();
+    if (error) {
+        return error;
     }
 
+    auto& worldParameters = storage.Store<WorldParameters>();
     auto setup = setupScript.ExtractParameters();
-
-    WorldParameters worldParameters;
     worldParameters.systems = std::move(setup.systems);
-    worldParameters.simulationScript = std::move(setup.simulationScript);
 
-    for (auto&& [_, factory] : setup.factories) {
+    std::map<SpawnPolicy, ICellFactory*> weakFactories;
+    for (auto&& [policy, factory] : setup.factories) {
+        weakFactories[policy] = factory.get();
         worldParameters.factories.emplace_back(std::move(factory));
     }
 
-    storage.Store<WorldParameters>(std::move(worldParameters));
+    auto simulationScript = std::make_unique<SimulationScript>(worldParameters.systems, std::move(weakFactories));
+    simulationScript->SetParameters(setup.initialSimulationParameters);
+    worldParameters.simulationScript = std::move(simulationScript);
+
     storage.Store<UiLayout>(setup.uiLayout);
+    storage.Store<SimulationParameters>(setup.initialSimulationParameters);
 
     return std::error_code();
 }
+
 void ScriptSystem::TerminateSystem()
 {
 }

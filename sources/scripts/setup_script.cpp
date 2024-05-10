@@ -1,6 +1,5 @@
 #include "setup_script.h"
 #include "command_line.h"
-#include "storage/storage.h"
 
 #include "ui_layout.h"
 #include "world_render.h"
@@ -21,8 +20,6 @@
 #include "systems/spawner.h"
 #include "systems/type_system.h"
 
-#include "simulation.h"
-#include "simulation_script.h"
 #include "updatable.h"
 
 static const std::string_view FontArgument = "--font";
@@ -70,31 +67,20 @@ std::error_code SetupScript::Perform()
     if (!mbSystems) {
         return mbSystems.error();
     }
-    auto systems = std::make_unique<common::Storage>(std::move(mbSystems.value()));
-    SetupSystems(*systems, config);
-    auto factories = MakeSpawnFactories(*systems);
-    std::map<SpawnPolicy , ICellFactory*> weakFactories;
-    for (auto&&[policy, factory] : factories) {
+    auto& systems = mbSystems.value();
+    SetupSystems(systems, config);
+    auto factories = MakeSpawnFactories(systems);
+    std::map<SpawnPolicy, ICellFactory*> weakFactories;
+    for (auto&& [policy, factory] : factories) {
         weakFactories[policy] = factory.get();
     }
-
-    auto simulationScript = std::make_unique<SimulationScript>(*systems, std::move(weakFactories));
-    SimulationParameters simulationParameters;
-    simulationParameters.selectionEpochTicks = config.selectionEpochTicks;
-    simulationParameters.bestCellSelectionSize = config.bestCellSelectionSize;
-    simulationParameters.spawnPolicy = SpawnPolicy::Random;
-    simulationParameters.limitCellAge = config.limitCellAge;
-    simulationScript->SetParameters(simulationParameters);
-
-    auto simulation = std::make_unique<Simulation>(*simulationScript);
-    simulation->SetAutoMode(config.targetSimulationTime);
 
     _parameters = std::make_unique<Parameters>();
     _parameters->factories = std::move(factories);
     _parameters->systems = std::move(systems);
-    _parameters->simulationScript = std::move(simulationScript);
-    _parameters->simulation = std::move(simulation);
-    _parameters->uiLayout = std::make_unique<UiLayout>(uiLayout);
+    _parameters->uiLayout = uiLayout;
+    _parameters->initialSimulationParameters = MakeSimulationParams();
+
     return {};
 }
 
@@ -130,7 +116,7 @@ SetupScript::Parameters SetupScript::ExtractParameters()
     return parameters;
 }
 
-std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const Config& config, const UiLayout& uiLayout)
+std::expected<common::StackStorage, std::error_code> SetupScript::MakeSystems(const Config& config, const UiLayout& uiLayout)
 {
     auto mbFontPath = _commandLine.FindValue(FontArgument);
     if (!mbFontPath.has_value()) {
@@ -152,7 +138,7 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
         return std::unexpected { make_error_code(SetupScriptErrors::InvalidShader) };
     }
 
-    common::Storage systems;
+    common::StackStorage systems;
     auto& idSystem = systems.Store<IdSystem>(config.rowsCount * config.columnsCount);
     auto& brainSystem = systems.Store<BrainSystem>(idSystem.GetCellsCountLimit());
     auto& typeSystem = systems.Store<TypeSystem>(idSystem.GetCellsCountLimit());
@@ -177,7 +163,7 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
     return std::move(systems);
 }
 
-void SetupScript::SetupSystems(const common::Storage& system, const Config& config)
+void SetupScript::SetupSystems(const common::StackStorage& system, const Config& config)
 {
     auto& simulationVm = system.Modify<SimulationVirtualMachine>();
     auto& healthSystem = system.Modify<HealthSystem>();
@@ -217,7 +203,8 @@ UiLayout SetupScript::MakeUiLayout()
 
     return layout;
 }
-std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> SetupScript::MakeSpawnFactories(const common::Storage& systems)
+
+std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> SetupScript::MakeSpawnFactories(const common::StackStorage& systems)
 {
     std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> factories;
 
@@ -230,4 +217,15 @@ std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> SetupScript::MakeSpawnFacto
     factories.emplace(SpawnPolicy::Random, std::move(randomCellFactory));
     factories.emplace(SpawnPolicy::Patrol, std::move(patrolCellFactory));
     return factories;
+}
+
+SimulationParameters SetupScript::MakeSimulationParams()
+{
+    SimulationParameters params;
+    params.limitCellAge = CellAge { 100 };
+    params.bestCellSelectionSize = 100;
+    params.selectionEpochTicks = 1000;
+    params.spawnPolicy = SpawnPolicy::Random;
+    params.targetSimulationTime = sf::milliseconds(15);
+    return params;
 }

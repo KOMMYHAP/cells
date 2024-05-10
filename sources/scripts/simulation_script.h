@@ -5,18 +5,7 @@
 #include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
 #include "components/cell_age.h"
-
-enum class SpawnPolicy {
-    Random,
-    Patrol
-};
-
-struct SimulationParameters {
-    CellAge limitCellAge { 100 };
-    uint16_t bestCellSelectionSize { 100 };
-    uint16_t selectionEpochTicks { 1000 };
-    SpawnPolicy spawnPolicy { SpawnPolicy::Random };
-};
+#include "simulation_parameters.h"
 
 struct SimulationStatistics {
     uint32_t cellsCount { 0 };
@@ -26,7 +15,7 @@ struct SimulationStatistics {
 
 class SimulationScript final : public BaseScript {
 public:
-    SimulationScript(const common::Storage& systems, std::map<SpawnPolicy, ICellFactory*> factories);
+    SimulationScript(const common::StackStorage& systems, std::map<SpawnPolicy, ICellFactory*> factories);
 
     std::error_code Perform() override;
 
@@ -34,7 +23,7 @@ public:
     const SimulationStatistics& GetStatistics() const { return _stats; }
 
 private:
-    const common::Storage& _systems;
+    const common::StackStorage& _systems;
     std::map<SpawnPolicy, ICellFactory*> _factories;
     SimulationParameters _parameters;
     SimulationStatistics _stats;

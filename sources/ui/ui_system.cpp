@@ -5,6 +5,7 @@
 #include "ui_layout.h"
 #include "world_render.h"
 #include "world_widget.h"
+#include "world.h"
 
 UiSystem::UiSystem() = default;
 UiSystem::~UiSystem() = default;
@@ -18,8 +19,9 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
 
+    auto* world = storage.Get<World*>();
     auto offset = sf::Vector2f { static_cast<float>(layout.fieldOffset), static_cast<float>(layout.fieldOffset) };
-    _worldWidget = std::make_unique<WorldWidget>(_window, storage.Modify<WorldRender>(), offset);
+    _worldWidget = std::make_unique<WorldWidget>(_window, world->GetSystems().Modify<WorldRender>(), offset);
 
     storage.Store<UiSystem*>(this);
     return std::error_code();

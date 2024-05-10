@@ -3,4 +3,5 @@
 namespace common {
 class CommandLine;
 class Storage;
+class StackStorage;
 }

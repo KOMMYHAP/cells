@@ -1,6 +1,6 @@
 #include "simulation_script.h"
 
-#include "storage/storage.h"
+#include "storage/stack_storage.h"
 
 #include "systems/age_system.h"
 #include "systems/brain_system.h"
@@ -14,7 +14,7 @@
 #include "systems/spawner.h"
 #include "systems/type_system.h"
 
-SimulationScript::SimulationScript(const common::Storage& systems, std::map<SpawnPolicy, ICellFactory*> factories)
+SimulationScript::SimulationScript(const common::StackStorage& systems, std::map<SpawnPolicy, ICellFactory*> factories)
     : _systems(systems)
     , _factories(std::move(factories))
 {

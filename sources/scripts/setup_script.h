@@ -25,7 +25,7 @@ public:
         common::StackStorage systems;
         std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> factories;
         UiLayout uiLayout;
-        std::unique_ptr<SimulationScript> simulationScript;
+        SimulationParameters initialSimulationParameters;
     };
     Parameters ExtractParameters();
 
@@ -33,10 +33,11 @@ private:
     struct Config;
 
     Config MakeConfig();
+    SimulationParameters MakeSimulationParams();
     UiLayout MakeUiLayout();
-    std::expected<common::Storage, std::error_code> MakeSystems(const Config& config, const UiLayout& uiLayout);
-    std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> MakeSpawnFactories(const common::Storage& systems);
-    void SetupSystems(const common::Storage& system, const Config& config);
+    std::expected<common::StackStorage, std::error_code> MakeSystems(const Config& config, const UiLayout& uiLayout);
+    std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> MakeSpawnFactories(const common::StackStorage& systems);
+    void SetupSystems(const common::StackStorage& system, const Config& config);
 
     const common::CommandLine& _commandLine;
     std::unique_ptr<Parameters> _parameters;
