@@ -7,7 +7,11 @@ namespace common {
 class Storage {
 public:
     Storage();
-    ~Storage();
+    Storage(const Storage& other) = delete;
+    Storage(Storage&& other) noexcept = default;
+    Storage& operator=(const Storage& other) = delete;
+    Storage& operator=(Storage&& other) noexcept = default;
+    ~Storage() noexcept;
 
     template <class T>
     T& Modify() const;
