@@ -2,14 +2,11 @@
 
 #include "base_script.h"
 #include "components/cell_age.h"
-#include "drawable.h"
 #include "setup_script_errors.h"
 #include "simulation_script.h"
 #include "storage/stack_storage.h"
 #include "ui_layout.h"
 
-class Drawable;
-class Updatable;
 class Simulation;
 class SimulationScript;
 class UiLayout;

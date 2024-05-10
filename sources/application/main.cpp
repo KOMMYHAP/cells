@@ -1,37 +1,19 @@
-#include "breakpoint.h"
-#include "command_line.h"
 #include "common_system.h"
-#include "profile/profile.h"
-#include "random.h"
 #include "registrar/registrar.h"
-#include "storage/storage.h"
 
-#include "systems/age_system.h"
-#include "systems/brain_system.h"
 #include "systems/graveyard_system.h"
-#include "systems/health_system.h"
 #include "systems/id_system.h"
 #include "systems/position_system.h"
-#include "systems/selection_system.h"
-#include "systems/simulation_virtual_machine.h"
-#include "systems/spawn_system.h"
-#include "systems/spawner.h"
 #include "systems/type_system.h"
 
-#include "simulation.h"
 #include "world.h"
 
-#include "main_window.h"
 #include "scripts_system.h"
-#include "ui_layout.h"
 #include "ui_system.h"
 
 #include "world_render.h"
-#include "world_widget.h"
 
 #include "main_loop.h"
-#include "setup_script.h"
-#include "simulation_script.h"
 
 const std::string_view FontArgument = "--font";
 const std::string_view FragmentShaderArgument = "--fragment-shader";

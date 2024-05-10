@@ -20,8 +20,6 @@
 #include "systems/spawner.h"
 #include "systems/type_system.h"
 
-#include "updatable.h"
-
 static const std::string_view FontArgument = "--font";
 static const std::string_view FragmentShaderArgument = "--fragment-shader";
 
