@@ -4,3 +4,4 @@
 #include <SFML/Window.hpp>
 
 #include "basic_defines.h"
+#include "common_fwd.h"

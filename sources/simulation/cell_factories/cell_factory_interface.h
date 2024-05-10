@@ -4,6 +4,8 @@
 
 class ICellFactory {
 public:
+    virtual ~ICellFactory() = default;
+
     enum class Status : uint8_t {
         Success,
         FailedToCreate,
@@ -14,7 +16,4 @@ public:
         CellBrain brain;
     };
     virtual Result Make() = 0;
-
-protected:
-    ~ICellFactory() = default;
 };

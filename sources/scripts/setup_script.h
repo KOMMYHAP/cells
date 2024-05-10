@@ -4,7 +4,7 @@
 #include "components/cell_age.h"
 #include "drawable.h"
 #include "setup_script_errors.h"
-#include "storage/storage.h"
+#include "simulation_script.h"
 
 class Drawable;
 class Updatable;
@@ -20,7 +20,8 @@ public:
     std::expected<void, std::error_code> Perform() override;
 
     struct Parameters {
-        common::Storage systems;
+        std::unique_ptr<common::Storage> systems;
+        std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> factories;
         std::unique_ptr<UiLayout> uiLayout;
         std::unique_ptr<SimulationScript> simulationScript;
         std::unique_ptr<Simulation> simulation;
@@ -33,6 +34,7 @@ private:
     Config MakeConfig();
     UiLayout MakeUiLayout();
     std::expected<common::Storage, std::error_code> MakeSystems(const Config& config, const UiLayout& uiLayout);
+    std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> MakeSpawnFactories(const common::Storage & systems);
     void SetupSystems(const common::Storage& system, const Config& config);
 
     const common::CommandLine& _commandLine;

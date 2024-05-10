@@ -70,14 +70,19 @@ std::expected<void, std::error_code> SetupScript::Perform()
     if (!mbSystems) {
         return std::unexpected { mbSystems.error() };
     }
+    auto systems = std::make_unique<common::Storage>(std::move(mbSystems.value()));
+    SetupSystems(*systems, config);
+    auto factories = MakeSpawnFactories(*systems);
+    std::map<SpawnPolicy , ICellFactory*> weakFactories;
+    for (auto&&[policy, factory] : factories) {
+        weakFactories[policy] = factory.get();
+    }
 
-    SetupSystems(mbSystems.value(), config);
-
-    auto simulationScript = std::make_unique<SimulationScript>(mbSystems.value());
+    auto simulationScript = std::make_unique<SimulationScript>(*systems, std::move(weakFactories));
     SimulationParameters simulationParameters;
     simulationParameters.selectionEpochTicks = config.selectionEpochTicks;
     simulationParameters.bestCellSelectionSize = config.bestCellSelectionSize;
-    simulationParameters.spawnPolicy = SimulationParameters::SpawnPolicy::Random;
+    simulationParameters.spawnPolicy = SpawnPolicy::Random;
     simulationParameters.limitCellAge = config.limitCellAge;
     simulationScript->SetParameters(simulationParameters);
 
@@ -85,7 +90,8 @@ std::expected<void, std::error_code> SetupScript::Perform()
     simulation->SetAutoMode(config.targetSimulationTime);
 
     _parameters = std::make_unique<Parameters>();
-    _parameters->systems = std::move(mbSystems.value());
+    _parameters->factories = std::move(factories);
+    _parameters->systems = std::move(systems);
     _parameters->simulationScript = std::move(simulationScript);
     _parameters->simulation = std::move(simulation);
     _parameters->uiLayout = std::make_unique<UiLayout>(uiLayout);
@@ -113,8 +119,8 @@ SetupScript::Config SetupScript::MakeConfig()
     config.bestCellSelectionSize = 100;
     config.selectionEpochTicks = 100;
 
-    config.colors = { sf::Color::White, sf::Color::White, sf::Color::White, sf::Color::White };
-    return {};
+    config.colors = { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White };
+    return config;
 }
 
 SetupScript::Parameters SetupScript::ExtractParameters()
@@ -128,7 +134,6 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
 {
     auto mbFontPath = _commandLine.FindValue(FontArgument);
     if (!mbFontPath.has_value()) {
-        std::cerr << std::format("Please specify filepath to font file using {} $path", FontArgument) << std::endl;
         return std::unexpected { make_error_code(SetupScriptErrors::MissingArgumentFont) };
     }
 
@@ -139,7 +144,6 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
 
     auto mbFragmentShaderPath = _commandLine.FindValue(FragmentShaderArgument);
     if (!mbFragmentShaderPath.has_value()) {
-        std::cerr << std::format("Please specify filepath to fragment shader using {} $path", FragmentShaderArgument) << std::endl;
         return std::unexpected { make_error_code(SetupScriptErrors::MissingArgumentShader) };
     }
 
@@ -175,28 +179,24 @@ std::expected<common::Storage, std::error_code> SetupScript::MakeSystems(const C
 
 void SetupScript::SetupSystems(const common::Storage& system, const Config& config)
 {
-    auto& _simulationVm = system.Modify<SimulationVirtualMachine>();
-    auto& _healthSystem = system.Modify<HealthSystem>();
-    auto& _spawnSystem = system.Modify<SpawnSystem>();
-    auto& _idSystem = system.Modify<IdSystem>();
+    auto& simulationVm = system.Modify<SimulationVirtualMachine>();
+    auto& healthSystem = system.Modify<HealthSystem>();
+    auto& spawnSystem = system.Modify<SpawnSystem>();
+    auto& idSystem = system.Modify<IdSystem>();
 
-    _simulationVm.SetInstructionsPerStep(config.systemInstructionPerStep);
-    auto watcher = [simulationVm = &_simulationVm, healthSystem = &_healthSystem](ProcessorState state) {
+    simulationVm.SetInstructionsPerStep(config.systemInstructionPerStep);
+    auto watcher = [&](ProcessorState state) {
         if (state == ProcessorState::Good) {
             return;
         }
         // Cell's brain has illegal instruction, make insult as punishment
-        const CellId id = simulationVm->GetRunningCellId();
-        healthSystem->Set(id, CellHealth::Zero);
+        const CellId id = simulationVm.GetRunningCellId();
+        healthSystem.Set(id, CellHealth::Zero);
     };
-    _simulationVm.SetWatcher(std::move(watcher));
+    simulationVm.SetWatcher(std::move(watcher));
 
-    const auto targetPopulationSize = static_cast<uint32_t>(round(config.fullnessPercent * static_cast<float>(_idSystem.GetCellsCountLimit())));
-    _spawnSystem.SetSpawnLimit(targetPopulationSize);
-
-    const uint8_t moveCommandCount = 10;
-    auto _patrolCellFactory = std::make_unique<PatrolCellFactory>(_simulationVm, moveCommandCount);
-    auto _randomCellFactory = std::make_unique<RandomCellFactory>(_simulationVm, std::optional<uint16_t>());
+    const auto targetPopulationSize = static_cast<uint32_t>(round(config.fullnessPercent * static_cast<float>(idSystem.GetCellsCountLimit())));
+    spawnSystem.SetSpawnLimit(targetPopulationSize);
 }
 
 UiLayout SetupScript::MakeUiLayout()
@@ -216,4 +216,18 @@ UiLayout SetupScript::MakeUiLayout()
     //    ASSERT(layout.fieldHeight % (CellSize + CellPadding) == 0);
 
     return layout;
+}
+std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> SetupScript::MakeSpawnFactories(const common::Storage& systems)
+{
+    std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> factories;
+
+    auto& simulationVm = systems.Modify<SimulationVirtualMachine>();
+
+    const uint8_t moveCommandCount = 10;
+    auto patrolCellFactory = std::make_unique<PatrolCellFactory>(simulationVm, moveCommandCount);
+    auto randomCellFactory = std::make_unique<RandomCellFactory>(simulationVm, std::optional<uint16_t>());
+
+    factories.emplace(SpawnPolicy::Random, std::move(randomCellFactory));
+    factories.emplace(SpawnPolicy::Patrol, std::move(patrolCellFactory));
+    return factories;
 }

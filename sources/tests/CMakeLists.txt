@@ -6,6 +6,8 @@ add_executable(${PROJECT_NAME} main_tests.cpp tests_pch.h
         processor_tests.cpp
         procedure_tests.cpp
         storage_tests.cpp
+        stack_storage_tests.cpp
+        registrar_tests.cpp
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE tests_pch.h)

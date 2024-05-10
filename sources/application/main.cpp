@@ -3,13 +3,16 @@
 #include "main_window.h"
 #include "profile/profile.h"
 #include "random.h"
-#include "setup_script.h"
 #include "simulation.h"
-#include "simulation_script.h"
 #include "ui_layout.h"
 #include "world.h"
 #include "world_render.h"
 #include "world_widget.h"
+
+#include "storage/storage.h"
+
+#include "setup_script.h"
+#include "simulation_script.h"
 
 #include "systems/age_system.h"
 #include "systems/brain_system.h"
@@ -67,20 +70,26 @@ int main(int argc, char** argv)
     common::CommandLine commandLine { argc, argv };
 
     SetupScript setupScript { commandLine };
+    auto setupResult = setupScript.Perform();
+    if (!setupResult) {
+        std::cerr << setupResult.error().message() << std::endl;
+        return -1;
+    }
+
     auto setup = setupScript.ExtractParameters();
     const UiLayout& uiLayout = *setup.uiLayout;
 
     MainWindow mainWindow;
     sf::RenderTarget* renderTarget = mainWindow.TryCreate("Cells", sf::Vector2u { uiLayout.screenWidth, uiLayout.screenHeight });
     if (!renderTarget) {
-        PANIC("Failed to create main window!");
+        std::cerr << "Failed to create main window!" << std::endl;
         return -1;
     }
 
     MainWindow::RuntimeSetup runtimeConfig;
     runtimeConfig.updatableList.push_back(setup.simulation.get());
 
-    auto& worldRender = setup.systems.Modify<WorldRender>();
+    auto& worldRender = setup.systems->Modify<WorldRender>();
     WorldWidget worldWidget { *renderTarget, worldRender, sf::Vector2f { static_cast<float>(uiLayout.fieldOffset), static_cast<float>(uiLayout.fieldOffset) } };
     runtimeConfig.drawableList.push_back(&worldWidget);
 

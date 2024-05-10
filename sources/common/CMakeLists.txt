@@ -10,6 +10,7 @@ endif ()
 
 add_subdirectory(profile)
 add_subdirectory(storage)
+add_subdirectory(registrar)
 
 
 # add sources

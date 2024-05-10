@@ -14,8 +14,9 @@
 #include "systems/spawner.h"
 #include "systems/type_system.h"
 
-SimulationScript::SimulationScript(const common::Storage& systems)
+SimulationScript::SimulationScript(const common::Storage& systems, std::map<SpawnPolicy, ICellFactory*> factories)
     : _systems(systems)
+    , _factories(std::move(factories))
 {
 }
 
@@ -74,14 +75,7 @@ std::expected<void, std::error_code> SimulationScript::Perform()
 void SimulationScript::SetParameters(const SimulationParameters& parameters)
 {
     _parameters = parameters;
-    switch (_parameters.spawnPolicy) {
-    case SimulationParameters::SpawnPolicy::Random:
-        _cellFactory = _randomCellFactory.get();
-        break;
-    case SimulationParameters::SpawnPolicy::Patrol:
-        _cellFactory = _patrolCellFactory.get();
-        break;
-    default:
-        UNREACHABLE("Unknown spawn policy!", _parameters.spawnPolicy);
-    }
+    auto it = _factories.find(_parameters.spawnPolicy);
+    ASSERT(it != _factories.end(), "Spawn policy was not registered!", _parameters.spawnPolicy);
+    _cellFactory = it->second;
 }
