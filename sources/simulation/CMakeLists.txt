@@ -23,6 +23,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         simulation.h
         base_script.h
         world.h
+        world_parameters.h
         simulation_profile_category.h
         simulation_parameters.h
 )

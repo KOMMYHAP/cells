@@ -121,3 +121,28 @@ TEST(StorageTest, TestMoveOnlyItem)
 
     storage.Remove<T>();
 }
+
+TEST(StorageTest, TestPointerOnItem)
+{
+    common::Storage storage;
+
+    {
+        int a = 42;
+        auto& p = storage.Store<int*>(&a);
+        ASSERT_EQ(p, &a);
+    }
+    {
+        float b = 3.14f;
+        auto& p = storage.Store<float*>(&b);
+        ASSERT_EQ(p, &b);
+    }
+    {
+        double d = 9.75f;
+        auto& p = storage.Store<double*>(&d);
+        ASSERT_EQ(p, &d);
+    }
+
+    storage.Remove<double*>();
+    storage.Remove<float*>();
+    storage.Remove<int*>();
+}

@@ -5,6 +5,8 @@
 #include "drawable.h"
 #include "setup_script_errors.h"
 #include "simulation_script.h"
+#include "storage/stack_storage.h"
+#include "ui_layout.h"
 
 class Drawable;
 class Updatable;
@@ -17,14 +19,13 @@ public:
     SetupScript(const common::CommandLine& commandLine);
     ~SetupScript();
 
-    std::expected<void, std::error_code> Perform() override;
+    std::error_code Perform() override;
 
     struct Parameters {
-        std::unique_ptr<common::Storage> systems;
+        common::StackStorage systems;
         std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> factories;
-        std::unique_ptr<UiLayout> uiLayout;
+        UiLayout uiLayout;
         std::unique_ptr<SimulationScript> simulationScript;
-        std::unique_ptr<Simulation> simulation;
     };
     Parameters ExtractParameters();
 
@@ -34,7 +35,7 @@ private:
     Config MakeConfig();
     UiLayout MakeUiLayout();
     std::expected<common::Storage, std::error_code> MakeSystems(const Config& config, const UiLayout& uiLayout);
-    std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> MakeSpawnFactories(const common::Storage & systems);
+    std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> MakeSpawnFactories(const common::Storage& systems);
     void SetupSystems(const common::Storage& system, const Config& config);
 
     const common::CommandLine& _commandLine;

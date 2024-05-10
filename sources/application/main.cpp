@@ -1,13 +1,16 @@
 #include "breakpoint.h"
 #include "command_line.h"
+#include "common_system.h"
 #include "main_window.h"
 #include "profile/profile.h"
 #include "random.h"
+#include "scripts_system.h"
 #include "simulation.h"
 #include "ui_layout.h"
 #include "world.h"
 #include "world_render.h"
 #include "world_widget.h"
+#include <registrar/registrar.h>
 
 #include "storage/storage.h"
 
@@ -66,36 +69,18 @@ auto GetTimeInfo(sf::Time time)
 
 int main(int argc, char** argv)
 {
-    common::InitRandom("42");
-    common::CommandLine commandLine { argc, argv };
+    common::Registrar registrar;
+    registrar.Register(std::make_unique<common::CommonSystem>(argc, argv));
+    registrar.Register(std::make_unique<ScriptSystem>());
+    registrar.Register(std::make_unique<World>());
+    registrar.Register(std::make_unique<UiSystem>());
 
-    SetupScript setupScript { commandLine };
-    auto setupResult = setupScript.Perform();
-    if (!setupResult) {
-        std::cerr << setupResult.error().message() << std::endl;
+    const auto result = registrar.RunInit();
+    if (!result) {
+        std::cerr << std::format("Failed to initialize systems: {}") << std::endl;
         return -1;
     }
 
-    auto setup = setupScript.ExtractParameters();
-    const UiLayout& uiLayout = *setup.uiLayout;
-
-    MainWindow mainWindow;
-    sf::RenderTarget* renderTarget = mainWindow.TryCreate("Cells", sf::Vector2u { uiLayout.screenWidth, uiLayout.screenHeight });
-    if (!renderTarget) {
-        std::cerr << "Failed to create main window!" << std::endl;
-        return -1;
-    }
-
-    MainWindow::RuntimeSetup runtimeConfig;
-    runtimeConfig.updatableList.push_back(setup.simulation.get());
-
-    auto& worldRender = setup.systems->Modify<WorldRender>();
-    WorldWidget worldWidget { *renderTarget, worldRender, sf::Vector2f { static_cast<float>(uiLayout.fieldOffset), static_cast<float>(uiLayout.fieldOffset) } };
-    runtimeConfig.drawableList.push_back(&worldWidget);
-
-    mainWindow.Run(std::move(runtimeConfig));
-
-    common::TermRandom();
     return 0;
     //
     //    sf::Clock frameClock;

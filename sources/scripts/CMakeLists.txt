@@ -6,6 +6,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         simulation_script.cpp
         setup_script.cpp
         setup_script_errors.cpp
+        scripts_system.cpp
 )
 
 
@@ -15,6 +16,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         setup_script.h
         scripts_pch.h
         setup_script_errors.h
+        scripts_system.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

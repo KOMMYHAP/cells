@@ -20,7 +20,7 @@ SimulationScript::SimulationScript(const common::Storage& systems, std::map<Spaw
 {
 }
 
-std::expected<void, std::error_code> SimulationScript::Perform()
+std::error_code SimulationScript::Perform()
 {
     auto& idSystem = _systems.Modify<IdSystem>();
     auto& ageSystem = _systems.Modify<AgeSystem>();

@@ -61,14 +61,14 @@ SetupScript::SetupScript(const common::CommandLine& commandLine)
 
 SetupScript::~SetupScript() = default;
 
-std::expected<void, std::error_code> SetupScript::Perform()
+std::error_code SetupScript::Perform()
 {
     const Config config = MakeConfig();
     const UiLayout uiLayout = MakeUiLayout();
 
     auto mbSystems = MakeSystems(config, uiLayout);
     if (!mbSystems) {
-        return std::unexpected { mbSystems.error() };
+        return mbSystems.error();
     }
     auto systems = std::make_unique<common::Storage>(std::move(mbSystems.value()));
     SetupSystems(*systems, config);

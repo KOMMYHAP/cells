@@ -28,7 +28,7 @@ class SimulationScript final : public BaseScript {
 public:
     SimulationScript(const common::Storage& systems, std::map<SpawnPolicy, ICellFactory*> factories);
 
-    std::expected<void, std::error_code> Perform() override;
+    std::error_code Perform() override;
 
     void SetParameters(const SimulationParameters& parameters);
     const SimulationStatistics& GetStatistics() const { return _stats; }

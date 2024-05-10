@@ -1,16 +1,26 @@
 #pragma once
 
 #include "drawable.h"
-#include "ui_layout.h"
+#include "registrar/registrable_system.h"
 
-class UiSystem : public Drawable {
+class WorldWidget;
+
+class UiSystem : public common::RegistrableSystem {
 public:
-    UiSystem(sf::RenderTarget& renderTarget, const UiLayout& uiLayout, const common::Storage& systems);
+    UiSystem();
+    ~UiSystem();
 
-    void Draw() override;
+    std::error_code InitializeSystem(common::StackStorage& storage) override;
+    void TerminateSystem() override;
+
+    enum class MainLoopFeedback {
+        ShouldStop,
+        ShouldRun
+    };
+    MainLoopFeedback ProcessInput();
+    void Render();
 
 private:
-    sf::RenderTarget& _renderTarget;
+    sf::RenderWindow _window;
     std::unique_ptr<WorldWidget> _worldWidget;
-    const UiLayout _uiLayout;
 };

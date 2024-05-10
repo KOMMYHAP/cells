@@ -6,6 +6,7 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE
         main_window.cpp
         main.cpp
+        main_loop.cpp
         application_pch.h
 )
 
@@ -13,6 +14,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         main_window.h
+        main_loop.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
