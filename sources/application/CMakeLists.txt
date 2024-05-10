@@ -4,7 +4,6 @@ add_executable(${PROJECT_NAME} main.cpp)
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        main_window.cpp
         main.cpp
         main_loop.cpp
         application_pch.h
@@ -13,7 +12,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        main_window.h
         main_loop.h
 )
 
@@ -24,7 +22,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-processor
         cells-render
         cells-simulation
-        cells-application-interface
         sfml-system
         cells-ui
         cells-scripts

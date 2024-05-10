@@ -2,19 +2,16 @@ project(cells-ui)
 add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME} PUBLIC
-        world_widget.cpp
         ui_system.cpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
         ui_pch.h
-        world_widget.h
         ui_layout.h
         ui_system.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        cells-application-interface
         cells-simulation
         cells-render
         sfml-graphics

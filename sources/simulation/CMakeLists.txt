@@ -34,6 +34,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-common
         cells-processor
         cells-application-interface
+        sfml-system
 )
 
 

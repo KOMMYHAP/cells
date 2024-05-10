@@ -1,11 +1,10 @@
 #pragma once
 
 #include "sample_counter.h"
-#include "updatable.h"
 
 class BaseScript;
 
-class Simulation : public Updatable {
+class Simulation {
 public:
     Simulation(BaseScript& tickScript);
 
@@ -16,9 +15,6 @@ public:
 
     void Tick();
     void Ticks(uint32_t ticks);
-
-public:
-    void Update(sf::Time elapsedTime) override;
 
 private:
     void ProcessTick();

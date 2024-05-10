@@ -7,7 +7,6 @@ add_subdirectory(simulation)
 add_subdirectory(render)
 add_subdirectory(tests)
 add_subdirectory(application)
-add_subdirectory(application_interface)
 add_subdirectory(ui)
 add_subdirectory(scripts)
 

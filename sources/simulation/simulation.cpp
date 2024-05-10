@@ -1,6 +1,6 @@
 #include "simulation.h"
-#include "simulation_profile_category.h"
 #include "base_script.h"
+#include "simulation_profile_category.h"
 
 Simulation::Simulation(BaseScript& tickScript)
     : _tickScript(tickScript)
@@ -73,9 +73,4 @@ uint32_t Simulation::WarmUp()
     const uint32_t ticksToWarmUp = 1;
     Ticks(ticksToWarmUp);
     return ticksToWarmUp;
-}
-
-void Simulation::Update(sf::Time elapsedTime)
-{
-    Run(elapsedTime);
 }

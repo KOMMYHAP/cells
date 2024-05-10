@@ -1,15 +1,11 @@
 #pragma once
 
-#include "drawable.h"
 #include "registrar/registrable_system.h"
 
-class WorldWidget;
+class WorldRender;
 
 class UiSystem : public common::RegistrableSystem {
 public:
-    UiSystem();
-    ~UiSystem();
-
     std::error_code InitializeSystem(common::StackStorage& storage) override;
     void TerminateSystem() override;
 
@@ -22,5 +18,6 @@ public:
 
 private:
     sf::RenderWindow _window;
-    std::unique_ptr<WorldWidget> _worldWidget;
+    sf::RenderStates _worldStates;
+    WorldRender* _worldRender{nullptr};
 };
