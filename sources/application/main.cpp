@@ -1,57 +1,10 @@
-#include "common_system.h"
 #include "registrar/registrar.h"
 
-#include "systems/graveyard_system.h"
-#include "systems/id_system.h"
-#include "systems/position_system.h"
-#include "systems/type_system.h"
-
-#include "world.h"
-
+#include "common_system.h"
+#include "main_loop.h"
 #include "scripts_system.h"
 #include "ui_system.h"
-
-#include "world_render.h"
-
-#include "main_loop.h"
-
-const std::string_view FontArgument = "--font";
-const std::string_view FragmentShaderArgument = "--fragment-shader";
-
-const sf::Time TargetSimulationTime = sf::milliseconds(15);
-const uint8_t CellsCountPercentOfLimit = 20;
-
-const uint16_t ScreenWidth = 800;
-const uint16_t ScreenHeight = 600;
-
-const uint16_t FieldOffset = 20;
-const uint16_t FieldWidth = ScreenWidth - 2 * FieldOffset;
-const uint16_t FieldHeight = ScreenHeight - 2 * FieldOffset;
-
-const uint16_t StatusTextOffset = 5;
-const uint16_t StatusTextSize = 10;
-
-const uint16_t CellPadding = 0;
-const uint16_t CellSize = 8;
-
-const uint16_t RowsCount = FieldHeight / (CellSize + CellPadding);
-const uint16_t ColumnsCount = FieldWidth / (CellSize + CellPadding);
-
-const sf::Color Gray { 0xCCCCCCFF };
-const uint16_t StatusMessageBufferLimit = 200;
-
-auto GetTimeInfo(sf::Time time)
-{
-    const std::string_view tickUnit = time.asMilliseconds() >= 1000 ? "s"
-        : time.asMicroseconds() >= 1000                             ? "ms"
-                                                                    : "us";
-    const float tickTimeValue = time.asMilliseconds() >= 1000
-        ? time.asSeconds()
-        : time.asMicroseconds() >= 1000 ? static_cast<float>(time.asMilliseconds())
-                                        : static_cast<float>(time.asMicroseconds());
-
-    return std::make_tuple(tickTimeValue, tickUnit);
-}
+#include "world.h"
 
 int main(int argc, char** argv)
 {

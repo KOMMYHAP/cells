@@ -20,11 +20,9 @@
 #include "systems/spawner.h"
 #include "systems/type_system.h"
 
-static const std::string_view FontArgument = "--font";
 static const std::string_view FragmentShaderArgument = "--fragment-shader";
 
 const sf::Color Gray { 0xCCCCCCFF };
-const uint16_t StatusMessageBufferLimit = 200;
 
 struct SetupScript::Config {
     // common
@@ -116,16 +114,6 @@ SetupScript::Parameters SetupScript::ExtractParameters()
 
 std::expected<common::StackStorage, std::error_code> SetupScript::MakeSystems(const Config& config, const UiLayout& uiLayout)
 {
-    auto mbFontPath = _commandLine.FindValue(FontArgument);
-    if (!mbFontPath.has_value()) {
-        return std::unexpected { make_error_code(SetupScriptErrors::MissingArgumentFont) };
-    }
-
-    sf::Font defaultFont;
-    if (!defaultFont.loadFromFile(std::string { *mbFontPath })) {
-        return std::unexpected { make_error_code(SetupScriptErrors::InvalidFont) };
-    }
-
     auto mbFragmentShaderPath = _commandLine.FindValue(FragmentShaderArgument);
     if (!mbFragmentShaderPath.has_value()) {
         return std::unexpected { make_error_code(SetupScriptErrors::MissingArgumentShader) };

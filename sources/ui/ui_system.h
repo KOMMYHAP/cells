@@ -1,6 +1,7 @@
 #pragma once
 
 #include "registrar/registrable_system.h"
+#include "status_panel.h"
 
 class WorldRender;
 
@@ -14,10 +15,13 @@ public:
         ShouldRun
     };
     MainLoopFeedback ProcessInput();
+    void Update(sf::Time elapsedTime);
     void Render();
 
 private:
     sf::RenderWindow _window;
     sf::RenderStates _worldStates;
-    WorldRender* _worldRender{nullptr};
+    WorldRender* _worldRender { nullptr };
+    std::unique_ptr<sf::Font> _font;
+    std::unique_ptr<StatusPanel> _statusPanel;
 };

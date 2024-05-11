@@ -3,12 +3,14 @@ add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME} PUBLIC
         ui_system.cpp
+        status_panel.cpp
 )
 
 target_sources(${PROJECT_NAME} PRIVATE
         ui_pch.h
         ui_layout.h
         ui_system.h
+        status_panel.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
