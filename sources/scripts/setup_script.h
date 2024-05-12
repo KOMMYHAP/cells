@@ -32,7 +32,7 @@ private:
     Config MakeConfig();
     SimulationParameters MakeSimulationParams();
     UiLayout MakeUiLayout();
-    std::expected<common::StackStorage, std::error_code> MakeSystems(const Config& config, const UiLayout& uiLayout);
+    common::StackStorage MakeSystems(const Config& config);
     std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> MakeSpawnFactories(const common::StackStorage& systems);
     void SetupSystems(const common::StackStorage& system, const Config& config);
 

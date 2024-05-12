@@ -4,8 +4,6 @@
 #include "status_panel.h"
 #include "ui_widget.h"
 
-class WorldRender;
-
 class UiSystem : public common::RegistrableSystem {
 public:
     std::error_code InitializeSystem(common::StackStorage& storage) override;

@@ -2,11 +2,9 @@
 #include "command_line.h"
 
 #include "ui_layout.h"
-#include "world_widget.h"
 
 #include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
-#include "setup_script_errors.h"
 #include "simulation_parameters.h"
 #include "systems/age_system.h"
 #include "systems/brain_system.h"
@@ -54,11 +52,7 @@ std::error_code SetupScript::Perform()
     const Config config = MakeConfig();
     const UiLayout uiLayout = MakeUiLayout();
 
-    auto mbSystems = MakeSystems(config, uiLayout);
-    if (!mbSystems) {
-        return mbSystems.error();
-    }
-    auto& systems = mbSystems.value();
+    common::StackStorage systems = MakeSystems(config);
     SetupSystems(systems, config);
     auto factories = MakeSpawnFactories(systems);
     std::map<SpawnPolicy, ICellFactory*> weakFactories;
@@ -105,7 +99,7 @@ SetupScript::Parameters SetupScript::ExtractParameters()
     return parameters;
 }
 
-std::expected<common::StackStorage, std::error_code> SetupScript::MakeSystems(const Config& config, const UiLayout& uiLayout)
+common::StackStorage SetupScript::MakeSystems(const Config& config)
 {
     common::StackStorage systems;
     auto& idSystem = systems.Store<IdSystem>(config.rowsCount * config.columnsCount);
@@ -120,7 +114,7 @@ std::expected<common::StackStorage, std::error_code> SetupScript::MakeSystems(co
     /*auto& spawnSystem =*/systems.Store<SpawnSystem>(positionSystem, idSystem, spawner);
 
     /*auto& selectionSystem =*/systems.Store<SelectionSystem>(brainSystem, idSystem, config.selectionEpochTicks, config.bestCellSelectionSize);
-    return std::move(systems);
+    return systems;
 }
 
 void SetupScript::SetupSystems(const common::StackStorage& system, const Config& config)
