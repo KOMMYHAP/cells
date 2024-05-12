@@ -5,9 +5,14 @@
 
 #include "ui_layout.h"
 #include "world.h"
-#include "world_render.h"
+#include "world_widget.h"
+
+#include "systems/id_system.h"
+#include "systems/position_system.h"
+#include "systems/type_system.h"
 
 static const std::string_view FontArgument = "--font";
+static const std::string_view FragmentShaderArgument = "--fragment-shader";
 
 std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
@@ -19,25 +24,54 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     _window.setFramerateLimit(60);
 
     auto* world = storage.Get<World*>();
-    _worldRender = &world->GetSystems().Modify<WorldRender>();
-    _worldStates.transform.translate(static_cast<float>(layout.fieldOffset), static_cast<float>(layout.fieldOffset));
+    const common::StackStorage& systems = world->GetSystems();
 
-    auto mbFontPath = storage.Get<common::CommandLine>().FindValue(FontArgument);
+    const common::CommandLine& commandLine = storage.Get<common::CommandLine>();
+    auto mbFontPath = commandLine.FindValue(FontArgument);
     ASSERT(mbFontPath.has_value(), "you should specify font path via --font argument!");
 
     _font = std::make_unique<sf::Font>();
     const bool fontLoaded = _font->loadFromFile(std::string { *mbFontPath });
     ASSERT(fontLoaded, "invalid font!");
 
-    _statusPanel = std::make_unique<StatusPanel>(layout, *_font, *world);
-
     storage.Store<UiSystem*>(this);
+
+    {
+        auto statusPanel = std::make_unique<StatusPanel>(layout, *_font, *world);
+        AddWidget(std::move(statusPanel));
+    }
+
+    {
+        auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
+        ASSERT(mbFragmentShaderPath.has_value());
+
+        auto shader = std::make_unique<sf::Shader>();
+        const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
+        ASSERT(loaded);
+
+        WorldWidget::Config worldRenderConfig {
+            std::move(shader),
+            { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White },
+            sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
+            sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
+            systems.Modify<PositionSystem>(),
+            systems.Modify<IdSystem>(),
+            systems.Modify<TypeSystem>()
+        };
+        auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
+        AddWidget(std::move(worldWidget));
+    }
+
     return std::error_code();
 }
 
 void UiSystem::TerminateSystem()
 {
-    _worldRender = nullptr;
+    for (auto&& [_, widget] : std::ranges::reverse_view(_widgets)) {
+        widget.reset();
+    }
+    _widgets.clear();
+    _nextWidgetHandle.id = 0;
     _window.close();
 }
 
@@ -55,7 +89,9 @@ UiSystem::MainLoopFeedback UiSystem::ProcessInput()
 
 void UiSystem::Update(sf::Time elapsedTime)
 {
-    _statusPanel->Update(elapsedTime);
+    for (auto&& [_, widget] : _widgets) {
+        widget->Update(elapsedTime);
+    }
 }
 
 void UiSystem::Render()
@@ -67,8 +103,23 @@ void UiSystem::Render()
     const sf::Color gray { 0xCCCCCCFF };
     _window.clear(gray);
 
-    _statusPanel->Draw(_window);
-    _worldRender->Render(_window, _worldStates);
+    for (auto&& [_, widget] : _widgets) {
+        widget->Draw(_window);
+    }
 
     _window.display();
+}
+
+UiHandle UiSystem::AddWidget(std::unique_ptr<UiWidget> widget)
+{
+    const auto handle = _nextWidgetHandle;
+    _widgets.emplace(handle, std::move(widget));
+    _nextWidgetHandle.id += 1;
+    return handle;
+}
+
+void UiSystem::RemoveWidget(UiHandle handle)
+{
+    ASSERT(_widgets.contains(handle));
+    _widgets.erase(handle);
 }

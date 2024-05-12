@@ -1,10 +1,10 @@
-#include "world_render.h"
-#include "render_profile_category.h"
+#include "world_widget.h"
+
 #include "systems/id_system.h"
 #include "systems/position_system.h"
 #include "systems/type_system.h"
 
-WorldRender::WorldRender(Config&& config)
+WorldWidget::WorldWidget(Config&& config)
     : _config(std::move(config))
     , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
 {
@@ -34,10 +34,8 @@ WorldRender::WorldRender(Config&& config)
     ASSERT(vertexBufferUpdated);
 }
 
-void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
+void WorldWidget::Draw(sf::RenderTarget& target)
 {
-    common::ProfileScope renderScope("Render", RenderProfileCategory);
-
     const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
     std::fill(_textureData.begin(), _textureData.end(), clearColor);
 
@@ -46,11 +44,13 @@ void WorldRender::Render(sf::RenderTarget& target, sf::RenderStates states)
     });
     _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
 
+    sf::RenderStates states;
     states.shader = _config.fragmentShader.get();
+    states.transform.translate(_config.renderTargetOffset.x, _config.renderTargetOffset.y);
     target.draw(_vertexBuffer, states);
 }
 
-sf::Color WorldRender::GetColor(CellType type) const
+sf::Color WorldWidget::GetColor(CellType type) const
 {
     switch (type) {
     case CellType::Unit:
@@ -66,7 +66,7 @@ sf::Color WorldRender::GetColor(CellType type) const
     }
 }
 
-void WorldRender::ProcessCell(CellId id)
+void WorldWidget::ProcessCell(CellId id)
 {
     const CellPosition position = _config.positionSystem.Get(id);
     const uint16_t width = _config.positionSystem.GetWidth();
@@ -77,4 +77,8 @@ void WorldRender::ProcessCell(CellId id)
 
     uint32_t& pixel = _textureData[position.y * width + position.x];
     pixel = GetColor(cellType).toInteger();
+}
+
+void WorldWidget::Update(sf::Time /*elapsedTime*/)
+{
 }

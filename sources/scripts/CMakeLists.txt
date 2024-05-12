@@ -21,7 +21,6 @@ target_sources(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         cells-simulation
-        cells-render
         cells-ui
 )
 target_precompile_headers(${PROJECT_NAME} PRIVATE scripts_pch.h)

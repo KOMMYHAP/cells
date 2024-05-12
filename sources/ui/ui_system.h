@@ -2,6 +2,7 @@
 
 #include "registrar/registrable_system.h"
 #include "status_panel.h"
+#include "ui_widget.h"
 
 class WorldRender;
 
@@ -18,10 +19,14 @@ public:
     void Update(sf::Time elapsedTime);
     void Render();
 
+    UiHandle AddWidget(std::unique_ptr<UiWidget> widget);
+    void RemoveWidget(UiHandle handle);
+
+    const sf::Font& GetDefaultFont() const { return *_font; }
+
 private:
     sf::RenderWindow _window;
-    sf::RenderStates _worldStates;
-    WorldRender* _worldRender { nullptr };
     std::unique_ptr<sf::Font> _font;
-    std::unique_ptr<StatusPanel> _statusPanel;
+    std::map<UiHandle, std::unique_ptr<UiWidget>> _widgets;
+    UiHandle _nextWidgetHandle;
 };

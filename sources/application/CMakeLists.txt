@@ -20,7 +20,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-common
         cells-processor
-        cells-render
         cells-simulation
         sfml-system
         cells-ui

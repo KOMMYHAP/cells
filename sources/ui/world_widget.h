@@ -2,26 +2,29 @@
 
 #include "components/cell_id.h"
 #include "components/cell_type.h"
+#include "ui_widget.h"
 
 class PositionSystem;
 class IdSystem;
 class TypeSystem;
 
-class WorldRender {
+class WorldWidget : public UiWidget {
 public:
     struct Config {
         std::unique_ptr<sf::Shader> fragmentShader;
         std::vector<sf::Color> colors;
         sf::Vector2u renderTargetSize;
+        sf::Vector2u renderTargetOffset;
 
         PositionSystem& positionSystem;
         IdSystem& idSystem;
         TypeSystem& typeSystem;
     };
 
-    WorldRender(Config&& config);
+    WorldWidget(Config&& config);
 
-    void Render(sf::RenderTarget& target, sf::RenderStates states);
+    void Update(sf::Time elapsedTime) override;
+    void Draw(sf::RenderTarget& target) override;
 
 private:
     void ProcessCell(CellId id);

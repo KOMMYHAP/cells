@@ -2,7 +2,7 @@
 #include "command_line.h"
 
 #include "ui_layout.h"
-#include "world_render.h"
+#include "world_widget.h"
 
 #include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
@@ -19,8 +19,6 @@
 #include "systems/spawn_system.h"
 #include "systems/spawner.h"
 #include "systems/type_system.h"
-
-static const std::string_view FragmentShaderArgument = "--fragment-shader";
 
 const sf::Color Gray { 0xCCCCCCFF };
 
@@ -42,9 +40,6 @@ struct SetupScript::Config {
     CellAge limitCellAge { CellAge::Zero };
     uint16_t bestCellSelectionSize { 0 };
     uint16_t selectionEpochTicks { 0 };
-
-    // render
-    std::vector<sf::Color> colors;
 };
 
 SetupScript::SetupScript(const common::CommandLine& commandLine)
@@ -100,8 +95,6 @@ SetupScript::Config SetupScript::MakeConfig()
     config.limitCellAge = CellAge { 100 };
     config.bestCellSelectionSize = 100;
     config.selectionEpochTicks = 100;
-
-    config.colors = { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White };
     return config;
 }
 
@@ -114,16 +107,6 @@ SetupScript::Parameters SetupScript::ExtractParameters()
 
 std::expected<common::StackStorage, std::error_code> SetupScript::MakeSystems(const Config& config, const UiLayout& uiLayout)
 {
-    auto mbFragmentShaderPath = _commandLine.FindValue(FragmentShaderArgument);
-    if (!mbFragmentShaderPath.has_value()) {
-        return std::unexpected { make_error_code(SetupScriptErrors::MissingArgumentShader) };
-    }
-
-    auto shader = std::make_unique<sf::Shader>();
-    if (!shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment)) {
-        return std::unexpected { make_error_code(SetupScriptErrors::InvalidShader) };
-    }
-
     common::StackStorage systems;
     auto& idSystem = systems.Store<IdSystem>(config.rowsCount * config.columnsCount);
     auto& brainSystem = systems.Store<BrainSystem>(idSystem.GetCellsCountLimit());
@@ -136,15 +119,6 @@ std::expected<common::StackStorage, std::error_code> SetupScript::MakeSystems(co
     auto& spawner = systems.Store<Spawner>(positionSystem, typeSystem, brainSystem, healthSystem, ageSystem, idSystem);
     /*auto& spawnSystem =*/systems.Store<SpawnSystem>(positionSystem, idSystem, spawner);
 
-    WorldRender::Config worldRenderConfig {
-        std::move(shader),
-        config.colors,
-        sf::Vector2u { uiLayout.fieldWidth, uiLayout.fieldHeight },
-        positionSystem,
-        idSystem,
-        typeSystem
-    };
-    /*auto& render =*/systems.Store<WorldRender>(std::move(worldRenderConfig));
     /*auto& selectionSystem =*/systems.Store<SelectionSystem>(brainSystem, idSystem, config.selectionEpochTicks, config.bestCellSelectionSize);
     return std::move(systems);
 }
