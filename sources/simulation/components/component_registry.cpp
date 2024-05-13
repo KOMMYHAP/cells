@@ -1,7 +1,7 @@
 #include "component_registry.h"
 
-ComponentRegistry::ComponentRegistry(size_t storageSize)
-    : _storageSize(storageSize)
+ComponentRegistry::ComponentRegistry(uint32_t cellsCount)
+    : _cellsCount(cellsCount)
 {
 }
 
@@ -10,7 +10,7 @@ ComponentHandle ComponentRegistry::Register(const Component& component)
     ASSERT(!_wasFreeze);
     const ComponentHandle handle = _nextHandle;
     ASSERT(!_storages.contains(handle));
-    _storages[handle] = ComponentStorage { component, _storageSize };
+    _storages[handle] = ComponentStorage { component, _cellsCount };
     _nextHandle.id += 1;
     return handle;
 }

@@ -1,11 +1,11 @@
-#include "systems/system.h"
 #include "components/component_registry.h"
+#include "systems/system.h"
 
 struct TestComponent {
     int value;
 };
 
-TEST(SystemTests, Case)
+TEST(SystemTests, Foreach)
 {
     constexpr size_t itemsCount = 10;
     ComponentRegistry registry { itemsCount };
@@ -39,5 +39,35 @@ TEST(SystemTests, Case)
     registry.Get(handle).Foreach<TestComponent>([&idx](const TestComponent& component) {
         idx += 1;
         ASSERT_EQ(component.value, idx);
+    });
+}
+
+TEST(SystemTests, Message)
+{
+    constexpr size_t itemsCount = 10;
+    ComponentRegistry registry { itemsCount };
+    const ComponentHandle handle = registry.Register(Component { sizeof(TestComponent) });
+    registry.Freeze();
+
+    registry.Modify(handle).Foreach<TestComponent>([](TestComponent& component) {
+        component.value = 0;
+    });
+
+    System system { registry, { handle } };
+    std::array<CellId, 3> ids { CellId { 0 }, CellId { 3 }, CellId { 9 } };
+    system.Message(ids, [](const System::Context& context) {
+        ASSUME(context.components.size(), 1);
+        auto* component = reinterpret_cast<TestComponent*>(context.components[0]);
+        component->value = static_cast<int>(context.id);
+    });
+
+    system.Foreach([&ids](const System::Context& context) {
+        ASSUME(context.components.size(), 1);
+        auto* component = reinterpret_cast<TestComponent*>(context.components[0]);
+        const bool shouldBeChanged = std::find(ids.begin(), ids.end(), context.id) != ids.end();
+        if (!shouldBeChanged) {
+            return;
+        }
+        ASSERT_EQ(component->value, static_cast<int>(context.id));
     });
 }

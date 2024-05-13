@@ -6,18 +6,18 @@
 
 class ComponentRegistry {
 public:
-    ComponentRegistry(size_t storageSize);
+    ComponentRegistry(uint32_t cellsCount);
     ComponentHandle Register(const Component& component);
     void Freeze();
 
     ComponentStorage& Modify(const ComponentHandle& handle);
     const ComponentStorage& Get(const ComponentHandle& handle) const;
 
-    size_t GetStorageSize() const { return _storageSize; }
+    uint32_t GetCellsCount() const { return _cellsCount; }
 
 private:
     bool _wasFreeze { false };
-    size_t _storageSize { 0 };
+    uint32_t _cellsCount { 0 };
     std::map<ComponentHandle, ComponentStorage> _storages;
     ComponentHandle _nextHandle;
 };

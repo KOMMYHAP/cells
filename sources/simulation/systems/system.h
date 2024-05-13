@@ -11,19 +11,21 @@ public:
     System(ComponentRegistry& registry, const std::vector<ComponentHandle>& handles);
 
     struct Context {
+        CellId id;
         const std::vector<std::byte*>& components;
     };
     void Foreach(const std::function<void(const Context&)>& func);
 
+    void Message(const std::span<CellId>& cells, const std::function<void(const Context&)>& func);
+
 private:
     struct ComponentInfo {
         ComponentHandle handle;
-        const Component* meta { nullptr };
+        uint16_t sizeInBytes{0};
         std::byte* startAddress { nullptr };
     };
 
     void InitComponents(const std::vector<ComponentHandle>& handles);
-    void ResetComponentBuffer();
 
     ComponentRegistry& _componentRegistry;
     std::vector<ComponentInfo> _componentInfoList;

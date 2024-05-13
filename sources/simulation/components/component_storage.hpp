@@ -31,7 +31,7 @@ void ComponentStorage::Foreach(Func&& func)
     if (GetCellsCount() == 0) {
         return;
     }
-    T* item = &Modify<T>(0);
+    T* item = &Modify<T>(CellId { 0 });
     const size_t count = GetCellsCount();
     for (size_t i = 0; i < count; ++i) {
         func(*item);
@@ -46,7 +46,7 @@ void ComponentStorage::Foreach(Func&& func) const
     if (GetCellsCount() == 0) {
         return;
     }
-    const T* item = &Get<T>(0);
+    const T* item = &Get<T>(CellId { 0 });
     const size_t count = GetCellsCount();
     for (size_t i = 0; i < count; ++i) {
         func(*item);

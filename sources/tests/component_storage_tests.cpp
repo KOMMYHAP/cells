@@ -10,12 +10,11 @@ TEST(ComponentStorageTest, SimpleTestData)
     ComponentStorage storage { info, 100 };
 
     ASSERT_EQ(storage.GetCellsCount(), 100);
-    ASSERT_EQ(storage.GetSizeInBytes(), 100 * sizeof(TestData));
     ASSERT_EQ(storage.GetMetaInfo().sizeInBytes, info.sizeInBytes);
 
-    TestData& data = storage.Modify<TestData>(0);
+    TestData& data = storage.Modify<TestData>(CellId{0});
     data.value = 42;
-    ASSERT_EQ(storage.Get<TestData>(0).value, 42);
+    ASSERT_EQ(storage.Get<TestData>(CellId{0}).value, 42);
 }
 
 TEST(ComponentStorageTest, Foreach)
@@ -51,9 +50,9 @@ TEST(ComponentStorageTest, SequenceOrder)
     Component info { sizeof(int) };
     ComponentStorage storage { info, 10 };
 
-    for (size_t i = 0; i < storage.GetCellsCount() - 1; ++i) {
-        const int* p1 = &storage.Get<int>(i);
-        const int* p2 = &storage.Get<int>(i + 1);
+    for (uint32_t i = 0; i < storage.GetCellsCount() - 1; ++i) {
+        const int* p1 = &storage.Get<int>(CellId{i});
+        const int* p2 = &storage.Get<int>(CellId{i + 1});
         ASSERT_EQ(p1 + 1, p2);
     }
 }
@@ -67,7 +66,7 @@ TEST(ComponentStorageTest, OutOfIndex_DeathTest)
     Component info { sizeof(TestData) };
     ComponentStorage storage { info, 100 };
 
-    EXPECT_DEATH(storage.Get<TestData>(100), "");
-    EXPECT_DEATH(storage.Modify<TestData>(100), "");
-    EXPECT_DEATH(storage.Get<double>(0), "");
+    EXPECT_DEATH(storage.Get<TestData>(CellId{100}), "");
+    EXPECT_DEATH(storage.Modify<TestData>(CellId{100}), "");
+    EXPECT_DEATH(storage.Get<double>(CellId{0}), "");
 }
