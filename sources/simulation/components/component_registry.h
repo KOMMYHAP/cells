@@ -4,6 +4,7 @@
 #include "component_handle.h"
 #include "component_storage.h"
 
+
 class ComponentRegistry {
 public:
     ComponentRegistry(uint32_t cellsCount);
@@ -19,5 +20,5 @@ private:
     bool _wasFreeze { false };
     uint32_t _cellsCount { 0 };
     std::map<ComponentHandle, ComponentStorage> _storages;
-    ComponentHandle _nextHandle;
+    ComponentHandle _nextHandle { 0 };
 };

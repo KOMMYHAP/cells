@@ -8,7 +8,8 @@ class ComponentRegistry;
 
 class System {
 public:
-    System(ComponentRegistry& registry, const std::vector<ComponentHandle>& handles);
+    System() = default;
+    System(const ComponentRegistry& registry, const std::span<ComponentHandle>& handles);
 
     struct Context {
         CellId id;
@@ -21,13 +22,11 @@ public:
 private:
     struct ComponentInfo {
         ComponentHandle handle;
-        uint16_t sizeInBytes{0};
+        uint16_t sizeInBytes { 0 };
         std::byte* startAddress { nullptr };
     };
 
-    void InitComponents(const std::vector<ComponentHandle>& handles);
-
-    ComponentRegistry& _componentRegistry;
+    uint32_t _cellsCount { 0 };
     std::vector<ComponentInfo> _componentInfoList;
     std::vector<std::byte*> _componentBuffer;
 };

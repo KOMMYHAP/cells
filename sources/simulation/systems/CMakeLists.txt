@@ -13,6 +13,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         spawner.cpp
         destroyer.cpp
         system.cpp
+        system_registry.cpp
 )
 
 
@@ -35,4 +36,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         destroyer.h
         spawn_properties.h
         system.h
+        system_handle.h
+        system_registry.h
 )

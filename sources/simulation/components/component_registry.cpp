@@ -11,7 +11,7 @@ ComponentHandle ComponentRegistry::Register(const Component& component)
     const ComponentHandle handle = _nextHandle;
     ASSERT(!_storages.contains(handle));
     _storages[handle] = ComponentStorage { component, _cellsCount };
-    _nextHandle.id += 1;
+    _nextHandle = static_cast<ComponentHandle>(static_cast<uint16_t>(_nextHandle) + 1);
     return handle;
 }
 
