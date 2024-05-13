@@ -9,18 +9,18 @@ void ComponentStorage::VerifyComponent() const
 }
 
 template <class T>
-const T& ComponentStorage::Get(size_t componentIndex) const
+const T& ComponentStorage::Get(CellId id) const
 {
     VerifyComponent<T>();
-    const std::byte& address = GetUnsafe(componentIndex);
+    const std::byte& address = GetUnsafe(id);
     return reinterpret_cast<const T&>(address);
 }
 
 template <class T>
-T& ComponentStorage::Modify(size_t componentIndex)
+T& ComponentStorage::Modify(CellId id)
 {
     VerifyComponent<T>();
-    std::byte& address = ModifyUnsafe(componentIndex);
+    std::byte& address = ModifyUnsafe(id);
     return reinterpret_cast<T&>(address);
 }
 
@@ -28,11 +28,11 @@ template <class T, class Func>
     requires std::invocable<Func, T&>
 void ComponentStorage::Foreach(Func&& func)
 {
-    if (Count() == 0) {
+    if (GetCellsCount() == 0) {
         return;
     }
     T* item = &Modify<T>(0);
-    const size_t count = Count();
+    const size_t count = GetCellsCount();
     for (size_t i = 0; i < count; ++i) {
         func(*item);
         ++item;
@@ -43,11 +43,11 @@ template <class T, class Func>
     requires std::invocable<Func, const T>
 void ComponentStorage::Foreach(Func&& func) const
 {
-    if (Count() == 0) {
+    if (GetCellsCount() == 0) {
         return;
     }
     const T* item = &Get<T>(0);
-    const size_t count = Count();
+    const size_t count = GetCellsCount();
     for (size_t i = 0; i < count; ++i) {
         func(*item);
         ++item;

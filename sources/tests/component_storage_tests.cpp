@@ -9,8 +9,8 @@ TEST(ComponentStorageTest, SimpleTestData)
     Component info { sizeof(TestData) };
     ComponentStorage storage { info, 100 };
 
-    ASSERT_EQ(storage.Count(), 100);
-    ASSERT_EQ(storage.CountBytes(), 100 * sizeof(TestData));
+    ASSERT_EQ(storage.GetCellsCount(), 100);
+    ASSERT_EQ(storage.GetSizeInBytes(), 100 * sizeof(TestData));
     ASSERT_EQ(storage.GetMetaInfo().sizeInBytes, info.sizeInBytes);
 
     TestData& data = storage.Modify<TestData>(0);
@@ -51,7 +51,7 @@ TEST(ComponentStorageTest, SequenceOrder)
     Component info { sizeof(int) };
     ComponentStorage storage { info, 10 };
 
-    for (size_t i = 0; i < storage.Count() - 1; ++i) {
+    for (size_t i = 0; i < storage.GetCellsCount() - 1; ++i) {
         const int* p1 = &storage.Get<int>(i);
         const int* p2 = &storage.Get<int>(i + 1);
         ASSERT_EQ(p1 + 1, p2);

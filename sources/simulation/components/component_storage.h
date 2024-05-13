@@ -1,25 +1,25 @@
 #pragma once
 
 #include "component.h"
+#include "components/cell_id.h"
 
 class ComponentStorage {
 public:
     ComponentStorage() = default;
-    ComponentStorage(const Component& metaInfo, size_t count);
+    ComponentStorage(const Component& metaInfo, uint32_t cellsCount);
 
     const Component& GetMetaInfo() const { return _info; };
 
-    std::byte& ModifyUnsafe(size_t componentIndex);
-    const std::byte& GetUnsafe(size_t componentIndex) const;
+    std::byte& ModifyUnsafe(CellId id);
+    const std::byte& GetUnsafe(CellId id) const;
 
     template <class T>
-    T& Modify(size_t componentIndex);
+    T& Modify(CellId id);
 
     template <class T>
-    const T& Get(size_t componentIndex) const;
+    const T& Get(CellId id) const;
 
-    size_t Count() const;
-    size_t CountBytes() const;
+    uint32_t GetCellsCount() const;
 
     template <class T, class Func>
         requires std::invocable<Func, T&>

@@ -22,6 +22,9 @@ private:
         std::byte* startAddress { nullptr };
     };
 
+    void InitComponents(const std::vector<ComponentHandle>& handles);
+    void ResetComponentBuffer();
+
     ComponentRegistry& _componentRegistry;
     std::vector<ComponentInfo> _componentInfoList;
     std::vector<std::byte*> _componentBuffer;
