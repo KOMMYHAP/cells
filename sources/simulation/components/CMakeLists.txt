@@ -10,10 +10,13 @@ target_sources(${PROJECT_NAME} PUBLIC
         component.h
         component_storage.h
         component_storage.hpp
+        component_handle.h
+        component_registry.h
 )
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
         cell_position.cpp
         component_storage.cpp
+        component_registry.cpp
 )

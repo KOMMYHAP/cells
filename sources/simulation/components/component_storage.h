@@ -21,6 +21,14 @@ public:
     size_t Count() const;
     size_t CountBytes() const;
 
+    template <class T, class Func>
+        requires std::invocable<Func, T&>
+    void Foreach(Func&& func);
+
+    template <class T, class Func>
+        requires std::invocable<Func, const T>
+    void Foreach(Func&& func) const;
+
 private:
     template <class T>
         requires std::is_trivially_default_constructible_v<T>

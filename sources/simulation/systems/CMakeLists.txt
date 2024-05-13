@@ -12,6 +12,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         age_system.cpp
         spawner.cpp
         destroyer.cpp
+        system.cpp
 )
 
 
@@ -33,4 +34,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         spawner.h
         destroyer.h
         spawn_properties.h
+        system.h
 )

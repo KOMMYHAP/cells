@@ -9,6 +9,7 @@ add_executable(${PROJECT_NAME} main_tests.cpp tests_pch.h
         stack_storage_tests.cpp
         registrar_tests.cpp
         component_storage_tests.cpp
+        system_tests.cpp
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE tests_pch.h)

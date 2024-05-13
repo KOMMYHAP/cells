@@ -23,6 +23,7 @@ const std::byte& ComponentStorage::GetUnsafe(size_t componentIndex) const
 
 size_t ComponentStorage::Count() const
 {
+    ASSUME(_info.sizeInBytes > 0);
     ASSUME(_buffer.size() % _info.sizeInBytes == 0);
     return _buffer.size() / _info.sizeInBytes;
 }

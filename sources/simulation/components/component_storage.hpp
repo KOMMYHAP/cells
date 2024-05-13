@@ -23,3 +23,33 @@ T& ComponentStorage::Modify(size_t componentIndex)
     std::byte& address = ModifyUnsafe(componentIndex);
     return reinterpret_cast<T&>(address);
 }
+
+template <class T, class Func>
+    requires std::invocable<Func, T&>
+void ComponentStorage::Foreach(Func&& func)
+{
+    if (Count() == 0) {
+        return;
+    }
+    T* item = &Modify<T>(0);
+    const size_t count = Count();
+    for (size_t i = 0; i < count; ++i) {
+        func(*item);
+        ++item;
+    }
+}
+
+template <class T, class Func>
+    requires std::invocable<Func, const T>
+void ComponentStorage::Foreach(Func&& func) const
+{
+    if (Count() == 0) {
+        return;
+    }
+    const T* item = &Get<T>(0);
+    const size_t count = Count();
+    for (size_t i = 0; i < count; ++i) {
+        func(*item);
+        ++item;
+    }
+}
