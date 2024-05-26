@@ -10,8 +10,9 @@ add_executable(${PROJECT_NAME} main_tests.cpp tests_pch.h
         registrar_tests.cpp
         component_storage_tests.cpp
         system_tests.cpp
+        sol2_tests.cpp
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE tests_pch.h)
-target_link_libraries(${PROJECT_NAME} PRIVATE cells-processor cells-simulation gtest)
+target_link_libraries(${PROJECT_NAME} PRIVATE cells-processor cells-simulation gtest sol2::sol2 lua)
 target_copy_required_dll(${PROJECT_NAME})

@@ -1,0 +1,1 @@
+target_sources(${PROJECT_NAME} PUBLIC lauxlib.h lua.h luaconf.h lualib.h lua.hpp)
