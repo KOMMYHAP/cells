@@ -6,6 +6,8 @@
 #include "ui_system.h"
 #include "world.h"
 
+#include "native/lua_registrable_system.h"
+
 int main(int argc, char** argv)
 {
     common::Registrar registrar;
@@ -13,6 +15,7 @@ int main(int argc, char** argv)
     registrar.Register(std::make_unique<ScriptSystem>());
     registrar.Register(std::make_unique<World>());
     registrar.Register(std::make_unique<UiSystem>());
+    registrar.Register(std::make_unique<scripts::LuaSystem>());
 
     auto mainLoop = std::make_unique<MainLoop>();
     auto* rawMainLoop = mainLoop.get();

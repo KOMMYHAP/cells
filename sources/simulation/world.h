@@ -1,8 +1,10 @@
 #pragma once
 
 #include "registrar/registrable_system.h"
+
+#include "components/component_registry.h"
 #include "simulation.h"
-#include "systems/system.h"
+#include "systems/sequence_system.h"
 #include "systems/system_registry.h"
 #include "world_parameters.h"
 
@@ -20,8 +22,11 @@ public:
     const SystemRegistry& GetSystems() const { return *_systems; }
     SystemRegistry& ModifySystems() { return *_systems; }
 
+    const WorldParameters& GetWorldParameters() const { return *_parameters; }
+
 private:
     WorldParameters* _parameters { nullptr };
     std::unique_ptr<Simulation> _simulation;
+    std::unique_ptr<ComponentRegistry> _components;
     std::unique_ptr<SystemRegistry> _systems;
 };

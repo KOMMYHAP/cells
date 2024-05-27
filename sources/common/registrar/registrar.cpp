@@ -3,10 +3,12 @@
 
 namespace common {
 
-void Registrar::Register(std::unique_ptr<RegistrableSystem> system)
+RegistrableSystem& Registrar::Register(std::unique_ptr<RegistrableSystem> system)
 {
     ASSERT(_state == State::Registration, "Registration phase required!", _state);
+    RegistrableSystem* rawPointer = system.get();
     _systems.push_back(std::move(system));
+    return *rawPointer;
 }
 
 std::error_code Registrar::RunInit()

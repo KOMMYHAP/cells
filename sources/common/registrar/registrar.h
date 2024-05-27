@@ -7,7 +7,11 @@ namespace common {
 
 class Registrar {
 public:
-    void Register(std::unique_ptr<RegistrableSystem> system);
+    template<class T>
+        requires std::derived_from<T, RegistrableSystem>
+    T& Register(std::unique_ptr<T> system);
+
+    RegistrableSystem& Register(std::unique_ptr<RegistrableSystem> system);
 
     std::error_code RunInit();
     void RunTerm();
@@ -26,3 +30,5 @@ private:
 };
 
 }
+
+#include "registrar.hpp"

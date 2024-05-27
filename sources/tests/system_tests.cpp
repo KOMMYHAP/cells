@@ -1,5 +1,5 @@
 #include "components/component_registry.h"
-#include "systems/system.h"
+#include "systems/sequence_system.h"
 
 struct TestComponent {
     int value;
@@ -9,14 +9,15 @@ TEST(SystemTests, Foreach)
 {
     constexpr size_t itemsCount = 10;
     ComponentRegistry registry { itemsCount };
-    const ComponentHandle handle = registry.Register(Component { sizeof(TestComponent) });
+    const ComponentHandle handle = registry.Register(Component { "test", sizeof(TestComponent) });
     registry.Freeze();
 
     registry.Modify(handle).Foreach<TestComponent>([](TestComponent& component) {
         component.value = 0;
     });
 
-    System system { registry, { handle } };
+    std::array components { handle };
+    System system { "test", registry, std::span { components } };
     system.Foreach([](const System::Context& context) {
         ASSUME(context.components.size(), 1);
         auto* component = reinterpret_cast<TestComponent*>(context.components[0]);
@@ -46,14 +47,15 @@ TEST(SystemTests, Message)
 {
     constexpr size_t itemsCount = 10;
     ComponentRegistry registry { itemsCount };
-    const ComponentHandle handle = registry.Register(Component { sizeof(TestComponent) });
+    const ComponentHandle handle = registry.Register(Component { "test", sizeof(TestComponent) });
     registry.Freeze();
 
     registry.Modify(handle).Foreach<TestComponent>([](TestComponent& component) {
         component.value = 0;
     });
 
-    System system { registry, { handle } };
+    std::array components { handle };
+    System system { "test", registry, components };
     std::array<CellId, 3> ids { CellId { 0 }, CellId { 3 }, CellId { 9 } };
     system.Message(ids, [](const System::Context& context) {
         ASSUME(context.components.size(), 1);

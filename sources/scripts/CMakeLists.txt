@@ -19,9 +19,13 @@ target_sources(${PROJECT_NAME} PUBLIC
         scripts_system.h
 )
 
+add_subdirectory(native)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
         cells-simulation
         cells-ui
+        sol2::sol2
+        lua
 )
 target_precompile_headers(${PROJECT_NAME} PRIVATE scripts_pch.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

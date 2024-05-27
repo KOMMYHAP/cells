@@ -10,8 +10,8 @@ std::error_code World::InitializeSystem(common::StackStorage& storage)
     _simulation = std::make_unique<Simulation>(*_parameters->simulationScript);
     _simulation->SetAutoMode(simulationParameters.targetSimulationTime);
 
-    auto & components = storage.Get<ComponentRegistry>();
-    _systems = std::make_unique<SystemRegistry>(components);
+    _components = std::make_unique<ComponentRegistry>(_parameters->cellsCountLimit);
+    _systems = std::make_unique<SystemRegistry>(*_components);
 
     storage.Store<World*>(this);
     return {};
@@ -20,6 +20,7 @@ std::error_code World::InitializeSystem(common::StackStorage& storage)
 void World::TerminateSystem()
 {
     _systems.reset();
+    _components.reset();
     _simulation.reset();
     _parameters = nullptr;
 

@@ -24,7 +24,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     _window.setFramerateLimit(60);
 
     auto* world = storage.Get<World*>();
-    const common::StackStorage& systems = world->GetSystems();
+    const SystemRegistry& systems = world->GetSystems();
 
     const common::CommandLine& commandLine = storage.Get<common::CommandLine>();
     auto mbFontPath = commandLine.FindValue(FontArgument);
@@ -49,17 +49,17 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
         ASSERT(loaded);
 
-        WorldWidget::Config worldRenderConfig {
-            std::move(shader),
-            { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White },
-            sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
-            sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
-            systems.Modify<PositionSystem>(),
-            systems.Modify<IdSystem>(),
-            systems.Modify<TypeSystem>()
-        };
-        auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
-        AddWidget(std::move(worldWidget));
+//        WorldWidget::Config worldRenderConfig {
+//            std::move(shader),
+//            { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White },
+//            sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
+//            sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
+//            systems.Modify<PositionSystem>(),
+//            systems.Modify<IdSystem>(),
+//            systems.Modify<TypeSystem>()
+//        };
+//        auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
+//        AddWidget(std::move(worldWidget));
     }
 
     return std::error_code();

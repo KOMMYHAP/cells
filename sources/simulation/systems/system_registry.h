@@ -1,18 +1,21 @@
 #pragma once
 
-#include "system.h"
+#include "components/cell_id.h"
+#include "sequence_system.h"
 #include "system_handle.h"
 
 class SystemRegistry {
 public:
-    SystemRegistry(const ComponentRegistry& registry);
-    SystemHandle Register(const std::span<ComponentHandle>& handles);
+    SystemRegistry(ComponentRegistry& registry);
 
-    System& Modify(SystemHandle handle);
-    const System& Get(SystemHandle handle) const;
+    SystemHandle MakeSequenceSystem(std::string_view name, const std::span<ComponentHandle>& handles, std::function<void(const SystemContext&)> function);
+
+    SystemBase& Modify(SystemHandle handle);
+    const SystemBase& Get(SystemHandle handle) const;
 
 private:
-    const ComponentRegistry& _registry;
-    std::map<SystemHandle, System> _systems;
+    ComponentRegistry& _registry;
+    std::map<SystemHandle, std::unique_ptr<SystemBase>> _systems;
+    std::vector<CellId> _fixedSequenceIds;
     SystemHandle _nextHandle { 0 };
 };

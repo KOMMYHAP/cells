@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sample_counter.h"
+#include "systems/system_handle.h"
 #include "ui_layout.h"
 #include "ui_widget.h"
 

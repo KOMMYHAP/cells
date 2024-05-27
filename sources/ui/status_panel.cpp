@@ -1,6 +1,6 @@
 #include "status_panel.h"
+#include "systems/id_system.h"
 #include "world.h"
-#include <systems/id_system.h>
 
 const uint16_t StatusMessageBufferLimit = 200;
 const uint16_t StatusTextSize = 10;
@@ -37,9 +37,16 @@ void StatusPanel::Update(sf::Time elapsedTime)
     const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
     const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
-    auto& idSystem = _world.GetSystems().Get<IdSystem>();
-    const uint32_t cellsCount = idSystem.GetCellsCount();
-    const float cellsCountPercent = static_cast<uint8_t>(static_cast<float>(idSystem.GetCellsCount()) / (idSystem.GetCellsCountLimit()) * 100.0f);
+    // todo:
+    // convert to native component?
+    // extract debug system to lua?
+    //
+    //    auto& idSystem = _world.GetSystems().Get(_idSystem);
+    //    const uint32_t cellsCount = idSystem.GetCellsCount();
+    //    const float cellsCountPercent = static_cast<uint8_t>(static_cast<float>(idSystem.GetCellsCount()) / (idSystem.GetCellsCountLimit()) * 100.0f);
+    //
+    const uint32_t cellsCount = 0;
+    const float cellsCountPercent = 0.0f;
 
     _buffer.clear();
     std::format_to_n(std::back_inserter(_buffer), _buffer.capacity(),

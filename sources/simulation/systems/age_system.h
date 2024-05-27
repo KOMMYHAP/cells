@@ -3,6 +3,7 @@
 #include "components/cell_age.h"
 #include "components/cell_id.h"
 
+class System;
 class HealthSystem;
 
 class AgeSystem {

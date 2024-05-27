@@ -1,21 +1,6 @@
-#include "system.h"
+#include "sequence_system.h"
 #include "components/component_registry.h"
 #include "components/component_storage.h"
-
-System::System(const ComponentRegistry& registry, const std::span<ComponentHandle>& handles)
-    : _cellsCount(registry.GetCellsCount())
-{
-    ASSERT(_componentInfoList.empty() && _componentBuffer.empty(), "Component was already initialized!");
-    _componentInfoList.reserve(handles.size());
-    _componentBuffer.reserve(handles.size());
-    for (const ComponentHandle& handle : handles) {
-        ComponentStorage& storage = registry.Modify(handle);
-        std::byte* firstComponent = &storage.ModifyUnsafe(CellId { 0 });
-        _componentInfoList.emplace_back(handle, storage.GetMetaInfo().sizeInBytes, firstComponent);
-
-        _componentBuffer.push_back(firstComponent);
-    }
-}
 
 void System::Foreach(const std::function<void(const Context&)>& func)
 {
@@ -53,4 +38,17 @@ void System::Message(const std::span<CellId>& cells, const std::function<void(co
         const Context context { cellId, _componentBuffer };
         func(context);
     }
+}
+
+SequenceSystem::SequenceSystem(ComponentRegistry& registry, std::string_view name, const std::span<ComponentHandle>& handles)
+    : SystemBase(registry, name, handles)
+{
+}
+
+void SequenceSystem::Process()
+{
+    if (_ids.empty() || !_function) {
+        return;
+    }
+    ProcessImpl(_ids, _function);
 }
