@@ -36,9 +36,9 @@ SystemHandle LuaSystemFactory::MakeSystem(sol::this_state state, std::string_vie
         handles.push_back(handle);
     }
 
-    auto luaFunctionWrapper = [s = std::move(storage)](const SystemContext& context) {
-        storage->
-        ProcessSystem()
+    auto luaFunctionWrapper = [/*s = std::move(storage)*/](const SystemContext& context) {
+        // storage->
+        // ProcessSystem()
     };
 
     return _registry.MakeSequenceSystem(name, handles, std::move(luaFunctionWrapper));
@@ -46,12 +46,12 @@ SystemHandle LuaSystemFactory::MakeSystem(sol::this_state state, std::string_vie
 
 void LuaSystemFactory::ProcessSystem(LuaSystemFactory::LuaSystemStorage& storage, const SystemContext& context)
 {
-    int pushcount = 0;
-    for (int i = index; i <= stacktop; ++i) {
-        lua_pushvalue(L, i);
-        pushcount += 1;
-    }
-    return pushcount;
+    // int pushcount = 0;
+    // for (int i = index; i <= stacktop; ++i) {
+    //     lua_pushvalue(L, i);
+    //     pushcount += 1;
+    // }
+    // return pushcount;
 }
 
 }

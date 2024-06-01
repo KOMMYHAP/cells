@@ -7,6 +7,8 @@
 class SystemRegistry {
 public:
     SystemRegistry(ComponentRegistry& registry);
+    SystemRegistry(const SystemRegistry &) = delete; 
+    const SystemRegistry& operator=(const SystemRegistry &) = delete; 
 
     SystemHandle MakeSequenceSystem(std::string_view name, const std::span<ComponentHandle>& handles, std::function<void(const SystemContext&)> function);
 

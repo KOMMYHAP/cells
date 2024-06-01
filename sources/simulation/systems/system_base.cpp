@@ -15,7 +15,7 @@ SystemBase::SystemBase(ComponentRegistry& registry, std::string_view name, const
     }
 }
 
-void SystemBase::ProcessImpl(std::span<CellId> cells, const std::function<void(const SystemContext&)>& func)
+void SystemBase::ProcessImpl(std::span<const CellId> cells, const std::function<void(const SystemContext&)>& func)
 {
     const size_t componentsCount = _componentInfoList.size();
 

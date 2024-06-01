@@ -16,7 +16,7 @@ public:
     virtual void Process() = 0;
 
 protected:
-    void ProcessImpl(std::span<CellId> cells, const std::function<void(const SystemContext&)>& func);
+    void ProcessImpl(std::span<const CellId> cells, const std::function<void(const SystemContext&)>& func);
 
 private:
     struct ComponentInfo {

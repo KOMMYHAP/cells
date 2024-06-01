@@ -23,8 +23,8 @@ private:
     };
     void ProcessSystem(LuaSystemStorage & storage, const SystemContext & context);
 
-    SystemRegistry _registry;
-    ComponentRegistry _componentRegistry;
+    SystemRegistry& _registry;
+    ComponentRegistry& _componentRegistry;
 };
 
 }

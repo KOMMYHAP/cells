@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SFML/sequence_system.hpp>
+#include <SFML/System.hpp>
 
 #include "basic_defines.h"
 #include "common_fwd.h"
