@@ -8,6 +8,7 @@ add_subdirectory(tests)
 add_subdirectory(application)
 add_subdirectory(ui)
 add_subdirectory(scripts)
+add_subdirectory(foo)
 
 if (ENABLE_ASAN AND NOT BUILD_SHARED_LIBS)
     target_asan_compile_options(ImGui-SFML sfml-graphics sfml-window sfml-system)

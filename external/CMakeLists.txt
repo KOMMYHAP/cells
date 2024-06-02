@@ -9,7 +9,7 @@ add_subdirectory(sfml)
 add_subdirectory(imgui-sfml)
 add_subdirectory(libassert)
 add_subdirectory(nlohmann)
-add_subdirectory(boost)
+# add_subdirectory(boost) BURN IT
 add_subdirectory(lua) # sol2 depends on lua, must be added before sol2
 add_subdirectory(sol2)
 add_subdirectory(gsl)

@@ -5,6 +5,7 @@ FetchContent_Declare(
         boost
         GIT_REPOSITORY https://github.com/boostorg/boost
         GIT_TAG ab7968a0bbcf574a7859240d1d8443f58ed6f6cf # 1.85
+        GIT_SHALLOW ON
 )
 
 
