@@ -6,32 +6,32 @@
 
 WorldWidget::WorldWidget(Config&& config)
     : _config(std::move(config))
-    , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
+      , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
 {
     const uint16_t cellsWidth = _config.positionSystem.GetWidth();
     const uint16_t cellsHeight = _config.positionSystem.GetHeight();
 
     const bool textureCreated = _texture.create(cellsWidth, cellsHeight);
-    ASSERT(textureCreated);
+    Expects(textureCreated);
 
     // We need shader only for custom texture now
     _config.fragmentShader->setUniform("texture", _texture);
 
     _textureData.resize(cellsWidth * cellsHeight);
 
-    ASSERT(_vertexBuffer.isAvailable());
-    std::array<sf::Vertex, 4> vertices {
-        sf::Vertex { { _config.renderTargetSize.x - 1.0f, 0.0f }, { 1.0f, 0.0f } },
-        sf::Vertex { { 0.0f, 0.0f }, { 0.0f, 0.0f } },
-        sf::Vertex { { _config.renderTargetSize.x - 1.0f, _config.renderTargetSize.y - 1.0f }, { 1.0f, 1.0f } },
-        sf::Vertex { { 0.0f, _config.renderTargetSize.y - 1.0f }, { 0.0f, 1.0f } },
+    Expects(_vertexBuffer.isAvailable());
+    std::array<sf::Vertex, 4> vertices{
+        sf::Vertex{ { _config.renderTargetSize.x - 1.0f, 0.0f }, { 1.0f, 0.0f } },
+        sf::Vertex{ { 0.0f, 0.0f }, { 0.0f, 0.0f } },
+        sf::Vertex{ { _config.renderTargetSize.x - 1.0f, _config.renderTargetSize.y - 1.0f }, { 1.0f, 1.0f } },
+        sf::Vertex{ { 0.0f, _config.renderTargetSize.y - 1.0f }, { 0.0f, 1.0f } },
 
     };
     const bool vertexBufferCreated = _vertexBuffer.create(vertices.size());
-    ASSERT(vertexBufferCreated);
+    Expects(vertexBufferCreated);
 
     const bool vertexBufferUpdated = _vertexBuffer.update(vertices.data());
-    ASSERT(vertexBufferUpdated);
+    Expects(vertexBufferUpdated);
 }
 
 void WorldWidget::Draw(sf::RenderTarget& target)
@@ -71,7 +71,7 @@ void WorldWidget::ProcessCell(CellId id)
     const CellPosition position = _config.positionSystem.Get(id);
     const uint16_t width = _config.positionSystem.GetWidth();
     const auto pixelIndex = position.y * width + position.x;
-    ASSERT(pixelIndex < _textureData.size());
+    Expects(pixelIndex < _textureData.size());
 
     const CellType cellType = _config.typeSystem.Get(id);
 
@@ -79,6 +79,4 @@ void WorldWidget::ProcessCell(CellId id)
     pixel = GetColor(cellType).toInteger();
 }
 
-void WorldWidget::Update(sf::Time /*elapsedTime*/)
-{
-}
+void WorldWidget::Update(sf::Time /*elapsedTime*/) {}

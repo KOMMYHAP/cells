@@ -4,23 +4,21 @@ constexpr uint32_t InvalidGridIndex = std::numeric_limits<uint32_t>::max();
 
 PositionSystem::PositionSystem(uint32_t width, uint32_t height)
     : _width(width)
-    , _height(height)
-    , _positions(width * height, InvalidCellPosition)
-    , _grid(width * height, CellId::Invalid)
-{
-}
+      , _height(height)
+      , _positions(width * height, InvalidCellPosition)
+      , _grid(width * height, CellId::Invalid) {}
 
 void PositionSystem::Move(CellId id, CellPosition nextPosition)
 {
-    ASSERT(nextPosition != InvalidCellPosition);
-    ASSERT(Find(nextPosition) == CellId::Invalid);
+    Expects(nextPosition != InvalidCellPosition);
+    Expects(Find(nextPosition) == CellId::Invalid);
 
     const auto index = CellIdToInt(id);
-    ASSERT(index <= _positions.size());
+    Expects(index <= _positions.size());
 
     const auto currentPosition = _positions[index];
     if (currentPosition != InvalidCellPosition) {
-        ASSERT(IsNeighbourFor(currentPosition, nextPosition));
+        Expects(IsNeighbourFor(currentPosition, nextPosition));
         const uint32_t currentGridIndex = ToGridIndex(currentPosition);
         _grid[currentGridIndex] = CellId::Invalid;
     }
@@ -33,7 +31,7 @@ void PositionSystem::Move(CellId id, CellPosition nextPosition)
 CellPosition PositionSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
-    ASSERT(index <= _positions.size());
+    Expects(index <= _positions.size());
     return _positions[index];
 }
 
@@ -49,10 +47,10 @@ CellId PositionSystem::Find(CellPosition position) const
 bool PositionSystem::IsNeighbourFor(CellId lhs, CellId rhs) const
 {
     const CellPosition lhsPosition = Get(lhs);
-    ASSERT(lhsPosition != InvalidCellPosition);
+    Expects(lhsPosition != InvalidCellPosition);
 
     const CellPosition rhsPosition = Get(rhs);
-    ASSERT(rhsPosition != InvalidCellPosition);
+    Expects(rhsPosition != InvalidCellPosition);
 
     return IsNeighbourFor(lhsPosition, rhsPosition);
 }
@@ -93,7 +91,7 @@ CellPosition PositionSystem::TryApplyDirection(CellPosition position, Direction 
 void PositionSystem::Reset(CellId id)
 {
     const auto positionIndex = CellIdToInt(id);
-    ASSERT(positionIndex <= _positions.size());
+    Expects(positionIndex <= _positions.size());
 
     const auto position = _positions[positionIndex];
     if (position == InvalidCellPosition) {

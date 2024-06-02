@@ -16,9 +16,7 @@
 
 SimulationScript::SimulationScript(const common::StackStorage& systems, std::map<SpawnPolicy, ICellFactory*> factories)
     : _systems(systems)
-    , _factories(std::move(factories))
-{
-}
+      , _factories(std::move(factories)) {}
 
 std::error_code SimulationScript::Perform()
 {
@@ -76,6 +74,6 @@ void SimulationScript::SetParameters(const SimulationParameters& parameters)
 {
     _parameters = parameters;
     auto it = _factories.find(_parameters.spawnPolicy);
-    ASSERT(it != _factories.end(), "Spawn policy was not registered!", _parameters.spawnPolicy);
+    Expects(it != _factories.end(), "Spawn policy was not registered!", _parameters.spawnPolicy);
     _cellFactory = it->second;
 }

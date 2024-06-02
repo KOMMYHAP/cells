@@ -1,5 +1,5 @@
 #pragma once
 
-#include "basic_defines.h"
+#include "common.h"
 
 #include "gtest/gtest.h"

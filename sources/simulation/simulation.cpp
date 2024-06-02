@@ -3,9 +3,7 @@
 #include "simulation_profile_category.h"
 
 Simulation::Simulation(BaseScript& tickScript)
-    : _tickScript(tickScript)
-{
-}
+    : _tickScript(tickScript) {}
 
 void Simulation::Tick()
 {
@@ -14,14 +12,14 @@ void Simulation::Tick()
 
 void Simulation::Ticks(uint32_t ticks)
 {
-    for (uint32_t i { 0 }; i < ticks; ++i) {
+    for (uint32_t i{ 0 }; i < ticks; ++i) {
         ProcessTick();
     }
 }
 
 void Simulation::ProcessTick()
 {
-    common::ProfileScope tickProfileScope { "TickGeneration", SimulationProfileCategory };
+    common::ProfileScope tickProfileScope{ "TickGeneration", SimulationProfileCategory };
     sf::Clock clock;
     _tickScript.Perform();
     _tickCounter.AddSample(clock.getElapsedTime().asSeconds());
@@ -34,7 +32,7 @@ void Simulation::SetManualMode()
 
 void Simulation::SetAutoMode(sf::Time targetSimulationTime)
 {
-    ASSERT(targetSimulationTime.asSeconds() > 0.0f);
+    Expects(targetSimulationTime.asSeconds() > 0.0f);
     _autoModeParams.emplace(targetSimulationTime, sf::Time::Zero);
 }
 

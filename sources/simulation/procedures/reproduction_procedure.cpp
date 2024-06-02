@@ -11,13 +11,11 @@
 
 ReproductionProcedure::ReproductionProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, HealthSystem& healthSystem, BrainSystem& brainSystem, TypeSystem& typeSystem, Spawner& spawner)
     : _vm(vm)
-    , _positionSystem(positionSystem)
-    , _healthSystem(healthSystem)
-    , _brainSystem(brainSystem)
-    , _typeSystem(typeSystem)
-    , _spawner(spawner)
-{
-}
+      , _positionSystem(positionSystem)
+      , _healthSystem(healthSystem)
+      , _brainSystem(brainSystem)
+      , _typeSystem(typeSystem)
+      , _spawner(spawner) {}
 
 void ReproductionProcedure::Execute(ProcedureContext& context)
 {
@@ -32,7 +30,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     }
     const CellId id = _vm.GetRunningCellId();
 
-    constexpr CellHealth healthPerAction { 50 };
+    constexpr CellHealth healthPerAction{ 50 };
     if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
         return;
     }
@@ -58,7 +56,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    constexpr CellHealth childInitialHealth { 35 };
+    constexpr CellHealth childInitialHealth{ 35 };
 
     SpawnProperties properties;
     properties.position = childPosition;
@@ -70,7 +68,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
 
 CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPosition rhs) const
 {
-    ASSERT(_positionSystem.IsNeighbourFor(lhs, rhs));
+    Expects(_positionSystem.IsNeighbourFor(lhs, rhs));
 
     const int16_t fromX = std::min(lhs.x - 1, rhs.x - 1);
     const int16_t fromY = std::min(lhs.y - 1, rhs.y - 1);
@@ -78,11 +76,11 @@ CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPositio
     const int16_t toY = std::max(lhs.y + 1, rhs.y + 1);
 
     std::array<CellPosition, 6> testPositions;
-    uint8_t testPositionSize { 0 };
+    uint8_t testPositionSize{ 0 };
 
     for (int16_t y = fromY; y <= toY; ++y) {
         for (int16_t x = fromX; x <= toX; ++x) {
-            const CellPosition position { x, y };
+            const CellPosition position{ x, y };
 
             if (position == lhs || position == rhs) {
                 continue;
@@ -94,14 +92,14 @@ CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPositio
             if (!isNeighbour) {
                 continue;
             }
-            ASSERT(testPositionSize < testPositions.size());
+            Expects(testPositionSize < testPositions.size());
             testPositions[testPositionSize] = position;
             testPositionSize += 1;
         }
     }
 
-    ASSERT(testPositionSize >= 1);
-    std::uniform_int_distribution<uint16_t> offsetDistribution { 0, static_cast<uint16_t>(testPositionSize - 1) };
+    Expects(testPositionSize >= 1);
+    std::uniform_int_distribution<uint16_t> offsetDistribution{ 0, static_cast<uint16_t>(testPositionSize - 1) };
     const uint8_t offset = static_cast<uint8_t>(offsetDistribution(common::GetRandomEngine()));
 
     for (uint8_t i = 0; i < testPositionSize; ++i) {
@@ -120,6 +118,6 @@ CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPositio
 CellBrain ReproductionProcedure::MakeChildBrain(CellId lhs, CellId rhs) const
 {
     constexpr uint8_t crossoverPoint = 10;
-    CrossoverAlgorithm crossover { crossoverPoint };
+    CrossoverAlgorithm crossover{ crossoverPoint };
     return crossover.Combine(_brainSystem.Get(lhs), _brainSystem.Get(rhs));
 }

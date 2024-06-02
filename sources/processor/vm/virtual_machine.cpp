@@ -12,7 +12,7 @@ static_assert(std::is_trivial_v<ProcessorFlags>, "As part of memory view Process
 
 ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t inputArgs, uint8_t outputArgs)
 {
-    ProcedureTableEntry info = ProcedureTableEntry { inputArgs, outputArgs, procedure };
+    auto info = ProcedureTableEntry{ inputArgs, outputArgs, procedure };
     const ProcedureId id = _procedureTable.RegisterProcedure(info);
     return id;
 }
@@ -20,15 +20,15 @@ ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t 
 void VirtualMachine::Run(ProcessorMemory memory)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
-    ASSERT(controlBlockRead);
+    Expects(controlBlockRead);
 
-    ProcessorContext context {
+    ProcessorContext context{
         _procedureTable,
         _processorStateWatcher,
         *controlBlock,
         memory,
     };
-    Processor processor { _systemInstructionPerStep };
+    Processor processor{ _systemInstructionPerStep };
     processor.Execute(context);
 }
 

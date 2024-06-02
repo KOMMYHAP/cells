@@ -4,22 +4,22 @@
 
 CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBrain& parentRight)
 {
-    ProcessorConstMemory memoryLeft { parentLeft.data };
-    ASSERT(memoryLeft.HasBytes<ProcessorControlBlock>());
+    ProcessorConstMemory memoryLeft{ parentLeft.data };
+    Expects(memoryLeft.HasBytes<ProcessorControlBlock>());
 
     memoryLeft.Move<ProcessorControlBlock>();
     auto blobLeft = memoryLeft.MakeSpan(0);
 
-    ProcessorConstMemory memoryRight { parentRight.data };
-    ASSERT(memoryRight.HasBytes<ProcessorControlBlock>());
+    ProcessorConstMemory memoryRight{ parentRight.data };
+    Expects(memoryRight.HasBytes<ProcessorControlBlock>());
     memoryRight.Move<ProcessorControlBlock>();
     auto blobRight = memoryRight.MakeSpan(0);
 
     const uint8_t point = _point;
 
-    CellBrain brain {};
-    ProcessorMemory memory { brain.data };
-    ProcessorControlBlock controlBlock {
+    CellBrain brain{};
+    ProcessorMemory memory{ brain.data };
+    ProcessorControlBlock controlBlock{
         static_cast<uint8_t>(ProcessorState::Good),
         0,
         0,
@@ -28,7 +28,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
         {}
     };
     const bool writeSuccess = memory.TryWrite(controlBlock);
-    ASSERT(writeSuccess);
+    Expects(writeSuccess);
 
     auto blobOut = memory.MakeSpan(0);
     std::memcpy(blobOut.data(), blobLeft.data(), point);
@@ -37,6 +37,4 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
 }
 
 CrossoverAlgorithm::CrossoverAlgorithm(uint8_t point)
-    : _point(point)
-{
-}
+    : _point(point) {}

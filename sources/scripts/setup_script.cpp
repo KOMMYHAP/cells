@@ -18,32 +18,30 @@
 #include "systems/spawner.h"
 #include "systems/type_system.h"
 
-const sf::Color Gray { 0xCCCCCCFF };
+const sf::Color Gray{ 0xCCCCCCFF };
 
 struct SetupScript::Config {
     // common
-    uint16_t rowsCount { 0 };
-    uint16_t columnsCount { 0 };
+    uint16_t rowsCount{ 0 };
+    uint16_t columnsCount{ 0 };
 
     // simulation
     sf::Time targetSimulationTime;
 
     // virtual machine
-    uint8_t systemInstructionPerStep { 0 };
+    uint8_t systemInstructionPerStep{ 0 };
 
     // spawner
-    float fullnessPercent { 0.0f };
+    float fullnessPercent{ 0.0f };
 
     // selection
-    CellAge limitCellAge { CellAge::Zero };
-    uint16_t bestCellSelectionSize { 0 };
-    uint16_t selectionEpochTicks { 0 };
+    CellAge limitCellAge{ CellAge::Zero };
+    uint16_t bestCellSelectionSize{ 0 };
+    uint16_t selectionEpochTicks{ 0 };
 };
 
 SetupScript::SetupScript(const common::CommandLine& commandLine)
-    : _commandLine(commandLine)
-{
-}
+    : _commandLine(commandLine) {}
 
 SetupScript::~SetupScript() = default;
 
@@ -86,7 +84,7 @@ SetupScript::Config SetupScript::MakeConfig()
     config.fullnessPercent = 0.2f;
 
     // selection
-    config.limitCellAge = CellAge { 100 };
+    config.limitCellAge = CellAge{ 100 };
     config.bestCellSelectionSize = 100;
     config.selectionEpochTicks = 100;
     return config;
@@ -94,7 +92,7 @@ SetupScript::Config SetupScript::MakeConfig()
 
 SetupScript::Parameters SetupScript::ExtractParameters()
 {
-    ASSERT(_parameters);
+    Expects(_parameters);
     Parameters parameters = std::move(*_parameters);
     return parameters;
 }
@@ -108,12 +106,15 @@ common::StackStorage SetupScript::MakeSystems(const Config& config)
     auto& positionSystem = systems.Store<PositionSystem>(config.rowsCount, config.columnsCount);
     auto& graveyardSystem = systems.Store<GraveyardSystem>(idSystem.GetCellsCountLimit(), idSystem, typeSystem, positionSystem);
     auto& healthSystem = systems.Store<HealthSystem>(idSystem.GetCellsCountLimit(), graveyardSystem);
-    /*auto& simulationVm =*/systems.Store<SimulationVirtualMachine>(brainSystem);
+    /*auto& simulationVm =*/
+    systems.Store<SimulationVirtualMachine>(brainSystem);
     auto& ageSystem = systems.Store<AgeSystem>(idSystem.GetCellsCountLimit(), healthSystem);
     auto& spawner = systems.Store<Spawner>(positionSystem, typeSystem, brainSystem, healthSystem, ageSystem, idSystem);
-    /*auto& spawnSystem =*/systems.Store<SpawnSystem>(positionSystem, idSystem, spawner);
+    /*auto& spawnSystem =*/
+    systems.Store<SpawnSystem>(positionSystem, idSystem, spawner);
 
-    /*auto& selectionSystem =*/systems.Store<SelectionSystem>(brainSystem, idSystem, config.selectionEpochTicks, config.bestCellSelectionSize);
+    /*auto& selectionSystem =*/
+    systems.Store<SelectionSystem>(brainSystem, idSystem, config.selectionEpochTicks, config.bestCellSelectionSize);
     return systems;
 }
 
@@ -151,9 +152,9 @@ UiLayout SetupScript::MakeUiLayout()
     layout.statusTextSize = 10;
     layout.cellPadding = 0;
 
-    //    ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
-    //    ASSERT(layout.fieldWidth % (CellSize + CellPadding) == 0);
-    //    ASSERT(layout.fieldHeight % (CellSize + CellPadding) == 0);
+    //    Expects(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
+    //    Expects(layout.fieldWidth % (CellSize + CellPadding) == 0);
+    //    Expects(layout.fieldHeight % (CellSize + CellPadding) == 0);
 
     return layout;
 }
@@ -176,7 +177,7 @@ std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> SetupScript::MakeSpawnFacto
 SimulationParameters SetupScript::MakeSimulationParams()
 {
     SimulationParameters params;
-    params.limitCellAge = CellAge { 100 };
+    params.limitCellAge = CellAge{ 100 };
     params.bestCellSelectionSize = 100;
     params.selectionEpochTicks = 1000;
     params.spawnPolicy = SpawnPolicy::Random;

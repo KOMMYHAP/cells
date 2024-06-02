@@ -10,13 +10,11 @@
 
 Spawner::Spawner(PositionSystem& positionSystem, TypeSystem& typeSystem, BrainSystem& brainSystem, HealthSystem& healthSystem, AgeSystem& ageSystem, IdSystem& idSystem)
     : _positionSystem(positionSystem)
-    , _typeSystem(typeSystem)
-    , _brainSystem(brainSystem)
-    , _healthSystem(healthSystem)
-    , _ageSystem(ageSystem)
-    , _idSystem(idSystem)
-{
-}
+      , _typeSystem(typeSystem)
+      , _brainSystem(brainSystem)
+      , _healthSystem(healthSystem)
+      , _ageSystem(ageSystem)
+      , _idSystem(idSystem) {}
 
 CellId Spawner::TrySpawn(const SpawnProperties& properties)
 {
@@ -24,9 +22,9 @@ CellId Spawner::TrySpawn(const SpawnProperties& properties)
     if (id == CellId::Invalid) {
         return CellId::Invalid;
     }
-    ASSERT(properties.position != InvalidCellPosition);
-    ASSERT(properties.type != CellType::Dummy);
-    ASSERT(properties.health != CellHealth::Zero);
+    Expects(properties.position != InvalidCellPosition);
+    Expects(properties.type != CellType::Dummy);
+    Expects(properties.health != CellHealth::Zero);
 
     _brainSystem.Access(id) = properties.brain;
     _positionSystem.Set(id, properties.position);

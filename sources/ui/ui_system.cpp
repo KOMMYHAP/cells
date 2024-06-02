@@ -18,7 +18,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
     const auto& layout = storage.Get<UiLayout>();
     _window.create(sf::VideoMode(layout.screenWidth, layout.screenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
-    ASSERT(_window.isOpen());
+    Expects(_window.isOpen());
 
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
@@ -28,11 +28,11 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
     const common::CommandLine& commandLine = storage.Get<common::CommandLine>();
     auto mbFontPath = commandLine.FindValue(FontArgument);
-    ASSERT(mbFontPath.has_value(), "you should specify font path via --font argument!");
+    Expects(mbFontPath.has_value(), "you should specify font path via --font argument!");
 
     _font = std::make_unique<sf::Font>();
-    const bool fontLoaded = _font->loadFromFile(std::string { *mbFontPath });
-    ASSERT(fontLoaded, "invalid font!");
+    const bool fontLoaded = _font->loadFromFile(std::string{ *mbFontPath });
+    Expects(fontLoaded, "invalid font!");
 
     storage.Store<UiSystem*>(this);
 
@@ -43,23 +43,23 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
     {
         auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
-        ASSERT(mbFragmentShaderPath.has_value());
+        Expects(mbFragmentShaderPath.has_value());
 
         auto shader = std::make_unique<sf::Shader>();
-        const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
-        ASSERT(loaded);
+        const bool loaded = shader->loadFromFile(std::string{ *mbFragmentShaderPath }, sf::Shader::Fragment);
+        Expects(loaded);
 
-//        WorldWidget::Config worldRenderConfig {
-//            std::move(shader),
-//            { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White },
-//            sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
-//            sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
-//            systems.Modify<PositionSystem>(),
-//            systems.Modify<IdSystem>(),
-//            systems.Modify<TypeSystem>()
-//        };
-//        auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
-//        AddWidget(std::move(worldWidget));
+        //        WorldWidget::Config worldRenderConfig {
+        //            std::move(shader),
+        //            { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White },
+        //            sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
+        //            sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
+        //            systems.Modify<PositionSystem>(),
+        //            systems.Modify<IdSystem>(),
+        //            systems.Modify<TypeSystem>()
+        //        };
+        //        auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
+        //        AddWidget(std::move(worldWidget));
     }
 
     return std::error_code();
@@ -77,8 +77,8 @@ void UiSystem::TerminateSystem()
 
 UiSystem::MainLoopFeedback UiSystem::ProcessInput()
 {
-    auto feedback { MainLoopFeedback::ShouldRun };
-    sf::Event event {};
+    auto feedback{ MainLoopFeedback::ShouldRun };
+    sf::Event event{};
     while (_window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             feedback = MainLoopFeedback::ShouldStop;
@@ -100,7 +100,7 @@ void UiSystem::Render()
         return;
     }
 
-    const sf::Color gray { 0xCCCCCCFF };
+    const sf::Color gray{ 0xCCCCCCFF };
     _window.clear(gray);
 
     for (auto&& [_, widget] : _widgets) {
@@ -120,6 +120,6 @@ UiHandle UiSystem::AddWidget(std::unique_ptr<UiWidget> widget)
 
 void UiSystem::RemoveWidget(UiHandle handle)
 {
-    ASSERT(_widgets.contains(handle));
+    Expects(_widgets.contains(handle));
     _widgets.erase(handle);
 }

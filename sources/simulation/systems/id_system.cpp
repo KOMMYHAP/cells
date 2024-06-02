@@ -2,7 +2,7 @@
 
 IdSystem::IdSystem(uint32_t capacity)
     : _capacity(capacity)
-    , _validCells(capacity, false)
+      , _validCells(capacity, false)
 {
     _freeIds.resize(capacity);
     for (auto it = _freeIds.rbegin(); it != _freeIds.rend(); ++it) {
@@ -31,14 +31,14 @@ CellId IdSystem::Create()
 void IdSystem::Remove(CellId id)
 {
     const auto index = CellIdToInt(id);
-    ASSERT(index <= _validCells.size());
+    Expects(index <= _validCells.size());
     _validCells[index] = false;
     _freeIds.push_back(id);
 }
 
 CellId IdSystem::MakeNextId()
 {
-    ASSERT(_nextId != CellId::Invalid);
+    Expects(_nextId != CellId::Invalid);
 
     CellId id = _nextId;
     _nextId = static_cast<CellId>(CellIdToInt(_nextId) + 1);

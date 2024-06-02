@@ -15,7 +15,7 @@ bool StackStorage::Has() const
 template <class T>
 void StackStorage::Remove()
 {
-    ASSERT(_order.top() == typeid(T), "Trying to remove item in wrong order!");
+    Expects(_order.top() == typeid(T), "Trying to remove item in wrong order!");
     _order.pop();
     return _storage.Remove<T>();
 }

@@ -27,7 +27,7 @@ const Storage::Item& Storage::Get(Storage::ItemType type) const
 
 Storage::Item& Storage::Store(Storage::Item item)
 {
-    const Storage::ItemType type { item->GetTypeIndex() };
+    const Storage::ItemType type{ item->GetTypeIndex() };
     ASSERT(!_items.contains(type));
     auto [it, _] = _items.emplace(type, std::move(item));
     return it->second;

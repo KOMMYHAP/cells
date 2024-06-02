@@ -17,13 +17,11 @@ public:
         return {};
     }
 
-    void TerminateSystem() override
-    {
-    }
+    void TerminateSystem() override {}
 
     uint16_t cellsCount = 100;
-    ComponentRegistry* componentsRegistry { nullptr };
-    SystemRegistry* systemsRegistry { nullptr };
+    ComponentRegistry* componentsRegistry{ nullptr };
+    SystemRegistry* systemsRegistry{ nullptr };
 };
 
 [[noreturn]] static sol::protected_function_result LuaPanicOnError(lua_State* L, sol::protected_function_result /*result*/)
@@ -84,14 +82,14 @@ TEST(SolTests, BasicUseCase)
     //
     //    componentRegistry._registry.Freeze();
     //
-    //    ASSERT(result.valid(), result.status());
+    //    Expects(result.valid(), result.status());
     //
     //    const scripts::ComponentId testComponentId = lua["test_component_id"];
     //    const ::ComponentHandle testComponentHandle = static_cast<::ComponentHandle>(testComponentId.id);
     //    const ComponentStorage& storage = componentRegistry._registry.Get(testComponentHandle);
     //
     //    const scripts::LuaComponent testComponent = lua["test_component"];
-    //    ASSERT(storage.GetMetaInfo().sizeInBytes == testComponent.sizeBytes);
+    //    Expects(storage.GetMetaInfo().sizeInBytes == testComponent.sizeBytes);
     //
     //    // how to create component in lua and pass it from c++?
 }
