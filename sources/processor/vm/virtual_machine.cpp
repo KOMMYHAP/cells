@@ -20,7 +20,7 @@ ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t 
 void VirtualMachine::Run(ProcessorMemory memory)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
-    Expects(controlBlockRead);
+    ASSERT(controlBlockRead);
 
     ProcessorContext context{
         _procedureTable,

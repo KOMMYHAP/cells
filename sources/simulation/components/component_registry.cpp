@@ -5,9 +5,9 @@ ComponentRegistry::ComponentRegistry(uint32_t cellsCount)
 
 ComponentHandle ComponentRegistry::Register(const Component& component)
 {
-    Expects(!_wasFreeze);
+    ASSERT(!_wasFreeze);
     const ComponentHandle handle = _nextHandle;
-    Expects(!_storages.contains(handle));
+    ASSERT(!_storages.contains(handle));
     _storages[handle] = ComponentStorage{ component, _cellsCount };
     _nextHandle = static_cast<ComponentHandle>(static_cast<uint16_t>(_nextHandle) + 1);
     return handle;
@@ -15,21 +15,21 @@ ComponentHandle ComponentRegistry::Register(const Component& component)
 
 ComponentStorage& ComponentRegistry::Modify(const ComponentHandle& handle)
 {
-    Expects(_wasFreeze);
-    Expects(_storages.contains(handle));
+    ASSERT(_wasFreeze);
+    ASSERT(_storages.contains(handle));
     return _storages[handle];
 }
 
 const ComponentStorage& ComponentRegistry::Get(const ComponentHandle& handle) const
 {
-    Expects(_wasFreeze);
+    ASSERT(_wasFreeze);
     auto it = _storages.find(handle);
-    Expects(it != _storages.end());
+    ASSERT(it != _storages.end());
     return it->second;
 }
 
 void ComponentRegistry::Freeze()
 {
-    Expects(!_wasFreeze);
+    ASSERT(!_wasFreeze);
     _wasFreeze = true;
 }

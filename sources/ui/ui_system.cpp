@@ -18,7 +18,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
     const auto& layout = storage.Get<UiLayout>();
     _window.create(sf::VideoMode(layout.screenWidth, layout.screenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
-    Expects(_window.isOpen());
+    ASSERT(_window.isOpen());
 
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
@@ -28,11 +28,11 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
     const common::CommandLine& commandLine = storage.Get<common::CommandLine>();
     auto mbFontPath = commandLine.FindValue(FontArgument);
-    Expects(mbFontPath.has_value(), "you should specify font path via --font argument!");
+    ASSERT(mbFontPath.has_value(), "you should specify font path via --font argument!");
 
     _font = std::make_unique<sf::Font>();
     const bool fontLoaded = _font->loadFromFile(std::string{ *mbFontPath });
-    Expects(fontLoaded, "invalid font!");
+    ASSERT(fontLoaded, "invalid font!");
 
     storage.Store<UiSystem*>(this);
 
@@ -43,11 +43,11 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
     {
         auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
-        Expects(mbFragmentShaderPath.has_value());
+        ASSERT(mbFragmentShaderPath.has_value());
 
         auto shader = std::make_unique<sf::Shader>();
         const bool loaded = shader->loadFromFile(std::string{ *mbFragmentShaderPath }, sf::Shader::Fragment);
-        Expects(loaded);
+        ASSERT(loaded);
 
         //        WorldWidget::Config worldRenderConfig {
         //            std::move(shader),
@@ -120,6 +120,6 @@ UiHandle UiSystem::AddWidget(std::unique_ptr<UiWidget> widget)
 
 void UiSystem::RemoveWidget(UiHandle handle)
 {
-    Expects(_widgets.contains(handle));
+    ASSERT(_widgets.contains(handle));
     _widgets.erase(handle);
 }

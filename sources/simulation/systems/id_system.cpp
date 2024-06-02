@@ -31,14 +31,14 @@ CellId IdSystem::Create()
 void IdSystem::Remove(CellId id)
 {
     const auto index = CellIdToInt(id);
-    Expects(index <= _validCells.size());
+    ASSERT(index <= _validCells.size());
     _validCells[index] = false;
     _freeIds.push_back(id);
 }
 
 CellId IdSystem::MakeNextId()
 {
-    Expects(_nextId != CellId::Invalid);
+    ASSERT(_nextId != CellId::Invalid);
 
     CellId id = _nextId;
     _nextId = static_cast<CellId>(CellIdToInt(_nextId) + 1);

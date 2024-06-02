@@ -114,7 +114,7 @@ private:
     {
         return [this](ProcessorState state) {
             if (_assertOnBadState) {
-                Expects(state != ProcessorState::Good);
+                ASSERT(state != ProcessorState::Good);
             }
             _lastProcessorState = state;
         };

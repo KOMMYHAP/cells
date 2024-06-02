@@ -12,14 +12,14 @@ WorldWidget::WorldWidget(Config&& config)
     const uint16_t cellsHeight = _config.positionSystem.GetHeight();
 
     const bool textureCreated = _texture.create(cellsWidth, cellsHeight);
-    Expects(textureCreated);
+    ASSERT(textureCreated);
 
     // We need shader only for custom texture now
     _config.fragmentShader->setUniform("texture", _texture);
 
     _textureData.resize(cellsWidth * cellsHeight);
 
-    Expects(_vertexBuffer.isAvailable());
+    ASSERT(_vertexBuffer.isAvailable());
     std::array<sf::Vertex, 4> vertices{
         sf::Vertex{ { _config.renderTargetSize.x - 1.0f, 0.0f }, { 1.0f, 0.0f } },
         sf::Vertex{ { 0.0f, 0.0f }, { 0.0f, 0.0f } },
@@ -28,10 +28,10 @@ WorldWidget::WorldWidget(Config&& config)
 
     };
     const bool vertexBufferCreated = _vertexBuffer.create(vertices.size());
-    Expects(vertexBufferCreated);
+    ASSERT(vertexBufferCreated);
 
     const bool vertexBufferUpdated = _vertexBuffer.update(vertices.data());
-    Expects(vertexBufferUpdated);
+    ASSERT(vertexBufferUpdated);
 }
 
 void WorldWidget::Draw(sf::RenderTarget& target)
@@ -71,7 +71,7 @@ void WorldWidget::ProcessCell(CellId id)
     const CellPosition position = _config.positionSystem.Get(id);
     const uint16_t width = _config.positionSystem.GetWidth();
     const auto pixelIndex = position.y * width + position.x;
-    Expects(pixelIndex < _textureData.size());
+    ASSERT(pixelIndex < _textureData.size());
 
     const CellType cellType = _config.typeSystem.Get(id);
 

@@ -6,13 +6,13 @@ TypeSystem::TypeSystem(uint32_t capacity)
 void TypeSystem::Set(CellId id, CellType type)
 {
     const auto index = CellIdToInt(id);
-    Expects(index <= _types.size());
+    ASSERT(index <= _types.size());
     _types[index] = type;
 }
 
 CellType TypeSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
-    Expects(index <= _types.size());
+    ASSERT(index <= _types.size());
     return _types[index];
 }

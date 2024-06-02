@@ -74,6 +74,6 @@ void SimulationScript::SetParameters(const SimulationParameters& parameters)
 {
     _parameters = parameters;
     auto it = _factories.find(_parameters.spawnPolicy);
-    Expects(it != _factories.end(), "Spawn policy was not registered!", _parameters.spawnPolicy);
+    ASSERT(it != _factories.end(), "Spawn policy was not registered!", _parameters.spawnPolicy);
     _cellFactory = it->second;
 }

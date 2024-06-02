@@ -1,7 +1,10 @@
 #pragma once
 
-#include "common.h"
+#include "basic_defines.h"
 
-#include <gsl/assert>      // Ensures/Expects
+// GSL
 #include <gsl/pointers>    // owner, not_null
-#include <gsl/util>        // finally()/narrow_cast()...
+#undef GSL_ASSUME
+#undef GSL_LIKELY
+#undef Expects
+#undef Ensures

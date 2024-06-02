@@ -24,13 +24,11 @@ TEST(SystemTests, Foreach)
     std::array components{ handle };
 
     auto initComponent = [](const SystemContext& context) {
-        Expects(context.components.size() == 1);
+        ASSERT(context.components.size() == 1);
         auto* component = reinterpret_cast<TestComponent*>(context.components[0]);
         component->value = 1;
     };
     const auto testSystem = systemRegistry.MakeSequenceSystem("test", std::span{ components }, initComponent);
-
-    
 
     system.Foreach();
 

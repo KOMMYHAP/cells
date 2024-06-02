@@ -92,7 +92,7 @@ SetupScript::Config SetupScript::MakeConfig()
 
 SetupScript::Parameters SetupScript::ExtractParameters()
 {
-    Expects(_parameters);
+    ASSERT(_parameters);
     Parameters parameters = std::move(*_parameters);
     return parameters;
 }
@@ -152,9 +152,9 @@ UiLayout SetupScript::MakeUiLayout()
     layout.statusTextSize = 10;
     layout.cellPadding = 0;
 
-    //    Expects(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
-    //    Expects(layout.fieldWidth % (CellSize + CellPadding) == 0);
-    //    Expects(layout.fieldHeight % (CellSize + CellPadding) == 0);
+    //    ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
+    //    ASSERT(layout.fieldWidth % (CellSize + CellPadding) == 0);
+    //    ASSERT(layout.fieldHeight % (CellSize + CellPadding) == 0);
 
     return layout;
 }

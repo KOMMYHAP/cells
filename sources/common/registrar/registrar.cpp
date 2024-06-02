@@ -1,11 +1,12 @@
 #include "registrar.h"
 #include "storage/stack_storage.h"
+#include "asserts/assert.h"
 
 namespace common {
 
 RegistrableSystem& Registrar::Register(std::unique_ptr<RegistrableSystem> system)
 {
-    Expects(_state == State::Registration, "Registration phase required!", _state);
+    ASSERT(_state == State::Registration);
     RegistrableSystem* rawPointer = system.get();
     _systems.push_back(std::move(system));
     return *rawPointer;
@@ -13,7 +14,7 @@ RegistrableSystem& Registrar::Register(std::unique_ptr<RegistrableSystem> system
 
 std::error_code Registrar::RunInit()
 {
-    Expects(_state == State::Registration, "Wrong registration phase!", _state);
+    ASSERT(_state == State::Registration);
     _state = State::Initialized;
 
     for (auto& system : _systems) {
@@ -28,7 +29,7 @@ std::error_code Registrar::RunInit()
 
 void Registrar::RunTerm()
 {
-    Expects(_state == State::Initialized, "Wrong registration phase!", _state);
+    ASSERT(_state == State::Initialized);
     _state = State::Terminated;
 
     for (auto& system : std::ranges::reverse_view(_systems)) {

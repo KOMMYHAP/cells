@@ -3,7 +3,7 @@
 SystemBase::SystemBase(ComponentRegistry& registry, std::string_view name, const std::span<ComponentHandle>& handles)
     : _name(name)
 {
-    Expects(_componentInfoList.empty() && _componentBuffer.empty(), "Component was already initialized!");
+    ASSERT(_componentInfoList.empty() && _componentBuffer.empty(), "Component was already initialized!");
     _componentInfoList.reserve(handles.size());
     _componentBuffer.reserve(handles.size());
     for (const ComponentHandle& handle : handles) {

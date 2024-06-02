@@ -6,9 +6,8 @@ Storage::Storage() = default;
 
 Storage::~Storage() noexcept
 {
-    for (auto&& [type, item] : _items) {
-        PANIC("You should manually remove all items from storage to ensure correct order!", item);
-    }
+    // "You should manually remove all items from storage to ensure correct order!"
+    ASSERT(_items.empty());
 }
 
 Storage::Item& Storage::Modify(Storage::ItemType type) const

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "asserts/assert.h"
+
 namespace common {
 inline size_t StackStorage::Count() const
 {
@@ -15,7 +17,7 @@ bool StackStorage::Has() const
 template <class T>
 void StackStorage::Remove()
 {
-    Expects(_order.top() == typeid(T), "Trying to remove item in wrong order!");
+    ASSERT(_order.top() == typeid(T));
     _order.pop();
     return _storage.Remove<T>();
 }

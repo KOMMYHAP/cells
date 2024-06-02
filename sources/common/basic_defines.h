@@ -78,5 +78,3 @@
 #include <utility>
 #include <valarray>
 #include <vector>
-// External libraries
-#include "libassert/assert.hpp"

@@ -82,14 +82,14 @@ TEST(SolTests, BasicUseCase)
     //
     //    componentRegistry._registry.Freeze();
     //
-    //    Expects(result.valid(), result.status());
+    //    ASSERT(result.valid(), result.status());
     //
     //    const scripts::ComponentId testComponentId = lua["test_component_id"];
     //    const ::ComponentHandle testComponentHandle = static_cast<::ComponentHandle>(testComponentId.id);
     //    const ComponentStorage& storage = componentRegistry._registry.Get(testComponentHandle);
     //
     //    const scripts::LuaComponent testComponent = lua["test_component"];
-    //    Expects(storage.GetMetaInfo().sizeInBytes == testComponent.sizeBytes);
+    //    ASSERT(storage.GetMetaInfo().sizeInBytes == testComponent.sizeBytes);
     //
     //    // how to create component in lua and pass it from c++?
 }

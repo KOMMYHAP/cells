@@ -34,7 +34,7 @@ Result RandomCellFactory::Make()
         }
 
         memory.Write(instruction);
-        Expects(description.argumentsCount <= 2);
+        ASSERT(description.argumentsCount <= 2);
         if (description.argumentsCount == 2) {
             const auto [operand1, operand2] = GenerateTwoOperand(instruction);
             memory.Write(operand1, operand2);

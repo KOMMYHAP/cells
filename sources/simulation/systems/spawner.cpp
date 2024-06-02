@@ -22,9 +22,9 @@ CellId Spawner::TrySpawn(const SpawnProperties& properties)
     if (id == CellId::Invalid) {
         return CellId::Invalid;
     }
-    Expects(properties.position != InvalidCellPosition);
-    Expects(properties.type != CellType::Dummy);
-    Expects(properties.health != CellHealth::Zero);
+    ASSERT(properties.position != InvalidCellPosition);
+    ASSERT(properties.type != CellType::Dummy);
+    ASSERT(properties.health != CellHealth::Zero);
 
     _brainSystem.Access(id) = properties.brain;
     _positionSystem.Set(id, properties.position);

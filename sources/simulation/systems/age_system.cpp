@@ -13,7 +13,7 @@ void AgeSystem::Increment(CellId id, CellAge limitAge)
     }
 
     const auto index = CellIdToInt(id);
-    Expects(index <= _ageList.size());
+    ASSERT(index <= _ageList.size());
     const CellAge currentAge = _ageList[index];
 
     const uint16_t current = static_cast<uint16_t>(currentAge) + 1;
@@ -29,13 +29,13 @@ void AgeSystem::Increment(CellId id, CellAge limitAge)
 CellAge AgeSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
-    Expects(index <= _ageList.size());
+    ASSERT(index <= _ageList.size());
     return _ageList[index];
 }
 
 void AgeSystem::Set(CellId id, CellAge age)
 {
     const auto index = CellIdToInt(id);
-    Expects(index <= _ageList.size());
+    ASSERT(index <= _ageList.size());
     _ageList[index] = age;
 }

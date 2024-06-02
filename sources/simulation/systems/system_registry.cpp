@@ -24,13 +24,13 @@ SystemHandle SystemRegistry::MakeSequenceSystem(std::string_view name, const std
 
 SystemBase& SystemRegistry::Modify(SystemHandle handle)
 {
-    Expects(_systems.contains(handle));
+    ASSERT(_systems.contains(handle));
     return *(_systems[handle]);
 }
 
 const SystemBase& SystemRegistry::Get(SystemHandle handle) const
 {
-    Expects(_systems.contains(handle));
+    ASSERT(_systems.contains(handle));
     auto it = _systems.find(handle);
     return *(it->second);
 }

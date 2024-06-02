@@ -5,13 +5,13 @@
 CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBrain& parentRight)
 {
     ProcessorConstMemory memoryLeft{ parentLeft.data };
-    Expects(memoryLeft.HasBytes<ProcessorControlBlock>());
+    ASSERT(memoryLeft.HasBytes<ProcessorControlBlock>());
 
     memoryLeft.Move<ProcessorControlBlock>();
     auto blobLeft = memoryLeft.MakeSpan(0);
 
     ProcessorConstMemory memoryRight{ parentRight.data };
-    Expects(memoryRight.HasBytes<ProcessorControlBlock>());
+    ASSERT(memoryRight.HasBytes<ProcessorControlBlock>());
     memoryRight.Move<ProcessorControlBlock>();
     auto blobRight = memoryRight.MakeSpan(0);
 
@@ -28,7 +28,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
         {}
     };
     const bool writeSuccess = memory.TryWrite(controlBlock);
-    Expects(writeSuccess);
+    ASSERT(writeSuccess);
 
     auto blobOut = memory.MakeSpan(0);
     std::memcpy(blobOut.data(), blobLeft.data(), point);

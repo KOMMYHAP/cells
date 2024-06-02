@@ -8,14 +8,14 @@ BrainSystem::BrainSystem(uint32_t capacity)
 CellBrain& BrainSystem::Access(CellId id)
 {
     const auto index = CellIdToInt(id);
-    Expects(index <= _cells.size());
+    ASSERT(index <= _cells.size());
     return _cells[index];
 }
 
 const CellBrain& BrainSystem::Get(CellId id) const
 {
     const auto index = CellIdToInt(id);
-    Expects(index <= _cells.size());
+    ASSERT(index <= _cells.size());
     return _cells[index];
 }
 

@@ -32,7 +32,7 @@ void Simulation::SetManualMode()
 
 void Simulation::SetAutoMode(sf::Time targetSimulationTime)
 {
-    Expects(targetSimulationTime.asSeconds() > 0.0f);
+    ASSERT(targetSimulationTime.asSeconds() > 0.0f);
     _autoModeParams.emplace(targetSimulationTime, sf::Time::Zero);
 }
 
