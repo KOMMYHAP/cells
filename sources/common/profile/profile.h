@@ -42,3 +42,7 @@ struct ProfileScope final {
 };
 
 }
+
+#if defined(COMMON_PROFILE_ENABLED)
+#undef COMMON_PROFILE_ENABLED
+#endif
