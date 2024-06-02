@@ -6,18 +6,20 @@ namespace common {
 
 CommonSystem::CommonSystem(int argc, char** argv)
     : _argc(argc)
-      , _argv(argv) {}
+    , _argv(argv)
+{
+}
 
 std::error_code CommonSystem::InitializeSystem(StackStorage& storage)
 {
-    common::InitRandom("42");
+    InitRandom("42");
     storage.Store<CommandLine>(_argc, _argv);
     return {};
 }
 
 void CommonSystem::TerminateSystem()
 {
-    common::TermRandom();
+    TermRandom();
 }
 
 }

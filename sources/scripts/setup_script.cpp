@@ -18,30 +18,32 @@
 #include "systems/spawner.h"
 #include "systems/type_system.h"
 
-const sf::Color Gray{ 0xCCCCCCFF };
+const sf::Color Gray { 0xCCCCCCFF };
 
 struct SetupScript::Config {
     // common
-    uint16_t rowsCount{ 0 };
-    uint16_t columnsCount{ 0 };
+    uint16_t rowsCount { 0 };
+    uint16_t columnsCount { 0 };
 
     // simulation
     sf::Time targetSimulationTime;
 
     // virtual machine
-    uint8_t systemInstructionPerStep{ 0 };
+    uint8_t systemInstructionPerStep { 0 };
 
     // spawner
-    float fullnessPercent{ 0.0f };
+    float fullnessPercent { 0.0f };
 
     // selection
-    CellAge limitCellAge{ CellAge::Zero };
-    uint16_t bestCellSelectionSize{ 0 };
-    uint16_t selectionEpochTicks{ 0 };
+    CellAge limitCellAge { CellAge::Zero };
+    uint16_t bestCellSelectionSize { 0 };
+    uint16_t selectionEpochTicks { 0 };
 };
 
 SetupScript::SetupScript(const common::CommandLine& commandLine)
-    : _commandLine(commandLine) {}
+    : _commandLine(commandLine)
+{
+}
 
 SetupScript::~SetupScript() = default;
 
@@ -69,7 +71,7 @@ std::error_code SetupScript::Perform()
 
 SetupScript::Config SetupScript::MakeConfig()
 {
-    SetupScript::Config config;
+    Config config;
     // window
     config.rowsCount = 100;
     config.columnsCount = 50;
@@ -84,7 +86,7 @@ SetupScript::Config SetupScript::MakeConfig()
     config.fullnessPercent = 0.2f;
 
     // selection
-    config.limitCellAge = CellAge{ 100 };
+    config.limitCellAge = CellAge { 100 };
     config.bestCellSelectionSize = 100;
     config.selectionEpochTicks = 100;
     return config;
@@ -165,7 +167,7 @@ std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> SetupScript::MakeSpawnFacto
 
     auto& simulationVm = systems.Modify<SimulationVirtualMachine>();
 
-    const uint8_t moveCommandCount = 10;
+    constexpr uint8_t moveCommandCount = 10;
     auto patrolCellFactory = std::make_unique<PatrolCellFactory>(simulationVm, moveCommandCount);
     auto randomCellFactory = std::make_unique<RandomCellFactory>(simulationVm, std::optional<uint16_t>());
 
@@ -177,7 +179,7 @@ std::map<SpawnPolicy, std::unique_ptr<ICellFactory>> SetupScript::MakeSpawnFacto
 SimulationParameters SetupScript::MakeSimulationParams()
 {
     SimulationParameters params;
-    params.limitCellAge = CellAge{ 100 };
+    params.limitCellAge = CellAge { 100 };
     params.bestCellSelectionSize = 100;
     params.selectionEpochTicks = 1000;
     params.spawnPolicy = SpawnPolicy::Random;

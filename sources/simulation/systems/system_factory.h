@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "system_handle.h"
 #include "components/component_handle.h"
+#include "system_handle.h"
 #include "systems/system_context.h"
 
 class SystemRegistry;

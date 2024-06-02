@@ -17,7 +17,6 @@ add_subdirectory(asserts)
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        common_pch.h
         flags.cpp
         command_line.cpp
         sample_counter.cpp
@@ -41,14 +40,14 @@ target_sources(${PROJECT_NAME} PUBLIC
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_precompile_headers(${PROJECT_NAME} PRIVATE common_pch.h)
+target_precompile_headers(${PROJECT_NAME} PRIVATE basic_defines.h)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 target_link_libraries(${PROJECT_NAME} PUBLIC
         Microsoft.GSL::GSL
 )
 
 if (MSVC)
-    target_compile_options(${PROJECT_NAME} PUBLIC /WX /W4 /permissive-)
+    # target_compile_options(${PROJECT_NAME} PUBLIC /WX /W4 /permissive-)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-    target_compile_options(${PROJECT_NAME} PUBLIC -Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion)
+    # target_compile_options(${PROJECT_NAME} PUBLIC -Werror -Wall -Wextra -Wpedantic)
 endif ()

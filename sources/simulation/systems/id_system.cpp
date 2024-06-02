@@ -2,7 +2,7 @@
 
 IdSystem::IdSystem(uint32_t capacity)
     : _capacity(capacity)
-      , _validCells(capacity, false)
+    , _validCells(capacity, false)
 {
     _freeIds.resize(capacity);
     for (auto it = _freeIds.rbegin(); it != _freeIds.rend(); ++it) {

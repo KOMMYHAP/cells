@@ -7,7 +7,7 @@ namespace common {
 
 class Registrar {
 public:
-    template<class T>
+    template <class T>
         requires std::derived_from<T, RegistrableSystem>
     T& Register(std::unique_ptr<T> system);
 

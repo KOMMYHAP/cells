@@ -18,5 +18,5 @@ public:
 private:
     ComponentRegistry& _registry;
     std::map<SystemHandle, std::unique_ptr<SystemBase>> _systems;
-    SystemHandle _nextHandle{ 0 };
+    SystemHandle _nextHandle { 0 };
 };

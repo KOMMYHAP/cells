@@ -62,8 +62,8 @@ std::vector<CellBrain> SelectionSystem::CollectBestBrains() const
         aliveCellIds.push_back(id);
     });
 
-    std::shuffle(aliveCellIds.begin(), aliveCellIds.end(), common::GetRandomEngine());
-    const uint16_t bestCellsCount = std::min<uint16_t>(_bestCellsLimit, aliveCellIds.size());
+    std::ranges::shuffle(aliveCellIds, common::GetRandomEngine());
+    const auto bestCellsCount = NarrowCast<uint16_t>(std::min(_bestCellsLimit, NarrowCast<uint32_t>(aliveCellIds.size())));
 
     std::ranges::transform(std::span(aliveCellIds).first(bestCellsCount), std::back_inserter(bestBrains), [&](const CellId id) {
         return _brainSystem.Get(id);

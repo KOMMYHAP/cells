@@ -5,7 +5,7 @@ template <class T>
 void ComponentStorage::VerifyComponent() const
 {
     constexpr size_t requestedSize = sizeof(T);
-    ASSUME(_info.sizeInBytes == requestedSize, "Invalid component size", requestedSize, _info.sizeInBytes);
+    ASSERT(_info.sizeInBytes == requestedSize, "Invalid component size", requestedSize, _info.sizeInBytes);
 }
 
 template <class T>

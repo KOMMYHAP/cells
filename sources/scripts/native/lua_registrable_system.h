@@ -9,7 +9,7 @@ class LuaSystemImpl;
 class LuaSystem : public common::RegistrableSystem {
 public:
     LuaSystem();
-    ~LuaSystem();
+    ~LuaSystem() override;
 
     std::error_code InitializeSystem(common::StackStorage& storage) override;
     void TerminateSystem() override;

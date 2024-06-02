@@ -23,7 +23,7 @@ public:
 
     void Move(uint8_t offset);
 
-    uint8_t Size() const { return _memory.size(); }
+    uint8_t Size() const { return NarrowCast<uint8_t>(_memory.size()); }
 
     template <MemoryType... Ts>
     bool HasBytes() const;

@@ -4,15 +4,15 @@
 #include "processor_state.h"
 
 ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory)
-    : _procedureTable(procedureTable)
-    , _controlBlock(controlBlock)
+    : _controlBlock(controlBlock)
+    , _procedureTable(procedureTable)
     , _initialMemory(memory)
     , _memory(_initialMemory)
-    , _watcher(stateWatcher)
     , _stack(_controlBlock.stack, _controlBlock.stackOffset)
+    , _watcher(stateWatcher)
 {
     if (!SetCommandPointer(_controlBlock.nextCommand)) {
-        UNREACHABLE("Invalid command pointer!");
+        ASSERT_FAIL("Invalid command pointer!");
     }
 }
 

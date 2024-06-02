@@ -2,8 +2,8 @@
 #include "processor/processor.h"
 
 ProcedureContext::ProcedureContext(ProcessorContext& context, ProcessorStack stack, uint8_t& inputArgs, uint8_t& outputArgs)
-    : _processorContext(context)
-    , _stack(stack)
+    : _stack(stack)
+    , _processorContext(context)
     , _restInputArgs(inputArgs)
     , _restOutputArgs(outputArgs)
 {

@@ -25,7 +25,7 @@ std::string SetupScriptErrorCategory::message(int ev) const
     case SetupScriptErrors::InvalidShader:
         return "specified fragment shader is invalid";
     default:
-        UNREACHABLE("Unknown error code!", ev);
+        ASSERT_FAIL("Unknown error code!", ev);
     }
 }
 

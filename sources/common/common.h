@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "common_pch.h"
+#include "basic_defines.h"
 
 #include "asserts/assert.h"
 #include "utils/narrow_cast.h"

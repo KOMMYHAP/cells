@@ -3,7 +3,9 @@
 
 HealthSystem::HealthSystem(uint32_t capacity, GraveyardSystem& graveyardSystem)
     : _healthList(capacity, CellHealth::Zero)
-      , _graveyardSystem(graveyardSystem) {}
+    , _graveyardSystem(graveyardSystem)
+{
+}
 
 void HealthSystem::Set(CellId id, CellHealth health)
 {
@@ -56,7 +58,7 @@ CellHealth HealthSystem::Decrement(CellId id, CellHealth health)
 
     const auto healthCurrent = static_cast<int32_t>(_healthList[index]);
     auto healthDiff = static_cast<int32_t>(health);
-    const auto healthLimit = static_cast<int32_t>(CellHealth::Zero);
+    constexpr auto healthLimit = static_cast<int32_t>(CellHealth::Zero);
 
     if (healthCurrent - healthDiff < healthLimit) {
         healthDiff = healthCurrent;

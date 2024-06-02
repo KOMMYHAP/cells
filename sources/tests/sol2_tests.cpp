@@ -17,17 +17,17 @@ public:
         return {};
     }
 
-    void TerminateSystem() override {}
+    void TerminateSystem() override { }
 
     uint16_t cellsCount = 100;
-    ComponentRegistry* componentsRegistry{ nullptr };
-    SystemRegistry* systemsRegistry{ nullptr };
+    ComponentRegistry* componentsRegistry { nullptr };
+    SystemRegistry* systemsRegistry { nullptr };
 };
 
 [[noreturn]] static sol::protected_function_result LuaPanicOnError(lua_State* L, sol::protected_function_result /*result*/)
 {
     sol::error error = sol::stack::get_traceback_or_errors(L);
-    PANIC(error.what());
+    ASSERT_FAIL(error.what());
 }
 
 TEST(SolTests, BasicUseCase)

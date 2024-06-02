@@ -3,7 +3,9 @@
 #include "processor/processor_control_block.h"
 
 BrainSystem::BrainSystem(uint32_t capacity)
-    : _cells(capacity) {}
+    : _cells(capacity)
+{
+}
 
 CellBrain& BrainSystem::Access(CellId id)
 {

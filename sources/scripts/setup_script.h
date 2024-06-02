@@ -9,12 +9,12 @@
 
 class Simulation;
 class SimulationScript;
-class UiLayout;
+struct UiLayout;
 
 class SetupScript final : public BaseScript {
 public:
     SetupScript(const common::CommandLine& commandLine);
-    ~SetupScript();
+    ~SetupScript() override;
 
     std::error_code Perform() override;
 

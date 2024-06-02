@@ -14,8 +14,8 @@ void SimulationVirtualMachine::RegisterProcedure(ProcedureType type, uint8_t inp
         const auto index = static_cast<uint16_t>(procedureId);
         ASSERT(_procedureDataList[index].procedure == nullptr, "Another procedure registered by the same index!", procedureId);
 
-        SimulationProcedureInfo info{ std::move(name), inputCount, outputCount, type };
-        _procedureDataList[index] = ProcedureData{ std::move(info), std::move(procedure) };
+        SimulationProcedureInfo info { std::move(name), inputCount, outputCount, type };
+        _procedureDataList[index] = ProcedureData { std::move(info), std::move(procedure) };
     }
 
     {

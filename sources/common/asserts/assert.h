@@ -23,7 +23,6 @@
 
 #endif
 
-
 #if defined(COMMON_ASSERTS_ENABLED)
 #undef COMMON_ASSERTS_ENABLED
 #endif

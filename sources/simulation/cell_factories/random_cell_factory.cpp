@@ -7,16 +7,18 @@
 #include "random.h"
 #include "systems/simulation_virtual_machine.h"
 
-RandomCellFactory::RandomCellFactory(SimulationVirtualMachine& vm, std::optional<uint16_t> limitBrainSize /* = {}*/)
+RandomCellFactory::RandomCellFactory(SimulationVirtualMachine& vm, std::optional<uint8_t> limitBrainSize /* = {}*/)
     : _brainSize(limitBrainSize.value_or(CellBrainLimit - sizeof(ProcessorControlBlock)))
-      , _vm(vm) {}
+    , _vm(vm)
+{
+}
 
-Result RandomCellFactory::Make()
+RandomCellFactory::Result RandomCellFactory::Make()
 {
     Result result;
     result.status = Status::FailedToCreate;
 
-    ProcessorMemory memory{ result.brain.data };
+    ProcessorMemory memory { result.brain.data };
     if (!InitMemory(memory)) {
         return result;
     }
@@ -29,7 +31,7 @@ Result RandomCellFactory::Make()
         const ProcessorInstructionDescription description = GetProcessorInstructionDescription(instruction);
 
         if (!memory.HasBytes(sizeof(instruction) + description.argumentsCount)) {
-            while (memory.TryWrite(ProcessorInstruction::Nope)) {}
+            while (memory.TryWrite(ProcessorInstruction::Nope)) { }
             break;
         }
 
@@ -51,9 +53,9 @@ Result RandomCellFactory::Make()
 bool RandomCellFactory::InitMemory(ProcessorMemory& memory)
 {
     // todo: extract it
-    ProcessorControlBlock controlBlock{
+    ProcessorControlBlock controlBlock {
         static_cast<uint8_t>(ProcessorState::Good),
-        static_cast<uint8_t>(0),
+        0,
         0,
         {},
         0,
@@ -64,7 +66,7 @@ bool RandomCellFactory::InitMemory(ProcessorMemory& memory)
 
 ProcessorInstruction RandomCellFactory::GenerateProcessorInstruction()
 {
-    std::uniform_int_distribution<uint16_t> distribution{ 0, ProcessorInstructionCount - 1 };
+    std::uniform_int_distribution<uint16_t> distribution { 0, ProcessorInstructionCount - 1 };
     const uint16_t value = distribution(common::GetRandomEngine());
     return static_cast<ProcessorInstruction>(value);
 }
@@ -83,22 +85,22 @@ std::tuple<std::byte, std::byte> RandomCellFactory::GenerateTwoOperand(Processor
     case ProcessorInstruction::SubtractRegistryValue:
         return { GenerateRegistryIndex(), GenerateValue() };
     default:
-        UNREACHABLE("Unknown instruction!", hint);
+        ASSERT_FAIL("Unknown instruction!", hint);
     }
 }
 
 std::byte RandomCellFactory::GenerateRegistryIndex()
 {
-    std::uniform_int_distribution<uint16_t> distribution{ 0, ProcessorRegistryCount - 1 };
-    const uint8_t value = distribution(common::GetRandomEngine());
-    return static_cast<std::byte>(value);
+    std::uniform_int_distribution<uint16_t> distribution { 0, ProcessorRegistryCount - 1 };
+    const auto value = NarrowCast<uint8_t>(distribution(common::GetRandomEngine()));
+    return std::byte { value };
 }
 
 std::byte RandomCellFactory::GenerateValue()
 {
-    std::uniform_int_distribution<uint16_t> distribution{ 0, ProcessorRegistryCount - 1 };
-    const uint8_t value = distribution(common::GetRandomEngine());
-    return static_cast<std::byte>(value);
+    std::uniform_int_distribution<uint16_t> distribution { 0, ProcessorRegistryCount - 1 };
+    const auto value = NarrowCast<uint8_t>(distribution(common::GetRandomEngine()));
+    return std::byte { value };
 }
 
 std::byte RandomCellFactory::GenerateOneOperand(ProcessorInstruction hint)
@@ -117,17 +119,17 @@ std::byte RandomCellFactory::GenerateOneOperand(ProcessorInstruction hint)
     case ProcessorInstruction::PopStackRegistry:
         return GenerateRegistryIndex();
     case ProcessorInstruction::Call:
-        return static_cast<std::byte>(GenerateProcedureId());
+        return GenerateProcedureId();
     default:
-        UNREACHABLE("Unknown instruction!", hint);
+        ASSERT_FAIL("Unknown instruction!", hint);
     }
 }
 
 std::byte RandomCellFactory::GenerateProcedureId()
 {
-    std::uniform_int_distribution<uint16_t> distribution{ 0, ProcedureCountLimit - 1 };
-    const uint8_t value = distribution(common::GetRandomEngine());
+    std::uniform_int_distribution<uint16_t> distribution { 0, ProcedureCountLimit - 1 };
+    const auto value = NarrowCast<uint8_t>(distribution(common::GetRandomEngine()));
     const auto procedureType = static_cast<ProcedureType>(value);
     const ProcedureId procedureId = _vm.GetProcedureId(procedureType);
-    return static_cast<std::byte>(procedureId);
+    return std::byte { static_cast<uint8_t>(procedureId) };
 }

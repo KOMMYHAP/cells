@@ -5,9 +5,9 @@
 
 GraveyardSystem::GraveyardSystem(uint32_t capacity, IdSystem& idSystem, TypeSystem& typeSystem, PositionSystem& positionSystem)
     : _graveyardFlags(capacity, false)
-      , _idSystem(idSystem)
-      , _typeSystem(typeSystem)
-      , _positionSystem(positionSystem)
+    , _idSystem(idSystem)
+    , _typeSystem(typeSystem)
+    , _positionSystem(positionSystem)
 {
     _graveyard.reserve(capacity);
 }

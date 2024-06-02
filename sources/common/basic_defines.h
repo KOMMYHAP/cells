@@ -22,7 +22,6 @@
 #include <cwchar>
 #include <cwctype>
 
-
 // C++
 #include <algorithm>
 #include <any>
@@ -78,3 +77,10 @@
 #include <utility>
 #include <valarray>
 #include <vector>
+
+// GSL
+#include <gsl/pointers> // owner, not_null
+#undef GSL_ASSUME
+#undef GSL_LIKELY
+#undef Expects
+#undef Ensures

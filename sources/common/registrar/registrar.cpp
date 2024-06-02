@@ -1,6 +1,6 @@
 #include "registrar.h"
-#include "storage/stack_storage.h"
 #include "asserts/assert.h"
+#include "storage/stack_storage.h"
 
 namespace common {
 

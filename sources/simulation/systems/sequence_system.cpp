@@ -27,7 +27,7 @@
 //
 //     for (const CellId cellId : cells) {
 //         const auto itemIndex = static_cast<uint32_t>(cellId);
-//         ASSUME(itemIndex < _cellsCount);
+//         ASSERT(itemIndex < _cellsCount);
 //
 //         for (size_t componentIndex = 0; componentIndex < componentsCount; ++componentIndex) {
 //             const ComponentInfo& info = _componentInfoList[componentIndex];

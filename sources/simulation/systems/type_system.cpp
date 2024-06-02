@@ -1,7 +1,9 @@
 #include "type_system.h"
 
 TypeSystem::TypeSystem(uint32_t capacity)
-    : _types(capacity, CellType::Dummy) {}
+    : _types(capacity, CellType::Dummy)
+{
+}
 
 void TypeSystem::Set(CellId id, CellType type)
 {

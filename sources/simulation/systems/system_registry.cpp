@@ -2,7 +2,9 @@
 #include "sequence_system.h"
 
 SystemRegistry::SystemRegistry(ComponentRegistry& registry)
-    : _registry(registry) {}
+    : _registry(registry)
+{
+}
 
 SystemHandle SystemRegistry::Register(std::unique_ptr<SystemBase> system)
 {

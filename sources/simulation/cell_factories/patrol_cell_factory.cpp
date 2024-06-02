@@ -9,8 +9,8 @@
 #include "systems/simulation_virtual_machine.h"
 
 PatrolCellFactory::PatrolCellFactory(SimulationVirtualMachine& vm, uint8_t moveCommandCount)
-    : _simulationVm(vm)
-    , _moveCommandCount(moveCommandCount)
+    : _moveCommandCount(moveCommandCount)
+    , _simulationVm(vm)
 {
 }
 
@@ -19,7 +19,7 @@ bool PatrolCellFactory::InitMemory(ProcessorMemory& memory)
     // todo: extract it
     ProcessorControlBlock controlBlock {
         static_cast<uint8_t>(ProcessorState::Good),
-        static_cast<uint8_t>(0),
+        0,
         0,
         {},
         0,
@@ -28,7 +28,7 @@ bool PatrolCellFactory::InitMemory(ProcessorMemory& memory)
     return memory.TryWrite(controlBlock);
 }
 
-auto PatrolCellFactory::Make() -> Result
+PatrolCellFactory::Result PatrolCellFactory::Make()
 {
     Result result;
     result.status = Status::FailedToCreate;

@@ -17,7 +17,7 @@ template <MemoryType... Ts>
 std::tuple<bool, Ts...> ProcessorStack::TryPop()
 {
     if (!CanPop<Ts...>()) {
-        return { false, Ts{}... };
+        return { false, Ts {}... };
     }
     return { true, Pop<Ts>()... };
 }
@@ -25,7 +25,7 @@ std::tuple<bool, Ts...> ProcessorStack::TryPop()
 template <MemoryType T>
 T ProcessorStack::Pop()
 {
-    ASSUME(CanPop<T>());
+    ASSERT(CanPop<T>());
     _offset -= sizeof(T);
     T value;
     memcpy(&value, &_buffer[_offset], sizeof(T));
@@ -36,8 +36,8 @@ template <class T>
     requires MemoryType<std::decay_t<T>>
 void ProcessorStack::Push(T&& value)
 {
-    ASSUME(CanPush<std::decay_t<T>>());
-    new(&_buffer[_offset]) std::decay_t<T>(std::forward<T>(value));
+    ASSERT(CanPush<std::decay_t<T>>());
+    new (&_buffer[_offset]) std::decay_t<T>(std::forward<T>(value));
     _offset += sizeof(T);
 }
 
@@ -54,7 +54,9 @@ bool ProcessorStack::TryPush(Ts&&... ts)
 
 inline ProcessorStack::ProcessorStack(const std::span<std::byte>& buffer, uint8_t& offset)
     : _buffer(buffer)
-      , _offset(offset) {}
+    , _offset(offset)
+{
+}
 
 inline uint8_t ProcessorStack::GetPushedBytesCount() const
 {

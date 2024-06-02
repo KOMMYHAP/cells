@@ -27,17 +27,17 @@ public:
 
 class ProcedureFixture : public testing::Test {
 public:
-    VirtualMachine* vm{ nullptr };
+    VirtualMachine* vm { nullptr };
 
     ProcessorControlBlock& AccessControlBlock()
     {
-        ProcessorMemory memory{ _memoryBuffer };
+        ProcessorMemory memory { _memoryBuffer };
         return memory.Access<ProcessorControlBlock>();
     }
 
     ProcessorMemory GetMemory()
     {
-        ProcessorMemory memory{ _memoryBuffer };
+        ProcessorMemory memory { _memoryBuffer };
         memory.Move<ProcessorControlBlock>();
         return memory;
     }
@@ -45,7 +45,7 @@ public:
     ProcessorStack GetStack()
     {
         ProcessorControlBlock& controlBlock = AccessControlBlock();
-        ProcessorStack stack{ controlBlock.stack, controlBlock.stackOffset };
+        ProcessorStack stack { controlBlock.stack, controlBlock.stackOffset };
         return stack;
     }
 
@@ -102,12 +102,12 @@ protected:
         vm->SetInstructionsPerStep(1);
         MakeMemory(255);
 
-        ProcessorMemory rawMemory{ _memoryBuffer };
+        ProcessorMemory rawMemory { _memoryBuffer };
         ProcessorControlBlock controlBlock = {};
         rawMemory.Write(controlBlock);
     }
 
-    void TearDown() override {}
+    void TearDown() override { }
 
 private:
     ProcessorStateWatcher MakeKiller()
@@ -123,14 +123,14 @@ private:
     void MakeMemory(uint8_t size)
     {
         _memoryBuffer.resize(size);
-        std::fill(_memoryBuffer.begin(), _memoryBuffer.end(), std::byte{ 0xDD });
+        std::fill(_memoryBuffer.begin(), _memoryBuffer.end(), std::byte { 0xDD });
     }
 
     std::vector<std::byte> _memoryBuffer;
     std::unique_ptr<VirtualMachine> _vm;
     std::unique_ptr<TestProcedure> _procedure;
-    bool _assertOnBadState{ true };
-    ProcessorState _lastProcessorState{ ProcessorState::Good };
+    bool _assertOnBadState { true };
+    ProcessorState _lastProcessorState { ProcessorState::Good };
 };
 
 DisabledAssertScope::DisabledAssertScope(ProcedureFixture& fixture)
@@ -152,7 +152,7 @@ TEST_F(ProcedureFixture, RegisterProcedure)
     procedure->func = [](ProcedureContext& context) {};
 
     std::set<ProcedureId> oldIds;
-    for (uint8_t i{ 0 }; i < ProcedureTableLimit; ++i) {
+    for (uint8_t i { 0 }; i < ProcedureTableLimit; ++i) {
         const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 0);
         ASSERT_NE(id, ProcedureId::Invalid);
         ASSERT_EQ(oldIds.find(id), oldIds.end());
@@ -165,7 +165,7 @@ TEST_F(ProcedureFixture, RegisterProcedure)
 
 TEST_F(ProcedureFixture, UnknownProcedure)
 {
-    ProcedureId id{ 0 };
+    ProcedureId id { 0 };
     GetMemory().Write(ProcessorInstruction::Call, id);
     auto _ = MakeScopeWithoutAssert();
     Tick();
@@ -174,7 +174,7 @@ TEST_F(ProcedureFixture, UnknownProcedure)
 
 TEST_F(ProcedureFixture, CheckProcedureIsCalled)
 {
-    int counter{ 0 };
+    int counter { 0 };
     auto procedure = std::make_unique<TestProcedure>();
     procedure->func = [&](ProcedureContext& context) {
         counter += 1;
@@ -192,7 +192,7 @@ TEST_F(ProcedureFixture, CheckProcedureIsCalled)
     Tick();
     ASSERT_EQ(counter, 2);
 
-    accessor.Write(ProcessorInstruction::Jump, std::byte{ 0 });
+    accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
     Tick();
     ASSERT_EQ(counter, 2);
 
@@ -205,7 +205,7 @@ TEST_F(ProcedureFixture, CheckProcedureIsCalled)
 
 TEST_F(ProcedureFixture, Procedure_In1_Out0)
 {
-    int counter{ 0 };
+    int counter { 0 };
     auto procedure = std::make_unique<TestProcedure>();
     procedure->func = [&](ProcedureContext& context) {
         counter += 1;
@@ -225,9 +225,9 @@ TEST_F(ProcedureFixture, Procedure_In1_Out0)
     }
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 42 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
     accessor.Write(ProcessorInstruction::Call, id);
-    accessor.Write(ProcessorInstruction::Jump, std::byte{ 0 });
+    accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
     Tick();
     Tick();
     Tick();
@@ -244,7 +244,7 @@ TEST_F(ProcedureFixture, Procedure_In0_Out1)
 {
     auto procedure = std::make_unique<TestProcedure>();
     procedure->func = [&](ProcedureContext& context) {
-        static uint8_t counter{ 0 };
+        static uint8_t counter { 0 };
         counter += 1;
         const bool s = context.TryPushResult(counter);
         ASSERT_TRUE(s);
@@ -261,7 +261,7 @@ TEST_F(ProcedureFixture, Procedure_In0_Out1)
         ASSERT_EQ(data, std::byte { 1 });
     }
 
-    accessor.Write(ProcessorInstruction::Jump, std::byte{ 0 });
+    accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
     Tick();
 }
 
@@ -308,14 +308,14 @@ TEST_F(ProcedureFixture, Procedure_In1_Out1)
         const auto [popResult, popData] = context.TryPopArgs<std::byte>();
         ASSERT_TRUE(popResult);
         ASSERT_EQ(popData, std::byte { 42 });
-        const bool pushResult = context.TryPushResult(std::byte{ 43 });
+        const bool pushResult = context.TryPushResult(std::byte { 43 });
         ASSERT_TRUE(pushResult);
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 1, 1);
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 42 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
     accessor.Write(ProcessorInstruction::Call, id);
     Tick();
     Tick();
@@ -330,7 +330,7 @@ TEST_F(ProcedureFixture, Rollback_InvalidCommandInProcedure)
     auto procedure = std::make_unique<TestProcedure>();
     procedure->func = [&](ProcedureContext& context) {
         context.MarkProcedureAsInvalid();
-        context.TryPushResult(std::byte{ 42 });
+        context.TryPushResult(std::byte { 42 });
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
@@ -356,7 +356,7 @@ TEST_F(ProcedureFixture, Rollback_IgnoredInput)
     procedure->func = [&](ProcedureContext& context) {};
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 1, 0);
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 1 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     Tick();
     accessor.Write(ProcessorInstruction::Call, id);
     TestRollback(ProcessorState::ProcedureIgnoreInput);
@@ -372,7 +372,7 @@ TEST_F(ProcedureFixture, Rollback_TooMuchInputRequested)
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 1, 0);
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 1 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     Tick();
     accessor.Write(ProcessorInstruction::Call, id);
     TestRollback(ProcessorState::ProcedureTooMuchInputRequested);
@@ -383,7 +383,7 @@ TEST_F(ProcedureFixture, Rollback_TooMuchOuput)
     auto accessor = GetMemory();
     auto procedure = std::make_unique<TestProcedure>();
     procedure->func = [&](ProcedureContext& context) {
-        const bool r = context.TryPushResult(std::byte{ 2 }, std::byte{ 3 });
+        const bool r = context.TryPushResult(std::byte { 2 }, std::byte { 3 });
         ASSERT_FALSE(r);
     };
 

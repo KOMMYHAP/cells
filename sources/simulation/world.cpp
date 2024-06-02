@@ -23,7 +23,6 @@ void World::TerminateSystem()
     _components.reset();
     _simulation.reset();
     _parameters = nullptr;
-
 }
 
 void World::Update(sf::Time elapsedTime)

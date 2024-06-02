@@ -3,10 +3,12 @@
 constexpr uint32_t InvalidGridIndex = std::numeric_limits<uint32_t>::max();
 
 PositionSystem::PositionSystem(uint32_t width, uint32_t height)
-    : _width(width)
-      , _height(height)
-      , _positions(width * height, InvalidCellPosition)
-      , _grid(width * height, CellId::Invalid) {}
+    : _width(NarrowCast<PositionType>(width))
+    , _height(NarrowCast<PositionType>(height))
+    , _positions(width * height, InvalidCellPosition)
+    , _grid(width * height, CellId::Invalid)
+{
+}
 
 void PositionSystem::Move(CellId id, CellPosition nextPosition)
 {
@@ -83,7 +85,7 @@ CellPosition PositionSystem::TryApplyDirection(CellPosition position, Direction 
         }
         break;
     default:
-        UNREACHABLE("Unknown direction!", direction);
+        ASSERT_FAIL("Unknown direction!", direction);
     }
     return InvalidCellPosition;
 }

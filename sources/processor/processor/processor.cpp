@@ -40,7 +40,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
     const auto instruction = static_cast<ProcessorInstruction>(rawInstruction);
 
     switch (instruction) {
-        /// instructions with two operands:
+    /// instructions with two operands:
     case ProcessorInstruction::WriteRegistryRegistry:
     case ProcessorInstruction::CompareRegistryRegistry:
     case ProcessorInstruction::AddRegistryRegistry:
@@ -63,7 +63,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
         }
     } break;
 
-        /// instructions with one operand:
+    /// instructions with one operand:
     case ProcessorInstruction::PushStackRegistry:
     case ProcessorInstruction::PushStackValue:
     case ProcessorInstruction::PopStackRegistry:
@@ -88,7 +88,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
         }
     } break;
 
-        /// instructions without operand:
+    /// instructions without operand:
     case ProcessorInstruction::Nope:
         ASSERT(GetProcessorInstructionDescription(instruction).argumentsCount == 0);
         if (!context.MoveCommandPointer(1)) {
@@ -194,7 +194,7 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, Proces
     return true;
 }
 
-bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContext, ProcessorContext& context)
+bool Processor::ProcessOneOperand(OneOperandContext instructionContext, ProcessorContext& context)
 {
     ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
 
@@ -239,7 +239,7 @@ bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContex
         }
     } break;
 
-        /// https://www.felixcloutier.com/x86/jcc
+    /// https://www.felixcloutier.com/x86/jcc
     case ProcessorInstruction::JumpIfEqual: {
         const bool shouldJump = context.HasFlag(ProcessorFlags::Zero);
         if (!shouldJump) {
@@ -303,7 +303,7 @@ void Processor::UpdateFlags(FlagsContext flagsContext, ProcessorContext& context
         result = flagsContext.operand1 + flagsContext.operand2;
         break;
     default:
-        UNREACHABLE("Unknown instruction", flagsContext.instruction);
+        ASSERT_FAIL("Unknown instruction", flagsContext.instruction);
     }
 
     context.SetFlag(ProcessorFlags::Zero, result == 0);

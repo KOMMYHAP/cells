@@ -1,4 +1,5 @@
 #include "storage/storage.h"
+#include "asserts/assert.h"
 
 namespace common {
 
@@ -10,29 +11,29 @@ Storage::~Storage() noexcept
     ASSERT(_items.empty());
 }
 
-Storage::Item& Storage::Modify(Storage::ItemType type) const
+Storage::Item& Storage::Modify(ItemType type) const
 {
     ASSERT(_items.contains(type));
     auto it = _items.find(type);
     return const_cast<Item&>(it->second);
 }
 
-const Storage::Item& Storage::Get(Storage::ItemType type) const
+const Storage::Item& Storage::Get(ItemType type) const
 {
     ASSERT(_items.contains(type));
     auto it = _items.find(type);
     return it->second;
 }
 
-Storage::Item& Storage::Store(Storage::Item item)
+Storage::Item& Storage::Store(Item item)
 {
-    const Storage::ItemType type{ item->GetTypeIndex() };
+    const ItemType type { item->GetTypeIndex() };
     ASSERT(!_items.contains(type));
     auto [it, _] = _items.emplace(type, std::move(item));
     return it->second;
 }
 
-void Storage::Remove(Storage::ItemType type)
+void Storage::Remove(ItemType type)
 {
     ASSERT(_items.contains(type));
     _items.erase(type);
@@ -43,7 +44,7 @@ size_t Storage::Count() const
     return _items.size();
 }
 
-bool Storage::Has(Storage::ItemType type) const
+bool Storage::Has(ItemType type) const
 {
     return _items.contains(type);
 }

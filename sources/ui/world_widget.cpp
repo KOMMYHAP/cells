@@ -6,7 +6,7 @@
 
 WorldWidget::WorldWidget(Config&& config)
     : _config(std::move(config))
-      , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
+    , _vertexBuffer(sf::PrimitiveType::TrianglesStrip, sf::VertexBuffer::Static)
 {
     const uint16_t cellsWidth = _config.positionSystem.GetWidth();
     const uint16_t cellsHeight = _config.positionSystem.GetHeight();
@@ -20,11 +20,11 @@ WorldWidget::WorldWidget(Config&& config)
     _textureData.resize(cellsWidth * cellsHeight);
 
     ASSERT(_vertexBuffer.isAvailable());
-    std::array<sf::Vertex, 4> vertices{
-        sf::Vertex{ { _config.renderTargetSize.x - 1.0f, 0.0f }, { 1.0f, 0.0f } },
-        sf::Vertex{ { 0.0f, 0.0f }, { 0.0f, 0.0f } },
-        sf::Vertex{ { _config.renderTargetSize.x - 1.0f, _config.renderTargetSize.y - 1.0f }, { 1.0f, 1.0f } },
-        sf::Vertex{ { 0.0f, _config.renderTargetSize.y - 1.0f }, { 0.0f, 1.0f } },
+    std::array<sf::Vertex, 4> vertices {
+        sf::Vertex { { _config.renderTargetSize.x - 1.0f, 0.0f }, { 1.0f, 0.0f } },
+        sf::Vertex { { 0.0f, 0.0f }, { 0.0f, 0.0f } },
+        sf::Vertex { { _config.renderTargetSize.x - 1.0f, _config.renderTargetSize.y - 1.0f }, { 1.0f, 1.0f } },
+        sf::Vertex { { 0.0f, _config.renderTargetSize.y - 1.0f }, { 0.0f, 1.0f } },
 
     };
     const bool vertexBufferCreated = _vertexBuffer.create(vertices.size());
@@ -46,7 +46,7 @@ void WorldWidget::Draw(sf::RenderTarget& target)
 
     sf::RenderStates states;
     states.shader = _config.fragmentShader.get();
-    states.transform.translate(_config.renderTargetOffset.x, _config.renderTargetOffset.y);
+    states.transform.translate(NarrowCast<float>(_config.renderTargetOffset.x), NarrowCast<float>(_config.renderTargetOffset.y));
     target.draw(_vertexBuffer, states);
 }
 
@@ -62,7 +62,7 @@ sf::Color WorldWidget::GetColor(CellType type) const
     case CellType::Dummy:
         return _config.colors.at(3);
     default:
-        UNREACHABLE("Unknown cell type!");
+        ASSERT_FAIL("Unknown cell type!");
     }
 }
 
@@ -79,4 +79,4 @@ void WorldWidget::ProcessCell(CellId id)
     pixel = GetColor(cellType).toInteger();
 }
 
-void WorldWidget::Update(sf::Time /*elapsedTime*/) {}
+void WorldWidget::Update(sf::Time /*elapsedTime*/) { }

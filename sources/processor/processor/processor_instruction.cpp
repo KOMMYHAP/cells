@@ -33,7 +33,7 @@ ProcessorInstructionDescription GetProcessorInstructionDescription(ProcessorInst
         break;
     case ProcessorInstruction::LastProcessorInstruction:
     default:
-        UNREACHABLE("Unknown instruction!", instruction);
+        ASSERT_FAIL("Unknown instruction!", instruction);
     }
 
     return description;

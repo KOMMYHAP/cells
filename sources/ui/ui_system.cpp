@@ -10,6 +10,7 @@
 #include "systems/id_system.h"
 #include "systems/position_system.h"
 #include "systems/type_system.h"
+#include "utils/stub_error_code.h"
 
 static const std::string_view FontArgument = "--font";
 static const std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -24,15 +25,19 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     _window.setFramerateLimit(60);
 
     auto* world = storage.Get<World*>();
-    const SystemRegistry& systems = world->GetSystems();
+    // const SystemRegistry& systems = world->GetSystems();
 
     const common::CommandLine& commandLine = storage.Get<common::CommandLine>();
     auto mbFontPath = commandLine.FindValue(FontArgument);
-    ASSERT(mbFontPath.has_value(), "you should specify font path via --font argument!");
+    if (!mbFontPath.has_value()) {
+        return common::MakeStubErrorCode();
+    }
 
     _font = std::make_unique<sf::Font>();
-    const bool fontLoaded = _font->loadFromFile(std::string{ *mbFontPath });
-    ASSERT(fontLoaded, "invalid font!");
+    const bool fontLoaded = _font->loadFromFile(std::string { *mbFontPath });
+    if (!fontLoaded) {
+        return common::MakeStubErrorCode();
+    }
 
     storage.Store<UiSystem*>(this);
 
@@ -46,7 +51,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         ASSERT(mbFragmentShaderPath.has_value());
 
         auto shader = std::make_unique<sf::Shader>();
-        const bool loaded = shader->loadFromFile(std::string{ *mbFragmentShaderPath }, sf::Shader::Fragment);
+        const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
         ASSERT(loaded);
 
         //        WorldWidget::Config worldRenderConfig {
@@ -77,8 +82,8 @@ void UiSystem::TerminateSystem()
 
 UiSystem::MainLoopFeedback UiSystem::ProcessInput()
 {
-    auto feedback{ MainLoopFeedback::ShouldRun };
-    sf::Event event{};
+    auto feedback { MainLoopFeedback::ShouldRun };
+    sf::Event event {};
     while (_window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
             feedback = MainLoopFeedback::ShouldStop;
@@ -100,7 +105,7 @@ void UiSystem::Render()
         return;
     }
 
-    const sf::Color gray{ 0xCCCCCCFF };
+    const sf::Color gray { 0xCCCCCCFF };
     _window.clear(gray);
 
     for (auto&& [_, widget] : _widgets) {

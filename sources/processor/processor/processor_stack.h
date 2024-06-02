@@ -4,7 +4,7 @@
 
 class ProcessorStack {
 public:
-    ProcessorStack(const std::span<std::byte>& buffer, uint8_t & offset);
+    ProcessorStack(const std::span<std::byte>& buffer, uint8_t& offset);
 
     template <class T>
         requires MemoryType<std::decay_t<T>>

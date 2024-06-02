@@ -19,13 +19,13 @@ class ProcessorFixture : public testing::Test {
 public:
     ProcessorControlBlock& AccessControlBlock()
     {
-        ProcessorMemory memory{ _memoryBuffer };
+        ProcessorMemory memory { _memoryBuffer };
         return memory.Access<ProcessorControlBlock>();
     }
 
     ProcessorMemory GetMemory()
     {
-        ProcessorMemory memory{ _memoryBuffer };
+        ProcessorMemory memory { _memoryBuffer };
         memory.Move<ProcessorControlBlock>();
         return memory;
     }
@@ -61,12 +61,12 @@ protected:
         _vm = MakeVm(1);
         MakeMemory(255);
 
-        ProcessorMemory rawMemory{ _memoryBuffer };
+        ProcessorMemory rawMemory { _memoryBuffer };
         ProcessorControlBlock controlBlock = {};
         rawMemory.Write(controlBlock);
     }
 
-    void TearDown() override {}
+    void TearDown() override { }
 
 private:
     std::unique_ptr<VirtualMachine> MakeVm(uint8_t systemInstructionPerTick)
@@ -90,13 +90,13 @@ private:
     void MakeMemory(uint8_t size)
     {
         _memoryBuffer.resize(size);
-        std::fill(_memoryBuffer.begin(), _memoryBuffer.end(), std::byte{ 0xDD });
+        std::fill(_memoryBuffer.begin(), _memoryBuffer.end(), std::byte { 0xDD });
     }
 
     std::vector<std::byte> _memoryBuffer;
     std::unique_ptr<VirtualMachine> _vm;
-    bool _assertOnBadState{ true };
-    ProcessorState _lastProcessorState{ ProcessorState::Good };
+    bool _assertOnBadState { true };
+    ProcessorState _lastProcessorState { ProcessorState::Good };
 };
 
 DisabledAssertScope::DisabledAssertScope(ProcessorFixture& fixture)
@@ -112,7 +112,7 @@ DisabledAssertScope::~DisabledAssertScope()
 
 }
 
-TEST_F(ProcessorFixture, Processor_Init_Term) {}
+TEST_F(ProcessorFixture, Processor_Init_Term) { }
 
 TEST_F(ProcessorFixture, Processor_Nope)
 {
@@ -134,9 +134,9 @@ TEST_F(ProcessorFixture, Processor_StackOverflow)
 {
     auto accessor = GetMemory();
     for (uint8_t i = 0; i < ProcessorStackSize; ++i) {
-        accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 1 });
+        accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     }
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 1 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
 
     for (uint8_t i = 0; i < ProcessorStackSize; ++i) {
         Tick();
@@ -151,7 +151,7 @@ TEST_F(ProcessorFixture, Processor_StackOverflow)
 TEST_F(ProcessorFixture, Processor_StackUnderflow)
 {
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PopStackRegistry, std::uint8_t{ 0 });
+    accessor.Write(ProcessorInstruction::PopStackRegistry, std::uint8_t { 0 });
     {
         auto _ = MakeScopeWithoutAssert();
         Tick();
@@ -162,8 +162,8 @@ TEST_F(ProcessorFixture, Processor_StackUnderflow)
 TEST_F(ProcessorFixture, Processor_PopStackToInvalidRegister)
 {
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 42 });
-    accessor.Write(ProcessorInstruction::PopStackRegistry, std::uint8_t{ ProcessorRegistryCount });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PopStackRegistry, std::uint8_t { ProcessorRegistryCount });
 
     Tick();
     {
@@ -178,8 +178,8 @@ TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick)
     MakeVmWithCustomSystemInstructionPerTick(2);
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 42 });
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 24 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 24 });
 
     ASSERT_EQ(AccessControlBlock().stackOffset, 0);
     Tick();
@@ -191,8 +191,8 @@ TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick_WithJump)
     MakeVmWithCustomSystemInstructionPerTick(3);
 
     auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte{ 42 });
-    accessor.Write(ProcessorInstruction::Jump, std::byte{ 0 });
+    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
+    accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
     accessor.Write(ProcessorInstruction::Nope);
 
     ASSERT_EQ(AccessControlBlock().stackOffset, 0);

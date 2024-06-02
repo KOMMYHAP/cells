@@ -6,8 +6,6 @@
 
 namespace scripts {
 
-
-
 class LuaSystemFactory {
 public:
     LuaSystemFactory(SystemRegistry& systemRegistry, ComponentRegistry& componentRegistry);
@@ -21,7 +19,7 @@ private:
         sol::this_state state;
         sol::protected_function function;
     };
-    void ProcessSystem(LuaSystemStorage & storage, const SystemContext & context);
+    void ProcessSystem(LuaSystemStorage& storage, const SystemContext& context);
 
     SystemRegistry& _registry;
     ComponentRegistry& _componentRegistry;

@@ -3,7 +3,9 @@
 
 AgeSystem::AgeSystem(uint32_t capacity, HealthSystem& healthSystem)
     : _ageList(capacity, CellAge::Zero)
-      , _healthSystem(healthSystem) {}
+    , _healthSystem(healthSystem)
+{
+}
 
 void AgeSystem::Increment(CellId id, CellAge limitAge)
 {

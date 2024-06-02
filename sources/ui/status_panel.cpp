@@ -2,19 +2,22 @@
 #include "systems/id_system.h"
 #include "world.h"
 
-const uint16_t StatusMessageBufferLimit = 200;
-const uint16_t StatusTextSize = 10;
-const uint16_t StatusTextOffset = 0;
+constexpr uint16_t StatusMessageBufferLimit = 200;
+constexpr uint16_t StatusTextSize = 10;
+constexpr uint16_t StatusTextOffset = 0;
 
 static auto GetTimeInfo(sf::Time time)
 {
-    const std::string_view tickUnit = time.asMilliseconds() >= 1000 ? "s"
-        : time.asMicroseconds() >= 1000                             ? "ms"
-                                                                    : "us";
+    const std::string_view tickUnit = time.asMilliseconds() >= 1000
+        ? "s"
+        : time.asMicroseconds() >= 1000
+        ? "ms"
+        : "us";
     const float tickTimeValue = time.asMilliseconds() >= 1000
         ? time.asSeconds()
-        : time.asMicroseconds() >= 1000 ? static_cast<float>(time.asMilliseconds())
-                                        : static_cast<float>(time.asMicroseconds());
+        : time.asMicroseconds() >= 1000
+        ? static_cast<float>(time.asMilliseconds())
+        : static_cast<float>(time.asMicroseconds());
 
     return std::make_tuple(tickTimeValue, tickUnit);
 }
@@ -24,7 +27,7 @@ StatusPanel::StatusPanel(const UiLayout& layout, const sf::Font& font, World& wo
 {
     _text.setFont(font);
     _text.setCharacterSize(StatusTextSize);
-    _text.setPosition(layout.fieldOffset + StatusTextSize, StatusTextOffset);
+    _text.setPosition(NarrowCast<float>(layout.fieldOffset + StatusTextSize), StatusTextOffset);
 
     _buffer.reserve(StatusMessageBufferLimit);
 }
@@ -45,8 +48,8 @@ void StatusPanel::Update(sf::Time elapsedTime)
     //    const uint32_t cellsCount = idSystem.GetCellsCount();
     //    const float cellsCountPercent = static_cast<uint8_t>(static_cast<float>(idSystem.GetCellsCount()) / (idSystem.GetCellsCountLimit()) * 100.0f);
     //
-    const uint32_t cellsCount = 0;
-    const float cellsCountPercent = 0.0f;
+    constexpr uint32_t cellsCount = 0;
+    constexpr float cellsCountPercent = 0.0f;
 
     _buffer.clear();
     std::format_to_n(std::back_inserter(_buffer), _buffer.capacity(),

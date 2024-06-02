@@ -19,14 +19,14 @@ SystemHandle LuaSystemFactory::MakeSystem(sol::this_state state, std::string_vie
 
     for (sol::variadic_args::const_iterator arg : args) {
         if (!arg->is<uint16_t>()) {
-            PANIC(std::format("Failed to register system: argument at {} index must be component handle!", arg.index));
+            ASSERT_FAIL(std::format("Failed to register system: argument at {} index must be component handle!", arg.index));
             return SystemHandle::Invalid;
         }
 
         const uint16_t rawHandle = arg->as<uint16_t>();
         const ComponentHandle handle { rawHandle };
         if (handle == ComponentHandle::Invalid) {
-            PANIC(std::format("Failed to register system: argument at {} index is invalid handle, seems like its component was not created!", arg.index));
+            ASSERT_FAIL(std::format("Failed to register system: argument at {} index is invalid handle, seems like its component was not created!", arg.index));
             return SystemHandle::Invalid;
         }
 
@@ -41,7 +41,9 @@ SystemHandle LuaSystemFactory::MakeSystem(sol::this_state state, std::string_vie
         // ProcessSystem()
     };
 
-    return _registry.MakeSequenceSystem(name, handles, std::move(luaFunctionWrapper));
+    // return _registry.MakeSequenceSystem(name, handles, std::move(luaFunctionWrapper));
+    ASSERT(false, "todo");
+    return {};
 }
 
 void LuaSystemFactory::ProcessSystem(LuaSystemFactory::LuaSystemStorage& storage, const SystemContext& context)

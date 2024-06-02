@@ -5,7 +5,7 @@
 #include "procedures/direction.h"
 
 class PositionSystem {
-    using PositionType = decltype(CellPosition::x);
+    using PositionType = std::decay_t<decltype(CellPosition::x)>;
 
 public:
     PositionSystem(uint32_t width, uint32_t height);

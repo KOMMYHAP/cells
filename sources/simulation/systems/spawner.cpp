@@ -10,11 +10,13 @@
 
 Spawner::Spawner(PositionSystem& positionSystem, TypeSystem& typeSystem, BrainSystem& brainSystem, HealthSystem& healthSystem, AgeSystem& ageSystem, IdSystem& idSystem)
     : _positionSystem(positionSystem)
-      , _typeSystem(typeSystem)
-      , _brainSystem(brainSystem)
-      , _healthSystem(healthSystem)
-      , _ageSystem(ageSystem)
-      , _idSystem(idSystem) {}
+    , _typeSystem(typeSystem)
+    , _brainSystem(brainSystem)
+    , _healthSystem(healthSystem)
+    , _ageSystem(ageSystem)
+    , _idSystem(idSystem)
+{
+}
 
 CellId Spawner::TrySpawn(const SpawnProperties& properties)
 {

@@ -3,7 +3,9 @@
 #include "simulation_profile_category.h"
 
 Simulation::Simulation(BaseScript& tickScript)
-    : _tickScript(tickScript) {}
+    : _tickScript(tickScript)
+{
+}
 
 void Simulation::Tick()
 {
@@ -12,14 +14,14 @@ void Simulation::Tick()
 
 void Simulation::Ticks(uint32_t ticks)
 {
-    for (uint32_t i{ 0 }; i < ticks; ++i) {
+    for (uint32_t i { 0 }; i < ticks; ++i) {
         ProcessTick();
     }
 }
 
 void Simulation::ProcessTick()
 {
-    common::ProfileScope tickProfileScope{ "TickGeneration", SimulationProfileCategory };
+    common::ProfileScope tickProfileScope { "TickGeneration", SimulationProfileCategory };
     sf::Clock clock;
     _tickScript.Perform();
     _tickCounter.AddSample(clock.getElapsedTime().asSeconds());
@@ -54,7 +56,7 @@ uint32_t Simulation::Run(sf::Time elapsedTime)
 
     const sf::Time tickTime = sf::seconds(_tickCounter.CalcMedian());
     const float availableTicks = params.availableTimeToSpent / tickTime;
-    const float minimumTicks = 1.0f;
+    constexpr float minimumTicks = 1.0f;
     const float maximumTicks = std::max(minimumTicks, params.limitSimulationTime / tickTime);
     const float ticksToProcess = std::clamp(availableTicks, minimumTicks, maximumTicks);
     const uint32_t roundedTicksToProcess = static_cast<uint32_t>(ticksToProcess);
@@ -68,7 +70,7 @@ uint32_t Simulation::Run(sf::Time elapsedTime)
 
 uint32_t Simulation::WarmUp()
 {
-    const uint32_t ticksToWarmUp = 1;
+    constexpr uint32_t ticksToWarmUp = 1;
     Ticks(ticksToWarmUp);
     return ticksToWarmUp;
 }

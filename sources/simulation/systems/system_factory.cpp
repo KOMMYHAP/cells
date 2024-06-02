@@ -1,20 +1,18 @@
 ﻿#include "system_factory.h"
 
+#include "components/component_registry.h"
 #include "sequence_system.h"
 #include "system_registry.h"
-#include "components/component_registry.h"
-
 
 SystemFactory::SystemFactory(SystemRegistry& systemRegistry, ComponentRegistry& componentRegistry)
     : _systemRegistry(&systemRegistry)
-      , _componentRegistry(&componentRegistry)
-      , _fixedSequenceIds(_componentRegistry->GetCellsCount(), CellId::Invalid)
+    , _componentRegistry(&componentRegistry)
+    , _fixedSequenceIds(_componentRegistry->GetCellsCount(), CellId::Invalid)
 {
     for (size_t i = 0; i < _componentRegistry->GetCellsCount(); ++i) {
         _fixedSequenceIds[i] = static_cast<CellId>(i);
     }
 }
-
 
 SystemHandle SystemFactory::Make(std::string_view name, const std::span<ComponentHandle>& handles, std::function<void(const SystemContext&)> function)
 {

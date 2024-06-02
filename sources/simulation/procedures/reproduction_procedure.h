@@ -1,8 +1,8 @@
 #pragma once
 
-#include "components/cell_position.h"
 #include "components/cell_brain.h"
 #include "components/cell_id.h"
+#include "components/cell_position.h"
 #include "procedures/procedure.h"
 
 class SimulationVirtualMachine;

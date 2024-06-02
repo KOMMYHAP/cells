@@ -3,9 +3,9 @@
 ProcessorControlBlockGuard::ProcessorControlBlockGuard(ProcessorControlBlock& controlBlock)
     : _controlBlock(controlBlock)
     , _initialControlBlock(_controlBlock)
-    , _shouldRollback(true)
 {
 }
+
 ProcessorControlBlockGuard::~ProcessorControlBlockGuard()
 {
     if (_shouldRollback) {

@@ -9,13 +9,13 @@ class ProcessorMemory;
 
 class PatrolCellFactory : public ICellFactory {
 public:
-    PatrolCellFactory(SimulationVirtualMachine & simulationVm, uint8_t moveCommandCount);
+    PatrolCellFactory(SimulationVirtualMachine& simulationVm, uint8_t moveCommandCount);
 
     Result Make() override;
 
 private:
     bool InitMemory(ProcessorMemory& memory);
 
-    uint8_t _moveCommandCount{0};
+    uint8_t _moveCommandCount { 0 };
     SimulationVirtualMachine& _simulationVm;
 };

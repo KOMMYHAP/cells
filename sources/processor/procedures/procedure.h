@@ -25,8 +25,11 @@ private:
 
     ProcessorStack _stack;
     ProcessorContext& _processorContext;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
     uint8_t& _restInputArgs;
     uint8_t& _restOutputArgs;
+#pragma clang diagnostic pop
 };
 
 class ProcedureBase {

@@ -4,8 +4,10 @@
 
 SimulationVirtualMachine::SimulationVirtualMachine(BrainSystem& brainSystem)
     : _brainSystem(brainSystem)
-      , _procedureDataList(ProcedureTableLimit)
-      , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid) {}
+    , _procedureDataList(ProcedureTableLimit)
+    , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
+{
+}
 
 void SimulationVirtualMachine::Run(CellId id)
 {

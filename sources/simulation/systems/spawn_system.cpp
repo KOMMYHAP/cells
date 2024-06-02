@@ -10,8 +10,10 @@
 
 SpawnSystem::SpawnSystem(PositionSystem& positionSystem, IdSystem& idSystem, Spawner& spawner)
     : _positionSystem(positionSystem)
-      , _idSystem(idSystem)
-      , _spawner(spawner) {}
+    , _idSystem(idSystem)
+    , _spawner(spawner)
+{
+}
 
 void SpawnSystem::SpawnN(uint32_t cellsCount)
 {
@@ -21,9 +23,9 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
 
     std::vector<CellPosition> positions = _positionSystem.CollectFreePositions();
     std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
-    uint32_t spawnedCount{ 0 };
+    uint32_t spawnedCount { 0 };
 
-    constexpr CellHealth initialHealth{ 100 };
+    constexpr CellHealth initialHealth { 100 };
 
     for (const CellPosition& position : positions) {
         const auto mbBrain = TryMakeCellBrain();

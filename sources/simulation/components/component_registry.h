@@ -4,7 +4,6 @@
 #include "component_handle.h"
 #include "component_storage.h"
 
-
 class ComponentRegistry {
 public:
     ComponentRegistry(uint32_t cellsCount);
