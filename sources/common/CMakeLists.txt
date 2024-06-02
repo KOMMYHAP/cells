@@ -42,4 +42,5 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE common_pch.h)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 target_link_libraries(${PROJECT_NAME} PUBLIC
         libassert::assert
+        Microsoft.GSL::GSL
 )
