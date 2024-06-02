@@ -2,21 +2,12 @@
 #include "sequence_system.h"
 
 SystemRegistry::SystemRegistry(ComponentRegistry& registry)
-    : _registry(registry)
-      , _fixedSequenceIds(registry.GetCellsCount(), CellId::Invalid)
-{
-    for (size_t i = 0; i < registry.GetCellsCount(); ++i) {
-        _fixedSequenceIds[i] = static_cast<CellId>(i);
-    }
-}
+    : _registry(registry) {}
 
-SystemHandle SystemRegistry::MakeSequenceSystem(std::string_view name, const std::span<ComponentHandle>& handles, std::function<void(const SystemContext&)> function)
+SystemHandle SystemRegistry::Register(std::unique_ptr<SystemBase> system)
 {
     const SystemHandle handle = _nextHandle;
-    Expects(!_systems.contains(handle));
-    auto system = std::make_unique<SequenceSystem>(_registry, name, handles);
-    system->SetSequence(_fixedSequenceIds);
-    system->SetFunction(std::move(function));
+    ASSERT(!_systems.contains(handle));
     _systems[handle] = std::move(system);
     _nextHandle = static_cast<SystemHandle>(static_cast<uint16_t>(_nextHandle) + 1);
     return handle;

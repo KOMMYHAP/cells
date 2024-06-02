@@ -7,10 +7,10 @@
 class SystemRegistry {
 public:
     SystemRegistry(ComponentRegistry& registry);
-    SystemRegistry(const SystemRegistry &) = delete; 
-    const SystemRegistry& operator=(const SystemRegistry &) = delete; 
+    SystemRegistry(const SystemRegistry&) = delete;
+    const SystemRegistry& operator=(const SystemRegistry&) = delete;
 
-    SystemHandle MakeSequenceSystem(std::string_view name, const std::span<ComponentHandle>& handles, std::function<void(const SystemContext&)> function);
+    SystemHandle Register(std::unique_ptr<SystemBase> system);
 
     SystemBase& Modify(SystemHandle handle);
     const SystemBase& Get(SystemHandle handle) const;
@@ -18,6 +18,5 @@ public:
 private:
     ComponentRegistry& _registry;
     std::map<SystemHandle, std::unique_ptr<SystemBase>> _systems;
-    std::vector<CellId> _fixedSequenceIds;
-    SystemHandle _nextHandle { 0 };
+    SystemHandle _nextHandle{ 0 };
 };
