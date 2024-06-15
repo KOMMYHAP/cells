@@ -1,6 +1,6 @@
 include(FetchContent)
 
-option(BUILD_SHARED_LIBS "Build external libraries as shared libraries?" ON)
+option(BUILD_SHARED_LIBS "Build external libraries as shared libraries?" OFF)
 
 add_subdirectory(pix)
 add_subdirectory(gtest)

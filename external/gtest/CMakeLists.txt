@@ -8,7 +8,7 @@ FetchContent_Declare(
 )
 
 
-set(gtest_force_shared_crt ON)
+set(gtest_force_shared_crt ${BUILD_SHARED_LIBS})
 set(gtest_enable_system_include OFF)
 set(BUILD_GMOCK OFF)
 set(INSTALL_GTEST  OFF)
