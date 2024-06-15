@@ -4,5 +4,5 @@
 
 struct SystemContext {
     CellId id;
-    const std::vector<std::byte*>& components;
+    std::span<std::byte*> components;
 };
