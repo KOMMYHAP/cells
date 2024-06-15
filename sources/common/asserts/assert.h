@@ -1,18 +1,18 @@
 ﻿#pragma once
 
-#include <cassert>
-#if defined(assert)
-#undef assert
-#endif
+// #include <cassert>
+// #if defined(assert)
+// #undef assert
+// #endif
 
 #include "asserts_config.h"
 
-#include "libassert/assert.hpp"
+// #include "libassert/assert.hpp"
 
 #if defined(COMMON_ASSERTS_ENABLED)
 
-#define ASSERT(...) LIBASSERT_ASSERT(__VA_ARGS__)
-#define ASSERT_FAIL(...) LIBASSERT_PANIC(__VA_ARGS__)
+#define ASSERT(x, ...) assert(!!(x))
+#define ASSERT_FAIL(...) assert(false)
 // #define ASSUME LIBASSERT_ASSUME
 
 #else
