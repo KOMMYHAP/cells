@@ -12,3 +12,4 @@ add_subdirectory(nlohmann)
 add_subdirectory(lua) # sol2 depends on lua, must be added before sol2
 add_subdirectory(sol2)
 add_subdirectory(gsl)
+add_subdirectory(entt)
