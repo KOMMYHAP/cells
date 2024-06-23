@@ -23,6 +23,7 @@ public:
     const SimulationStatistics& GetStatistics() const { return _stats; }
 
 private:
+    entt::registry
     const common::StackStorage& _systems;
     std::map<SpawnPolicy, ICellFactory*> _factories;
     SimulationParameters _parameters;

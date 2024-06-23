@@ -1,76 +1,43 @@
 #include "simulation.h"
-#include "base_script.h"
-#include "simulation_profile_category.h"
 
-Simulation::Simulation(BaseScript& tickScript)
-    : _tickScript(tickScript)
-{
-}
-
-void Simulation::Tick()
-{
-    Ticks(1);
-}
-
-void Simulation::Ticks(uint32_t ticks)
-{
-    for (uint32_t i { 0 }; i < ticks; ++i) {
-        ProcessTick();
-    }
-}
-
-void Simulation::ProcessTick()
-{
-    common::ProfileScope tickProfileScope { "TickGeneration", SimulationProfileCategory };
-    sf::Clock clock;
-    _tickScript.Perform();
-    _tickCounter.AddSample(clock.getElapsedTime().asSeconds());
-}
-
-void Simulation::SetManualMode()
-{
-    _autoModeParams.reset();
-}
-
-void Simulation::SetAutoMode(sf::Time targetSimulationTime)
+void Simulation::Setup(sf::Time targetSimulationTime, std::vector<SimulationSystem*> systems)
 {
     ASSERT(targetSimulationTime.asSeconds() > 0.0f);
-    _autoModeParams.emplace(targetSimulationTime, sf::Time::Zero);
+
+    _systems = std::move(systems);
+    _limitSimulationTime = targetSimulationTime;
+    _availableTimeToSpent = sf::Time::Zero;
 }
 
 uint32_t Simulation::Run(sf::Time elapsedTime)
 {
-    if (!_autoModeParams.has_value()) {
-        return 0;
-    }
-    if (!_tickCounter.IsFull()) {
-        return WarmUp();
-    }
-
-    RuntimeParams& params = *_autoModeParams;
-
-    params.availableTimeToSpent += elapsedTime;
-    if (params.availableTimeToSpent.asSeconds() < 0.0f) {
+    if (_tickTime == sf::Time::Zero) {
         return 0;
     }
 
-    const sf::Time tickTime = sf::seconds(_tickCounter.CalcMedian());
-    const float availableTicks = params.availableTimeToSpent / tickTime;
+    _availableTimeToSpent += elapsedTime;
+    if (_availableTimeToSpent.asSeconds() < 0.0f) {
+        return 0;
+    }
+
+    const float availableTicks = _availableTimeToSpent / _tickTime;
     constexpr float minimumTicks = 1.0f;
-    const float maximumTicks = std::max(minimumTicks, params.limitSimulationTime / tickTime);
+    const float maximumTicks = std::max(minimumTicks, _limitSimulationTime / _tickTime);
     const float ticksToProcess = std::clamp(availableTicks, minimumTicks, maximumTicks);
     const uint32_t roundedTicksToProcess = static_cast<uint32_t>(ticksToProcess);
 
-    params.availableTimeToSpent -= sf::seconds(roundedTicksToProcess * tickTime.asSeconds());
-    params.availableTimeToSpent = std::min(params.availableTimeToSpent, tickTime);
+    _availableTimeToSpent -= sf::seconds(static_cast<float>(roundedTicksToProcess) * _tickTime.asSeconds());
+    _availableTimeToSpent = std::min(_availableTimeToSpent, _tickTime);
 
     Ticks(roundedTicksToProcess);
     return roundedTicksToProcess;
 }
 
-uint32_t Simulation::WarmUp()
+void Simulation::Ticks(uint32_t count)
 {
-    constexpr uint32_t ticksToWarmUp = 1;
-    Ticks(ticksToWarmUp);
-    return ticksToWarmUp;
+    for (auto _ : std::ranges::iota_view { 0u, count }) {
+        for (const auto& system : _systems) {
+            system->Update();
+        }
+    }
 }
