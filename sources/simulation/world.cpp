@@ -4,7 +4,7 @@
 
 #include "storage/stack_storage.h"
 
-std::error_code World::InitializeSystem(common::StackStorage& storage)
+std::error_code World::InitializeSystem(ApplicationStorage& storage)
 {
     _ecsWorld = std::make_unique<EcsWorld>();
     _simulation = std::make_unique<Simulation>();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "application_storage.h"
 #include "registrar/registrable_system.h"
 
 #include "simulation.h"
@@ -7,7 +8,7 @@
 
 class World final : public common::RegistrableSystem {
 public:
-    std::error_code InitializeSystem(common::StackStorage& storage) override;
+    std::error_code InitializeSystem(ApplicationStorage& storage) override;
     void TerminateSystem() override;
 
     void Update(sf::Time elapsedTime);

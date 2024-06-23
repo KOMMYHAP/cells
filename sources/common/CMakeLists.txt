@@ -37,6 +37,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         random.h
         common_system.h
         common.h
+        application_storage.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
