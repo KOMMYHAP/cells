@@ -14,7 +14,7 @@ SystemFactory::SystemFactory(SystemRegistry& systemRegistry, ComponentRegistry& 
     }
 }
 
-SystemHandle SystemFactory::Make(std::string_view name, const std::span<ComponentHandle>& handles, std::function<void(const SystemContext&)> function)
+SystemHandle SystemFactory::Make(std::string_view name, std::span<const ComponentHandle> handles, std::function<void(const SystemContext&)> function)
 {
     auto system = std::make_unique<SequenceSystem>(*_componentRegistry, name, handles);
     system->SetSequence(_fixedSequenceIds);

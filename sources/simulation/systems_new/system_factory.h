@@ -9,7 +9,7 @@ class ComponentRegistry;
 class SystemFactory {
 public:
     SystemFactory(SystemRegistry& systemRegistry, ComponentRegistry& componentRegistry);
-    SystemHandle Make(std::string_view name, const std::span<ComponentHandle>& handles, std::function<void(const SystemContext&)> function);
+    SystemHandle Make(std::string_view name, std::span<const ComponentHandle> handles, std::function<void(const SystemContext&)> function);
 
 private:
     gsl::not_null<SystemRegistry*> _systemRegistry;

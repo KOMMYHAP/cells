@@ -1,10 +1,61 @@
 #include "components/component_registry.h"
 #include "systems/sequence_system.h"
+#include "systems/system_factory.h"
 #include "systems/system_registry.h"
 
-struct TestComponent {
-    int value;
+class SystemFixture : public ::testing::Test {
+public:
+    SystemFactory* systemFactory { nullptr };
+    SystemRegistry* systemRegistry { nullptr };
+    ComponentRegistry* componentRegistry { nullptr };
+    uint32_t cellsCount { 0 };
+
+protected:
+    void SetUp() override
+    {
+        cellsCount = 100;
+        _componentRegistry = std::make_unique<ComponentRegistry>(cellsCount);
+        _systemRegistry = std::make_unique<SystemRegistry>(*_componentRegistry);
+        _systemFactory = std::make_unique<SystemFactory>(*_systemRegistry, *_componentRegistry);
+
+        systemFactory = _systemFactory.get();
+        componentRegistry = _componentRegistry.get();
+        systemRegistry = _systemRegistry.get();
+    }
+    void TearDown() override
+    {
+        systemRegistry = nullptr;
+        componentRegistry = nullptr;
+        systemFactory = nullptr;
+        _systemFactory.reset();
+        _systemRegistry.reset();
+        _componentRegistry.reset();
+    }
+
+private:
+    std::unique_ptr<ComponentRegistry> _componentRegistry;
+    std::unique_ptr<SystemRegistry> _systemRegistry;
+    std::unique_ptr<SystemFactory> _systemFactory;
 };
+
+TEST_F(SystemFixture, SetFixedValue)
+{
+    struct Value {
+        int data;
+    };
+    constexpr int TestValue = 42;
+
+    const ComponentHandle component = componentRegistry->Register({ "Value", 1, sizeof(Value) });
+    std::span components { &component, 1 };
+    const SystemHandle system = systemFactory->Make("SetFixedValue", components, [](const SystemContext& context) {
+        std::byte* rawComponent = context.components[0];
+        auto* value = reinterpret_cast<Value*>(rawComponent);
+        value->data = TestValue;
+    });
+
+    SystemBase& s = systemRegistry->Modify(system);
+    s.Process();
+}
 
 TEST(SystemTests, Foreach)
 {

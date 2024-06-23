@@ -12,11 +12,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         age_system.cpp
         spawner.cpp
         destroyer.cpp
-        sequence_system.cpp
-        system_registry.cpp
-        system_base.cpp
-        composite_system.cpp
-        system_factory.cpp
 )
 
 
@@ -38,11 +33,4 @@ target_sources(${PROJECT_NAME} PUBLIC
         spawner.h
         destroyer.h
         spawn_properties.h
-        sequence_system.h
-        system_handle.h
-        system_registry.h
-        system_base.h
-        system_context.h
-        composite_system.h
-        system_factory.h
 )
