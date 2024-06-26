@@ -60,6 +60,7 @@
 #include <regex>
 #include <scoped_allocator>
 #include <set>
+#include <shared_mutex>
 #include <span>
 #include <sstream>
 #include <stack>

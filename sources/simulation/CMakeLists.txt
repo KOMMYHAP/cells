@@ -8,6 +8,7 @@ add_subdirectory(systems)
 add_subdirectory(procedures)
 add_subdirectory(genetic)
 add_subdirectory(cell_factories)
+add_subdirectory(systems_ecs)
 
 
 # add sources
@@ -26,6 +27,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         simulation_profile_category.h
         simulation_parameters.h
         simulation_system.h
+        ecs_simulation_system.h
         simulation_ecs.h
 )
 

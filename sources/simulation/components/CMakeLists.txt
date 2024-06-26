@@ -1,5 +1,4 @@
-# add headers
-target_sources(${PROJECT_NAME} PUBLIC
+target_sources(${PROJECT_NAME} PRIVATE
         cell_brain.h
         cell_id.h
         cell_position.h
@@ -12,11 +11,11 @@ target_sources(${PROJECT_NAME} PUBLIC
         component_storage.hpp
         component_handle.h
         component_registry.h
-)
-
-# add sources
-target_sources(${PROJECT_NAME} PRIVATE
+        
         cell_position.cpp
         component_storage.cpp
         component_registry.cpp
+        
+        spawn_place.h
+        move_direction.h
 )

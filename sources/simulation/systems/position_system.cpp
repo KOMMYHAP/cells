@@ -3,10 +3,10 @@
 constexpr uint32_t InvalidGridIndex = std::numeric_limits<uint32_t>::max();
 
 PositionSystem::PositionSystem(uint32_t width, uint32_t height)
-    : _width(NarrowCast<PositionType>(width))
-    , _height(NarrowCast<PositionType>(height))
-    , _positions(width * height, InvalidCellPosition)
-    , _grid(width * height, CellId::Invalid)
+    : _width(width)
+    , _height(height)
+    , _positions(NarrowCast<size_t>(width * height), InvalidCellPosition)
+    , _grid(NarrowCast<size_t>(width * height), CellId::Invalid)
 {
 }
 
@@ -84,9 +84,8 @@ CellPosition PositionSystem::TryApplyDirection(CellPosition position, Direction 
             return position;
         }
         break;
-    default:
-        ASSERT_FAIL("Unknown direction!", direction);
     }
+
     return InvalidCellPosition;
 }
 
@@ -107,8 +106,10 @@ void PositionSystem::Reset(CellId id)
 
 bool PositionSystem::IsNeighbourFor(CellPosition lhs, CellPosition rhs) const
 {
-    auto positionMoveVector = rhs - lhs;
-    const uint16_t distanceSqr = positionMoveVector.x * positionMoveVector.x + positionMoveVector.y * positionMoveVector.y;
+    CellPosition delta = rhs;
+    delta.x -= lhs.x;
+    delta.y -= lhs.y;
+    const uint16_t distanceSqr = delta.x * delta.x + delta.y * delta.y;
     return distanceSqr == 1;
 }
 

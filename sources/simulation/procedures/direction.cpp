@@ -15,6 +15,7 @@ bool TryParse(uint8_t data, Direction& direction)
     case static_cast<uint8_t>(Direction::Up):
         direction = Direction::Up;
         return true;
+    default:
+        return false;
     }
-    return false;
 }

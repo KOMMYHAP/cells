@@ -1,8 +1,9 @@
 #pragma once
 
 #include "components/cell_id.h"
+#include "simulation_system.h"
 
-class IdSystem {
+class IdSystem : public SimulationSystem {
 public:
     IdSystem(uint32_t capacity);
 
@@ -15,6 +16,8 @@ public:
     template <class Func>
         requires std::invocable<Func, CellId>
     void Iterate(Func&& func);
+
+    
 
 private:
     CellId MakeNextId();

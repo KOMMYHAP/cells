@@ -37,7 +37,7 @@ WorldWidget::WorldWidget(Config&& config)
 void WorldWidget::Draw(sf::RenderTarget& target)
 {
     const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
-    std::fill(_textureData.begin(), _textureData.end(), clearColor);
+    std::ranges::fill(_textureData, clearColor);
 
     _config.idSystem.Iterate([this](const CellId id) {
         ProcessCell(id);

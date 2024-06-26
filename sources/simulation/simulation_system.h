@@ -3,5 +3,5 @@
 class SimulationSystem {
 public:
     virtual ~SimulationSystem() = default;
-    virtual void Update() = 0;
+    virtual void DoSystemUpdate() = 0;
 };

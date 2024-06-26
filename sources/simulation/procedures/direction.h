@@ -1,10 +1,6 @@
 #pragma once
+#include "components/move_direction.h"
 
-enum class Direction : uint8_t {
-    Left,
-    Right,
-    Up,
-    Down,
-};
+using Direction = MoveDirection;
 
 bool TryParse(uint8_t data, Direction& direction);

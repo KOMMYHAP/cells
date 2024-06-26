@@ -33,4 +33,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         spawner.h
         destroyer.h
         spawn_properties.h
+        system_typed.h
 )

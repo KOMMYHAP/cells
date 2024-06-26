@@ -10,14 +10,10 @@ class PositionSystem {
 public:
     PositionSystem(uint32_t width, uint32_t height);
 
-    void Set(CellId id, CellPosition);
+    void Set(CellId id, CellPosition position);
 
     CellPosition Get(CellId id) const;
     CellId Find(CellPosition position) const;
-
-    template <class Func>
-        requires std::invocable<Func, CellPosition>
-    void Iterate(Func&& func) const;
 
     std::vector<CellPosition> CollectFreePositions() const;
 
@@ -37,8 +33,8 @@ private:
     uint32_t ToGridIndex(CellPosition position) const;
     uint32_t TryGetGridIndex(CellPosition position) const;
 
-    const PositionType _width;
-    const PositionType _height;
+    uint32_t _width{0};
+    uint32_t _height{0};
 
     std::vector<CellPosition> _positions;
     std::vector<CellId> _grid;
