@@ -12,7 +12,6 @@ public:
     {
     }
 
-protected:
     void DoSystemUpdate() final
     {
         _ecsWorld->view<Components...>().each([this](const CellId id, Components&&... components) {

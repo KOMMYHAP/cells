@@ -12,8 +12,8 @@
 #include "systems/type_system.h"
 #include "utils/stub_error_code.h"
 
-static const std::string_view FontArgument = "--font";
-static const std::string_view FragmentShaderArgument = "--fragment-shader";
+static constexpr std::string_view FontArgument = "--font";
+static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
 
 std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
@@ -24,10 +24,9 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
 
-    auto* world = storage.Get<World*>();
-    // const SystemRegistry& systems = world->GetSystems();
+    auto& world = *storage.Get<World*>();
 
-    const common::CommandLine& commandLine = storage.Get<common::CommandLine>();
+    const auto& commandLine = storage.Get<common::CommandLine>();
     auto mbFontPath = commandLine.FindValue(FontArgument);
     if (!mbFontPath.has_value()) {
         return common::MakeStubErrorCode();
@@ -42,9 +41,19 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     storage.Store<UiSystem*>(this);
 
     {
-        auto statusPanel = std::make_unique<StatusPanel>(layout, *_font, *world);
+        auto statusPanel = std::make_unique<StatusPanel>(layout, *_font, world);
         AddWidget(std::move(statusPanel));
     }
+
+    auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
+    ASSERT(mbFragmentShaderPath.has_value());
+
+    auto shader = std::make_unique<sf::Shader>();
+    const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
+    ASSERT(loaded);
+
+    EcsWorld& ecsWorld = world.ModifyEcsWorld();
+    _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
 
     {
         auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
@@ -54,24 +63,22 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
         ASSERT(loaded);
 
-        //        WorldWidget::Config worldRenderConfig {
-        //            std::move(shader),
-        //            { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White },
-        //            sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
-        //            sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
-        //            systems.Modify<PositionSystem>(),
-        //            systems.Modify<IdSystem>(),
-        //            systems.Modify<TypeSystem>()
-        //        };
-        //        auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
-        //        AddWidget(std::move(worldWidget));
+        WorldWidget::Config worldRenderConfig {
+            _renderSystem.get(),
+            std::move(shader),
+            sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
+            sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
+        };
+        auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
+        AddWidget(std::move(worldWidget));
     }
 
-    return std::error_code();
+    return {};
 }
 
 void UiSystem::TerminateSystem()
 {
+    _renderSystem.reset();
     for (auto&& [_, widget] : std::ranges::reverse_view(_widgets)) {
         widget.reset();
     }

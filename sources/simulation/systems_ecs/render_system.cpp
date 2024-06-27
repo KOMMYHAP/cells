@@ -2,26 +2,11 @@
 
 #include "SFML/Graphics/RenderTarget.hpp"
 
-RenderSystem::RenderSystem(Config&& config)
-    : EcsSimulationSystem(*config.ecsWorld)
-    , _shader(config.fragmentShader)
-    , _fieldSize(config.fieldSize)
-    , _renderTargetSize(config.renderTargetSize)
-    , _renderTargetOffset(config.renderTargetOffset)
+RenderSystem::RenderSystem(EcsWorld& ecsWorld, sf::Vector2u fieldSize)
+    : EcsSimulationSystem(ecsWorld)
+    , _fieldSize(fieldSize)
 {
-}
-
-void RenderSystem::RenderFrame(sf::RenderTarget& target)
-{
-    const uint32_t clearColor = GetColor(CellType::Dummy).toInteger();
-    std::ranges::fill(_textureData, clearColor);
-
-    _texture.update(reinterpret_cast<const uint8_t*>(_textureData.data()));
-
-    sf::RenderStates states;
-    states.shader = _shader.get();
-    states.transform.translate(NarrowCast<float>(_renderTargetOffset.x), NarrowCast<float>(_renderTargetOffset.y));
-    target.draw(_vertexBuffer, states);
+    _textureData.resize(_fieldSize.x * _fieldSize.y);
 }
 
 sf::Color RenderSystem::GetColor(const CellType type) const
@@ -44,6 +29,10 @@ void RenderSystem::DoProcessComponents(CellId /*id*/, const CellType type, const
     const auto pixelIndex = position.y * _fieldSize.x + position.x;
     ASSERT(pixelIndex < _textureData.size());
 
-    uint32_t& pixel = _textureData[position.y * _fieldSize.x + position.x];
-    pixel = GetColor(type).toInteger();
+    auto* colorBytes = reinterpret_cast<std::byte*>(&_textureData[position.y * _fieldSize.x + position.x]);
+    const sf::Color color = GetColor(type);
+    colorBytes[0] = static_cast<std::byte>(color.r);
+    colorBytes[1] = static_cast<std::byte>(color.g);
+    colorBytes[2] = static_cast<std::byte>(color.b);
+    colorBytes[3] = static_cast<std::byte>(color.a);
 }

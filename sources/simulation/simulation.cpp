@@ -1,10 +1,9 @@
 #include "simulation.h"
 
-void Simulation::Setup(sf::Time targetSimulationTime, std::vector<SimulationSystem*> systems)
+void Simulation::Setup(sf::Time targetSimulationTime)
 {
     ASSERT(targetSimulationTime.asSeconds() > 0.0f);
 
-    _systems = std::move(systems);
     _limitSimulationTime = targetSimulationTime;
     _availableTimeToSpent = sf::Time::Zero;
 }
@@ -29,7 +28,6 @@ uint32_t Simulation::Run(sf::Time elapsedTime)
     _availableTimeToSpent -= sf::seconds(static_cast<float>(roundedTicksToProcess) * _tickTime.asSeconds());
     _availableTimeToSpent = std::min(_availableTimeToSpent, _tickTime);
 
-    Ticks(roundedTicksToProcess);
     return roundedTicksToProcess;
 }
 
@@ -37,7 +35,7 @@ void Simulation::Ticks(uint32_t count)
 {
     for (auto _ : std::ranges::iota_view { 0u, count }) {
         for (const auto& system : _systems) {
-            system->Update();
+            system->DoSystemUpdate();
         }
     }
 }
