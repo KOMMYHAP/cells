@@ -17,5 +17,5 @@ private:
 
     gsl::not_null<PositionSystem*> _currentPositionManager;
     gsl::not_null<PositionSystem*> _nextPositionManager;
-    std::mutex _nextPositionMutex;
+    std::shared_mutex _positionMutex;
 };

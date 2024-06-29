@@ -14,8 +14,7 @@ void MovementSystem::DoProcessComponents(CellId id, CellPosition position, MoveD
         return;
     }
 
-    const CellId targetCell = _currentPositionManager->Find(nextPosition);
-    if (targetCell != CellId::Invalid) {
+    if (const CellId expectedTargetCell = _currentPositionManager->Find(nextPosition); expectedTargetCell != CellId::Invalid) {
         return;
     }
 
@@ -23,6 +22,15 @@ void MovementSystem::DoProcessComponents(CellId id, CellPosition position, MoveD
     ecsWorld.remove<MoveDirection>(id);
     ecsWorld.emplace_or_replace<CellPosition>(id, position);
 
-    std::scoped_lock _ { _nextPositionMutex };
-    _nextPositionManager->Set(id, nextPosition);
+    {
+        std::shared_lock _ { _positionMutex };
+        if (const CellId actualTargetCell = _nextPositionManager->Find(nextPosition); actualTargetCell != CellId::Invalid) {
+            return;
+        }
+    }
+
+    {
+        std::unique_lock _ { _positionMutex };
+        _currentPositionManager->Set(id, position);
+    }
 }
