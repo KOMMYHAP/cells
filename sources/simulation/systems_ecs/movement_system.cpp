@@ -30,7 +30,7 @@ void MovementSystem::DoProcessComponents(const CellId id, CellPosition& position
 
     {
         std::unique_lock _ { _positionMutex };
-        _currentPositionManager->Set(id, position);
+        _currentPositionManager->Set(id, nextPosition);
     }
 
     position = nextPosition;

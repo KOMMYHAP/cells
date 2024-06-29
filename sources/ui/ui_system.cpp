@@ -65,7 +65,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     ASSERT(loaded);
 
     EcsWorld& ecsWorld = world.ModifyEcsWorld();
-    // _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
+    _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
 
     {
         auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);

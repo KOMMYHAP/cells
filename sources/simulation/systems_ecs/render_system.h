@@ -7,7 +7,7 @@
 #include "components/cell_position.h"
 #include "components/cell_type.h"
 
-class RenderSystem final : public SimulationEcsSystem<RenderSystem, CellType, CellPosition> {
+class RenderSystem final : public SimulationEcsSystem<RenderSystem, const CellType, const CellPosition> {
 public:
     explicit RenderSystem(EcsWorld& ecsWorld, sf::Vector2u fieldSize);
 

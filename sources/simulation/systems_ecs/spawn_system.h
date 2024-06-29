@@ -8,11 +8,11 @@
 
 class ICellFactory;
 
-class SpawnSystem final : public SimulationEcsSystem<SpawnSystem, CellPosition, SpawnPlace> {
+class SpawnSystem final : public SimulationEcsSystem<SpawnSystem, const SpawnPlace> {
 public:
     SpawnSystem(EcsWorld& ecsWorld, Random::Accessor random, SimulationVirtualMachine& vm);
 
-    void DoProcessComponents(CellId id, CellPosition position, SpawnPlace);
+    void DoProcessComponents(CellId id, SpawnPlace);
 private:
 
     gsl::not_null<SimulationVirtualMachine*> _simulationVm;
