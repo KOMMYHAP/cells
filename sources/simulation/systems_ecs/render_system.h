@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "SFML/Graphics/Texture.hpp"
-#include "SFML/Graphics/VertexBuffer.hpp"
+#include <SFML/Graphics/Color.hpp>
 
 #include "ecs_simulation_system.h"
 
