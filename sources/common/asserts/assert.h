@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-// #include <cassert>
+#include <cassert>
 // #if defined(assert)
 // #undef assert
 // #endif
