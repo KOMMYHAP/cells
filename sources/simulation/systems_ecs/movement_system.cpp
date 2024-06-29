@@ -7,7 +7,7 @@ MovementSystem::MovementSystem(EcsWorld& ecsWorld, PositionSystem& currentPositi
 {
 }
 
-void MovementSystem::DoProcessComponents(CellId id, CellPosition position, MoveDirection direction)
+void MovementSystem::DoProcessComponents(const CellId id, CellPosition& position, const MoveDirection direction)
 {
     const CellPosition nextPosition = _currentPositionManager->TryApplyDirection(position, direction);
     if (nextPosition == InvalidCellPosition) {
@@ -20,7 +20,6 @@ void MovementSystem::DoProcessComponents(CellId id, CellPosition position, MoveD
 
     EcsWorld& ecsWorld = AccessEcsWorld();
     ecsWorld.remove<MoveDirection>(id);
-    ecsWorld.replace<CellPosition>(id, position);
 
     {
         std::shared_lock _ { _positionMutex };
@@ -33,4 +32,6 @@ void MovementSystem::DoProcessComponents(CellId id, CellPosition position, MoveD
         std::unique_lock _ { _positionMutex };
         _currentPositionManager->Set(id, position);
     }
+
+    position = nextPosition;
 }

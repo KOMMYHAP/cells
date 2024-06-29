@@ -1,6 +1,4 @@
 ﻿#pragma once
-#include "components/cell_position.h"
-#include "components/spawn_place.h"
 #include "simulation_ecs_config.h"
 
 #include <entt/entity/registry.hpp>

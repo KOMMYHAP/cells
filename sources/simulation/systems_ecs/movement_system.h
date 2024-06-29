@@ -8,11 +8,11 @@
 
 class ICellFactory;
 
-class MovementSystem final : public SimulationEcsSystem<MovementSystem, CellPosition, MoveDirection> {
+class MovementSystem final : public SimulationEcsSystem<MovementSystem, CellPosition, const MoveDirection> {
 public:
     MovementSystem(EcsWorld& ecsWorld, PositionSystem& currentPositions, PositionSystem& nextPositions);
 
-    void DoProcessComponents(CellId id, CellPosition position, MoveDirection direction);
+    void DoProcessComponents(CellId id, CellPosition& position, MoveDirection direction);
 private:
     gsl::not_null<PositionSystem*> _currentPositionManager;
     gsl::not_null<PositionSystem*> _nextPositionManager;
