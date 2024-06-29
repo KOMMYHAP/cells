@@ -9,6 +9,11 @@ RenderSystem::RenderSystem(EcsWorld& ecsWorld, sf::Vector2u fieldSize)
     _textureData.resize(_fieldSize.x * _fieldSize.y);
 }
 
+void RenderSystem::ClearTextureData()
+{
+    std::ranges::fill(_textureData, 0);
+}
+
 sf::Color RenderSystem::GetColor(const CellType type) const
 {
     switch (type) {

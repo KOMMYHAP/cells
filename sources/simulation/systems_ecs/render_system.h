@@ -11,6 +11,7 @@ class RenderSystem final : public SimulationEcsSystem<RenderSystem, const CellTy
 public:
     explicit RenderSystem(EcsWorld& ecsWorld, sf::Vector2u fieldSize);
 
+    void ClearTextureData();
     std::span<const uint32_t> GetTextureData() const { return _textureData; }
     sf::Vector2u GetTextureSize() const { return _fieldSize; }
 

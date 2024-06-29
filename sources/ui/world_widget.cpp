@@ -38,5 +38,6 @@ void WorldWidget::Draw(sf::RenderTarget& target)
 
 void WorldWidget::Update(sf::Time elapsedTime)
 {
+    _config.renderSystem->ClearTextureData();
     _config.renderSystem->DoSystemUpdate();
 }
