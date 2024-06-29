@@ -14,6 +14,7 @@ add_subdirectory(registrar)
 add_subdirectory(utils)
 add_subdirectory(asserts)
 add_subdirectory(mt)
+add_subdirectory(random)
 
 
 # add sources
@@ -22,7 +23,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         command_line.cpp
         sample_counter.cpp
         breakpoint.cpp
-        random.cpp
         common_system.cpp
 )
 
@@ -35,7 +35,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         sample_counter.h
         sample_counter.hpp
         breakpoint.h
-        random.h
         common_system.h
         common.h
         application_storage.h
