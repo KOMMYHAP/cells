@@ -6,6 +6,7 @@ void SimulationTickCalculator::Setup(sf::Time targetSimulationTime)
 
     _limitSimulationTime = targetSimulationTime;
     _availableTimeToSpent = sf::Time::Zero;
+    _tickTime = sf::seconds(1);
 }
 
 uint32_t SimulationTickCalculator::Run(sf::Time elapsedTime)

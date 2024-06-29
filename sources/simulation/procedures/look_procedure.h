@@ -3,17 +3,17 @@
 #include "procedures/procedure.h"
 
 class SimulationVirtualMachine;
-class PositionSystem;
+class CellLocator;
 class TypeSystem;
 
 class LookProcedure final : public ProcedureBase {
 public:
-    LookProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, TypeSystem& typeSystem);
+    LookProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, TypeSystem& typeSystem);
 
     void Execute(ProcedureContext& context) override;
 
 private:
     const SimulationVirtualMachine& _vm;
-    PositionSystem& _positionSystem;
+    CellLocator& _positionSystem;
     TypeSystem& _typeSystem;
 };

@@ -7,13 +7,13 @@
 #include "systems_ecs/spawn_system.h"
 
 World::World()
-    : _worldSize(800, 600)
-    , _currentPositions(_worldSize.x, _worldSize.y)
-    , _nextPositions(_worldSize.x, _worldSize.y)
+    : _worldSize(100, 100)
+    , _cellsOnCurrentTick(_worldSize.x, _worldSize.y)
+    , _cellsOnNextTick(_worldSize.x, _worldSize.y)
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
-    _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _currentPositions, _nextPositions));
+    _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsOnCurrentTick, _cellsOnNextTick));
     _simulationSystems.emplace_back(std::make_unique<SpawnSystem>(_ecsWorld, Random::Accessor { _randomEngine }, _simulationVm));
 
     auto createCell = [this](int16_t x, int16_t y) {
@@ -22,7 +22,9 @@ World::World()
         _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
     };
     for (int i = 0; i < 100; ++i) {
-        createCell(i, i);
+        int x = i % _worldSize.x;
+        int y = i % _worldSize.y;
+        createCell(x, y);
     }
 
     _tickCalculator.Setup(targetSimulationTime);
@@ -35,5 +37,6 @@ void World::Update(const sf::Time elapsedTime)
         for (const auto& system : _simulationSystems) {
             system->DoSystemUpdate();
         }
+        _cellsOnCurrentTick = _cellsOnNextTick;
     }
 }

@@ -2,10 +2,10 @@
 #include <genetic/crossover_algorithm.h>
 
 #include "simulation_procedure_context.h"
-#include "systems_ecs/position_system.h"
+#include "systems_ecs/cell_locator.h"
 #include "systems_ecs/simulation_virtual_machine.h"
 
-ReproductionProcedure::ReproductionProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, HealthSystem& healthSystem, BrainSystem& brainSystem, TypeSystem& typeSystem, Spawner& spawner)
+ReproductionProcedure::ReproductionProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, HealthSystem& healthSystem, BrainSystem& brainSystem, TypeSystem& typeSystem, Spawner& spawner)
     : _vm(vm)
     , _positionSystem(positionSystem)
     , _healthSystem(healthSystem)
@@ -34,26 +34,26 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     //     return;
     // }
 
-    const CellPosition position = _positionSystem.Get(id);
-    const CellPosition secondParentPosition = _positionSystem.TryApplyDirection(position, direction);
-    if (secondParentPosition == InvalidCellPosition) {
-        return;
-    }
-
-    const CellId secondParentId = _positionSystem.Find(secondParentPosition);
-    if (secondParentId == CellId::Invalid) {
-        return;
-    }
+    // const CellPosition position = _positionSystem.Get(id);
+    // const CellPosition secondParentPosition = _positionSystem.TryApplyDirection(position, direction);
+    // if (secondParentPosition == InvalidCellPosition) {
+    //     return;
+    // }
+    //
+    // const CellId secondParentId = _positionSystem.Find(secondParentPosition);
+    // if (secondParentId == CellId::Invalid) {
+    //     return;
+    // }
     // const CellType secondParentType = _typeSystem.Get(secondParentId);
     // if (secondParentType != CellType::Unit) {
     //     // Hmm... Does cell try to reproduce with ... food?
     //     return;
     // }
 
-    const CellPosition childPosition = SelectPosition(position, secondParentPosition);
-    if (childPosition == InvalidCellPosition) {
-        return;
-    }
+    // const CellPosition childPosition = SelectPosition(position, secondParentPosition);
+    // if (childPosition == InvalidCellPosition) {
+    //     return;
+    // }
 
     // constexpr CellHealth childInitialHealth { 35 };
     //

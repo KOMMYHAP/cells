@@ -3,19 +3,19 @@
 #include "procedures/procedure.h"
 
 class SimulationVirtualMachine;
-class PositionSystem;
+class CellLocator;
 class HealthSystem;
 class TypeSystem;
 
 class ConsumeProcedure final : public ProcedureBase {
 public:
-    ConsumeProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, HealthSystem& healthSystem, TypeSystem& typeSystem);
+    ConsumeProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, HealthSystem& healthSystem, TypeSystem& typeSystem);
 
     void Execute(ProcedureContext& context) override;
 
 private:
     const SimulationVirtualMachine& _vm;
-    PositionSystem& _positionSystem;
+    CellLocator& _positionSystem;
     HealthSystem& _healthSystem;
     TypeSystem& _typeSystem;
 };

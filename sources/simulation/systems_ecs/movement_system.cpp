@@ -1,6 +1,6 @@
 ﻿#include "movement_system.h"
 
-MovementSystem::MovementSystem(EcsWorld& ecsWorld, PositionSystem& currentPositions, PositionSystem& nextPositions)
+MovementSystem::MovementSystem(EcsWorld& ecsWorld, CellLocator& currentPositions, CellLocator& nextPositions)
     : SimulationEcsSystem(ecsWorld)
     , _currentPositionManager(&currentPositions)
     , _nextPositionManager(&nextPositions)
@@ -30,7 +30,7 @@ void MovementSystem::DoProcessComponents(const CellId id, CellPosition& position
 
     {
         std::unique_lock _ { _positionMutex };
-        _currentPositionManager->Set(id, nextPosition);
+        _currentPositionManager->Move(position, nextPosition);
     }
 
     position = nextPosition;

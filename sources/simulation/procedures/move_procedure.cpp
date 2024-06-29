@@ -1,7 +1,7 @@
 #include "move_procedure.h"
 
 #include "simulation_procedure_context.h"
-#include "systems_ecs/position_system.h"
+#include "systems_ecs/cell_locator.h"
 #include "systems_ecs/simulation_virtual_machine.h"
 
 #include <entt/entity/registry.hpp>

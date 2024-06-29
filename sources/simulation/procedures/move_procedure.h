@@ -3,7 +3,7 @@
 #include "procedures/procedure.h"
 #include "systems_ecs/simulation_ecs_system.h"
 
-class PositionSystem;
+class CellLocator;
 class SimulationVirtualMachine;
 
 class MoveProcedure final : public ProcedureBase {

@@ -7,7 +7,7 @@
 #include "random/random.h"
 #include "simulation/simulation_system.h"
 #include "simulation/tick_calculator.h"
-#include "systems_ecs/position_system.h"
+#include "systems_ecs/cell_locator.h"
 #include "systems_ecs/simulation_virtual_machine.h"
 
 class World {
@@ -26,8 +26,8 @@ private:
     SimulationTickCalculator _tickCalculator;
     std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;
     sf::Vector2u _worldSize;
-    PositionSystem _currentPositions;
-    PositionSystem _nextPositions;
+    CellLocator _cellsOnCurrentTick;
+    CellLocator _cellsOnNextTick;
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
 };

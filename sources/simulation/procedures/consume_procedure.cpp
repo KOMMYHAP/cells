@@ -1,9 +1,9 @@
 #include "consume_procedure.h"
 #include "simulation_procedure_context.h"
-#include "systems_ecs/position_system.h"
+#include "systems_ecs/cell_locator.h"
 #include "systems_ecs/simulation_virtual_machine.h"
 
-ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, HealthSystem& healthSystem, TypeSystem& typeSystem)
+ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, HealthSystem& healthSystem, TypeSystem& typeSystem)
     : _vm(vm)
     , _positionSystem(positionSystem)
     , _healthSystem(healthSystem)
@@ -31,16 +31,16 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
     //     return;
     // }
 
-    const CellPosition position = _positionSystem.Get(id);
-    const CellPosition newPosition = _positionSystem.TryApplyDirection(position, direction);
-    if (newPosition == InvalidCellPosition) {
-        context.MarkProcedureAsInvalid();
-        return;
-    }
-    const CellId anotherCell = _positionSystem.Find(newPosition);
-    if (anotherCell == CellId::Invalid) {
-        return;
-    }
+    // const CellPosition position = _positionSystem.Get(id);
+    // const CellPosition newPosition = _positionSystem.TryApplyDirection(position, direction);
+    // if (newPosition == InvalidCellPosition) {
+    //     context.MarkProcedureAsInvalid();
+    //     return;
+    // }
+    // const CellId anotherCell = _positionSystem.Find(newPosition);
+    // if (anotherCell == CellId::Invalid) {
+    //     return;
+    // }
 
     // const CellType anotherCellType = _typeSystem.Get(anotherCell);
     // if (anotherCellType == CellType::Unit) {

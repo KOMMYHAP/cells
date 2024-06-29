@@ -9,9 +9,10 @@ target_sources(${PROJECT_NAME} PRIVATE
         render_system.h
         simulation_ecs_config.h
         simulation_ecs_system.h
-        position_system.h
-        position_system.cpp
+        cell_locator.h
+        cell_locator.cpp
         simulation_virtual_machine.cpp
         simulation_virtual_machine.h
         simulation_virtual_machine.hpp
+        simulation_component_type.h
 )
