@@ -13,8 +13,17 @@ World::World()
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
-    _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _currentPositions, _nextPositions));
+    // _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _currentPositions, _nextPositions));
     _simulationSystems.emplace_back(std::make_unique<SpawnSystem>(_ecsWorld, Random::Accessor { _randomEngine }, _simulationVm));
+
+    auto createCell = [this](int16_t x, int16_t y) {
+        const CellId id = _ecsWorld.create();
+        _ecsWorld.emplace<SpawnPlace>(id, SpawnPlace {});
+        _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
+    };
+    for (int i = 0; i < 100; ++i) {
+        createCell(i, i);
+    }
 
     _tickCalculator.Setup(targetSimulationTime);
 }

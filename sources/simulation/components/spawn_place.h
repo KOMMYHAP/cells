@@ -2,4 +2,5 @@
 
 struct SpawnPlace
 {
+    bool dummy;
 };

@@ -1,11 +1,13 @@
 ﻿#pragma once
+#include "components/cell_position.h"
+#include "components/spawn_place.h"
 #include "simulation_ecs_config.h"
 
 #include <entt/entity/registry.hpp>
 
 #include "simulation/simulation_system.h"
 
-template <class Derived, class... Components>
+template <typename Derived, typename... Components>
 class SimulationEcsSystem : public SimulationSystem {
 public:
     explicit SimulationEcsSystem(EcsWorld& world)
@@ -15,8 +17,9 @@ public:
 
     void DoSystemUpdate() final
     {
-        _ecsWorld->view<Components...>().each([this]<class... T>(const CellId & id, T&&... components) {
-            DowncastToImpl().DoProcessComponents(id, std::forward<T>(components)...);
+        static_assert((!std::is_empty_v<Components> && ...), "ECS framework 'entt' does not support empty type in view. Type can contain a dummy field as a workaround!");
+        _ecsWorld->view<Components...>().each([this]<typename... T0>(const CellId& id, T0&&... components) {
+            DowncastToImpl().DoProcessComponents(id, std::forward<T0>(components)...);
         });
     }
 

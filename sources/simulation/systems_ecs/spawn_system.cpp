@@ -10,17 +10,15 @@
 #include "processor/processor_instruction.h"
 #include "processor/processor_memory.h"
 
+
 SpawnSystem::SpawnSystem(EcsWorld& ecsWorld, Random::Accessor random, SimulationVirtualMachine& vm)
     : SimulationEcsSystem(ecsWorld)
     , _simulationVm(&vm)
     , _random(std::move(random))
 {
-    ecsWorld.view<const CellPosition>().each([this](const CellId id, const CellPosition& components) {
-        DoProcessComponents(id, components);
-    });
 }
 
-void SpawnSystem::DoProcessComponents(CellId id, CellPosition position)
+void SpawnSystem::DoProcessComponents(const CellId id, const CellPosition position, const SpawnPlace)
 {
     EcsWorld& ecsWorld = AccessEcsWorld();
 
