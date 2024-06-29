@@ -20,16 +20,16 @@ public:
 
     void MarkProcedureAsInvalid();
 
+    const ProcessorExternalContext& GetExternalContext() const;
+    ProcessorExternalContext& ModifyExternalContext();
+
 private:
     void SetState(ProcessorState state);
 
     ProcessorStack _stack;
-    ProcessorContext& _processorContext;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-private-field"
-    uint8_t& _restInputArgs;
-    uint8_t& _restOutputArgs;
-#pragma clang diagnostic pop
+    gsl::not_null<ProcessorContext*> _processorContext;
+    gsl::not_null<uint8_t*> _restInputArgs;
+    gsl::not_null<uint8_t*> _restOutputArgs;
 };
 
 class ProcedureBase {

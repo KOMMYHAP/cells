@@ -11,10 +11,10 @@ public:
     void SetWatcher(ProcessorStateWatcher watcher);
     void SetInstructionsPerStep(uint8_t count);
 
-    void Run(ProcessorMemory memory);
+    void Run(ProcessorMemory memory, std::any procedureExternalContext = {});
 
 private:
     ProcedureTable _procedureTable;
-    uint8_t _systemInstructionPerStep;
+    uint8_t _systemInstructionPerStep{0};
     ProcessorStateWatcher _processorStateWatcher;
 };

@@ -4,6 +4,10 @@
 class ProcessorControlBlockGuard {
 public:
     ProcessorControlBlockGuard(ProcessorControlBlock& controlBlock);
+    ProcessorControlBlockGuard(const ProcessorControlBlockGuard&) = delete;
+    ProcessorControlBlockGuard(ProcessorControlBlockGuard&&) = delete;
+    ProcessorControlBlockGuard& operator=(const ProcessorControlBlockGuard&) = delete;
+    ProcessorControlBlockGuard& operator=(ProcessorControlBlockGuard&&) = delete;
     ~ProcessorControlBlockGuard();
 
     bool ShouldRollback() const { return _shouldRollback; }
@@ -11,6 +15,6 @@ public:
 
 private:
     bool _shouldRollback { true };
-    ProcessorControlBlock& _controlBlock;
+    gsl::not_null<ProcessorControlBlock*> _controlBlock;
     ProcessorControlBlock _initialControlBlock;
 };

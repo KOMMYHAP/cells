@@ -5,6 +5,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         reproduction_procedure.cpp
         look_procedure.cpp
         direction.cpp
+        simulation_procedure_context.cpp
 )
 
 
@@ -15,4 +16,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         direction.h
         reproduction_procedure.h
         look_procedure.h
+        simulation_procedure_context.h
 )

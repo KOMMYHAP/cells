@@ -1,17 +1,17 @@
 #pragma once
 
 #include "procedures/procedure.h"
+#include "simulation_ecs.h"
 
 class PositionSystem;
 class SimulationVirtualMachine;
 
 class MoveProcedure final : public ProcedureBase {
 public:
-    MoveProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem);
+    MoveProcedure(EcsWorld& world);
 
     void Execute(ProcedureContext& context) override;
 
 private:
-    PositionSystem& _positionSystem;
-    const SimulationVirtualMachine& _vm;
+    gsl::not_null<EcsWorld*> _world;
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include "processor_external_context.h"
 
 enum class ProcessorState : unsigned char {
     Good,
@@ -15,4 +16,4 @@ enum class ProcessorState : unsigned char {
     UnknownProcedure,
 };
 
-using ProcessorStateWatcher = std::function<void(ProcessorState)>;
+using ProcessorStateWatcher = std::function<void(ProcessorState, ProcessorExternalContext&)>;

@@ -1,7 +1,7 @@
 #include "reproduction_procedure.h"
 #include <genetic/crossover_algorithm.h>
 
-#include "random.h"
+#include "simulation_procedure_context.h"
 #include "systems/brain_system.h"
 #include "systems/health_system.h"
 #include "systems/position_system.h"
@@ -30,7 +30,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
         context.MarkProcedureAsInvalid();
         return;
     }
-    const CellId id = _vm.GetRunningCellId();
+    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
 
     constexpr CellHealth healthPerAction { 50 };
     if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
@@ -103,18 +103,19 @@ CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPositio
     }
 
     ASSERT(testPositionSize >= 1);
-    std::uniform_int_distribution<uint16_t> offsetDistribution { 0, static_cast<uint16_t>(testPositionSize - 1) };
-    const uint8_t offset = static_cast<uint8_t>(offsetDistribution(common::GetRandomEngine()));
-
-    for (uint8_t i = 0; i < testPositionSize; ++i) {
-        const uint8_t index = (i + offset) % testPositionSize;
-        const CellPosition position = testPositions[index];
-        const CellId id = _positionSystem.Find(position);
-        const bool emptyPosition = id == CellId::Invalid;
-        if (emptyPosition) {
-            return position;
-        }
-    }
+    //
+    // std::uniform_int_distribution<uint16_t> offsetDistribution { 0, static_cast<uint16_t>(testPositionSize - 1) };
+    // const uint8_t offset = static_cast<uint8_t>(offsetDistribution(common::GetRandomEngine()));
+    //
+    // for (uint8_t i = 0; i < testPositionSize; ++i) {
+    //     const uint8_t index = (i + offset) % testPositionSize;
+    //     const CellPosition position = testPositions[index];
+    //     const CellId id = _positionSystem.Find(position);
+    //     const bool emptyPosition = id == CellId::Invalid;
+    //     if (emptyPosition) {
+    //         return position;
+    //     }
+    // }
 
     return InvalidCellPosition;
 }

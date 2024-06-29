@@ -2,6 +2,7 @@
 #include "ecs_simulation_system.h"
 
 #include "components/cell_position.h"
+#include "systems/simulation_virtual_machine.h"
 
 class ICellFactory;
 
@@ -12,5 +13,5 @@ public:
 private:
     void DoProcessComponents(CellId id, CellPosition position);
 
-    gsl::not_null<ICellFactory*> _cellFactory;
+    gsl::not_null<SimulationVirtualMachine*> _simulationVm;
 };

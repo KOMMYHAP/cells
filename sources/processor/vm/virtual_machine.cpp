@@ -16,17 +16,20 @@ ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t 
     return id;
 }
 
-void VirtualMachine::Run(ProcessorMemory memory)
+void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalContext /*= {}*/)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     ASSERT(controlBlockRead);
 
-    ProcessorContext context {
-        _procedureTable,
-        _processorStateWatcher,
-        *controlBlock,
+    ProcessorExternalContext externalContext { std::move(procedureExternalContext) };
+    ProcessorContext::Params params {
+        &_procedureTable,
+        &_processorStateWatcher,
+        controlBlock,
+        &externalContext,
         memory,
     };
+    ProcessorContext context { std::move(params) };
     Processor processor { _systemInstructionPerStep };
     processor.Execute(context);
 }

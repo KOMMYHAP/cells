@@ -1,20 +1,19 @@
 #include "simulation_virtual_machine.h"
+
+#include "procedures/simulation_procedure_context.h"
 #include "storage/storage.h"
 #include "systems/brain_system.h"
 
-SimulationVirtualMachine::SimulationVirtualMachine(BrainSystem& brainSystem)
-    : _brainSystem(brainSystem)
-    , _procedureDataList(ProcedureTableLimit)
+SimulationVirtualMachine::SimulationVirtualMachine()
+    : _procedureDataList(ProcedureTableLimit)
     , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
 {
 }
 
-void SimulationVirtualMachine::Run(CellId id)
+void SimulationVirtualMachine::Run(const CellId& id, CellBrain& brain)
 {
-    ProcessorMemory memory = _brainSystem.AccessMemory(id);
-    _runningCellId = id;
-    _virtualMachine.Run(memory);
-    _runningCellId = CellId::Invalid;
+    const ProcessorMemory memory { brain.data };
+    _virtualMachine.Run(memory, std::make_any<SimulationProcedureContext>(&id));
 }
 
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const
@@ -44,7 +43,7 @@ void SimulationVirtualMachine::SetWatcher(ProcessorStateWatcher watcher)
     _virtualMachine.SetWatcher(std::move(watcher));
 }
 
-void SimulationVirtualMachine::SetInstructionsPerStep(uint8_t count)
+void SimulationVirtualMachine::SetInstructionsPerStep(const uint8_t count)
 {
     _virtualMachine.SetInstructionsPerStep(count);
 }

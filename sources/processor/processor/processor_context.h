@@ -3,12 +3,21 @@
 #include "procedures/procedure_table.h"
 #include "processor_control_block.h"
 #include "processor_control_block_guard.h"
+#include "processor_external_context.h"
 #include "processor_memory.h"
 #include "processor_state.h"
 
 class ProcessorContext {
 public:
-    ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory);
+    struct Params {
+        gsl::not_null<const ProcedureTable*> procedureTable;
+        gsl::not_null<const ProcessorStateWatcher*> stateWatcher;
+        gsl::not_null<ProcessorControlBlock*> controlBlock;
+        gsl::not_null<ProcessorExternalContext*> externalContext;
+        ProcessorMemory memory;
+    };
+
+    explicit ProcessorContext(Params params);
 
     ProcessorControlBlockGuard MakeGuard();
     bool RunProcedure(ProcedureId id);
@@ -32,13 +41,13 @@ public:
     bool PushStack(std::byte data);
     std::pair<bool, std::byte> PopStack();
 
+    const ProcessorExternalContext& GetExternalContext() const { return *_params.externalContext; }
+    ProcessorExternalContext& ModifyExternalContext() { return *_params.externalContext; }
+
 private:
-    ProcessorControlBlock& _controlBlock;
-    const ProcedureTable& _procedureTable;
-    const ProcessorMemory _initialMemory;
-    ProcessorMemory _memory;
+    Params _params;
+    ProcessorMemory _initialMemory;
     ProcessorStack _stack;
-    const std::function<void(ProcessorState)>& _watcher;
 };
 
 #include "processor_context.hpp"

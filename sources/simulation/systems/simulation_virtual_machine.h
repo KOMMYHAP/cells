@@ -4,6 +4,7 @@
 #include "components/procedure_type.h"
 #include "vm/virtual_machine.h"
 
+struct CellBrain;
 class BrainSystem;
 
 struct SimulationProcedureInfo {
@@ -15,7 +16,7 @@ struct SimulationProcedureInfo {
 
 class SimulationVirtualMachine {
 public:
-    SimulationVirtualMachine(BrainSystem& brainSystem);
+    SimulationVirtualMachine();
 
     template <class Procedure, class... Args>
         requires std::constructible_from<Procedure, Args...>
@@ -24,9 +25,8 @@ public:
     void SetWatcher(ProcessorStateWatcher watcher);
     void SetInstructionsPerStep(uint8_t count);
 
-    void Run(CellId id);
+    void Run(const CellId& id, CellBrain& brain);
 
-    CellId GetRunningCellId() const { return _runningCellId; }
     ProcedureId GetProcedureId(ProcedureType type) const;
     const SimulationProcedureInfo* FindProcedureInfo(ProcedureType type) const;
 
@@ -37,8 +37,6 @@ private:
     };
 
     VirtualMachine _virtualMachine;
-    BrainSystem& _brainSystem;
-    CellId _runningCellId;
     std::vector<ProcedureData> _procedureDataList;
     std::vector<ProcedureId> _procedureTypeMapping;
 };

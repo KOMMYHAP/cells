@@ -16,7 +16,6 @@ PatrolCellFactory::PatrolCellFactory(SimulationVirtualMachine& vm, uint8_t moveC
 
 bool PatrolCellFactory::InitMemory(ProcessorMemory& memory)
 {
-    // todo: extract it
     ProcessorControlBlock controlBlock {
         static_cast<uint8_t>(ProcessorState::Good),
         0,

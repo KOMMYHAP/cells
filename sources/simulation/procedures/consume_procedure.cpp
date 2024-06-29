@@ -1,5 +1,6 @@
 #include "consume_procedure.h"
 #include "direction.h"
+#include "simulation_procedure_context.h"
 #include "systems/health_system.h"
 #include "systems/position_system.h"
 #include "systems/simulation_virtual_machine.h"
@@ -25,7 +26,7 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    const CellId id = _vm.GetRunningCellId();
+    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
 
     constexpr CellHealth healthPerAction { 5 };
     if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

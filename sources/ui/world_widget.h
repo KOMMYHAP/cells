@@ -6,7 +6,7 @@
 class WorldWidget : public UiWidget {
 public:
     struct Config {
-        std::unique_ptr<RenderSystem> renderSystem;
+        gsl::not_null<RenderSystem*> renderSystem;
         std::unique_ptr<sf::Shader> fragmentShader;
         sf::Vector2u renderTargetSize;
         sf::Vector2u renderTargetOffset;

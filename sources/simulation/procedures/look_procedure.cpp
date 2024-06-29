@@ -1,5 +1,6 @@
 #include "look_procedure.h"
 
+#include "simulation_procedure_context.h"
 #include "systems/position_system.h"
 #include "systems/simulation_virtual_machine.h"
 #include "systems/type_system.h"
@@ -23,7 +24,7 @@ void LookProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    const CellId id = _vm.GetRunningCellId();
+    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
     const CellPosition position = _positionSystem.Get(id);
     const CellPosition lookPosition = _positionSystem.TryApplyDirection(position, direction);
     if (lookPosition == InvalidCellPosition) {
