@@ -1,6 +1,6 @@
-#include "simulation.h"
+#include "tick_calculator.h"
 
-void Simulation::Setup(sf::Time targetSimulationTime)
+void SimulationTickCalculator::Setup(sf::Time targetSimulationTime)
 {
     ASSERT(targetSimulationTime.asSeconds() > 0.0f);
 
@@ -8,7 +8,7 @@ void Simulation::Setup(sf::Time targetSimulationTime)
     _availableTimeToSpent = sf::Time::Zero;
 }
 
-uint32_t Simulation::Run(sf::Time elapsedTime)
+uint32_t SimulationTickCalculator::Run(sf::Time elapsedTime)
 {
     if (_tickTime == sf::Time::Zero) {
         return 0;
@@ -29,13 +29,4 @@ uint32_t Simulation::Run(sf::Time elapsedTime)
     _availableTimeToSpent = std::min(_availableTimeToSpent, _tickTime);
 
     return roundedTicksToProcess;
-}
-
-void Simulation::Ticks(uint32_t count)
-{
-    for (auto _ : std::ranges::iota_view { 0u, count }) {
-        for (const auto& system : _systems) {
-            system->DoSystemUpdate();
-        }
-    }
 }

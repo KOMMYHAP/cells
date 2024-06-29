@@ -1,7 +1,7 @@
 #pragma once
 #include "random.h"
 
-namespace random {
+namespace Random {
 
 template <std::ranges::random_access_range Ranges>
     requires std::permutable<std::ranges::iterator_t<Ranges>>

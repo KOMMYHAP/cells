@@ -7,4 +7,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         aging_system.h
         render_system.cpp
         render_system.h
+        simulation_ecs_config.h
+        simulation_ecs_system.h
 )

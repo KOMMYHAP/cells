@@ -1,21 +1,19 @@
 ﻿#include "spawn_system.h"
 
-#include "cell_factories/cell_factory_interface.h"
-#include "components/cell_age.h"
 #include "components/cell_brain.h"
-#include "components/cell_health.h"
 #include "components/cell_type.h"
 #include "components/move_direction.h"
 #include "components/procedure_type.h"
-#include "entt/entt.hpp"
 
 #include "components/spawn_place.h"
 #include "processor/processor_control_block.h"
+#include "processor/processor_instruction.h"
 #include "processor/processor_memory.h"
 
-SpawnSystem::SpawnSystem(EcsWorld& ecsWorld, ICellFactory& cellFactory)
-    : EcsSimulationSystem(ecsWorld)
-    , _cellFactory(&cellFactory)
+SpawnSystem::SpawnSystem(EcsWorld& ecsWorld, Random::Accessor random, SimulationVirtualMachine& vm)
+    : SimulationEcsSystem(ecsWorld)
+    , _simulationVm(&vm)
+    , _random(std::move(random))
 {
 }
 
@@ -23,7 +21,7 @@ void SpawnSystem::DoProcessComponents(CellId id, CellPosition position)
 {
     EcsWorld& ecsWorld = AccessEcsWorld();
 
-    const bool hasPrototypeComponents = ecsWorld.any_of<CellBrain, CellType, CellHealth, CellAge>(id);
+    const bool hasPrototypeComponents = ecsWorld.any_of<CellBrain, CellType>(id);
     ASSERT(!hasPrototypeComponents);
 
     auto& brain = ecsWorld.emplace<CellBrain>(id);
@@ -37,30 +35,26 @@ void SpawnSystem::DoProcessComponents(CellId id, CellPosition position)
         {}
     };
     memory.Write(controlBlock);
-    
+
     const ProcedureId move = _simulationVm->GetProcedureId(ProcedureType::Move);
 
-    for (uint8_t i = 0; i < _moveCommandCount; ++i) {
-        memory.Write(ProcessorInstruction::PushStackValue, Direction::Right);
+    constexpr int moveCommandCount { 10 };
+    for (int i = 0; i < moveCommandCount; ++i) {
+        memory.Write(ProcessorInstruction::PushStackValue, MoveDirection::Right);
         memory.Write(ProcessorInstruction::Call, move);
     }
-    for (uint8_t i = 0; i < _moveCommandCount; ++i) {
-        memory.Write(ProcessorInstruction::PushStackValue, Direction::Left);
+    for (uint8_t i = 0; i < moveCommandCount; ++i) {
+        memory.Write(ProcessorInstruction::PushStackValue, MoveDirection::Left);
         memory.Write(ProcessorInstruction::Call, move);
     }
     memory.Write(ProcessorInstruction::Jump, std::byte { 0 });
 
-    result.status = Status::Success;
-
-    constexpr CellHealth initialHealth { 100 };
-    ecsWorld.emplace<CellBrain>(id, brain);
     ecsWorld.emplace<CellType>(id, CellType::Unit);
-    ecsWorld.emplace<CellHealth>(id, initialHealth);
-    ecsWorld.emplace<CellAge>(id, CellAge::Zero);
+
     ecsWorld.emplace<CellPosition>(id, position);
 
     constexpr MoveDirection possibleDirections[] = { MoveDirection::Down, MoveDirection::Up, MoveDirection::Left, MoveDirection::Right };
-    const MoveDirection selectedDirection = random::Select(std::span(possibleDirections));
+    const MoveDirection selectedDirection = _random.Select(std::span(possibleDirections));
     ecsWorld.emplace<MoveDirection>(id, selectedDirection);
 
     ecsWorld.remove<SpawnPlace>(id);

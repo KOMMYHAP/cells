@@ -1,6 +1,6 @@
 #include "random.h"
 
-namespace random {
+namespace Random {
 
 Engine MakeEngine(std::string_view seed)
 {
@@ -16,13 +16,13 @@ Accessor::Accessor(Engine& engine)
 float Accessor::GetNextValue()
 {
     std::uniform_real_distribution dist { 0.0f, 1.0f };
-    return dist(_engine);
+    return dist(*_engine);
 }
 
 uint32_t Accessor::GetValue(const uint32_t start, const uint32_t end)
 {
     std::uniform_int_distribution dist { start, end };
-    return dist(_engine);
+    return dist(*_engine);
 }
 
 }

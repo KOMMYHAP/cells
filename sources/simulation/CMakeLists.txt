@@ -9,26 +9,19 @@ add_subdirectory(procedures)
 add_subdirectory(genetic)
 add_subdirectory(cell_factories)
 add_subdirectory(systems_ecs)
+add_subdirectory(simulation)
 
 
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        simulation.cpp
-        world.cpp
         simulation_pch.h
+        simulation_registrable_system.cpp
 )
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
-        simulation.h
-        world.h
-        world_parameters.h
-        simulation_profile_category.h
-        simulation_parameters.h
-        simulation_system.h
-        ecs_simulation_system.h
-        simulation_ecs.h
+        simulation_registrable_system.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

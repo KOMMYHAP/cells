@@ -23,7 +23,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         command_line.cpp
         sample_counter.cpp
         breakpoint.cpp
-        common_system.cpp
 )
 
 
@@ -35,7 +34,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         sample_counter.h
         sample_counter.hpp
         breakpoint.h
-        common_system.h
         common.h
         application_storage.h
 )

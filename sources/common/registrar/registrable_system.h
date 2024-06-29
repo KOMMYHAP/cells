@@ -1,13 +1,13 @@
 #pragma once
 
-namespace common {
+#include "application_storage.h"
 
-class StackStorage;
+namespace common {
 
 class RegistrableSystem {
 public:
     virtual ~RegistrableSystem() = default;
-    virtual std::error_code InitializeSystem(StackStorage& storage) = 0;
+    virtual std::error_code InitializeSystem(ApplicationStorage& storage) = 0;
     virtual void TerminateSystem() = 0;
 };
 

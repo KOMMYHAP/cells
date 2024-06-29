@@ -3,7 +3,7 @@
 #include "SFML/Graphics/RenderTarget.hpp"
 
 RenderSystem::RenderSystem(EcsWorld& ecsWorld, sf::Vector2u fieldSize)
-    : EcsSimulationSystem(ecsWorld)
+    : SimulationEcsSystem(ecsWorld)
     , _fieldSize(fieldSize)
 {
     _textureData.resize(_fieldSize.x * _fieldSize.y);

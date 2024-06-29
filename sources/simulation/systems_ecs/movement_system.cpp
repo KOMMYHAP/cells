@@ -1,7 +1,7 @@
 ﻿#include "movement_system.h"
 
 MovementSystem::MovementSystem(EcsWorld& ecsWorld, PositionSystem& currentPositions, PositionSystem& nextPositions)
-    : EcsSimulationSystem(ecsWorld)
+    : SimulationEcsSystem(ecsWorld)
     , _currentPositionManager(&currentPositions)
     , _nextPositionManager(&nextPositions)
 {
@@ -20,7 +20,7 @@ void MovementSystem::DoProcessComponents(CellId id, CellPosition position, MoveD
 
     EcsWorld& ecsWorld = AccessEcsWorld();
     ecsWorld.remove<MoveDirection>(id);
-    ecsWorld.emplace_or_replace<CellPosition>(id, position);
+    ecsWorld.replace<CellPosition>(id, position);
 
     {
         std::shared_lock _ { _positionMutex };

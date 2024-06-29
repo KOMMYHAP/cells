@@ -1,6 +1,6 @@
 #pragma once
 
-namespace random {
+namespace Random {
 
 using Engine = std::default_random_engine;
 
@@ -8,11 +8,12 @@ Engine MakeEngine(std::string_view seed);
 
 class Accessor {
 public:
-    Accessor(Engine& engine);
+    explicit Accessor(Engine& engine);
     Accessor(const Accessor&) = default;
     Accessor(Accessor&&) = default;
     Accessor& operator=(const Accessor&) = default;
     Accessor& operator=(Accessor&&) = default;
+    ~Accessor() = default;
 
     // Returns value from range [0.0f; 1.0f]
     float GetNextValue();

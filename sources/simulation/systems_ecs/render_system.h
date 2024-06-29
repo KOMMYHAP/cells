@@ -2,12 +2,12 @@
 
 #include <SFML/Graphics/Color.hpp>
 
-#include "ecs_simulation_system.h"
+#include "simulation_ecs_system.h"
 
 #include "components/cell_position.h"
 #include "components/cell_type.h"
 
-class RenderSystem final : public EcsSimulationSystem<RenderSystem, CellType, CellPosition> {
+class RenderSystem final : public SimulationEcsSystem<RenderSystem, CellType, CellPosition> {
 public:
     explicit RenderSystem(EcsWorld& ecsWorld, sf::Vector2u fieldSize);
 

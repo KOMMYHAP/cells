@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ecs_simulation_system.h"
+#include "simulation_ecs_system.h"
 
 #include "components/cell_id.h"
 #include "components/cell_position.h"
@@ -8,7 +8,7 @@
 
 class ICellFactory;
 
-class MovementSystem final : public EcsSimulationSystem<MovementSystem, CellPosition, MoveDirection> {
+class MovementSystem final : public SimulationEcsSystem<MovementSystem, CellPosition, MoveDirection> {
 public:
     MovementSystem(EcsWorld& ecsWorld, PositionSystem& currentPositions, PositionSystem& nextPositions);
 

@@ -1,13 +1,14 @@
 ﻿#pragma once
+#include "simulation_ecs_config.h"
+
 #include <entt/entity/registry.hpp>
 
-#include "simulation_ecs.h"
 #include "simulation_system.h"
 
 template <class Derived, class... Components>
-class EcsSimulationSystem : public SimulationSystem {
+class SimulationEcsSystem : public SimulationSystem {
 public:
-    explicit EcsSimulationSystem(EcsWorld& world)
+    explicit SimulationEcsSystem(EcsWorld& world)
         : _ecsWorld(&world)
     {
     }
