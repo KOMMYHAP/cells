@@ -2,7 +2,7 @@
 
 #include "components/cell_id.h"
 #include "components/cell_position.h"
-#include "procedures/direction.h"
+#include "components/move_direction.h"
 
 class PositionSystem {
     using PositionType = std::decay_t<decltype(CellPosition::x)>;
@@ -24,7 +24,7 @@ public:
     bool IsNeighbourFor(CellPosition lhs, CellPosition rhs) const;
 
     bool IsValidPosition(CellPosition position) const;
-    CellPosition TryApplyDirection(CellPosition position, Direction direction) const;
+    CellPosition TryApplyDirection(CellPosition position, MoveDirection direction) const;
 
 private:
     void Move(CellId id, CellPosition nextPosition);
@@ -39,5 +39,3 @@ private:
     std::vector<CellPosition> _positions;
     std::vector<CellId> _grid;
 };
-
-#include "position_system.hpp"

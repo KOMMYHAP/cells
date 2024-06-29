@@ -1,7 +1,7 @@
 #pragma once
 
 #include "procedures/procedure.h"
-#include "simulation_ecs.h"
+#include "systems_ecs/simulation_ecs_system.h"
 
 class PositionSystem;
 class SimulationVirtualMachine;

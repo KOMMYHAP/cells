@@ -57,28 +57,28 @@ bool PositionSystem::IsNeighbourFor(CellId lhs, CellId rhs) const
     return IsNeighbourFor(lhsPosition, rhsPosition);
 }
 
-CellPosition PositionSystem::TryApplyDirection(CellPosition position, Direction direction) const
+CellPosition PositionSystem::TryApplyDirection(CellPosition position, MoveDirection direction) const
 {
     switch (direction) {
-    case Direction::Left:
+    case MoveDirection::Left:
         if (position.x >= 1) {
             position.x -= 1;
             return position;
         }
         break;
-    case Direction::Right:
+    case MoveDirection::Right:
         if (position.x + 1 < GetWidth()) {
             position.x += 1;
             return position;
         }
         break;
-    case Direction::Up:
+    case MoveDirection::Up:
         if (position.y >= 1) {
             position.y -= 1;
             return position;
         }
         break;
-    case Direction::Down:
+    case MoveDirection::Down:
         if (position.y + 1 < GetHeight()) {
             position.y += 1;
             return position;
@@ -125,16 +125,17 @@ void PositionSystem::Set(CellId id, CellPosition position)
 std::vector<CellPosition> PositionSystem::CollectFreePositions() const
 {
     std::vector<CellPosition> freePosition;
-    freePosition.reserve(_grid.size());
-    Iterate([&](const CellPosition position) {
-        const uint32_t index = ToGridIndex(position);
-        const CellId id = _grid[index];
-        const bool isBusy = id != CellId::Invalid;
-        if (isBusy) {
-            return;
-        }
-        freePosition.emplace_back(position);
-    });
+    ASSERT(false, "Not implemented");
+    // freePosition.reserve(_grid.size());
+    // Iterate([&](const CellPosition position) {
+    //     const uint32_t index = ToGridIndex(position);
+    //     const CellId id = _grid[index];
+    //     const bool isBusy = id != CellId::Invalid;
+    //     if (isBusy) {
+    //         return;
+    //     }
+    //     freePosition.emplace_back(position);
+    // });
     return freePosition;
 }
 

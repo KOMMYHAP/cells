@@ -7,12 +7,10 @@
 
 #include "asserts_config.h"
 
-// #include "libassert/assert.hpp"
-
 #if defined(COMMON_ASSERTS_ENABLED)
 
-#define ASSERT(x, ...) assert(!!(x))
-#define ASSERT_FAIL(...) assert(false)
+#define ASSERT(expression) assert(!!(expression))
+#define ASSERT_FAIL(message) assert(false && (message))
 // #define ASSUME LIBASSERT_ASSUME
 
 #else

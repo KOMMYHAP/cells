@@ -18,7 +18,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         position_system.h
-        position_system.hpp
         id_system.h
         id_system.hpp
         brain_system.h

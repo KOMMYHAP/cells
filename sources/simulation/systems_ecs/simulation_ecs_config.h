@@ -4,7 +4,7 @@
 
 #define ENTT_NOEXCEPTION
 #define ENTT_USE_ATOMIC
-#define ENTT_ASSERT(expression, message) ASSERT(expession, message)
+#define ENTT_ASSERT(expression, message) ASSERT(expession)
 #define ENTT_ASSERT_CONSTEXPR(expression, message) static_assert(expession, message)
 
 #ifdef ENTT_CONFIG_CONFIG_H

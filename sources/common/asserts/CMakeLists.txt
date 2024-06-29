@@ -3,10 +3,8 @@ target_sources(${PROJECT_NAME} PUBLIC
         assert.h
 )
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC LIBASSERT_PREFIX_ASSERTIONS)
-target_link_libraries(${PROJECT_NAME} PUBLIC
-        libassert::assert
-)
+#target_compile_definitions(${PROJECT_NAME} PUBLIC LIBASSERT_PREFIX_ASSERTIONS)
+#target_link_libraries(${PROJECT_NAME} PUBLIC libassert::assert)
 
 # generate configuration header
 option(COMMON_ASSERTS_ENABLED "Enable asserts" ON)
