@@ -13,6 +13,7 @@ add_subdirectory(storage)
 add_subdirectory(registrar)
 add_subdirectory(utils)
 add_subdirectory(asserts)
+add_subdirectory(mt)
 
 
 # add sources
