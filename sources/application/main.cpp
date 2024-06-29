@@ -1,33 +1,44 @@
+#include "command_line.h"
 #include "registrar/registrar.h"
 
-#include "common_system.h"
 #include "main_loop.h"
-#include "scripts_system.h"
+#include "simulation_registrable_system.h"
 #include "ui_system.h"
-#include "world.h"
 
-#include "native/lua_registrable_system.h"
+class StubCmdLine : public common::RegistrableSystem {
+public:
+    StubCmdLine(int argc, char** argv)
+        : argc(argc)
+        , argv(argv)
+    {
+    }
+
+    std::error_code InitializeSystem(ApplicationStorage& storage) override
+    {
+        storage.Store<common::CommandLine>(argc, argv);
+        return {};
+    }
+    void TerminateSystem() override { }
+
+private:
+    int argc;
+    char** argv;
+};
 
 int main(int argc, char** argv)
 {
     common::Registrar registrar;
-    registrar.Register(std::make_unique<common::CommonSystem>(argc, argv));
-    registrar.Register(std::make_unique<ScriptSystem>());
-    registrar.Register(std::make_unique<World>());
+    registrar.Register(std::make_unique<StubCmdLine>(argc, argv));
+    registrar.Register(std::make_unique<SimulationRegistrableSystem>());
     registrar.Register(std::make_unique<UiSystem>());
-    registrar.Register(std::make_unique<scripts::LuaSystem>());
+    auto& mainLoop = registrar.Register(std::make_unique<MainLoop>());
 
-    auto mainLoop = std::make_unique<MainLoop>();
-    auto* rawMainLoop = mainLoop.get();
-    registrar.Register(std::move(mainLoop));
-
-    const auto error = registrar.RunInit();
-    if (error) {
+    if (const std::error_code error = registrar.RunInit()) {
         std::cerr << std::format("Failed to initialize systems: {}", error.message()) << std::endl;
         return -1;
     }
 
-    rawMainLoop->Run();
+    mainLoop.Run();
 
     return 0;
     //

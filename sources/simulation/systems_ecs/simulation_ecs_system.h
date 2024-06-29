@@ -15,8 +15,8 @@ public:
 
     void DoSystemUpdate() final
     {
-        _ecsWorld->view<Components...>().each([this](const CellId id, Components&&... components) {
-            DowncastToImpl().DoProcessComponents(id, std::forward<Components>(components)...);
+        _ecsWorld->view<Components...>().each([this]<class... T>(const CellId & id, T&&... components) {
+            DowncastToImpl().DoProcessComponents(id, std::forward<T>(components)...);
         });
     }
 

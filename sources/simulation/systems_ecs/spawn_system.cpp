@@ -15,6 +15,9 @@ SpawnSystem::SpawnSystem(EcsWorld& ecsWorld, Random::Accessor random, Simulation
     , _simulationVm(&vm)
     , _random(std::move(random))
 {
+    ecsWorld.view<const CellPosition>().each([this](const CellId id, const CellPosition& components) {
+        DoProcessComponents(id, components);
+    });
 }
 
 void SpawnSystem::DoProcessComponents(CellId id, CellPosition position)

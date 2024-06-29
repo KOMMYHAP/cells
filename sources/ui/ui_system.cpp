@@ -4,12 +4,9 @@
 #include "storage/stack_storage.h"
 
 #include "ui_layout.h"
-#include "world.h"
+#include "simulation/world.h"
 #include "world_widget.h"
 
-#include "systems/id_system.h"
-#include "systems/position_system.h"
-#include "systems/type_system.h"
 #include "utils/stub_error_code.h"
 
 static constexpr std::string_view FontArgument = "--font";
@@ -17,24 +14,39 @@ static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
 
 std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
-    const auto& layout = storage.Get<UiLayout>();
+    UiLayout layout;
+    layout.screenWidth = 800;
+    layout.screenHeight = 600;
+    layout.fieldOffset = 20;
+    layout.fieldWidth = layout.screenWidth - 2 * layout.fieldOffset;
+    layout.fieldHeight = layout.screenHeight - 2 * layout.fieldOffset;
+    layout.statusTextOffset = 5;
+    layout.statusTextSize = 10;
+    layout.cellPadding = 0;
+    
+    // ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
+    // ASSERT(layout.fieldWidth % (CellSize + CellPadding) == 0);
+    // ASSERT(layout.fieldHeight % (CellSize + CellPadding) == 0);
+    
     _window.create(sf::VideoMode(layout.screenWidth, layout.screenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
     ASSERT(_window.isOpen());
 
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
 
-    auto& world = *storage.Get<World*>();
+    auto& world = storage.Modify<World>();
 
     const auto& commandLine = storage.Get<common::CommandLine>();
     auto mbFontPath = commandLine.FindValue(FontArgument);
     if (!mbFontPath.has_value()) {
+        ASSERT_FAIL("Stub: pass font path to cmd line!");
         return common::MakeStubErrorCode();
     }
 
     _font = std::make_unique<sf::Font>();
     const bool fontLoaded = _font->loadFromFile(std::string { *mbFontPath });
     if (!fontLoaded) {
+        ASSERT_FAIL("Stub: invalid font by specified path!");
         return common::MakeStubErrorCode();
     }
 

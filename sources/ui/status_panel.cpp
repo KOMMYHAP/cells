@@ -1,6 +1,5 @@
 #include "status_panel.h"
-#include "systems/id_system.h"
-#include "world.h"
+#include "simulation/world.h"
 
 constexpr uint16_t StatusMessageBufferLimit = 200;
 constexpr uint16_t StatusTextSize = 10;

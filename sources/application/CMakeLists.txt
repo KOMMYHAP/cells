@@ -23,7 +23,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-simulation
         sfml-system
         cells-ui
-        cells-scripts
 )
 
 

@@ -2,12 +2,8 @@
 #include <genetic/crossover_algorithm.h>
 
 #include "simulation_procedure_context.h"
-#include "systems/brain_system.h"
-#include "systems/health_system.h"
-#include "systems/position_system.h"
-#include "systems/simulation_virtual_machine.h"
-#include "systems/spawner.h"
-#include "systems/type_system.h"
+#include "systems_ecs/position_system.h"
+#include "systems_ecs/simulation_virtual_machine.h"
 
 ReproductionProcedure::ReproductionProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, HealthSystem& healthSystem, BrainSystem& brainSystem, TypeSystem& typeSystem, Spawner& spawner)
     : _vm(vm)
@@ -21,6 +17,7 @@ ReproductionProcedure::ReproductionProcedure(const SimulationVirtualMachine& vm,
 
 void ReproductionProcedure::Execute(ProcedureContext& context)
 {
+    ASSERT_FAIL("Not implemented!");
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
         return;
@@ -32,10 +29,10 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     }
     const CellId id = *context.GetExternalContext().Get<SimulationProcedureContext>().id;
 
-    constexpr CellHealth healthPerAction { 50 };
-    if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
-        return;
-    }
+    // constexpr CellHealth healthPerAction { 50 };
+    // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
+    //     return;
+    // }
 
     const CellPosition position = _positionSystem.Get(id);
     const CellPosition secondParentPosition = _positionSystem.TryApplyDirection(position, direction);
@@ -47,25 +44,25 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     if (secondParentId == CellId::Invalid) {
         return;
     }
-    const CellType secondParentType = _typeSystem.Get(secondParentId);
-    if (secondParentType != CellType::Unit) {
-        // Hmm... Does cell try to reproduce with ... food?
-        return;
-    }
+    // const CellType secondParentType = _typeSystem.Get(secondParentId);
+    // if (secondParentType != CellType::Unit) {
+    //     // Hmm... Does cell try to reproduce with ... food?
+    //     return;
+    // }
 
     const CellPosition childPosition = SelectPosition(position, secondParentPosition);
     if (childPosition == InvalidCellPosition) {
         return;
     }
 
-    constexpr CellHealth childInitialHealth { 35 };
-
-    SpawnProperties properties;
-    properties.position = childPosition;
-    properties.health = childInitialHealth;
-    properties.type = CellType::Unit;
-    properties.brain = MakeChildBrain(id, secondParentId);
-    _spawner.TrySpawn(properties);
+    // constexpr CellHealth childInitialHealth { 35 };
+    //
+    // SpawnProperties properties;
+    // properties.position = childPosition;
+    // properties.health = childInitialHealth;
+    // properties.type = CellType::Unit;
+    // properties.brain = MakeChildBrain(id, secondParentId);
+    // _spawner.TrySpawn(properties);
 }
 
 CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPosition rhs) const
@@ -122,7 +119,8 @@ CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPositio
 
 CellBrain ReproductionProcedure::MakeChildBrain(CellId lhs, CellId rhs) const
 {
-    constexpr uint8_t crossoverPoint = 10;
-    CrossoverAlgorithm crossover { crossoverPoint };
-    return crossover.Combine(_brainSystem.Get(lhs), _brainSystem.Get(rhs));
+    // constexpr uint8_t crossoverPoint = 10;
+    // CrossoverAlgorithm crossover { crossoverPoint };
+    // return crossover.Combine(_brainSystem.Get(lhs), _brainSystem.Get(rhs));
+    return {};
 }

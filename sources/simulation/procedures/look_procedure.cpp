@@ -1,9 +1,9 @@
 #include "look_procedure.h"
 
+#include "components/cell_type.h"
 #include "simulation_procedure_context.h"
-#include "systems/position_system.h"
-#include "systems/simulation_virtual_machine.h"
-#include "systems/type_system.h"
+#include "systems_ecs/position_system.h"
+#include "systems_ecs/simulation_virtual_machine.h"
 
 LookProcedure::LookProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, TypeSystem& typeSystem)
     : _vm(vm)
@@ -14,6 +14,8 @@ LookProcedure::LookProcedure(const SimulationVirtualMachine& vm, PositionSystem&
 
 void LookProcedure::Execute(ProcedureContext& context)
 {
+    ASSERT_FAIL("Not implemented!");
+
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
         return;
@@ -38,6 +40,6 @@ void LookProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    const CellType anotherCellType = _typeSystem.Get(anotherCell);
-    context.TryPushResult(anotherCellType);
+    // const CellType anotherCellType = _typeSystem.Get(anotherCell);
+    // context.TryPushResult(anotherCellType);
 }

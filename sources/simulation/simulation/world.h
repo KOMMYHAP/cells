@@ -7,8 +7,8 @@
 #include "random/random.h"
 #include "simulation/simulation_system.h"
 #include "simulation/tick_calculator.h"
-#include "systems/position_system.h"
-#include "systems/simulation_virtual_machine.h"
+#include "systems_ecs/position_system.h"
+#include "systems_ecs/simulation_virtual_machine.h"
 
 class World {
 public:

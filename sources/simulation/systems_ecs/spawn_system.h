@@ -3,16 +3,16 @@
 
 #include "components/cell_position.h"
 #include "random/random.h"
-#include "systems/simulation_virtual_machine.h"
+#include "systems_ecs/simulation_virtual_machine.h"
 
 class ICellFactory;
 
-class SpawnSystem final : public SimulationEcsSystem<SpawnSystem, const CellPosition> {
+class SpawnSystem final : public SimulationEcsSystem<SpawnSystem, CellPosition> {
 public:
     SpawnSystem(EcsWorld& ecsWorld, Random::Accessor random, SimulationVirtualMachine& vm);
 
-private:
     void DoProcessComponents(CellId id, CellPosition position);
+private:
 
     gsl::not_null<SimulationVirtualMachine*> _simulationVm;
     Random::Accessor _random;
