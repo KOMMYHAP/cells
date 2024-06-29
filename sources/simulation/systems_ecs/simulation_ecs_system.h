@@ -3,7 +3,7 @@
 
 #include <entt/entity/registry.hpp>
 
-#include "simulation_system.h"
+#include "simulation/simulation_system.h"
 
 template <class Derived, class... Components>
 class SimulationEcsSystem : public SimulationSystem {

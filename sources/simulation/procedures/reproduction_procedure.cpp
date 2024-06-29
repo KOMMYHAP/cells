@@ -25,12 +25,12 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     if (!readArgs) {
         return;
     }
-    Direction direction;
-    if (!TryParse(rawDirection, direction)) {
+    MoveDirection direction;
+    if (!TryParseMoveDirection(rawDirection, direction)) {
         context.MarkProcedureAsInvalid();
         return;
     }
-    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = *context.GetExternalContext().Get<SimulationProcedureContext>().id;
 
     constexpr CellHealth healthPerAction { 50 };
     if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

@@ -6,7 +6,7 @@ namespace common {
 
 RegistrableSystem& Registrar::Register(std::unique_ptr<RegistrableSystem> system)
 {
-    ASSERT(_state == State::Registration);
+    ASSERT(_state == State::Registration, "Registration phase was already completed!");
     RegistrableSystem* rawPointer = system.get();
     _systems.push_back(std::move(system));
     return *rawPointer;
@@ -14,7 +14,7 @@ RegistrableSystem& Registrar::Register(std::unique_ptr<RegistrableSystem> system
 
 std::error_code Registrar::RunInit()
 {
-    ASSERT(_state == State::Registration);
+    ASSERT(_state == State::Registration, "Registration phase was already completed!");
     _state = State::Initialized;
 
     for (auto& system : _systems) {
@@ -29,7 +29,7 @@ std::error_code Registrar::RunInit()
 
 void Registrar::RunTerm()
 {
-    ASSERT(_state == State::Initialized);
+    ASSERT(_state == State::Initialized, "Initialization phase must be completed!");
     _state = State::Terminated;
 
     for (auto& system : std::ranges::reverse_view(_systems)) {

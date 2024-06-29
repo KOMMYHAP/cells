@@ -1,7 +1,6 @@
 #include "patrol_cell_factory.h"
 
 #include "components/procedure_type.h"
-#include "procedures/direction.h"
 #include "processor/processor_control_block.h"
 #include "processor/processor_instruction.h"
 #include "processor/processor_memory.h"

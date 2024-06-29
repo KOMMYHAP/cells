@@ -7,20 +7,19 @@ Storage::Storage() = default;
 
 Storage::~Storage() noexcept
 {
-    // "You should manually remove all items from storage to ensure correct order!"
-    ASSERT(_items.empty());
+    ASSERT(_items.empty(), "You should manually remove all items from storage to ensure correct order!");
 }
 
 Storage::Item& Storage::Modify(ItemType type) const
 {
-    ASSERT(_items.contains(type));
+    ASSERT(_items.contains(type), "Item was not found in storage!");
     auto it = _items.find(type);
     return const_cast<Item&>(it->second);
 }
 
 const Storage::Item& Storage::Get(ItemType type) const
 {
-    ASSERT(_items.contains(type));
+    ASSERT(_items.contains(type), "Item was not found in storage!");
     auto it = _items.find(type);
     return it->second;
 }
@@ -28,14 +27,14 @@ const Storage::Item& Storage::Get(ItemType type) const
 Storage::Item& Storage::Store(Item item)
 {
     const ItemType type { item->GetTypeIndex() };
-    ASSERT(!_items.contains(type));
+    ASSERT(!_items.contains(type), "Item was already placed in storage!");
     auto [it, _] = _items.emplace(type, std::move(item));
     return it->second;
 }
 
 void Storage::Remove(ItemType type)
 {
-    ASSERT(_items.contains(type));
+    ASSERT(_items.contains(type), "Item was not found in storage!");
     _items.erase(type);
 }
 

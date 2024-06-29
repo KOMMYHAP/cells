@@ -18,13 +18,13 @@ void LookProcedure::Execute(ProcedureContext& context)
     if (!readArgs) {
         return;
     }
-    Direction direction;
-    if (!TryParse(rawDirection, direction)) {
+    MoveDirection direction;
+    if (!TryParseMoveDirection(rawDirection, direction)) {
         context.MarkProcedureAsInvalid();
         return;
     }
 
-    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = *context.GetExternalContext().Get<SimulationProcedureContext>().id;
     const CellPosition position = _positionSystem.Get(id);
     const CellPosition lookPosition = _positionSystem.TryApplyDirection(position, direction);
     if (lookPosition == InvalidCellPosition) {

@@ -1,5 +1,4 @@
 #include "consume_procedure.h"
-#include "direction.h"
 #include "simulation_procedure_context.h"
 #include "systems/health_system.h"
 #include "systems/position_system.h"
@@ -20,13 +19,13 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
     if (!readArgs) {
         return;
     }
-    Direction direction;
-    if (!TryParse(rawDirection, direction)) {
+    MoveDirection direction;
+    if (!TryParseMoveDirection(rawDirection, direction)) {
         context.MarkProcedureAsInvalid();
         return;
     }
 
-    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = *context.GetExternalContext().Get<SimulationProcedureContext>().id;
 
     constexpr CellHealth healthPerAction { 5 };
     if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

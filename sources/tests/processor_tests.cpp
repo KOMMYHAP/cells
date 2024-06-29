@@ -79,7 +79,7 @@ private:
 
     ProcessorStateWatcher MakeKiller()
     {
-        return [this](ProcessorState state) {
+        return [this](ProcessorState state, ProcessorExternalContext& context) {
             if (_assertOnBadState) {
                 ASSERT(state != ProcessorState::Good);
             }

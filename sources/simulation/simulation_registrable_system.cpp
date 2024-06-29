@@ -1,6 +1,6 @@
 ﻿#include "simulation_registrable_system.h"
 
-#include "world.h"
+#include "simulation/world.h"
 
 SimulationRegistrableSystem::SimulationRegistrableSystem() = default;
 SimulationRegistrableSystem::~SimulationRegistrableSystem() = default;

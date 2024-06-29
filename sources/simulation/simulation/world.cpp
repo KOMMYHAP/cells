@@ -17,8 +17,6 @@ World::World()
     _simulationSystems.emplace_back(std::make_unique<SpawnSystem>(_ecsWorld, Random::Accessor { _randomEngine }, _simulationVm));
 
     _tickCalculator.Setup(targetSimulationTime);
-
-    return {};
 }
 
 void World::Update(const sf::Time elapsedTime)

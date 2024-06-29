@@ -9,7 +9,7 @@
 
 #if defined(COMMON_ASSERTS_ENABLED)
 
-#define ASSERT(expression) assert(!!(expression))
+#define ASSERT(expression, message) assert(!!(expression))
 #define ASSERT_FAIL(message) assert(false && (message))
 // #define ASSUME LIBASSERT_ASSUME
 

@@ -6,3 +6,5 @@ enum class MoveDirection : uint8_t {
     Up,
     Down,
 };
+
+bool TryParseMoveDirection(uint8_t data, MoveDirection& direction);
