@@ -10,11 +10,9 @@ class ICellFactory;
 
 class MovementSystem final : public SimulationEcsSystem<MovementSystem, CellPosition, const MoveDirection> {
 public:
-    MovementSystem(EcsWorld& ecsWorld, CellLocator& currentPositions, CellLocator& nextPositions);
+    MovementSystem(EcsWorld& ecsWorld, CellLocator& currentPositions);
 
     void DoProcessComponents(CellId id, CellPosition& position, MoveDirection direction);
 private:
     gsl::not_null<CellLocator*> _currentPositionManager;
-    gsl::not_null<CellLocator*> _nextPositionManager;
-    std::shared_mutex _positionMutex;
 };

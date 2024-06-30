@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sample_counter.h"
 #include "systems_ecs/simulation_ecs_system.h"
 
 #include <entt/entity/registry.hpp>
@@ -22,12 +23,16 @@ public:
     sf::Vector2u GetWorldSize() const { return _worldSize; }
 
 private:
+    void Warmup();
+    sf::Time GetTickTime() const;
+    void Tick();
+    
     EcsWorld _ecsWorld;
+    common::SampleCounter<float, 100> _tickSampler;
     SimulationTickCalculator _tickCalculator;
     std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;
     sf::Vector2u _worldSize;
-    CellLocator _cellsOnCurrentTick;
-    CellLocator _cellsOnNextTick;
+    CellLocator _cellsLocator;
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
 };

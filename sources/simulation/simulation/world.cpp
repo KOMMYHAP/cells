@@ -10,15 +10,14 @@
 
 World::World()
     : _worldSize(100, 100)
-    , _cellsOnCurrentTick(_worldSize.x, _worldSize.y)
-    , _cellsOnNextTick(_worldSize.x, _worldSize.y)
+    , _cellsLocator(_worldSize.x, _worldSize.y)
     , _randomEngine(Random::MakeEngine("white"))
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
     _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _ecsWorld);
 
-    _simulationVm.SetInstructionsPerStep(1);
+    _simulationVm.SetInstructionsPerStep(8);
     _simulationVm.SetWatcher([this](const ProcessorState state, const ProcessorExternalContext& context) {
         if (state == ProcessorState::Good) {
             return;
@@ -27,7 +26,7 @@ World::World()
         _ecsWorld.destroy(id);
     });
 
-    _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsOnCurrentTick, _cellsOnNextTick));
+    _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsLocator));
     _simulationSystems.emplace_back(std::make_unique<SpawnSystem>(_ecsWorld, Random::Accessor { _randomEngine }, _simulationVm));
     _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
 
@@ -42,16 +41,37 @@ World::World()
         createCell(x, y);
     }
 
-    _tickCalculator.Setup(targetSimulationTime, sf::seconds(1));
+    _tickCalculator.Setup(targetSimulationTime);
 }
 
 void World::Update(const sf::Time elapsedTime)
 {
-    const uint32_t ticks = _tickCalculator.Run(elapsedTime);
+    Warmup();
+
+    const uint32_t ticks = _tickCalculator.CalculateElapsedTicks(GetTickTime(), elapsedTime);
     for (uint32_t i { 0 }; i < ticks; ++i) {
-        for (const auto& system : _simulationSystems) {
-            system->DoSystemUpdate();
-        }
-        _cellsOnCurrentTick = _cellsOnNextTick;
+        Tick();
     }
+}
+
+void World::Warmup()
+{
+    while (!_tickSampler.IsFull()) {
+        Tick();
+    }
+}
+
+sf::Time World::GetTickTime() const
+{
+    return sf::seconds(_tickSampler.CalcMedian());
+}
+
+void World::Tick()
+{
+    const sf::Clock clock;
+    for (const auto& system : _simulationSystems) {
+        system->DoSystemUpdate();
+    }
+    const float seconds = clock.getElapsedTime().asSeconds();
+    _tickSampler.AddSample(seconds);
 }

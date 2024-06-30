@@ -1,17 +1,16 @@
 #include "tick_calculator.h"
 
-void SimulationTickCalculator::Setup(const sf::Time targetSimulationTime, sf::Time tickTime)
+void SimulationTickCalculator::Setup(const sf::Time targetSimulationTime)
 {
     ASSERT(targetSimulationTime.asSeconds() > 0.0f);
 
     _limitSimulationTime = targetSimulationTime;
     _availableTimeToSpent = sf::Time::Zero;
-    _tickTime = tickTime;
 }
 
-uint32_t SimulationTickCalculator::Run(const sf::Time elapsedTime)
+uint32_t SimulationTickCalculator::CalculateElapsedTicks(const sf::Time tickTime, const sf::Time elapsedTime)
 {
-    if (_tickTime == sf::Time::Zero) {
+    if (tickTime == sf::Time::Zero) {
         return 0;
     }
 
@@ -20,14 +19,14 @@ uint32_t SimulationTickCalculator::Run(const sf::Time elapsedTime)
         return 0;
     }
 
-    const float availableTicks = _availableTimeToSpent / _tickTime;
+    const float availableTicks = _availableTimeToSpent / tickTime;
     constexpr float minimumTicks = 1.0f;
-    const float maximumTicks = std::max(minimumTicks, _limitSimulationTime / _tickTime);
+    const float maximumTicks = std::max(minimumTicks, _limitSimulationTime / tickTime);
     const float ticksToProcess = std::clamp(availableTicks, minimumTicks, maximumTicks);
     const uint32_t roundedTicksToProcess = static_cast<uint32_t>(ticksToProcess);
 
-    _availableTimeToSpent -= sf::seconds(static_cast<float>(roundedTicksToProcess) * _tickTime.asSeconds());
-    _availableTimeToSpent = std::min(_availableTimeToSpent, _tickTime);
+    _availableTimeToSpent -= sf::seconds(static_cast<float>(roundedTicksToProcess) * tickTime.asSeconds());
+    _availableTimeToSpent = std::min(_availableTimeToSpent, tickTime);
 
     return roundedTicksToProcess;
 }

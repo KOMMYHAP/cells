@@ -1,9 +1,8 @@
 ﻿#include "movement_system.h"
 
-MovementSystem::MovementSystem(EcsWorld& ecsWorld, CellLocator& currentPositions, CellLocator& nextPositions)
+MovementSystem::MovementSystem(EcsWorld& ecsWorld, CellLocator& currentPositions)
     : SimulationEcsSystem(ecsWorld)
     , _currentPositionManager(&currentPositions)
-    , _nextPositionManager(&nextPositions)
 {
 }
 
@@ -13,25 +12,13 @@ void MovementSystem::DoProcessComponents(const CellId id, CellPosition& position
     if (nextPosition == InvalidCellPosition) {
         return;
     }
-
-    if (const CellId expectedTargetCell = _currentPositionManager->Find(nextPosition); expectedTargetCell != CellId::Invalid) {
+    if (const CellId targetCell = _currentPositionManager->Find(nextPosition); targetCell != CellId::Invalid) {
         return;
     }
 
     EcsWorld& ecsWorld = AccessEcsWorld();
     ecsWorld.remove<MoveDirection>(id);
 
-    {
-        std::shared_lock _ { _positionMutex };
-        if (const CellId actualTargetCell = _nextPositionManager->Find(nextPosition); actualTargetCell != CellId::Invalid) {
-            return;
-        }
-    }
-
-    {
-        std::unique_lock _ { _positionMutex };
-        _nextPositionManager->Move(position, nextPosition);
-    }
-
+    _currentPositionManager->Move(position, nextPosition);
     position = nextPosition;
 }

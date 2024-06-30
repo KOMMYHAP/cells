@@ -2,12 +2,11 @@
 
 class SimulationTickCalculator {
 public:
-    void Setup(sf::Time targetSimulationTime, sf::Time tickTime);
+    void Setup(sf::Time targetSimulationTime);
 
-    uint32_t Run(sf::Time elapsedTime);
+    uint32_t CalculateElapsedTicks(sf::Time tickTime, sf::Time elapsedTime);
 
 private:
-    sf::Time _tickTime;
     sf::Time _limitSimulationTime;
     sf::Time _availableTimeToSpent;
 };
