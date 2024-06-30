@@ -19,5 +19,4 @@ target_sources(${PROJECT_NAME} PRIVATE
         spawn_place.h
         move_direction.h
         move_direction.cpp
-        dummy_component.h
 )

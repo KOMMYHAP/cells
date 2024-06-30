@@ -1,6 +1,7 @@
 #include "world.h"
 
 #include "SFML/Graphics/Shader.hpp"
+#include "components/cell_type.h"
 #include "procedures/move_procedure.h"
 #include "procedures/simulation_procedure_context.h"
 
@@ -34,11 +35,23 @@ World::World()
         const CellId id = _ecsWorld.create();
         _ecsWorld.emplace<SpawnPlace>(id, SpawnPlace {});
         _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
+        _ecsWorld.emplace<CellType>(id, CellType::Unit);
     };
     for (int i = 0; i < 100; ++i) {
         int x = i % _worldSize.x;
         int y = i % _worldSize.y;
         createCell(x, y);
+    }
+    auto createFood = [this](int16_t x, int16_t y) {
+        const CellId id = _ecsWorld.create();
+        _ecsWorld.emplace<SpawnPlace>(id, SpawnPlace {});
+        _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
+        _ecsWorld.emplace<CellType>(id, CellType::Food);
+    };
+    for (int i = 0; i < 100; ++i) {
+        int x = (i + 5) % _worldSize.x;
+        int y = i % _worldSize.y;
+        createFood(x, y);
     }
 
     _tickCalculator.Setup(targetSimulationTime);
@@ -63,7 +76,8 @@ void World::Warmup()
 
 sf::Time World::GetTickTime() const
 {
-    return sf::seconds(_tickSampler.CalcMedian());
+    return sf::seconds(1);
+    // return sf::seconds(_tickSampler.CalcMedian());
 }
 
 void World::Tick()
