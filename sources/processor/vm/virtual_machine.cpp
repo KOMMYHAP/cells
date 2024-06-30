@@ -11,7 +11,7 @@ static_assert(std::is_trivial_v<ProcessorFlags>, "As part of memory view Process
 
 ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t inputArgs, uint8_t outputArgs)
 {
-    auto info = ProcedureTableEntry { inputArgs, outputArgs, procedure };
+    const auto info = ProcedureTableEntry { inputArgs, outputArgs, procedure };
     const ProcedureId id = _procedureTable.RegisterProcedure(info);
     return id;
 }
@@ -21,6 +21,7 @@ void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalConte
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     ASSERT(controlBlockRead);
 
+    ASSERT(_processorStateWatcher, "Invalid state watcher!");
     ProcessorExternalContext externalContext { std::move(procedureExternalContext) };
     ProcessorContext::Params params {
         &_procedureTable,

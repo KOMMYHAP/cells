@@ -10,7 +10,7 @@ public:
     template <class T>
     T& Modify()
     {
-        T* value = std::any_cast<T*>(_data);
+        T* value = std::any_cast<T>(&_data);
         ASSERT(value != nullptr);
         return *value;
     }
@@ -18,7 +18,7 @@ public:
     template <class T>
     const T& Get() const
     {
-        const T* value = std::any_cast<const T*>(_data);
+        const T* value = std::any_cast<T>(&_data);
         ASSERT(value != nullptr);
         return *value;
     }

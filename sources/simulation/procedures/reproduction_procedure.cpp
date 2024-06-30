@@ -27,7 +27,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
         context.MarkProcedureAsInvalid();
         return;
     }
-    const CellId id = *context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
 
     // constexpr CellHealth healthPerAction { 50 };
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

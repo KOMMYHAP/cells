@@ -1,15 +1,15 @@
 #include "tick_calculator.h"
 
-void SimulationTickCalculator::Setup(sf::Time targetSimulationTime)
+void SimulationTickCalculator::Setup(const sf::Time targetSimulationTime, sf::Time tickTime)
 {
     ASSERT(targetSimulationTime.asSeconds() > 0.0f);
 
     _limitSimulationTime = targetSimulationTime;
     _availableTimeToSpent = sf::Time::Zero;
-    _tickTime = sf::seconds(1);
+    _tickTime = tickTime;
 }
 
-uint32_t SimulationTickCalculator::Run(sf::Time elapsedTime)
+uint32_t SimulationTickCalculator::Run(const sf::Time elapsedTime)
 {
     if (_tickTime == sf::Time::Zero) {
         return 0;

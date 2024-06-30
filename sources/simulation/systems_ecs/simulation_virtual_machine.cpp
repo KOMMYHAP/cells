@@ -13,14 +13,16 @@ SimulationVirtualMachine::SimulationVirtualMachine()
 void SimulationVirtualMachine::Run(const CellId& id, CellBrain& brain)
 {
     const ProcessorMemory memory { brain.data };
-    _virtualMachine.Run(memory, std::make_any<SimulationProcedureContext>(&id));
+    _virtualMachine.Run(memory, std::make_any<SimulationProcedureContext>(id));
 }
 
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const
 {
     const auto index = static_cast<uint8_t>(type);
     ASSERT(index < _procedureTypeMapping.size());
-    return _procedureTypeMapping[index];
+    const ProcedureId id = _procedureTypeMapping[index];
+    ASSERT(id != ProcedureId::Invalid, "Procedure was not registered!");
+    return id;
 }
 
 const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(ProcedureType type) const

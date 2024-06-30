@@ -24,7 +24,7 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    const CellId id = *context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
 
     // constexpr CellHealth healthPerAction { 5 };
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

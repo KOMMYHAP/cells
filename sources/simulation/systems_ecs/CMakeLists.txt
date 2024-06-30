@@ -15,4 +15,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         simulation_virtual_machine.h
         simulation_virtual_machine.hpp
         simulation_component_type.h
+        brain_simulation_system.h
+        brain_simulation_system.cpp
 )

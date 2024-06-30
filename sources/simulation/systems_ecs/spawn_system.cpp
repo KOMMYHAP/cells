@@ -10,7 +10,7 @@
 #include "processor/processor_instruction.h"
 #include "processor/processor_memory.h"
 
-SpawnSystem::SpawnSystem(EcsWorld& ecsWorld, Random::Accessor random, SimulationVirtualMachine& vm)
+SpawnSystem::SpawnSystem(EcsWorld& ecsWorld, Random::Accessor random, const SimulationVirtualMachine& vm)
     : SimulationEcsSystem(ecsWorld)
     , _simulationVm(&vm)
     , _random(std::move(random))

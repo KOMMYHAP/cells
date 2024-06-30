@@ -1,7 +1,7 @@
 #pragma once
 #include "processor_external_context.h"
 
-enum class ProcessorState : unsigned char {
+enum class ProcessorState : uint8_t {
     Good,
     InvalidInstruction,
     InvalidProcedure,

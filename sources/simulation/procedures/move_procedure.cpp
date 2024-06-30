@@ -23,6 +23,6 @@ void MoveProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    const CellId* id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
-    _world->emplace_or_replace<MoveDirection>(*id, direction);
+    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    _world->emplace_or_replace<MoveDirection>(id, direction);
 }

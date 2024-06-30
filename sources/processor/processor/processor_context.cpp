@@ -11,6 +11,7 @@ ProcessorContext::ProcessorContext(Params params)
     if (!SetCommandPointer(_params.controlBlock->nextCommand)) {
         ASSERT_FAIL("Invalid command pointer!");
     }
+    ASSERT(*_params.stateWatcher, "Invalid state watcher!");
 }
 
 bool ProcessorContext::HasFlag(ProcessorFlags flag) const
