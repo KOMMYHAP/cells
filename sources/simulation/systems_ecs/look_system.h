@@ -10,7 +10,7 @@ class LookSystem final : public SimulationEcsSystem<LookSystem, const CellPositi
 public:
     explicit LookSystem(EcsWorld& ecsWorld, CellLocator& locator);
 
-    void DoProcessComponents(CellPosition position, LookDirection direction, ProcedureResult& result);
+    void DoProcessComponents(CellId id, CellPosition position, LookDirection direction, ProcedureResult& result);
 
 private:
     gsl::not_null<CellLocator*> _locator;

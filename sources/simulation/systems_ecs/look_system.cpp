@@ -8,7 +8,7 @@ LookSystem::LookSystem(EcsWorld& ecsWorld, CellLocator& locator)
 {
 }
 
-void LookSystem::DoProcessComponents(const CellPosition position, const LookDirection direction, ProcedureResult& result)
+void LookSystem::DoProcessComponents(CellId /*id*/, const CellPosition position, const LookDirection direction, ProcedureResult& result)
 {
     const CellPosition lookPosition = _locator->TryApplyDirection(position, direction.value);
     if (lookPosition == InvalidCellPosition) {
