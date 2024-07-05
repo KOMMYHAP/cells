@@ -26,9 +26,10 @@ template <MemoryType T>
 T ProcessorStack::Pop()
 {
     ASSERT(CanPop<T>());
-    _offset -= sizeof(T);
+    uint8_t& offset = *_offset;
+    offset -= sizeof(T);
     T value;
-    memcpy(&value, &_buffer[_offset], sizeof(T));
+    memcpy(&value, &_buffer[offset], sizeof(T));
     return value;
 }
 
@@ -37,8 +38,9 @@ template <class T>
 void ProcessorStack::Push(T&& value)
 {
     ASSERT(CanPush<std::decay_t<T>>());
-    new (&_buffer[_offset]) std::decay_t<T>(std::forward<T>(value));
-    _offset += sizeof(T);
+    uint8_t& offset = *_offset;
+    new (&_buffer[offset]) std::decay_t<T>(std::forward<T>(value));
+    offset += sizeof(T);
 }
 
 template <class... Ts>
@@ -52,15 +54,15 @@ bool ProcessorStack::TryPush(Ts&&... ts)
     return true;
 }
 
-inline ProcessorStack::ProcessorStack(const std::span<std::byte>& buffer, uint8_t& offset)
+inline ProcessorStack::ProcessorStack(std::span<std::byte> buffer, uint8_t& offset)
     : _buffer(buffer)
-    , _offset(offset)
+    , _offset(&offset)
 {
 }
 
 inline uint8_t ProcessorStack::GetPushedBytesCount() const
 {
-    return _offset;
+    return *_offset;
 }
 
 inline uint8_t ProcessorStack::GetBytesCapacity() const
