@@ -14,7 +14,7 @@ class Spawner;
 
 class ReproductionProcedure final : public ProcedureBase {
 public:
-    ReproductionProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, HealthSystem& healthSystem, BrainSystem& brainSystem, TypeSystem& typeSystem, Spawner& spawner);
+    ReproductionProcedure(EcsWorld& world);
 
     void Execute(ProcedureContext& context) override;
 
@@ -22,10 +22,7 @@ private:
     CellPosition SelectPosition(CellPosition lhs, CellPosition rhs) const;
     CellBrain MakeChildBrain(CellId lhs, CellId rhs) const;
 
-    const SimulationVirtualMachine& _vm;
-    CellLocator& _positionSystem;
-    HealthSystem& _healthSystem;
-    BrainSystem& _brainSystem;
-    TypeSystem& _typeSystem;
-    Spawner& _spawner;
+    // gsl::not_null<const SimulationVirtualMachine*> _vm;
+    // gsl::not_null<CellLocator*> _locator;
+    gsl::not_null<EcsWorld*> _world;
 };

@@ -19,4 +19,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         brain_simulation_system.cpp
         look_system.h
         look_system.cpp
+        energy_system.h
+        energy_system.cpp
+        reproduction_system.h
+        reproduction_system.cpp
 )

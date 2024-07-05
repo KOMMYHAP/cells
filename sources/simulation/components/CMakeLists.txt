@@ -16,10 +16,14 @@ target_sources(${PROJECT_NAME} PRIVATE
         component_storage.cpp
         component_registry.cpp
         
-        spawn_place.h
+        spawn_data.h
         look_direction.h
         move_direction.h
         direction.h
         direction.cpp
         procedure_result.h
+        reproduction_direction.h
+        cell_energy.h
+        cell_energy_change.h
+        cell_energy_empty.h
 )

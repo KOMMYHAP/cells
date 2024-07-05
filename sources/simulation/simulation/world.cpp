@@ -33,7 +33,7 @@ World::World()
 
     auto createCell = [this](int16_t x, int16_t y) {
         const CellId id = _ecsWorld.create();
-        _ecsWorld.emplace<SpawnPlace>(id, SpawnPlace {});
+        _ecsWorld.emplace<JustSpawned>(id, JustSpawned {});
         _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
         _ecsWorld.emplace<CellType>(id, CellType::Unit);
     };
@@ -44,7 +44,7 @@ World::World()
     }
     auto createFood = [this](int16_t x, int16_t y) {
         const CellId id = _ecsWorld.create();
-        _ecsWorld.emplace<SpawnPlace>(id, SpawnPlace {});
+        _ecsWorld.emplace<JustSpawned>(id, JustSpawned {});
         _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
         _ecsWorld.emplace<CellType>(id, CellType::Food);
     };

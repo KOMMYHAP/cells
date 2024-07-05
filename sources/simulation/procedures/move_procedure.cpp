@@ -4,8 +4,6 @@
 #include "systems_ecs/cell_locator.h"
 #include "systems_ecs/simulation_virtual_machine.h"
 
-#include <entt/entity/registry.hpp>
-
 MoveProcedure::MoveProcedure(EcsWorld& world)
     : _world(&world)
 {
