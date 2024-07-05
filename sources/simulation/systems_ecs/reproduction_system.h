@@ -11,13 +11,11 @@
 
 class ReproductionSystem final : public SimulationEcsSystem<ReproductionSystem, const CellPosition, const ReproductionDirection, ProcedureResult> {
 public:
-    ReproductionSystem(EcsWorld& ecsWorld, const SimulationVirtualMachine & vm, const CellLocator& locator, Random::Accessor random);
+    ReproductionSystem(EcsWorld& ecsWorld, const SimulationVirtualMachine& vm, const CellLocator& locator, Random::Accessor random);
 
     void DoProcessComponents(CellId id, CellPosition position, ReproductionDirection direction, ProcedureResult& result);
 
 private:
-    CellBrain MakeTempBrain();
-    
     gsl::not_null<const CellLocator*> _locator;
     gsl::not_null<const SimulationVirtualMachine*> _vm;
     Random::Accessor _random;

@@ -1,12 +1,15 @@
 #include "world.h"
 
 #include "SFML/Graphics/Shader.hpp"
+#include "cell_factories/patrol_cell.h"
 #include "components/cell_type.h"
 #include "procedures/move_procedure.h"
 #include "procedures/simulation_procedure_context.h"
 
 #include "systems_ecs/brain_simulation_system.h"
+#include "systems_ecs/look_system.h"
 #include "systems_ecs/movement_system.h"
+#include "systems_ecs/reproduction_system.h"
 #include "systems_ecs/spawn_system.h"
 
 World::World()
@@ -28,32 +31,20 @@ World::World()
     });
 
     _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsLocator));
-    _simulationSystems.emplace_back(std::make_unique<SpawnSystem>(_ecsWorld, Random::Accessor { _randomEngine }, _simulationVm));
+    _simulationSystems.emplace_back(std::make_unique<LookSystem>(_ecsWorld, _cellsLocator));
+    _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator, Random::Accessor { _randomEngine }));
     _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
 
     auto createCell = [this](int16_t x, int16_t y) {
-        const CellId id = _ecsWorld.create();
-        _ecsWorld.emplace<JustSpawned>(id, JustSpawned {});
-        _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
-        _ecsWorld.emplace<CellType>(id, CellType::Unit);
+        const CellId child = _ecsWorld.create();
+        _ecsWorld.emplace<CellBrain>(child, MakePatrolCell(_simulationVm));
+        _ecsWorld.emplace<CellPosition>(child, x, y);
     };
     for (int i = 0; i < 100; ++i) {
         int x = i % _worldSize.x;
         int y = i % _worldSize.y;
         createCell(x, y);
     }
-    auto createFood = [this](int16_t x, int16_t y) {
-        const CellId id = _ecsWorld.create();
-        _ecsWorld.emplace<JustSpawned>(id, JustSpawned {});
-        _ecsWorld.emplace<CellPosition>(id, CellPosition { x, y });
-        _ecsWorld.emplace<CellType>(id, CellType::Food);
-    };
-    for (int i = 0; i < 100; ++i) {
-        int x = (i + 5) % _worldSize.x;
-        int y = i % _worldSize.y;
-        createFood(x, y);
-    }
-
     _tickCalculator.Setup(targetSimulationTime);
 }
 
