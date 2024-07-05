@@ -13,6 +13,7 @@ public:
     MovementSystem(EcsWorld& ecsWorld, CellLocator& currentPositions);
 
     void DoProcessComponents(CellId id, CellPosition& position, MoveDirection direction);
+
 private:
-    gsl::not_null<CellLocator*> _currentPositionManager;
+    gsl::not_null<CellLocator*> _cellsLocator;
 };

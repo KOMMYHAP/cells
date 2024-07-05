@@ -8,12 +8,11 @@ class TypeSystem;
 
 class LookProcedure final : public ProcedureBase {
 public:
-    LookProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, TypeSystem& typeSystem);
+    LookProcedure(EcsWorld& world, const CellLocator& locator);
 
-    void Execute(ProcedureContext& context) override;
+    void Execute(ProcedureContext& procedureContext) override;
 
 private:
-    const SimulationVirtualMachine& _vm;
-    CellLocator& _positionSystem;
-    TypeSystem& _typeSystem;
+    gsl::not_null<EcsWorld*> _world;
+    gsl::not_null<const CellLocator*> _locator;
 };

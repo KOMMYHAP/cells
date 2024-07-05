@@ -17,6 +17,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         component_registry.cpp
         
         spawn_place.h
+        look_direction.h
         move_direction.h
-        move_direction.cpp
+        direction.h
+        direction.cpp
 )

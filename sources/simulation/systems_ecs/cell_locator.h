@@ -19,7 +19,7 @@ public:
     bool IsNeighbourFor(CellPosition lhs, CellPosition rhs) const;
 
     bool IsValidPosition(CellPosition position) const;
-    CellPosition TryApplyDirection(CellPosition position, MoveDirection direction) const;
+    CellPosition TryApplyDirection(CellPosition position, Direction direction) const;
 
 private:
     uint32_t ToGridIndex(CellPosition position) const;

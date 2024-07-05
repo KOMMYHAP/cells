@@ -9,7 +9,7 @@ class BrainSimulationSystem final : public SimulationEcsSystem<BrainSimulationSy
 public:
     explicit BrainSimulationSystem(EcsWorld& ecsWorld, SimulationVirtualMachine& vm);
 
-    void DoProcessComponents(const CellId& id, CellBrain& brain);
+    void DoProcessComponents(CellId id, CellBrain& brain);
 
 private:
     gsl::not_null<SimulationVirtualMachine*> _vm;

@@ -22,8 +22,8 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     if (!readArgs) {
         return;
     }
-    MoveDirection direction;
-    if (!TryParseMoveDirection(rawDirection, direction)) {
+    Direction direction;
+    if (!TryParseDirection(rawDirection, direction)) {
         context.MarkProcedureAsInvalid();
         return;
     }

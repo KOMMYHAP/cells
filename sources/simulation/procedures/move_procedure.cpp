@@ -17,12 +17,12 @@ void MoveProcedure::Execute(ProcedureContext& context)
     if (!readArgs) {
         return;
     }
-    MoveDirection direction;
-    if (!TryParseMoveDirection(rawDirection, direction)) {
+    Direction direction;
+    if (!TryParseDirection(rawDirection, direction)) {
         context.MarkProcedureAsInvalid();
         return;
     }
 
     const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
-    _world->emplace_or_replace<MoveDirection>(id, direction);
+    _world->emplace<MoveDirection>(id, direction);
 }

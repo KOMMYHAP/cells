@@ -28,28 +28,28 @@ CellId CellLocator::Find(CellPosition position) const
     return _grid[index];
 }
 
-CellPosition CellLocator::TryApplyDirection(CellPosition position, MoveDirection direction) const
+CellPosition CellLocator::TryApplyDirection(CellPosition position, Direction direction) const
 {
     switch (direction) {
-    case MoveDirection::Left:
+    case Direction::Left:
         if (position.x >= 1) {
             position.x -= 1;
             return position;
         }
         break;
-    case MoveDirection::Right:
+    case Direction::Right:
         if (position.x + 1 < GetWidth()) {
             position.x += 1;
             return position;
         }
         break;
-    case MoveDirection::Up:
+    case Direction::Up:
         if (position.y >= 1) {
             position.y -= 1;
             return position;
         }
         break;
-    case MoveDirection::Down:
+    case Direction::Down:
         if (position.y + 1 < GetHeight()) {
             position.y += 1;
             return position;

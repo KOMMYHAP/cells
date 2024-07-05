@@ -10,7 +10,7 @@ SimulationVirtualMachine::SimulationVirtualMachine()
 {
 }
 
-void SimulationVirtualMachine::Run(const CellId& id, CellBrain& brain)
+void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)
 {
     const ProcessorMemory memory { brain.data };
     _virtualMachine.Run(memory, std::make_any<SimulationProcedureContext>(id));

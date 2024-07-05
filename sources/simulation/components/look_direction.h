@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "direction.h"
 
-struct MoveDirection {
+struct LookDirection {
     Direction value;
 };

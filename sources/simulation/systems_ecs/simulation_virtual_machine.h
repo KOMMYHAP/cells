@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/cell_id.h"
+#include "components/cell_position.h"
 #include "components/procedure_type.h"
 #include "vm/virtual_machine.h"
 
@@ -25,7 +26,7 @@ public:
     void SetWatcher(ProcessorStateWatcher watcher);
     void SetInstructionsPerStep(uint8_t count);
 
-    void Run(const CellId& id, CellBrain& brain);
+    void Run(CellId id, CellBrain& brain);
 
     ProcedureId GetProcedureId(ProcedureType type) const;
     const SimulationProcedureInfo* FindProcedureInfo(ProcedureType type) const;
