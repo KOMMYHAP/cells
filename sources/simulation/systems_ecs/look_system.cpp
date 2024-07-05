@@ -16,8 +16,7 @@ void LookSystem::DoProcessComponents(const CellPosition position, const LookDire
         return;
     }
 
-    const CellId anotherCell = _locator->Find(lookPosition);
-    if (anotherCell == CellId::Invalid) {
+    if (const CellId anotherCell = _locator->Find(lookPosition); anotherCell == CellId::Invalid) {
         result.context.TryPushResult(CellType::Dummy);
         return;
     }

@@ -8,7 +8,7 @@ public:
     {
         _offset = 0;
         _memoryBuffer.resize(size);
-        std::fill(_memoryBuffer.begin(), _memoryBuffer.end(), std::byte { 0xDD });
+        std::ranges::fill(_memoryBuffer, std::byte { 0xDD });
     }
 
     ProcessorStack GetStack()

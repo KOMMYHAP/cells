@@ -4,7 +4,6 @@
 #include "simulation_ecs_system.h"
 #include "simulation_virtual_machine.h"
 
-#include "components/cell_brain.h"
 #include "components/procedure_result.h"
 #include "components/reproduction_direction.h"
 #include "random/random.h"
