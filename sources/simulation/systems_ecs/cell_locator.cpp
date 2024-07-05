@@ -7,9 +7,9 @@ CellLocator::CellLocator(uint32_t width, uint32_t height)
 {
 }
 
-void CellLocator::Move(const CellPosition position, const CellPosition newPosition)
+void CellLocator::Replace(const CellPosition oldPosition, const CellPosition newPosition)
 {
-    const uint32_t index = ToGridIndex(position);
+    const uint32_t index = ToGridIndex(oldPosition);
     const uint32_t newIndex = ToGridIndex(newPosition);
     ASSERT(_grid[newIndex] == CellId::Invalid, "Two cells placed on the same position!");
     _grid[newIndex] = std::exchange(_grid[index], CellId::Invalid);

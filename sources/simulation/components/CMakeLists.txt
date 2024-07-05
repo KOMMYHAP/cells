@@ -21,4 +21,5 @@ target_sources(${PROJECT_NAME} PRIVATE
         move_direction.h
         direction.h
         direction.cpp
+        procedure_result.h
 )

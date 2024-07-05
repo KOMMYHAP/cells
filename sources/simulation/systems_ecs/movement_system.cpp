@@ -19,6 +19,6 @@ void MovementSystem::DoProcessComponents(const CellId id, CellPosition& position
     EcsWorld& ecsWorld = AccessEcsWorld();
     ecsWorld.remove<MoveDirection>(id);
 
-    _cellsLocator->Move(position, nextPosition);
+    _cellsLocator->Replace(position, nextPosition);
     position = nextPosition;
 }

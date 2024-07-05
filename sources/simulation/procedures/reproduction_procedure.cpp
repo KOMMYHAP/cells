@@ -33,7 +33,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
     //     return;
     // }
-
+    //
     // const CellPosition position = _positionSystem.Get(id);
     // const CellPosition secondParentPosition = _positionSystem.TryApplyDirection(position, direction);
     // if (secondParentPosition == InvalidCellPosition) {
@@ -49,12 +49,12 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     //     // Hmm... Does cell try to reproduce with ... food?
     //     return;
     // }
-
+    //
     // const CellPosition childPosition = SelectPosition(position, secondParentPosition);
     // if (childPosition == InvalidCellPosition) {
     //     return;
     // }
-
+    //
     // constexpr CellHealth childInitialHealth { 35 };
     //
     // SpawnProperties properties;
