@@ -1,3 +1,4 @@
+#include "processor/processor_stack.h"
 #include "vm/virtual_machine.h"
 
 namespace {

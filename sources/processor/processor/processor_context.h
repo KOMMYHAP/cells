@@ -5,6 +5,7 @@
 #include "processor_control_block_guard.h"
 #include "processor_external_context.h"
 #include "processor_memory.h"
+#include "processor_stack.h"
 #include "processor_state.h"
 
 class ProcessorContext {
@@ -13,14 +14,17 @@ public:
         gsl::not_null<const ProcedureTable*> procedureTable;
         gsl::not_null<const ProcessorStateWatcher*> stateWatcher;
         gsl::not_null<ProcessorControlBlock*> controlBlock;
-        gsl::not_null<ProcessorExternalContext*> externalContext;
+        ProcessorExternalContext externalContext;
         ProcessorMemory memory;
     };
 
     explicit ProcessorContext(Params params);
 
     ProcessorControlBlockGuard MakeGuard();
-    bool RunProcedure(ProcedureId id);
+
+    bool StartProcedure(ProcedureId id);
+    bool CompleteProcedure(ProcedureId id, uint8_t ignoredInputArgs, uint8_t missingOutputArgs);
+    bool HasPendingProcedure() const { return _pendingProcedure.has_value(); }
 
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();
@@ -41,13 +45,14 @@ public:
     bool PushStack(std::byte data);
     std::pair<bool, std::byte> PopStack();
 
-    const ProcessorExternalContext& GetExternalContext() const { return *_params.externalContext; }
-    ProcessorExternalContext& ModifyExternalContext() { return *_params.externalContext; }
+    const ProcessorExternalContext& GetExternalContext() const { return _params.externalContext; }
+    ProcessorExternalContext& ModifyExternalContext() { return _params.externalContext; }
 
 private:
     Params _params;
     ProcessorMemory _initialMemory;
     ProcessorStack _stack;
+    std::optional<ProcedureId> _pendingProcedure;
 };
 
 #include "processor_context.hpp"

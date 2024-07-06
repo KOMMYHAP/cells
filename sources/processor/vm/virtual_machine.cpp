@@ -20,14 +20,13 @@ void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalConte
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     ASSERT(controlBlockRead);
-
     ASSERT(_processorStateWatcher, "Invalid state watcher!");
-    ProcessorExternalContext externalContext { std::move(procedureExternalContext) };
+
     ProcessorContext::Params params {
         &_procedureTable,
         &_processorStateWatcher,
         controlBlock,
-        &externalContext,
+        ProcessorExternalContext { std::move(procedureExternalContext) },
         memory,
     };
     ProcessorContext context { std::move(params) };

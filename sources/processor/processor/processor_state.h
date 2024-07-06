@@ -10,6 +10,8 @@ enum class ProcessorState : uint8_t {
     ProcedureIgnoreInput,
     ProcedureMissingOutput,
     ProcedureTooMuchOutput,
+    IncompleteDelayedProcedure,
+    UnknownDelayedProcedure,
     StackOverflow,
     StackUnderflow,
     OutOfMemory,

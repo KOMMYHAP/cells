@@ -1,7 +1,7 @@
 # add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        procedure.cpp
         procedure_table.cpp
+        procedure_context.cpp
 )
 
 
@@ -9,6 +9,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 target_sources(${PROJECT_NAME} PUBLIC
         procedure.h
         procedure_id.h
-        procedure.hpp
         procedure_table.h
+        procedure_context.h
+        procedure_context.hpp
 )

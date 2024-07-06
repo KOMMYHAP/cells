@@ -2,6 +2,7 @@
 
 #include "flags.h"
 #include "processor_state.h"
+#include "procedures/procedure_context.h"
 
 ProcessorContext::ProcessorContext(Params params)
     : _params(std::move(params))
@@ -37,7 +38,7 @@ bool ProcessorContext::IsState(ProcessorState state) const
 void ProcessorContext::SetState(ProcessorState state)
 {
     _params.controlBlock->state = static_cast<uint8_t>(state);
-    (*_params.stateWatcher)(state, *_params.externalContext);
+    (*_params.stateWatcher)(state, _params.externalContext);
 }
 
 bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
@@ -79,7 +80,7 @@ std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
     return { true, _params.controlBlock->registry[index] };
 }
 
-bool ProcessorContext::RunProcedure(const ProcedureId id)
+bool ProcessorContext::StartProcedure(ProcedureId id)
 {
     const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
     if (!info) {
@@ -95,20 +96,33 @@ bool ProcessorContext::RunProcedure(const ProcedureId id)
         SetState(ProcessorState::ProcedureMissingInput);
         return false;
     }
+    
+    ASSERT(!_pendingProcedure.has_value());
+    _pendingProcedure = id;
 
-    ProcedureContext procedureContext { *this, _stack, inputArgsCount, outputArgsCount };
+    ProcedureContext procedureContext { id, *this, _stack, inputArgsCount, outputArgsCount };
     info->procedure->Execute(procedureContext);
+    return true;
+}
+
+bool ProcessorContext::CompleteProcedure(ProcedureId id, uint8_t ignoredInputArgs, uint8_t missingOutputArgs)
+{
+    if (!_pendingProcedure.has_value() || *_pendingProcedure != id) {
+        SetState(ProcessorState::UnknownDelayedProcedure);
+        return false;
+    }
     if (!IsState(ProcessorState::Good)) {
         return false;
     }
-    if (inputArgsCount != 0) {
+    if (ignoredInputArgs != 0) {
         SetState(ProcessorState::ProcedureIgnoreInput);
         return false;
     }
-    if (outputArgsCount != 0) {
+    if (missingOutputArgs != 0) {
         SetState(ProcessorState::ProcedureMissingOutput);
         return false;
     }
+    _pendingProcedure.reset();
     return true;
 }
 

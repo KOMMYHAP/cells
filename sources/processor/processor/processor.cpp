@@ -31,6 +31,11 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
 {
     ASSERT(context.IsState(ProcessorState::Good));
 
+    if (context.HasPendingProcedure()) {
+        context.SetState(ProcessorState::IncompleteDelayedProcedure);
+        return {};
+    }
+
     ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
 
     const auto [instructionRead, rawInstruction] = context.TryReadMemory<uint8_t>();
@@ -234,7 +239,7 @@ bool Processor::ProcessOneOperand(OneOperandContext instructionContext, Processo
     } break;
     case ProcessorInstruction::Call: {
         const auto procedureIdx = static_cast<ProcedureId>(instructionContext.operand1);
-        if (!context.RunProcedure(procedureIdx)) {
+        if (!context.StartProcedure(procedureIdx)) {
             return false;
         }
     } break;

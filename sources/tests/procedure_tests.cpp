@@ -1,5 +1,7 @@
+#include "procedures/procedure_context.h"
 #include "processor/processor_control_block.h"
 #include "processor/processor_instruction.h"
+#include "processor/processor_stack.h"
 #include "vm/virtual_machine.h"
 
 namespace {
@@ -114,7 +116,7 @@ private:
     {
         return [this](ProcessorState state, ProcessorExternalContext& context) {
             if (_assertOnBadState) {
-                ASSERT(state != ProcessorState::Good);
+                ASSERT(state == ProcessorState::Good);
             }
             _lastProcessorState = state;
         };
@@ -123,7 +125,7 @@ private:
     void MakeMemory(uint8_t size)
     {
         _memoryBuffer.resize(size);
-        std::fill(_memoryBuffer.begin(), _memoryBuffer.end(), std::byte { 0xDD });
+        std::ranges::fill(_memoryBuffer, std::byte { 0xDD });
     }
 
     std::vector<std::byte> _memoryBuffer;
