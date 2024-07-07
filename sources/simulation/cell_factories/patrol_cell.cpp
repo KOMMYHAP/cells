@@ -21,13 +21,18 @@ CellBrain MakePatrolCell(const SimulationVirtualMachine& vm)
     memory.Write(controlBlock);
 
     const ProcedureId move = vm.GetProcedureId(ProcedureType::Move);
+    const ProcedureId look = vm.GetProcedureId(ProcedureType::Look);
 
     constexpr int moveCommandCount { 10 };
     for (int i = 0; i < moveCommandCount; ++i) {
         memory.Write(ProcessorInstruction::PushStackValue, Direction::Right);
+        memory.Write(ProcessorInstruction::Call, look);
+        memory.Write(ProcessorInstruction::PushStackValue, Direction::Right);
         memory.Write(ProcessorInstruction::Call, move);
     }
     for (uint8_t i = 0; i < moveCommandCount; ++i) {
+        memory.Write(ProcessorInstruction::PushStackValue, Direction::Left);
+        memory.Write(ProcessorInstruction::Call, look);
         memory.Write(ProcessorInstruction::PushStackValue, Direction::Left);
         memory.Write(ProcessorInstruction::Call, move);
     }

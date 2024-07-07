@@ -118,6 +118,7 @@ void ProcessorContext::DeferProcedure(const ProcedureContext& context)
 {
     ASSERT(_pendingProcedureId == ProcedureId::Invalid);
     _params.pendingProcedurePlaceholder->Set(context);
+    _pendingProcedureId = context.GetId();
 }
 
 bool ProcessorContext::CompleteProcedure(const ProcedureContext& context)

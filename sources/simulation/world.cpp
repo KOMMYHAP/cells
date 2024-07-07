@@ -3,6 +3,7 @@
 #include "SFML/Graphics/Shader.hpp"
 #include "cell_factories/patrol_cell.h"
 #include "components/cell_type.h"
+#include "procedures/look_procedure.h"
 #include "procedures/move_procedure.h"
 #include "simulation/simulation_procedure_context.h"
 
@@ -21,6 +22,7 @@ World::World()
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
     _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _ecsWorld);
+    _simulationVm.RegisterProcedure<LookProcedure>(ProcedureType::Look, 1, 1, "look", _ecsWorld, _cellsLocator);
 
     _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsLocator));
     _simulationSystems.emplace_back(std::make_unique<LookSystem>(_ecsWorld, _cellsLocator, _simulationVm));

@@ -54,9 +54,9 @@ public:
         return { _debugger, false };
     }
 
-    void Tick()
+    void Tick(std::any externalContext = {})
     {
-        _vm->Run({ _memoryBuffer });
+        _vm->Run({ _memoryBuffer }, std::move(externalContext));
     }
 
     void TestRollback(ProcessorState expectedErrorState)
@@ -408,4 +408,61 @@ TEST_F(ProcedureFixture, Rollback_TooMuchOuput)
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
     accessor.Write(ProcessorInstruction::Call, id);
     TestRollback(ProcessorState::ProcedureTooMuchOutput);
+}
+
+TEST_F(ProcedureFixture, DeferredExecution_Complete)
+{
+    auto accessor = GetMemory();
+    auto procedure = std::make_unique<TestProcedure>();
+    procedure->func = [&](ProcedureContext& context) {
+        context.DeferExecution();
+    };
+
+    const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
+    accessor.Write(ProcessorInstruction::Call, id);
+    Tick();
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
+
+    ProcedureContext context = vm->RestoreDeferredExecution(GetMemory());
+    const bool r = context.TryPushResult(std::byte { 42 });
+    ASSERT_TRUE(r);
+    context.CompleteProcedure();
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
+}
+
+TEST_F(ProcedureFixture, DeferredExecution_Abort)
+{
+    auto accessor = GetMemory();
+    auto procedure = std::make_unique<TestProcedure>();
+    procedure->func = [&](ProcedureContext& context) {
+        context.DeferExecution();
+    };
+
+    const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
+    accessor.Write(ProcessorInstruction::Call, id);
+    Tick();
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
+
+    ProcedureContext context = vm->RestoreDeferredExecution(GetMemory());
+    context.AbortProcedure();
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::AbortedProcedure);
+}
+
+TEST_F(ProcedureFixture, ExternalContext)
+{
+    auto accessor = GetMemory();
+    auto procedure = std::make_unique<TestProcedure>();
+    struct TestExternalContext {
+        std::string value;
+    };
+    TestExternalContext outContext;
+    procedure->func = [&](const ProcedureContext& context) {
+        outContext = context.GetExternalContext<TestExternalContext>();
+    };
+
+    const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 0);
+    accessor.Write(ProcessorInstruction::Call, id);
+    Tick(std::make_any<TestExternalContext>("hello"));
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
+    ASSERT_EQ(outContext.value, "hello");
 }

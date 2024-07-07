@@ -26,4 +26,5 @@ void LookSystem::DoProcessComponents(CellId id, CellPosition position, LookDirec
     }
 
     context.TryPushResult(CellType::Unit);
+    // context.CompleteProcedure();
 }
