@@ -8,8 +8,8 @@
 #include "random/random.h"
 #include "simulation/simulation_system.h"
 #include "simulation/tick_calculator.h"
-#include "systems_ecs/cell_locator.h"
-#include "systems_ecs/simulation_virtual_machine.h"
+#include "simulation/cell_locator.h"
+#include "simulation/simulation_virtual_machine.h"
 
 class World {
 public:

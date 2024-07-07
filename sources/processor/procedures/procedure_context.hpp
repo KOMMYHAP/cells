@@ -7,12 +7,12 @@ std::tuple<bool, Ts...> ProcedureContext::TryPopArgs()
         return { false, Ts {}... };
     }
 
-    if (sizeof...(Ts) > _restInputArgs) {
+    if (sizeof...(Ts) > _arguments.input) {
         AbortProcedure(ProcessorState::ProcedureTooMuchInputRequested);
         return { false, Ts {}... };
     }
 
-    _restInputArgs -= sizeof...(Ts);
+    _arguments.input -= sizeof...(Ts);
 
     const auto result = _stack.TryPop<Ts...>();
     const bool success = std::get<0>(result);
@@ -29,15 +29,15 @@ bool ProcedureContext::TryPushResult(Ts&&... ts)
     if (!_processorContext.IsState(ProcessorState::Good)) {
         return false;
     }
-    if (_restInputArgs != 0) {
+    if (_arguments.input != 0) {
         AbortProcedure(ProcessorState::ProcedureIgnoreInput);
         return false;
     }
-    if (sizeof...(Ts) > _restOutputArgs) {
+    if (sizeof...(Ts) > _arguments.output) {
         AbortProcedure(ProcessorState::ProcedureTooMuchOutput);
         return false;
     }
-    _restOutputArgs -= sizeof...(Ts);
+    _arguments.output -= sizeof...(Ts);
 
     const bool success = _stack.TryPush(std::forward<Ts>(ts)...);
     if (!success) {
@@ -45,7 +45,7 @@ bool ProcedureContext::TryPushResult(Ts&&... ts)
         return false;
     }
 
-    if (_restOutputArgs == 0) {
+    if (_arguments.output == 0) {
         CompleteProcedure();
     }
     return success;

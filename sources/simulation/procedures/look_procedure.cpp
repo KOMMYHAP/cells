@@ -1,10 +1,10 @@
 #include "look_procedure.h"
 
+#include "components/deferred_procedure_execution.h"
 #include "components/look_direction.h"
-#include "components/procedure_result.h"
-#include "simulation_procedure_context.h"
-#include "systems_ecs/cell_locator.h"
-#include "systems_ecs/simulation_virtual_machine.h"
+#include "procedures/procedure_context.h"
+#include "simulation/cell_locator.h"
+#include "simulation/simulation_procedure_context.h"
 
 LookProcedure::LookProcedure(EcsWorld& world, const CellLocator& locator)
     : _world(&world)
@@ -20,12 +20,13 @@ void LookProcedure::Execute(ProcedureContext& procedureContext)
     }
     Direction direction;
     if (!TryParseDirection(rawDirection, direction)) {
-        procedureContext.MarkProcedureAsInvalid();
+        procedureContext.AbortProcedure();
         return;
     }
 
-    auto&& [id] = procedureContext.GetExternalContext().Get<SimulationProcedureContext>();
+    auto&& [id] = procedureContext.GetExternalContext<SimulationProcedureContext>();
 
     _world->emplace<LookDirection>(id, direction);
-    _world->emplace<ProcedureResult>(id, procedureContext);
+    _world->emplace<DeferredProcedureExecution>(id);
+    procedureContext.DeferExecution();
 }

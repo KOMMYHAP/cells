@@ -1,7 +1,9 @@
 #include "consume_procedure.h"
-#include "simulation_procedure_context.h"
-#include "systems_ecs/cell_locator.h"
-#include "systems_ecs/simulation_virtual_machine.h"
+
+#include "procedures/procedure_context.h"
+#include "simulation/cell_locator.h"
+#include "simulation/simulation_procedure_context.h"
+#include "simulation/simulation_virtual_machine.h"
 
 ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, HealthSystem& healthSystem, TypeSystem& typeSystem)
     : _vm(vm)
@@ -20,11 +22,12 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
     }
     Direction direction;
     if (!TryParseDirection(rawDirection, direction)) {
-        context.MarkProcedureAsInvalid();
+        context.AbortProcedure();
         return;
     }
 
-    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
+    context.DeferExecution();
 
     // constexpr CellHealth healthPerAction { 5 };
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

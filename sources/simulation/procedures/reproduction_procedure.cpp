@@ -1,11 +1,12 @@
 #include "reproduction_procedure.h"
 
-#include "components/procedure_result.h"
+#include "components/deferred_procedure_execution.h"
 #include "components/reproduction_direction.h"
+#include "procedures/procedure_context.h"
 
-#include "simulation_procedure_context.h"
-#include "systems_ecs/cell_locator.h"
-#include "systems_ecs/simulation_virtual_machine.h"
+#include "simulation/cell_locator.h"
+#include "simulation/simulation_procedure_context.h"
+#include "simulation/simulation_virtual_machine.h"
 
 ReproductionProcedure::ReproductionProcedure(EcsWorld& world)
     : _world(&world)
@@ -20,12 +21,13 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     }
     Direction direction;
     if (!TryParseDirection(rawDirection, direction)) {
-        context.MarkProcedureAsInvalid();
+        context.AbortProcedure();
         return;
     }
-    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
     _world->emplace<ReproductionDirection>(id, direction);
-    _world->emplace<ProcedureResult>(id, context);
+    _world->emplace<DeferredProcedureExecution>(id, context);
+    context.DeferExecution();
 
     // constexpr CellHealth healthPerAction { 50 };
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

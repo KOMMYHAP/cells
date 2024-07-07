@@ -84,7 +84,7 @@ std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
     return { true, _params.controlBlock->registry[index] };
 }
 
-bool ProcessorContext::StartProcedure(ProcedureId id)
+bool ProcessorContext::StartProcedure(const ProcedureId id)
 {
     ASSERT(id != ProcedureId::Invalid);
 
@@ -103,36 +103,46 @@ bool ProcessorContext::StartProcedure(ProcedureId id)
         return false;
     }
 
-    _pendingProcedure = id;
-
-    ProcedureContext procedureContext { id, *this, _stack, inputArgsCount, outputArgsCount };
+    ProcedureContext procedureContext { id, *this, _stack, ProcedureContext::ArgumentsStatus { inputArgsCount, outputArgsCount } };
     info->procedure->Execute(procedureContext);
+
+    if (IsState(ProcessorState::Good) && !HasPendingProcedure()) {
+        CompleteProcedure(procedureContext);
+    }
     return true;
 }
 
-bool ProcessorContext::CompleteProcedure(const ProcedureId id, const uint8_t ignoredInputArgs, const uint8_t missingOutputArgs)
+void ProcessorContext::DeferProcedure(const ProcedureContext& context)
 {
-    ASSERT(id != ProcedureId::Invalid);
-    if (_pendingProcedure != id) {
+    ASSERT(_pendingProcedure == ProcedureId::Invalid);
+    _pendingProcedure = context.GetId();
+}
+
+bool ProcessorContext::CompleteProcedure(const ProcedureContext& context)
+{
+    ASSERT(context.GetId() != ProcedureId::Invalid);
+    if (HasPendingProcedure() && _pendingProcedure != context.GetId()) {
         SetState(ProcessorState::UnknownPendingProcedure);
         return false;
     }
-    if (ignoredInputArgs != 0) {
+    const auto [input, output] = context.GetRestArgumentsCount();
+    if (input != 0) {
         SetState(ProcessorState::ProcedureIgnoreInput);
         return false;
     }
-    if (missingOutputArgs != 0) {
+    if (output != 0) {
         SetState(ProcessorState::ProcedureMissingOutput);
         return false;
     }
+
     _pendingProcedure = ProcedureId::Invalid;
     return true;
 }
 
-bool ProcessorContext::AbortProcedure(const ProcedureId id, const ProcessorState state)
+bool ProcessorContext::AbortProcedure(const ProcedureContext& context, const ProcessorState state)
 {
-    ASSERT(id != ProcedureId::Invalid);
-    if (_pendingProcedure != id) {
+    ASSERT(context.GetId() != ProcedureId::Invalid);
+    if (HasPendingProcedure() && _pendingProcedure != context.GetId()) {
         SetState(ProcessorState::UnknownPendingProcedure);
         return false;
     }

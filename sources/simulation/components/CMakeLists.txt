@@ -20,7 +20,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         move_direction.h
         direction.h
         direction.cpp
-        procedure_result.h
+        deferred_procedure_execution.h
         reproduction_direction.h
         cell_energy.h
         cell_energy_change.h

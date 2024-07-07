@@ -1,7 +1,7 @@
 ﻿#include "reproduction_system.h"
 
 #include "cell_factories/patrol_cell.h"
-#include "components/procedure_result.h"
+#include "components/deferred_procedure_execution.h"
 
 ReproductionSystem::ReproductionSystem(EcsWorld& ecsWorld, const SimulationVirtualMachine& vm, const CellLocator& locator, Random::Accessor random)
     : SimulationEcsSystem(ecsWorld)

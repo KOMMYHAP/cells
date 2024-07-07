@@ -4,7 +4,7 @@
 //
 // #include "components/cell_type.h"
 // #include "components/spawn_data.h"
-// #include "systems_ecs/simulation_virtual_machine.h"
+// #include "simulation/simulation_virtual_machine.h"
 //
 // #include "random/random.h"
 //

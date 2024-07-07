@@ -4,7 +4,7 @@
 #include "simulation_ecs_system.h"
 #include "simulation_virtual_machine.h"
 
-#include "components/procedure_result.h"
+#include "components/deferred_procedure_execution.h"
 #include "components/reproduction_direction.h"
 #include "random/random.h"
 

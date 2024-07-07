@@ -4,7 +4,7 @@
 #include "components/cell_id.h"
 #include "components/cell_position.h"
 #include "components/move_direction.h"
-#include "systems_ecs/cell_locator.h"
+#include "simulation/cell_locator.h"
 
 class ICellFactory;
 

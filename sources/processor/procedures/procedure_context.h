@@ -10,7 +10,12 @@ enum class ProcessorState : uint8_t;
 
 class ProcedureContext {
 public:
-    ProcedureContext(ProcedureId id, ProcessorContext context, ProcessorStack stack, uint8_t inputArgs, uint8_t outputArgs);
+    struct ArgumentsStatus {
+        uint8_t input { 0 };
+        uint8_t output { 0 };
+    };
+
+    ProcedureContext(ProcedureId id, ProcessorContext context, ProcessorStack stack, ArgumentsStatus arguments);
 
     template <MemoryType... Ts>
     std::tuple<bool, Ts...> TryPopArgs();
@@ -20,12 +25,16 @@ public:
     bool TryPushResult(Ts&&... ts);
 
     void AbortProcedure();
+    void DeferExecution();
 
     template <class T>
     T& ModifyExternalContext();
 
     template <class T>
     const T& GetExternalContext() const;
+
+    ArgumentsStatus GetRestArgumentsCount() const { return _arguments; }
+    ProcedureId GetId() const { return _id; }
 
 private:
     void AbortProcedure(ProcessorState state);
@@ -34,8 +43,7 @@ private:
     ProcedureId _id;
     ProcessorStack _stack;
     ProcessorContext _processorContext;
-    uint8_t _restInputArgs { 0 };
-    uint8_t _restOutputArgs { 0 };
+    ArgumentsStatus _arguments;
 };
 
 #include "procedure_context.hpp"

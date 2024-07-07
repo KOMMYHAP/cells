@@ -1,7 +1,7 @@
 #include "simulation_cell_debugger.h"
 
-#include "procedures/simulation_procedure_context.h"
 #include "processor/processor_context.h"
+#include "simulation_procedure_context.h"
 
 void SimulationCellDebugger::SetWatchingCell(CellId id)
 {

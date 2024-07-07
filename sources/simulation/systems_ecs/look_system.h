@@ -3,8 +3,8 @@
 #include "cell_locator.h"
 #include "simulation_ecs_system.h"
 
+#include "components/deferred_procedure_execution.h"
 #include "components/look_direction.h"
-#include "components/procedure_result.h"
 
 class LookSystem final : public SimulationEcsSystem<LookSystem, const CellPosition, const LookDirection, ProcedureResult> {
 public:

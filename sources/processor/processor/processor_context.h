@@ -19,9 +19,11 @@ public:
     explicit ProcessorContext(Params params);
 
     bool StartProcedure(ProcedureId id);
-    bool CompleteProcedure(ProcedureId id, uint8_t ignoredInputArgs, uint8_t missingOutputArgs);
-    bool AbortProcedure(ProcedureId id, ProcessorState state);
+    void DeferProcedure(const ProcedureContext& context);
+    bool CompleteProcedure(const ProcedureContext& context);
+    bool AbortProcedure(const ProcedureContext& context, ProcessorState state);
     bool HasPendingProcedure() const { return _pendingProcedure != ProcedureId::Invalid; }
+    ProcedureId GetPendingProcedure() const { return _pendingProcedure; }
 
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();

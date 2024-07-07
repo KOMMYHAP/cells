@@ -1,12 +1,11 @@
 ﻿#include "procedure_context.h"
 #include "processor/processor.h"
 
-ProcedureContext::ProcedureContext(ProcedureId id, ProcessorContext context, ProcessorStack stack, const uint8_t inputArgs, const uint8_t outputArgs)
+ProcedureContext::ProcedureContext(ProcedureId id, ProcessorContext context, ProcessorStack stack, const ArgumentsStatus arguments)
     : _id(id)
     , _stack(std::move(stack))
     , _processorContext(std::move(context))
-    , _restInputArgs(inputArgs)
-    , _restOutputArgs(outputArgs)
+    , _arguments(arguments)
 {
 }
 
@@ -15,12 +14,17 @@ void ProcedureContext::AbortProcedure()
     AbortProcedure(ProcessorState::AbortedProcedure);
 }
 
+void ProcedureContext::DeferExecution()
+{
+    _processorContext.DeferProcedure(*this);
+}
+
 void ProcedureContext::AbortProcedure(const ProcessorState state)
 {
-    _processorContext.AbortProcedure(_id, state);
+    _processorContext.AbortProcedure(*this, state);
 }
 
 void ProcedureContext::CompleteProcedure()
 {
-    _processorContext.CompleteProcedure(_id, _restInputArgs, _restOutputArgs);
+    _processorContext.CompleteProcedure(*this);
 }
