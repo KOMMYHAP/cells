@@ -45,9 +45,6 @@ bool ProcedureContext::TryPushResult(Ts&&... ts)
         return false;
     }
 
-    if (_arguments.output == 0) {
-        CompleteProcedure();
-    }
     return success;
 }
 

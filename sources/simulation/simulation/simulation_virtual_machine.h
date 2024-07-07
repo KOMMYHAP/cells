@@ -17,7 +17,7 @@ struct SimulationProcedureInfo {
 
 class SimulationVirtualMachine {
 public:
-    SimulationVirtualMachine();
+    SimulationVirtualMachine(EcsWorld& world);
 
     template <class Procedure, class... Args>
         requires std::constructible_from<Procedure, Args...>

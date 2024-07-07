@@ -4,7 +4,7 @@
 #include "storage/stack_storage.h"
 
 #include "ui_layout.h"
-#include "simulation/world.h"
+#include "world.h"
 #include "world_widget.h"
 
 #include "utils/stub_error_code.h"

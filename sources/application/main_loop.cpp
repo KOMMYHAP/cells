@@ -1,5 +1,5 @@
 #include "main_loop.h"
-#include "simulation/world.h"
+#include "world.h"
 #include "ui_system.h"
 
 std::error_code MainLoop::InitializeSystem(common::StackStorage& storage)

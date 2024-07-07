@@ -2,7 +2,6 @@
 
 #include "components/cell_type.h"
 #include "procedures/procedure_context.h"
-#include "simulation/simulation_virtual_machine.h"
 
 LookSystem::LookSystem(EcsWorld& ecsWorld, CellLocator& locator, SimulationVirtualMachine& vm)
     : SimulationEcsSystem(ecsWorld)
@@ -10,7 +9,8 @@ LookSystem::LookSystem(EcsWorld& ecsWorld, CellLocator& locator, SimulationVirtu
     , _vm(&vm)
 {
 }
-void LookSystem::DoProcessComponents(CellId id, CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution)
+
+void LookSystem::DoProcessComponents(CellId id, CellPosition position, LookDirection direction, CellBrain& brain)
 {
     ProcedureContext context = _vm->RestoreDeferredExecution(id, brain);
 

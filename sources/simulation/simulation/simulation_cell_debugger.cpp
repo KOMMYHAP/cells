@@ -3,6 +3,11 @@
 #include "processor/processor_context.h"
 #include "simulation_procedure_context.h"
 
+SimulationCellDebugger::SimulationCellDebugger(EcsWorld& world)
+    : _world(&world)
+{
+}
+
 void SimulationCellDebugger::SetWatchingCell(CellId id)
 {
     _watchingCell = id;
@@ -25,4 +30,7 @@ void SimulationCellDebugger::DetachDebugger(ProcessorContext& context)
     }
 
     context.ModifyControlBlock() = _initialControlBlock;
+
+    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    _world->destroy(id);
 }

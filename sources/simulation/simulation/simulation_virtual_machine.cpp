@@ -5,8 +5,9 @@
 #include "storage/storage.h"
 #include "systems/brain_system.h"
 
-SimulationVirtualMachine::SimulationVirtualMachine()
-    : _procedureDataList(ProcedureTableLimit)
+SimulationVirtualMachine::SimulationVirtualMachine(EcsWorld& world)
+    : _debugger(world)
+    , _procedureDataList(ProcedureTableLimit)
     , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
 {
     _virtualMachine.SetDebugger(&_debugger);

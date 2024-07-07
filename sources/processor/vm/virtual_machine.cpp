@@ -8,6 +8,7 @@ static_assert(ProcessorStackSize >= std::max(ProcedureInputArgsCountLimit, Proce
     "Register overflow! Processor use registries to pass args to or obtain args from procedure");
 
 static_assert(sizeof(ProcessorControlBlock::pendingProcedureId) == sizeof(std::underlying_type_t<PendingProcedureId>));
+static_assert(sizeof(ProcessorControlBlock::state) == sizeof(std::underlying_type_t<ProcessorState>));
 
 static_assert(std::is_trivial_v<ProcessorControlBlock>, "As part of memory view ProcessorControlBlock must be trivial");
 static_assert(std::is_trivial_v<ProcessorInstruction>, "As part of memory view ProcessorInstruction must be trivial");
@@ -53,6 +54,7 @@ ProcedureContext VirtualMachine::RestoreDeferredExecution(ProcessorMemory memory
     static constexpr auto RawInvalidPendingProcedureId = static_cast<std::underlying_type_t<PendingProcedureId>>(PendingProcedureId::Invalid);
     const auto rawPendingProcedureId = std::exchange(controlBlock->pendingProcedureId, RawInvalidPendingProcedureId);
     const auto pendingProcedureId = static_cast<PendingProcedureId>(rawPendingProcedureId);
+    ASSERT(pendingProcedureId != PendingProcedureId::Invalid);
     return ExtractProcedureContext(pendingProcedureId);
 }
 
