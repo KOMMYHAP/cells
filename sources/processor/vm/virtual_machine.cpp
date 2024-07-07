@@ -13,11 +13,6 @@ static_assert(std::is_trivial_v<ProcessorControlBlock>, "As part of memory view 
 static_assert(std::is_trivial_v<ProcessorInstruction>, "As part of memory view ProcessorInstruction must be trivial");
 static_assert(std::is_trivial_v<ProcessorFlags>, "As part of memory view ProcessorFlags must be trivial");
 
-VirtualMachine::VirtualMachine()
-{
-    _pendingProcedures.resize(10'000);
-}
-
 ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t inputArgs, uint8_t outputArgs)
 {
     const auto info = ProcedureTableEntry { inputArgs, outputArgs, procedure };
@@ -31,12 +26,12 @@ void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalConte
     ASSERT(controlBlockRead);
 
     const PendingProcedureId pendingProcedureId = AllocatePendingProcedureId();
-    ProcedureContext& preallocatedPendingProcedureContext = ModifyProcedureContext(pendingProcedureId);
+    PendingProcedurePlaceholder& placeholder = GetPendingProcedureContext(pendingProcedureId);
 
     ProcessorContext::Params params {
         &_procedureTable,
         controlBlock,
-        &preallocatedPendingProcedureContext,
+        &placeholder,
         ProcessorExternalContext { std::move(procedureExternalContext) },
         memory
     };
@@ -64,7 +59,8 @@ ProcedureContext VirtualMachine::RestoreDeferredExecution(ProcessorMemory memory
 ProcedureContext VirtualMachine::ExtractProcedureContext(PendingProcedureId id)
 {
     const size_t index { static_cast<std::underlying_type_t<PendingProcedureId>>(id) };
-    const ProcedureContext context = _pendingProcedures[index];
+    PendingProcedurePlaceholder& placeholder = _pendingProcedures[index];
+    const ProcedureContext context = placeholder.Extract();
     FreePendingProcedureId(id);
     return context;
 }
@@ -74,8 +70,8 @@ PendingProcedureId VirtualMachine::AllocatePendingProcedureId()
     if (_freeIds.empty()) {
         ASSERT(_nextFreeId != PendingProcedureId::Invalid);
         _freeIds.push(_nextFreeId);
+        _pendingProcedures.emplace_back();
         const auto rawNextFreeId = static_cast<std::underlying_type_t<PendingProcedureId>>(_nextFreeId) + 1;
-        ASSERT(_pendingProcedures.capacity() > rawNextFreeId, "We cannot resize pendingProcedures now!");
         _nextFreeId = static_cast<PendingProcedureId>(rawNextFreeId);
     }
     const PendingProcedureId id = _freeIds.top();
@@ -83,7 +79,7 @@ PendingProcedureId VirtualMachine::AllocatePendingProcedureId()
     return id;
 }
 
-ProcedureContext& VirtualMachine::ModifyProcedureContext(PendingProcedureId id)
+PendingProcedurePlaceholder& VirtualMachine::GetPendingProcedureContext(PendingProcedureId id)
 {
     const size_t index { static_cast<std::underlying_type_t<PendingProcedureId>>(id) };
     return _pendingProcedures[index];

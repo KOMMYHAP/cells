@@ -4,6 +4,7 @@
 
 class ProcessorStack {
 public:
+    ProcessorStack() = default;
     ProcessorStack(std::span<std::byte> buffer, uint8_t& offset);
 
     template <class T>

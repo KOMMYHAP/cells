@@ -10,7 +10,8 @@ CellBrain MakePatrolCell(const SimulationVirtualMachine& vm)
     CellBrain brain;
     ProcessorMemory memory { brain.data };
     ProcessorControlBlock controlBlock {
-        static_cast<uint8_t>(ProcessorState::Good),
+        static_cast<std::underlying_type_t<ProcessorState>>(ProcessorState::Good),
+        static_cast<std::underlying_type_t<PendingProcedureId>>(PendingProcedureId::Invalid),
         0,
         0,
         {},

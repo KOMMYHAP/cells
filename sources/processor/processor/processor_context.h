@@ -1,18 +1,22 @@
 #pragma once
 
-#include "procedures/procedure_table.h"
+#include "procedures/procedure_id.h"
 #include "processor_control_block.h"
 #include "processor_external_context.h"
 #include "processor_memory.h"
 #include "processor_stack.h"
 #include "processor_state.h"
 
+class ProcedureContext;
+class ProcedureTable;
+class PendingProcedurePlaceholder;
+
 class ProcessorContext {
 public:
     struct Params {
         gsl::not_null<const ProcedureTable*> procedureTable;
         gsl::not_null<ProcessorControlBlock*> controlBlock;
-        gsl::not_null<ProcedureContext*> preallocatedPendingProcedureContext;
+        gsl::not_null<PendingProcedurePlaceholder*> pendingProcedurePlaceholder;
         ProcessorExternalContext externalContext;
         ProcessorMemory memory;
     };
@@ -55,7 +59,7 @@ private:
     Params _params;
     ProcessorMemory _initialMemory;
     ProcessorStack _stack;
-    ProcedureId _pendingProcedureId{ProcedureId::Invalid};
+    ProcedureId _pendingProcedureId { ProcedureId::Invalid };
 };
 
 #include "processor_context.hpp"

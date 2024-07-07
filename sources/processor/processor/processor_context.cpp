@@ -2,6 +2,8 @@
 
 #include "flags.h"
 #include "procedures/procedure_context.h"
+#include "procedures/procedure_context_placeholder.h"
+#include "procedures/procedure_table.h"
 #include "processor_state.h"
 
 ProcessorContext::ProcessorContext(Params params)
@@ -115,7 +117,7 @@ bool ProcessorContext::StartProcedure(const ProcedureId id)
 void ProcessorContext::DeferProcedure(const ProcedureContext& context)
 {
     ASSERT(_pendingProcedureId == ProcedureId::Invalid);
-    *_params.preallocatedPendingProcedureContext = context;
+    _params.pendingProcedurePlaceholder->Set(context);
 }
 
 bool ProcessorContext::CompleteProcedure(const ProcedureContext& context)

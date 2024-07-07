@@ -40,7 +40,7 @@ private:
     void AbortProcedure(ProcessorState state);
     void CompleteProcedure();
 
-    ProcedureId _id;
+    ProcedureId _id {ProcedureId::Invalid};
     ProcessorStack _stack;
     ProcessorContext _processorContext;
     ArgumentsStatus _arguments;

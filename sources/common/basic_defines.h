@@ -79,6 +79,7 @@
 #include <xutility>
 #include <valarray>
 #include <vector>
+#include <variant>
 
 // GSL
 #include <gsl/pointers> // owner, not_null

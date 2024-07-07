@@ -7,6 +7,7 @@ namespace details {
 template <class Unit>
 class MemoryBase {
 public:
+    MemoryBase() = default;
     MemoryBase(std::span<Unit> memory);
 
     template <MemoryType T>
@@ -40,6 +41,7 @@ protected:
 
 class ProcessorMemory : public details::MemoryBase<std::byte> {
 public:
+    ProcessorMemory() = default;
     ProcessorMemory(std::span<std::byte> memory);
 
     template <MemoryType T>
@@ -64,6 +66,7 @@ private:
 
 class ProcessorConstMemory : public details::MemoryBase<const std::byte> {
 public:
+    ProcessorConstMemory() = default;
     ProcessorConstMemory(std::span<std::byte> memory);
     ProcessorConstMemory(std::span<const std::byte> memory);
 };

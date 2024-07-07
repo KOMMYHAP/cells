@@ -2,6 +2,7 @@
 
 class ProcessorExternalContext {
 public:
+    ProcessorExternalContext() = default;
     explicit ProcessorExternalContext(std::any data)
         : _data(std::move(data))
     {
