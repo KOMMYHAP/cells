@@ -2,6 +2,7 @@
 
 #include "SFML/Graphics/Shader.hpp"
 #include "cell_factories/patrol_cell.h"
+#include "components/cell_type.h"
 #include "procedures/move_procedure.h"
 #include "simulation/simulation_procedure_context.h"
 
@@ -30,6 +31,7 @@ World::World()
         const CellId child = _ecsWorld.create();
         _ecsWorld.emplace<CellBrain>(child, MakePatrolCell(_simulationVm));
         _ecsWorld.emplace<CellPosition>(child, x, y);
+        _ecsWorld.emplace<CellType>(child, CellType::Unit);
     };
     for (int i = 0; i < 100; ++i) {
         int x = i % _worldSize.x;
