@@ -32,11 +32,9 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
     ASSERT(context.IsState(ProcessorState::Good));
 
     if (context.HasPendingProcedure()) {
-        context.SetState(ProcessorState::IncompleteDelayedProcedure);
+        context.SetState(ProcessorState::IncompletePendingProcedure);
         return {};
     }
-
-    ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
 
     const auto [instructionRead, rawInstruction] = context.TryReadMemory<uint8_t>();
     if (!instructionRead) {
@@ -100,13 +98,11 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
             return {};
         }
         break;
-    default:
     case ProcessorInstruction::LastProcessorInstruction:
         context.SetState(ProcessorState::InvalidInstruction);
         return {};
     }
 
-    controlBlockGuard.Submit();
     return instruction;
 }
 

@@ -2,7 +2,6 @@
 
 #include "procedures/procedure_table.h"
 #include "processor_control_block.h"
-#include "processor_control_block_guard.h"
 #include "processor_external_context.h"
 #include "processor_memory.h"
 #include "processor_stack.h"
@@ -20,11 +19,10 @@ public:
 
     explicit ProcessorContext(Params params);
 
-    ProcessorControlBlockGuard MakeGuard();
-
     bool StartProcedure(ProcedureId id);
     bool CompleteProcedure(ProcedureId id, uint8_t ignoredInputArgs, uint8_t missingOutputArgs);
-    bool HasPendingProcedure() const { return _pendingProcedure.has_value(); }
+    bool AbortProcedure(ProcedureId id, ProcessorState state);
+    bool HasPendingProcedure() const { return _pendingProcedure != ProcedureId::Invalid; }
 
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();
@@ -38,6 +36,7 @@ public:
     void ResetFlag(ProcessorFlags flag);
 
     bool IsState(ProcessorState state) const;
+    ProcessorState GetState() const;
     void SetState(ProcessorState state);
 
     bool WriteRegistry(uint8_t index, std::byte data);
@@ -49,10 +48,14 @@ public:
     ProcessorExternalContext& ModifyExternalContext() { return _params.externalContext; }
 
 private:
+    void RestoreControlBlock();
+    void NotifyStateChanged(ProcessorState state);
+
     Params _params;
     ProcessorMemory _initialMemory;
     ProcessorStack _stack;
-    std::optional<ProcedureId> _pendingProcedure;
+    ProcessorControlBlock _initialControlBlock;
+    ProcedureId _pendingProcedure { ProcedureId::Invalid };
 };
 
 #include "processor_context.hpp"

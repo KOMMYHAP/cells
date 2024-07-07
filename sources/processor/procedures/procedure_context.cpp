@@ -10,23 +10,17 @@ ProcedureContext::ProcedureContext(ProcedureId id, ProcessorContext context, Pro
 {
 }
 
-void ProcedureContext::MarkProcedureAsInvalid()
+void ProcedureContext::AbortProcedure()
 {
-    SetState(ProcessorState::InvalidProcedure);
+    AbortProcedure(ProcessorState::AbortedProcedure);
 }
 
-const ProcessorExternalContext& ProcedureContext::GetExternalContext() const
+void ProcedureContext::AbortProcedure(const ProcessorState state)
 {
-    return _processorContext.GetExternalContext();
+    _processorContext.AbortProcedure(_id, state);
 }
 
-ProcessorExternalContext& ProcedureContext::ModifyExternalContext()
+void ProcedureContext::CompleteProcedure()
 {
-    return _processorContext.ModifyExternalContext();
-}
-
-void ProcedureContext::SetState(const ProcessorState state)
-{
-    _processorContext.SetState(state);
     _processorContext.CompleteProcedure(_id, _restInputArgs, _restOutputArgs);
 }

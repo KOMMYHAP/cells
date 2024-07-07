@@ -3,8 +3,12 @@
 template <MemoryType... Ts>
 std::tuple<bool, Ts...> ProcedureContext::TryPopArgs()
 {
+    if (!_processorContext.IsState(ProcessorState::Good)) {
+        return { false, Ts {}... };
+    }
+
     if (sizeof...(Ts) > _restInputArgs) {
-        SetState(ProcessorState::ProcedureTooMuchInputRequested);
+        AbortProcedure(ProcessorState::ProcedureTooMuchInputRequested);
         return { false, Ts {}... };
     }
 
@@ -13,7 +17,7 @@ std::tuple<bool, Ts...> ProcedureContext::TryPopArgs()
     const auto result = _stack.TryPop<Ts...>();
     const bool success = std::get<0>(result);
     if (!success) {
-        SetState(ProcessorState::StackUnderflow);
+        AbortProcedure(ProcessorState::StackUnderflow);
     }
     return result;
 }
@@ -22,21 +26,39 @@ template <class... Ts>
     requires(MemoryType<std::decay_t<Ts>> && ...)
 bool ProcedureContext::TryPushResult(Ts&&... ts)
 {
+    if (!_processorContext.IsState(ProcessorState::Good)) {
+        return false;
+    }
     if (_restInputArgs != 0) {
-        SetState(ProcessorState::ProcedureIgnoreInput);
+        AbortProcedure(ProcessorState::ProcedureIgnoreInput);
         return false;
     }
     if (sizeof...(Ts) > _restOutputArgs) {
-        SetState(ProcessorState::ProcedureTooMuchOutput);
+        AbortProcedure(ProcessorState::ProcedureTooMuchOutput);
         return false;
     }
     _restOutputArgs -= sizeof...(Ts);
 
     const bool success = _stack.TryPush(std::forward<Ts>(ts)...);
     if (!success) {
-        SetState(ProcessorState::StackOverflow);
+        AbortProcedure(ProcessorState::StackOverflow);
+        return false;
     }
 
-    SetState(ProcessorState::Good);
+    if (_restOutputArgs == 0) {
+        CompleteProcedure();
+    }
     return success;
+}
+
+template <class T>
+T& ProcedureContext::ModifyExternalContext()
+{
+    return _processorContext.GetExternalContext().Modify<T>();
+}
+
+template <class T>
+const T& ProcedureContext::GetExternalContext() const
+{
+    return _processorContext.GetExternalContext().Get<T>();
 }

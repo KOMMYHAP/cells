@@ -79,7 +79,6 @@ public:
             ProcessorControlBlock& controlBlock = AccessControlBlock();
             ASSERT_EQ(GetLastProcessorState(), expectedErrorState);
             ASSERT_EQ(controlBlock.nextCommand, oldControlBlock.nextCommand);
-            ASSERT_EQ(controlBlock.state, oldControlBlock.state);
             ASSERT_EQ(controlBlock.flags, oldControlBlock.flags);
             ASSERT_EQ(controlBlock.stackOffset, oldControlBlock.stackOffset);
             ASSERT_TRUE(std::equal(controlBlock.stack.begin(), controlBlock.stack.end(), oldControlBlock.stack.begin()));
@@ -327,17 +326,70 @@ TEST_F(ProcedureFixture, Procedure_In1_Out1)
     ASSERT_EQ(data, std::byte { 43 });
 }
 
+TEST_F(ProcedureFixture, AbortProcedure)
+{
+    auto procedure = std::make_unique<TestProcedure>();
+    procedure->func = [&](ProcedureContext& context) {
+        context.AbortProcedure();
+    };
+
+    const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
+    GetMemory().Write(ProcessorInstruction::Call, id);
+    auto _ = MakeScopeWithoutAssert();
+    Tick();
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::AbortedProcedure);
+}
+
+TEST_F(ProcedureFixture, AbortProcedure_IgnoreUsageAfterAborted_PushArgs)
+{
+    auto procedure = std::make_unique<TestProcedure>();
+    bool outPushed = true;
+    procedure->func = [&](ProcedureContext& context) {
+        context.AbortProcedure();
+        const bool pushed = context.TryPushResult(std::byte { 42 });
+        outPushed = pushed;
+    };
+
+    const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
+    GetMemory().Write(ProcessorInstruction::Call, id);
+    auto _ = MakeScopeWithoutAssert();
+    Tick();
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::AbortedProcedure);
+    ASSERT_EQ(outPushed, false);
+}
+
+TEST_F(ProcedureFixture, AbortProcedure_IgnoreUsageAfterAborted_PopArgs)
+{
+    auto procedure = std::make_unique<TestProcedure>();
+    bool outRead = true;
+    procedure->func = [&](ProcedureContext& context) {
+        context.AbortProcedure();
+        const auto [read, _] = context.TryPopArgs<std::byte>();
+        outRead = read;
+    };
+
+    const ProcedureId id = vm->RegisterProcedure(procedure.get(), 1, 0);
+    ProcessorMemory memory = GetMemory();
+    memory.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
+    Tick();
+    auto _ = MakeScopeWithoutAssert();
+    memory.Write(ProcessorInstruction::Call, id);
+    Tick();
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::AbortedProcedure);
+    ASSERT_EQ(outRead, false);
+}
+
 TEST_F(ProcedureFixture, Rollback_InvalidCommandInProcedure)
 {
     auto procedure = std::make_unique<TestProcedure>();
     procedure->func = [&](ProcedureContext& context) {
-        context.MarkProcedureAsInvalid();
+        context.AbortProcedure();
         context.TryPushResult(std::byte { 42 });
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
     GetMemory().Write(ProcessorInstruction::Call, id);
-    TestRollback(ProcessorState::InvalidProcedure);
+    TestRollback(ProcessorState::AbortedProcedure);
 }
 
 TEST_F(ProcedureFixture, Rollback_MissingOutput)

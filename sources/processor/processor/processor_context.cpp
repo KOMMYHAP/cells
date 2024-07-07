@@ -1,13 +1,14 @@
 #include "processor_context.h"
 
 #include "flags.h"
-#include "processor_state.h"
 #include "procedures/procedure_context.h"
+#include "processor_state.h"
 
 ProcessorContext::ProcessorContext(Params params)
     : _params(std::move(params))
     , _initialMemory(_params.memory)
     , _stack(_params.controlBlock->stack, _params.controlBlock->stackOffset)
+    , _initialControlBlock(*_params.controlBlock)
 {
     if (!SetCommandPointer(_params.controlBlock->nextCommand)) {
         ASSERT_FAIL("Invalid command pointer!");
@@ -32,13 +33,20 @@ void ProcessorContext::ResetFlag(ProcessorFlags flag)
 
 bool ProcessorContext::IsState(ProcessorState state) const
 {
-    return _params.controlBlock->state == static_cast<uint8_t>(state);
+    return static_cast<std::underlying_type_t<ProcessorState>>(state) == _params.controlBlock->state;
+}
+
+ProcessorState ProcessorContext::GetState() const
+{
+    return static_cast<ProcessorState>(_params.controlBlock->state);
 }
 
 void ProcessorContext::SetState(ProcessorState state)
 {
-    _params.controlBlock->state = static_cast<uint8_t>(state);
-    (*_params.stateWatcher)(state, _params.externalContext);
+    ASSERT(state != ProcessorState::Good);
+    // _params.controlBlock->state = static_cast<std::underlying_type_t<ProcessorState>>(state);
+    RestoreControlBlock();
+    NotifyStateChanged(state);
 }
 
 bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
@@ -82,6 +90,8 @@ std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
 
 bool ProcessorContext::StartProcedure(ProcedureId id)
 {
+    ASSERT(id != ProcedureId::Invalid);
+
     const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
     if (!info) {
         SetState(ProcessorState::UnknownProcedure);
@@ -96,8 +106,7 @@ bool ProcessorContext::StartProcedure(ProcedureId id)
         SetState(ProcessorState::ProcedureMissingInput);
         return false;
     }
-    
-    ASSERT(!_pendingProcedure.has_value());
+
     _pendingProcedure = id;
 
     ProcedureContext procedureContext { id, *this, _stack, inputArgsCount, outputArgsCount };
@@ -105,13 +114,11 @@ bool ProcessorContext::StartProcedure(ProcedureId id)
     return true;
 }
 
-bool ProcessorContext::CompleteProcedure(ProcedureId id, uint8_t ignoredInputArgs, uint8_t missingOutputArgs)
+bool ProcessorContext::CompleteProcedure(const ProcedureId id, const uint8_t ignoredInputArgs, const uint8_t missingOutputArgs)
 {
-    if (!_pendingProcedure.has_value() || *_pendingProcedure != id) {
-        SetState(ProcessorState::UnknownDelayedProcedure);
-        return false;
-    }
-    if (!IsState(ProcessorState::Good)) {
+    ASSERT(id != ProcedureId::Invalid);
+    if (_pendingProcedure != id) {
+        SetState(ProcessorState::UnknownPendingProcedure);
         return false;
     }
     if (ignoredInputArgs != 0) {
@@ -122,7 +129,20 @@ bool ProcessorContext::CompleteProcedure(ProcedureId id, uint8_t ignoredInputArg
         SetState(ProcessorState::ProcedureMissingOutput);
         return false;
     }
-    _pendingProcedure.reset();
+    _pendingProcedure = ProcedureId::Invalid;
+    return true;
+}
+
+bool ProcessorContext::AbortProcedure(const ProcedureId id, const ProcessorState state)
+{
+    ASSERT(id != ProcedureId::Invalid);
+    if (_pendingProcedure != id) {
+        SetState(ProcessorState::UnknownPendingProcedure);
+        return false;
+    }
+
+    SetState(state);
+    _pendingProcedure = ProcedureId::Invalid;
     return true;
 }
 
@@ -144,9 +164,15 @@ std::pair<bool, std::byte> ProcessorContext::PopStack()
     return { success, data };
 }
 
-ProcessorControlBlockGuard ProcessorContext::MakeGuard()
+void ProcessorContext::RestoreControlBlock()
 {
-    return { *_params.controlBlock };
+    *_params.controlBlock = _initialControlBlock;
+}
+
+void ProcessorContext::NotifyStateChanged(ProcessorState state)
+{
+    // todo: move stateWatcher out processor context? e.g. to VirtualMachine
+    (*_params.stateWatcher)(state, _params.externalContext);
 }
 
 void ProcessorContext::SetFlag(ProcessorFlags flag, bool value)

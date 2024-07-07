@@ -19,13 +19,17 @@ public:
         requires(MemoryType<std::decay_t<Ts>> && ...)
     bool TryPushResult(Ts&&... ts);
 
-    void MarkProcedureAsInvalid();
+    void AbortProcedure();
 
-    const ProcessorExternalContext& GetExternalContext() const;
-    ProcessorExternalContext& ModifyExternalContext();
+    template <class T>
+    T& ModifyExternalContext();
+
+    template <class T>
+    const T& GetExternalContext() const;
 
 private:
-    void SetState(ProcessorState state);
+    void AbortProcedure(ProcessorState state);
+    void CompleteProcedure();
 
     ProcedureId _id;
     ProcessorStack _stack;
