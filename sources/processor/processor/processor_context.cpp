@@ -114,15 +114,15 @@ bool ProcessorContext::StartProcedure(const ProcedureId id)
 
 void ProcessorContext::DeferProcedure(const ProcedureContext& context)
 {
-    ASSERT(_pendingProcedure == ProcedureId::Invalid);
-    _pendingProcedure = context.GetId();
+    ASSERT(_pendingProcedureId == ProcedureId::Invalid);
+    *_params.preallocatedPendingProcedureContext = context;
 }
 
 bool ProcessorContext::CompleteProcedure(const ProcedureContext& context)
 {
     ASSERT(context.GetId() != ProcedureId::Invalid);
-    if (HasPendingProcedure() && _pendingProcedure != context.GetId()) {
-        SetState(ProcessorState::UnknownPendingProcedure);
+    if (HasPendingProcedure() && _pendingProcedureId != context.GetId()) {
+        SetState(ProcessorState::IncompletePendingProcedure);
         return false;
     }
     const auto [input, output] = context.GetRestArgumentsCount();
@@ -135,20 +135,20 @@ bool ProcessorContext::CompleteProcedure(const ProcedureContext& context)
         return false;
     }
 
-    _pendingProcedure = ProcedureId::Invalid;
+    _pendingProcedureId = ProcedureId::Invalid;
     return true;
 }
 
 bool ProcessorContext::AbortProcedure(const ProcedureContext& context, const ProcessorState state)
 {
     ASSERT(context.GetId() != ProcedureId::Invalid);
-    if (HasPendingProcedure() && _pendingProcedure != context.GetId()) {
-        SetState(ProcessorState::UnknownPendingProcedure);
+    if (HasPendingProcedure() && _pendingProcedureId != context.GetId()) {
+        SetState(ProcessorState::IncompletePendingProcedure);
         return false;
     }
 
     SetState(state);
-    _pendingProcedure = ProcedureId::Invalid;
+    _pendingProcedureId = ProcedureId::Invalid;
     return true;
 }
 

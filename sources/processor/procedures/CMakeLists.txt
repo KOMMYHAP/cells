@@ -12,4 +12,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         procedure_table.h
         procedure_context.h
         procedure_context.hpp
+        pending_procedure_id.h
 )

@@ -1,25 +1,29 @@
 ﻿#include "look_system.h"
 
 #include "components/cell_type.h"
+#include "procedures/procedure_context.h"
+#include "simulation/simulation_virtual_machine.h"
 
-LookSystem::LookSystem(EcsWorld& ecsWorld, CellLocator& locator)
+LookSystem::LookSystem(EcsWorld& ecsWorld, CellLocator& locator, SimulationVirtualMachine& vm)
     : SimulationEcsSystem(ecsWorld)
     , _locator(&locator)
+    , _vm(&vm)
 {
 }
-
-void LookSystem::DoProcessComponents(CellId /*id*/, const CellPosition position, const LookDirection direction, ProcedureResult& result)
+void LookSystem::DoProcessComponents(CellId id, CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution)
 {
+    ProcedureContext context = _vm->RestoreDeferredExecution(id, brain);
+
     const CellPosition lookPosition = _locator->TryApplyDirection(position, direction.value);
     if (lookPosition == InvalidCellPosition) {
-        result.context.TryPushResult(CellType::Wall);
+        context.TryPushResult(CellType::Wall);
         return;
     }
 
     if (const CellId anotherCell = _locator->Find(lookPosition); anotherCell == CellId::Invalid) {
-        result.context.TryPushResult(CellType::Dummy);
+        context.TryPushResult(CellType::Dummy);
         return;
     }
 
-    result.context.TryPushResult(CellType::Unit);
+    context.TryPushResult(CellType::Unit);
 }

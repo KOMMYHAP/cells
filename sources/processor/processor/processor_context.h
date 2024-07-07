@@ -12,6 +12,7 @@ public:
     struct Params {
         gsl::not_null<const ProcedureTable*> procedureTable;
         gsl::not_null<ProcessorControlBlock*> controlBlock;
+        gsl::not_null<ProcedureContext*> preallocatedPendingProcedureContext;
         ProcessorExternalContext externalContext;
         ProcessorMemory memory;
     };
@@ -22,8 +23,7 @@ public:
     void DeferProcedure(const ProcedureContext& context);
     bool CompleteProcedure(const ProcedureContext& context);
     bool AbortProcedure(const ProcedureContext& context, ProcessorState state);
-    bool HasPendingProcedure() const { return _pendingProcedure != ProcedureId::Invalid; }
-    ProcedureId GetPendingProcedure() const { return _pendingProcedure; }
+    bool HasPendingProcedure() const { return _pendingProcedureId != ProcedureId::Invalid; }
 
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();
@@ -55,7 +55,7 @@ private:
     Params _params;
     ProcessorMemory _initialMemory;
     ProcessorStack _stack;
-    ProcedureId _pendingProcedure { ProcedureId::Invalid };
+    ProcedureId _pendingProcedureId{ProcedureId::Invalid};
 };
 
 #include "processor_context.hpp"

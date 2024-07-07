@@ -1,6 +1,7 @@
 #include "simulation_virtual_machine.h"
 
-#include "procedures/simulation_procedure_context.h"
+#include "procedures/procedure_context.h"
+#include "simulation_procedure_context.h"
 #include "storage/storage.h"
 #include "systems/brain_system.h"
 
@@ -15,6 +16,14 @@ void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)
 {
     const ProcessorMemory memory { brain.data };
     _virtualMachine.Run(memory, std::make_any<SimulationProcedureContext>(id));
+}
+
+ProcedureContext SimulationVirtualMachine::RestoreDeferredExecution(const CellId id, CellBrain& brain)
+{
+    const ProcessorMemory memory { brain.data };
+    const ProcedureContext context = _virtualMachine.RestoreDeferredExecution(memory);
+    ASSERT(context.GetExternalContext<SimulationProcedureContext>().id == id);
+    return context;
 }
 
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const

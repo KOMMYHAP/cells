@@ -2,8 +2,9 @@
 
 #include "cell_factories/patrol_cell.h"
 #include "components/deferred_procedure_execution.h"
+#include "procedures/procedure_context.h"
 
-ReproductionSystem::ReproductionSystem(EcsWorld& ecsWorld, const SimulationVirtualMachine& vm, const CellLocator& locator, Random::Accessor random)
+ReproductionSystem::ReproductionSystem(EcsWorld& ecsWorld, SimulationVirtualMachine& vm, const CellLocator& locator, Random::Accessor random)
     : SimulationEcsSystem(ecsWorld)
     , _locator(&locator)
     , _vm(&vm)
@@ -11,16 +12,18 @@ ReproductionSystem::ReproductionSystem(EcsWorld& ecsWorld, const SimulationVirtu
 {
 }
 
-void ReproductionSystem::DoProcessComponents(CellId id, const CellPosition position, const ReproductionDirection direction, ProcedureResult& result)
+void ReproductionSystem::DoProcessComponents(CellId id, CellPosition position, ReproductionDirection direction, CellBrain& brain, DeferredProcedureExecution)
 {
+    ProcedureContext context = _vm->RestoreDeferredExecution(id, brain);
+    
     const CellPosition childPosition = _locator->TryApplyDirection(position, direction.value);
     if (childPosition == InvalidCellPosition) {
-        result.context.MarkProcedureAsInvalid();
+        context.AbortProcedure();
         return;
     }
 
     if (const CellId targetId = _locator->Find(childPosition); targetId != CellId::Invalid) {
-        result.context.MarkProcedureAsInvalid();
+        context.AbortProcedure();
         return;
     }
 

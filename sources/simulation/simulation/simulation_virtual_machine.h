@@ -23,9 +23,10 @@ public:
         requires std::constructible_from<Procedure, Args...>
     void RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args);
 
-    SimulationCellDebugger& ModifyCellDebugger() { return _debugger; };
+    SimulationCellDebugger& ModifyCellDebugger() { return _debugger; }
 
     void Run(CellId id, CellBrain& brain);
+    ProcedureContext RestoreDeferredExecution(CellId id, CellBrain& brain);
 
     ProcedureId GetProcedureId(ProcedureType type) const;
     const SimulationProcedureInfo* FindProcedureInfo(ProcedureType type) const;
