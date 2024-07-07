@@ -2,20 +2,13 @@
 #include "processor/processor_control_block.h"
 #include "processor/processor_instruction.h"
 #include "processor/processor_stack.h"
+#include "utils/test_processor_debugger.h"
+#include "utils/test_processor_state_guard.h"
 #include "vm/virtual_machine.h"
 
 namespace {
 
 class ProcedureFixture;
-
-class DisabledAssertScope {
-public:
-    DisabledAssertScope(ProcedureFixture& fixture);
-    ~DisabledAssertScope();
-
-private:
-    ProcedureFixture& _fixture;
-};
 
 class TestProcedure : public ProcedureBase {
 public:
@@ -53,17 +46,12 @@ public:
 
     ProcessorState GetLastProcessorState()
     {
-        return _lastProcessorState;
+        return _debugger.GetLastProcessorState();
     }
 
-    DisabledAssertScope MakeScopeWithoutAssert()
+    TestProcessorStateGuard MakeScopeWithoutAssert()
     {
-        return { *this };
-    }
-
-    void EnableAssertsOnBadProcessorState(bool value)
-    {
-        _assertOnBadState = value;
+        return { _debugger };
     }
 
     void Tick()
@@ -97,10 +85,9 @@ protected:
     void SetUp() override
     {
         _vm = std::make_unique<VirtualMachine>();
+        vm->SetDebugger(&_debugger);
         vm = _vm.get();
 
-        vm->SetWatcher(MakeKiller());
-        vm->SetInstructionsPerStep(1);
         MakeMemory(255);
 
         ProcessorMemory rawMemory { _memoryBuffer };
@@ -111,16 +98,6 @@ protected:
     void TearDown() override { }
 
 private:
-    ProcessorStateWatcher MakeKiller()
-    {
-        return [this](ProcessorState state, ProcessorExternalContext& context) {
-            if (_assertOnBadState) {
-                ASSERT(state == ProcessorState::Good);
-            }
-            _lastProcessorState = state;
-        };
-    }
-
     void MakeMemory(uint8_t size)
     {
         _memoryBuffer.resize(size);
@@ -129,21 +106,8 @@ private:
 
     std::vector<std::byte> _memoryBuffer;
     std::unique_ptr<VirtualMachine> _vm;
-    std::unique_ptr<TestProcedure> _procedure;
-    bool _assertOnBadState { true };
-    ProcessorState _lastProcessorState { ProcessorState::Good };
+    TestProcessorDebugger _debugger;
 };
-
-DisabledAssertScope::DisabledAssertScope(ProcedureFixture& fixture)
-    : _fixture(fixture)
-{
-    fixture.EnableAssertsOnBadProcessorState(false);
-}
-
-DisabledAssertScope::~DisabledAssertScope()
-{
-    _fixture.EnableAssertsOnBadProcessorState(true);
-}
 
 }
 

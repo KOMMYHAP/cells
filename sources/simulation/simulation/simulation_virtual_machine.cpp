@@ -8,6 +8,7 @@ SimulationVirtualMachine::SimulationVirtualMachine()
     : _procedureDataList(ProcedureTableLimit)
     , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
 {
+    _virtualMachine.SetDebugger(&_debugger);
 }
 
 void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)
@@ -38,14 +39,4 @@ const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(Proce
     }
 
     return &info.info;
-}
-
-void SimulationVirtualMachine::SetWatcher(ProcessorStateWatcher watcher)
-{
-    _virtualMachine.SetWatcher(std::move(watcher));
-}
-
-void SimulationVirtualMachine::SetInstructionsPerStep(const uint8_t count)
-{
-    _virtualMachine.SetInstructionsPerStep(count);
 }

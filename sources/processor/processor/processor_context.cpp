@@ -8,12 +8,10 @@ ProcessorContext::ProcessorContext(Params params)
     : _params(std::move(params))
     , _initialMemory(_params.memory)
     , _stack(_params.controlBlock->stack, _params.controlBlock->stackOffset)
-    , _initialControlBlock(*_params.controlBlock)
 {
     if (!SetCommandPointer(_params.controlBlock->nextCommand)) {
         ASSERT_FAIL("Invalid command pointer!");
     }
-    ASSERT(*_params.stateWatcher, "Invalid state watcher!");
 }
 
 bool ProcessorContext::HasFlag(ProcessorFlags flag) const
@@ -44,9 +42,7 @@ ProcessorState ProcessorContext::GetState() const
 void ProcessorContext::SetState(ProcessorState state)
 {
     ASSERT(state != ProcessorState::Good);
-    // _params.controlBlock->state = static_cast<std::underlying_type_t<ProcessorState>>(state);
-    RestoreControlBlock();
-    NotifyStateChanged(state);
+    _params.controlBlock->state = static_cast<std::underlying_type_t<ProcessorState>>(state);
 }
 
 bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
@@ -162,17 +158,6 @@ std::pair<bool, std::byte> ProcessorContext::PopStack()
         SetState(ProcessorState::StackUnderflow);
     }
     return { success, data };
-}
-
-void ProcessorContext::RestoreControlBlock()
-{
-    *_params.controlBlock = _initialControlBlock;
-}
-
-void ProcessorContext::NotifyStateChanged(ProcessorState state)
-{
-    // todo: move stateWatcher out processor context? e.g. to VirtualMachine
-    (*_params.stateWatcher)(state, _params.externalContext);
 }
 
 void ProcessorContext::SetFlag(ProcessorFlags flag, bool value)

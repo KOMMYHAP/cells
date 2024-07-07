@@ -22,7 +22,7 @@ World::World()
     _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _ecsWorld);
 
     _simulationVm.SetInstructionsPerStep(8);
-    _simulationVm.SetWatcher([this](const ProcessorState state, const ProcessorExternalContext& context) {
+    _simulationVm.S([this](const ProcessorState state, const ProcessorExternalContext& context) {
         if (state == ProcessorState::Good) {
             return;
         }

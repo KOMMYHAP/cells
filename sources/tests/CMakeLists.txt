@@ -14,6 +14,8 @@ add_executable(${PROJECT_NAME} main_tests.cpp tests_pch.h
         ecs_tests.cpp
 )
 
+add_subdirectory(utils)
+
 target_precompile_headers(${PROJECT_NAME} PRIVATE tests_pch.h)
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     cells-processor 

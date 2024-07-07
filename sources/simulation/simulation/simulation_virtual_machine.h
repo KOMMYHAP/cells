@@ -1,8 +1,8 @@
 #pragma once
 
 #include "components/cell_id.h"
-#include "components/cell_position.h"
-#include "components/procedure_type.h"
+#include "procedures/procedure_type.h"
+#include "simulation_cell_debugger.h"
 #include "vm/virtual_machine.h"
 
 struct CellBrain;
@@ -23,8 +23,7 @@ public:
         requires std::constructible_from<Procedure, Args...>
     void RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args);
 
-    void SetWatcher(ProcessorStateWatcher watcher);
-    void SetInstructionsPerStep(uint8_t count);
+    SimulationCellDebugger& ModifyCellDebugger() { return _debugger; };
 
     void Run(CellId id, CellBrain& brain);
 
@@ -38,6 +37,7 @@ private:
     };
 
     VirtualMachine _virtualMachine;
+    SimulationCellDebugger _debugger;
     std::vector<ProcedureData> _procedureDataList;
     std::vector<ProcedureId> _procedureTypeMapping;
 };

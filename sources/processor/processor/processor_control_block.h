@@ -1,7 +1,5 @@
 #pragma once
 
-#include "processor_state.h"
-
 enum class ProcessorFlags : uint8_t {
     Zero = 1 << 0,
     Sign = 1 << 1,

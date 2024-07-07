@@ -11,7 +11,6 @@ class ProcessorContext {
 public:
     struct Params {
         gsl::not_null<const ProcedureTable*> procedureTable;
-        gsl::not_null<const ProcessorStateWatcher*> stateWatcher;
         gsl::not_null<ProcessorControlBlock*> controlBlock;
         ProcessorExternalContext externalContext;
         ProcessorMemory memory;
@@ -47,14 +46,13 @@ public:
     const ProcessorExternalContext& GetExternalContext() const { return _params.externalContext; }
     ProcessorExternalContext& ModifyExternalContext() { return _params.externalContext; }
 
-private:
-    void RestoreControlBlock();
-    void NotifyStateChanged(ProcessorState state);
+    const ProcessorControlBlock& GetControlBlock() const { return *_params.controlBlock; }
+    ProcessorControlBlock& ModifyControlBlock() { return *_params.controlBlock; }
 
+private:
     Params _params;
     ProcessorMemory _initialMemory;
     ProcessorStack _stack;
-    ProcessorControlBlock _initialControlBlock;
     ProcedureId _pendingProcedure { ProcedureId::Invalid };
 };
 

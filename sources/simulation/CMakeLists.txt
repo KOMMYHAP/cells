@@ -16,12 +16,16 @@ add_subdirectory(simulation)
 target_sources(${PROJECT_NAME} PRIVATE
         simulation_pch.h
         simulation_registrable_system.cpp
+        tick_calculator.h
+        tick_calculator.cpp
+        world.cpp
 )
 
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         simulation_registrable_system.h
+        world.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -1,29 +1,28 @@
 #include "processor.h"
+
+#include "processor_debugger.h"
 #include "processor_instruction.h"
 #include "processor_profile_category.h"
 #include "processor_state.h"
 
-Processor::Processor(uint8_t systemInstructionToPerform)
-    : _systemInstructionToPerform(systemInstructionToPerform)
+void Processor::SetDebugger(ProcessorDebugger* debugger)
 {
-    ASSERT(_systemInstructionToPerform > 0);
+    _debugger = debugger;
 }
 
 void Processor::Execute(ProcessorContext& context)
 {
     common::ProfileScope processorProfileScope { "Processor", ProcessorProfileCategory };
 
-    for (int i = 0; i < _systemInstructionToPerform; ++i) {
-        auto mbInstruction = ProcessInstruction(context);
-        if (!mbInstruction.has_value()) {
-            // no completed instruction
-            break;
-        }
-        const ProcessorInstruction completedInstruction = *mbInstruction;
-        if (completedInstruction == ProcessorInstruction::Call) {
-            // one heavy instruction per execution is enough
-            break;
-        }
+    const bool debuggerEnabled = _debugger && _debugger->ShouldAttachDebugger(context);
+    if (debuggerEnabled) {
+        _debugger->AttachDebugger(context);
+    }
+
+    ProcessInstruction(context);
+
+    if (debuggerEnabled) {
+        _debugger->DetachDebugger(context);
     }
 }
 

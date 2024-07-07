@@ -5,7 +5,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_type.h
         cell_age.h
         cell_health.h
-        procedure_type.h
         component.h
         component_storage.h
         component_storage.hpp

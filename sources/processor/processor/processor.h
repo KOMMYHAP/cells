@@ -2,10 +2,11 @@
 #include "processor_context.h"
 #include "processor_instruction.h"
 
+class ProcessorDebugger;
+
 class Processor {
 public:
-    Processor(uint8_t systemInstructionToPerform);
-
+    void SetDebugger(ProcessorDebugger* debugger);
     void Execute(ProcessorContext& context);
 
 private:
@@ -31,5 +32,5 @@ private:
     };
     void UpdateFlags(FlagsContext flagsContext, ProcessorContext& context);
 
-    uint8_t _systemInstructionToPerform;
+    ProcessorDebugger* _debugger { nullptr };
 };

@@ -1,5 +1,4 @@
 #pragma once
-#include "processor_external_context.h"
 
 enum class ProcessorState : uint8_t {
     Good,
@@ -17,5 +16,3 @@ enum class ProcessorState : uint8_t {
     OutOfMemory,
     UnknownProcedure,
 };
-
-using ProcessorStateWatcher = std::function<void(ProcessorState, ProcessorExternalContext&)>;
