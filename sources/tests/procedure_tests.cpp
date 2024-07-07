@@ -51,7 +51,7 @@ public:
 
     TestProcessorStateGuard MakeScopeWithoutAssert()
     {
-        return { _debugger };
+        return { _debugger, false };
     }
 
     void Tick()
@@ -85,8 +85,8 @@ protected:
     void SetUp() override
     {
         _vm = std::make_unique<VirtualMachine>();
-        vm->SetDebugger(&_debugger);
         vm = _vm.get();
+        vm->SetDebugger(&_debugger);
 
         MakeMemory(255);
 

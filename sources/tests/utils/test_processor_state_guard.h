@@ -4,7 +4,7 @@ class TestProcessorDebugger;
 
 class TestProcessorStateGuard {
 public:
-    TestProcessorStateGuard(TestProcessorDebugger& debugger);
+    TestProcessorStateGuard(TestProcessorDebugger& debugger, bool enableAssert);
     ~TestProcessorStateGuard();
 
     TestProcessorStateGuard(const TestProcessorStateGuard& other) = delete;
@@ -14,4 +14,5 @@ public:
 
 private:
     gsl::not_null<TestProcessorDebugger*> _debugger;
+    bool _initialAssertState{false};
 };

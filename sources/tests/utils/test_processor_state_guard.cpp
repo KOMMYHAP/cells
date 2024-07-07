@@ -2,13 +2,13 @@
 
 #include "test_processor_debugger.h"
 
-TestProcessorStateGuard::TestProcessorStateGuard(TestProcessorDebugger& debugger)
+TestProcessorStateGuard::TestProcessorStateGuard(TestProcessorDebugger& debugger, bool enableAssert)
     : _debugger(&debugger)
 {
-    _debugger->SetAbortOnBadProcessorState(true);
+    _initialAssertState = _debugger->SetAbortOnBadProcessorState(enableAssert);
 }
 
 TestProcessorStateGuard::~TestProcessorStateGuard()
 {
-    _debugger->SetAbortOnBadProcessorState(false);
+    _debugger->SetAbortOnBadProcessorState(_initialAssertState);
 }

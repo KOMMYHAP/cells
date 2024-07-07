@@ -26,7 +26,7 @@ void TestProcessorDebugger::DetachDebugger(ProcessorContext& context)
     context.ModifyControlBlock() = _initialControlBlock;
 }
 
-void TestProcessorDebugger::SetAbortOnBadProcessorState(bool value)
+bool TestProcessorDebugger::SetAbortOnBadProcessorState(bool value)
 {
-    _shouldAbortOnErrorState = value;
+    return std::exchange(_shouldAbortOnErrorState, value);
 }

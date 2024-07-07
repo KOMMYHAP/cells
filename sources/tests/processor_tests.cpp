@@ -31,7 +31,7 @@ public:
 
     TestProcessorStateGuard MakeScopeWithoutAssert()
     {
-        return { _debugger };
+        return { _debugger, false };
     }
 
     void Tick()
@@ -39,15 +39,10 @@ public:
         _vm->Run({ _memoryBuffer });
     }
 
-    void MakeVmWithCustomSystemInstructionPerTick(uint8_t count)
-    {
-        _vm = MakeVm(count);
-    }
-
 protected:
     void SetUp() override
     {
-        _vm = MakeVm(1);
+        _vm = MakeVm();
         MakeMemory(255);
 
         ProcessorMemory rawMemory { _memoryBuffer };
@@ -58,7 +53,7 @@ protected:
     void TearDown() override { }
 
 private:
-    std::unique_ptr<VirtualMachine> MakeVm(uint8_t systemInstructionPerTick)
+    std::unique_ptr<VirtualMachine> MakeVm()
     {
         auto vm = std::make_unique<VirtualMachine>();
         vm->SetDebugger(&_debugger);
@@ -137,33 +132,4 @@ TEST_F(ProcessorFixture, Processor_PopStackToInvalidRegister)
         Tick();
     }
     ASSERT_EQ(GetLastProcessorState(), ProcessorState::InvalidInstruction);
-}
-
-TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick)
-{
-    MakeVmWithCustomSystemInstructionPerTick(2);
-
-    auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 24 });
-
-    ASSERT_EQ(AccessControlBlock().stackOffset, 0);
-    Tick();
-    ASSERT_EQ(AccessControlBlock().stackOffset, 2);
-}
-
-TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick_WithJump)
-{
-    MakeVmWithCustomSystemInstructionPerTick(3);
-
-    auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
-    accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
-    accessor.Write(ProcessorInstruction::Nope);
-
-    ASSERT_EQ(AccessControlBlock().stackOffset, 0);
-    ASSERT_EQ(AccessControlBlock().nextCommand, 0);
-    Tick();
-    ASSERT_EQ(AccessControlBlock().stackOffset, 2);
-    ASSERT_EQ(AccessControlBlock().nextCommand, 2);
 }

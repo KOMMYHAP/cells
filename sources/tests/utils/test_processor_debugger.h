@@ -10,7 +10,7 @@ public:
     void AttachDebugger(ProcessorContext& context) override;
     void DetachDebugger(ProcessorContext& context) override;
 
-    void SetAbortOnBadProcessorState(bool value);
+    bool SetAbortOnBadProcessorState(bool value);
     ProcessorState GetLastProcessorState() const { return _state; }
 
 private:
