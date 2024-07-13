@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-class ProcessorExternalContext {
+class ProcedureExternalContext {
 public:
-    ProcessorExternalContext() = default;
-    explicit ProcessorExternalContext(std::any data)
+    ProcedureExternalContext() = default;
+    explicit ProcedureExternalContext(std::any data)
         : _data(std::move(data))
     {
     }

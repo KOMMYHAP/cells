@@ -4,7 +4,6 @@
 
 class ProcessorStack {
 public:
-    ProcessorStack() = default;
     ProcessorStack(std::span<std::byte> buffer, uint8_t& offset);
 
     template <class T>
@@ -35,6 +34,11 @@ public:
     uint8_t GetBytesCapacity() const;
 
 private:
+    // todo: size of pointer is 8 bytes, but stack size is about 8 bytes too...
+    // std::byte[8] _buffer2{nullptr};
+    // uint8_t _offset2 { 0 };
+    // uint8_t _size { 0 };
+    
     std::span<std::byte> _buffer;
     gsl::not_null<uint8_t*> _offset;
 };

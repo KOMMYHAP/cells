@@ -1,12 +1,8 @@
 ﻿#pragma once
 
-#include "processor/processor_context.h"
+#include "procedure_external_context.h"
+#include "procedure_id.h"
 #include "processor/processor_stack.h"
-#include "processor/processor_state.h"
-
-struct ProcedureTableEntry;
-class ProcessorContext;
-enum class ProcessorState : uint8_t;
 
 class ProcedureContext {
 public:
@@ -14,8 +10,20 @@ public:
         uint8_t input { 0 };
         uint8_t output { 0 };
     };
+    enum class State : uint8_t {
+        Initial,
+        Aborted,
+        FailedMissingInput,
+        FailedStackUnderflow,
+        FailedTooMuchInputRequested,
+        FailedIgnoreInput,
+        FailedMissingOutput,
+        FailedTooMuchOutput,
+        FailedStackOverflow,
+    };
 
-    ProcedureContext(ProcedureId id, ProcessorContext context, ProcessorStack stack, ArgumentsStatus arguments);
+    ProcedureContext();
+    ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, ArgumentsStatus arguments);
 
     template <MemoryType... Ts>
     std::tuple<bool, Ts...> TryPopArgs();
@@ -24,26 +32,31 @@ public:
         requires(MemoryType<std::decay_t<Ts>> && ...)
     bool TryPushResult(Ts&&... ts);
 
-    void DeferExecution();
-    void CompleteProcedure();
     void AbortProcedure();
 
     template <class T>
-    T& ModifyExternalContext();
+    T& ModifyExternalContext() { return _externalContext.Modify<T>(); }
 
     template <class T>
-    const T& GetExternalContext() const;
+    const T& GetExternalContext() const { return _externalContext.Get<T>(); }
 
     ArgumentsStatus GetRestArgumentsCount() const { return _arguments; }
     ProcedureId GetId() const { return _id; }
+    State GetState() const { return _state; }
+    ProcessorStack GetStack() const { return _stack; }
+    
+    bool IsCompleted() const;
+    bool IsPending() const;
 
 private:
-    void AbortProcedure(ProcessorState state);
+    void SetState(State state);
+    bool IsInitialState() const { return _state == State::Initial; }
 
-    ProcedureId _id {ProcedureId::Invalid};
-    ProcessorStack _stack;
-    ProcessorContext _processorContext;
+    ProcedureId _id { ProcedureId::Invalid };
     ArgumentsStatus _arguments;
+    State _state { State::Initial };
+    ProcessorStack _stack;
+    ProcedureExternalContext _externalContext;
 };
 
 #include "procedure_context.hpp"

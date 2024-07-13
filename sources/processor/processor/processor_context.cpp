@@ -2,7 +2,6 @@
 
 #include "flags.h"
 #include "procedures/procedure_context.h"
-#include "procedures/procedure_context_placeholder.h"
 #include "procedures/procedure_table.h"
 #include "processor_state.h"
 
@@ -96,63 +95,33 @@ bool ProcessorContext::StartProcedure(const ProcedureId id)
         return false;
     }
 
-    uint8_t inputArgsCount = info->inputArgsCount;
-    uint8_t outputArgsCount = info->outputArgsCount;
-    const uint8_t initialStackOffset = _params.controlBlock->stackOffset;
-
-    if (initialStackOffset < inputArgsCount) {
-        SetState(ProcessorState::ProcedureMissingInput);
-        return false;
-    }
-
-    ProcedureContext procedureContext { id, *this, _stack, ProcedureContext::ArgumentsStatus { inputArgsCount, outputArgsCount } };
+    const ProcedureContext::ArgumentsStatus arguments { info->inputArgsCount, info->outputArgsCount };
+    ProcedureContext procedureContext { id, _params.externalContext, _stack, arguments };
     info->procedure->Execute(procedureContext);
 
-    if (IsState(ProcessorState::Good) && !HasPendingProcedure()) {
-        CompleteProcedure(procedureContext);
+    if (procedureContext.IsCompleted()) {
+        return true;
     }
-    return true;
+
+    _pendingProcedureId = id;
+    if (procedureContext.GetState() == ProcedureContext::State::Initial) {
+        SetState(ProcessorState::PendingProcedure);
+        return true;
+    }
+    SetState(ProcessorState::AbortedProcedure);
+    return false;
 }
 
-void ProcessorContext::DeferProcedure(const ProcedureContext& context)
+bool ProcessorContext::CompletePendingProcedure(const ProcedureContext& context)
 {
-    ASSERT(_pendingProcedureId == ProcedureId::Invalid);
-    _params.pendingProcedurePlaceholder->Set(context);
-    _pendingProcedureId = context.GetId();
-}
-
-bool ProcessorContext::CompleteProcedure(const ProcedureContext& context)
-{
-    ASSERT(context.GetId() != ProcedureId::Invalid);
-    if (HasPendingProcedure() && _pendingProcedureId != context.GetId()) {
-        SetState(ProcessorState::IncompletePendingProcedure);
-        return false;
-    }
-    const auto [input, output] = context.GetRestArgumentsCount();
-    if (input != 0) {
-        SetState(ProcessorState::ProcedureIgnoreInput);
-        return false;
-    }
-    if (output != 0) {
-        SetState(ProcessorState::ProcedureMissingOutput);
-        return false;
-    }
-
+    ASSERT(HasPendingProcedure() && _pendingProcedureId == context.GetId());
     _pendingProcedureId = ProcedureId::Invalid;
-    return true;
-}
-
-bool ProcessorContext::AbortProcedure(const ProcedureContext& context, const ProcessorState state)
-{
-    ASSERT(context.GetId() != ProcedureId::Invalid);
-    if (HasPendingProcedure() && _pendingProcedureId != context.GetId()) {
-        SetState(ProcessorState::IncompletePendingProcedure);
-        return false;
+    if (context.IsCompleted()) {
+        SetState(ProcessorState::Good);
+        return true;
     }
-
-    SetState(state);
-    _pendingProcedureId = ProcedureId::Invalid;
-    return true;
+    SetState(ProcessorState::AbortedProcedure);
+    return false;
 }
 
 bool ProcessorContext::PushStack(std::byte data)

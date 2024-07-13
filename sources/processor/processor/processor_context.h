@@ -1,32 +1,29 @@
 #pragma once
 
+#include "procedures/procedure_context.h"
+#include "procedures/procedure_external_context.h"
 #include "procedures/procedure_id.h"
 #include "processor_control_block.h"
-#include "processor_external_context.h"
 #include "processor_memory.h"
 #include "processor_stack.h"
 #include "processor_state.h"
 
 class ProcedureContext;
 class ProcedureTable;
-class PendingProcedurePlaceholder;
 
 class ProcessorContext {
 public:
     struct Params {
         gsl::not_null<const ProcedureTable*> procedureTable;
         gsl::not_null<ProcessorControlBlock*> controlBlock;
-        gsl::not_null<PendingProcedurePlaceholder*> pendingProcedurePlaceholder;
-        ProcessorExternalContext externalContext;
+        ProcedureExternalContext externalContext;
         ProcessorMemory memory;
     };
 
     explicit ProcessorContext(Params params);
 
     bool StartProcedure(ProcedureId id);
-    void DeferProcedure(const ProcedureContext& context);
-    bool CompleteProcedure(const ProcedureContext& context);
-    bool AbortProcedure(const ProcedureContext& context, ProcessorState state);
+    bool CompletePendingProcedure(const ProcedureContext& context);
     bool HasPendingProcedure() const { return _pendingProcedureId != ProcedureId::Invalid; }
 
     template <class... Ts>
@@ -48,9 +45,6 @@ public:
     std::pair<bool, std::byte> ReadRegistry(uint8_t index);
     bool PushStack(std::byte data);
     std::pair<bool, std::byte> PopStack();
-
-    const ProcessorExternalContext& GetExternalContext() const { return _params.externalContext; }
-    ProcessorExternalContext& ModifyExternalContext() { return _params.externalContext; }
 
     const ProcessorControlBlock& GetControlBlock() const { return *_params.controlBlock; }
     ProcessorControlBlock& ModifyControlBlock() { return *_params.controlBlock; }

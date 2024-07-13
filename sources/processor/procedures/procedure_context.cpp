@@ -1,30 +1,43 @@
 ﻿#include "procedure_context.h"
-#include "processor/processor.h"
 
-ProcedureContext::ProcedureContext(ProcedureId id, ProcessorContext context, ProcessorStack stack, const ArgumentsStatus arguments)
+namespace {
+
+// todo: remove this hack, add default ctor for ProcessorStack
+uint8_t g_invalidStackOffsetStub;
+const ProcessorStack g_invalidProcessorStack { {}, g_invalidStackOffsetStub };
+
+}
+
+ProcedureContext::ProcedureContext()
+    : _stack(g_invalidProcessorStack)
+{
+}
+
+ProcedureContext::ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, const ArgumentsStatus arguments)
     : _id(id)
-    , _stack(std::move(stack))
-    , _processorContext(std::move(context))
     , _arguments(arguments)
+    , _stack(std::move(stack))
+    , _externalContext(std::move(externalContext))
 {
 }
 
 void ProcedureContext::AbortProcedure()
 {
-    AbortProcedure(ProcessorState::AbortedProcedure);
+    SetState(State::Aborted);
 }
 
-void ProcedureContext::DeferExecution()
+bool ProcedureContext::IsCompleted() const
 {
-    _processorContext.DeferProcedure(*this);
+    return _arguments.input == 0 && _arguments.output == 0 && _state == State::Initial;
 }
 
-void ProcedureContext::AbortProcedure(const ProcessorState state)
+bool ProcedureContext::IsPending() const
 {
-    _processorContext.AbortProcedure(*this, state);
+    return !IsCompleted() && _state == State::Initial;
 }
 
-void ProcedureContext::CompleteProcedure()
+void ProcedureContext::SetState(State state)
 {
-    _processorContext.CompleteProcedure(*this);
+    ASSERT(state != State::Initial);
+    _state = state;
 }

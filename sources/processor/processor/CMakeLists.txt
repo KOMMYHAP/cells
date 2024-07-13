@@ -22,6 +22,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         processor_stack.hpp
         processor_memory_type.h
         processor_instruction.h
-        processor_external_context.h
         processor_debugger.h
 )
