@@ -49,6 +49,11 @@ public:
         return _debugger.GetLastProcessorState();
     }
 
+    ProcedureState GetLastProcedureState()
+    {
+        return _debugger.GetLastProcedureState();
+    }
+
     TestProcessorStateGuard MakeScopeWithoutAssert()
     {
         return { _debugger, false };
@@ -59,13 +64,14 @@ public:
         _vm->Run({ _memoryBuffer }, std::move(externalContext));
     }
 
-    void TestRollback(ProcessorState expectedErrorState)
+    void TestRollback(ProcessorState expectedProcessorState, ProcedureState expectedProcedureState)
     {
         const auto oldControlBlock = AccessControlBlock();
 
         auto checkControlBlockWasNotChanged = [&]() {
             ProcessorControlBlock& controlBlock = AccessControlBlock();
-            ASSERT_EQ(GetLastProcessorState(), expectedErrorState);
+            ASSERT_EQ(GetLastProcessorState(), expectedProcessorState);
+            ASSERT_EQ(GetLastProcedureState(), expectedProcedureState);
             ASSERT_EQ(controlBlock.nextCommand, oldControlBlock.nextCommand);
             ASSERT_EQ(controlBlock.flags, oldControlBlock.flags);
             ASSERT_EQ(controlBlock.stackOffset, oldControlBlock.stackOffset);
@@ -186,7 +192,7 @@ TEST_F(ProcedureFixture, Procedure_In1_Out0)
         auto _ = MakeScopeWithoutAssert();
         Tick();
         ASSERT_EQ(counter, 0);
-        ASSERT_EQ(GetLastProcessorState(), ProcessorState::ProcedureMissingInput);
+        ASSERT_EQ(GetLastProcessorState(), ProcessorState::AbortedProcedure);
     }
 
     auto accessor = GetMemory();
@@ -353,7 +359,7 @@ TEST_F(ProcedureFixture, Rollback_InvalidCommandInProcedure)
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
     GetMemory().Write(ProcessorInstruction::Call, id);
-    TestRollback(ProcessorState::AbortedProcedure);
+    TestRollback(ProcessorState::AbortedProcedure, ProcedureState::Aborted);
 }
 
 TEST_F(ProcedureFixture, Rollback_MissingOutput)
@@ -364,7 +370,7 @@ TEST_F(ProcedureFixture, Rollback_MissingOutput)
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
     accessor.Write(ProcessorInstruction::Call, id);
-    TestRollback(ProcessorState::ProcedureMissingOutput);
+    TestRollback(ProcessorState::AbortedProcedure, ProcedureState::FailedMissingOutput);
 }
 
 TEST_F(ProcedureFixture, Rollback_IgnoredInput)
@@ -377,7 +383,7 @@ TEST_F(ProcedureFixture, Rollback_IgnoredInput)
     accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     Tick();
     accessor.Write(ProcessorInstruction::Call, id);
-    TestRollback(ProcessorState::ProcedureIgnoreInput);
+    TestRollback(ProcessorState::AbortedProcedure, ProcedureState::FailedIgnoreInput);
 }
 
 TEST_F(ProcedureFixture, Rollback_TooMuchInputRequested)
@@ -393,7 +399,7 @@ TEST_F(ProcedureFixture, Rollback_TooMuchInputRequested)
     accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 1 });
     Tick();
     accessor.Write(ProcessorInstruction::Call, id);
-    TestRollback(ProcessorState::ProcedureTooMuchInputRequested);
+    TestRollback(ProcessorState::AbortedProcedure, ProcedureState::FailedTooMuchInputRequested);
 }
 
 TEST_F(ProcedureFixture, Rollback_TooMuchOuput)
@@ -407,26 +413,28 @@ TEST_F(ProcedureFixture, Rollback_TooMuchOuput)
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
     accessor.Write(ProcessorInstruction::Call, id);
-    TestRollback(ProcessorState::ProcedureTooMuchOutput);
+    TestRollback(ProcessorState::AbortedProcedure, ProcedureState::FailedTooMuchOutput);
 }
 
 TEST_F(ProcedureFixture, DeferredExecution_Complete)
 {
     auto accessor = GetMemory();
     auto procedure = std::make_unique<TestProcedure>();
+    std::optional<ProcedureContext> procedureContext;
     procedure->func = [&](ProcedureContext& context) {
-        context.DeferExecution();
+        procedureContext = context;
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
     accessor.Write(ProcessorInstruction::Call, id);
     Tick();
-    ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::PendingProcedure);
+    ASSERT_TRUE(procedureContext.has_value());
 
-    ProcedureContext context = vm->RestoreDeferredExecution(GetMemory());
-    const bool r = context.TryPushResult(std::byte { 42 });
+    const bool r = procedureContext->TryPushResult(std::byte { 42 });
     ASSERT_TRUE(r);
-    context.CompleteProcedure();
+
+    vm->CompleteDeferredExecution(GetMemory(), *procedureContext);
     ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
 }
 
@@ -434,18 +442,22 @@ TEST_F(ProcedureFixture, DeferredExecution_Abort)
 {
     auto accessor = GetMemory();
     auto procedure = std::make_unique<TestProcedure>();
+    std::optional<ProcedureContext> procedureContext;
     procedure->func = [&](ProcedureContext& context) {
-        context.DeferExecution();
+        procedureContext = context;
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 1);
     accessor.Write(ProcessorInstruction::Call, id);
     Tick();
-    ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
+    ASSERT_EQ(GetLastProcessorState(), ProcessorState::PendingProcedure);
+    ASSERT_TRUE(procedureContext.has_value());
 
-    ProcedureContext context = vm->RestoreDeferredExecution(GetMemory());
-    context.AbortProcedure();
+    procedureContext->AbortProcedure();
+    vm->CompleteDeferredExecution(GetMemory(), *procedureContext);
+
     ASSERT_EQ(GetLastProcessorState(), ProcessorState::AbortedProcedure);
+    ASSERT_EQ(GetLastProcedureState(), ProcedureState::Aborted);
 }
 
 TEST_F(ProcedureFixture, ExternalContext)

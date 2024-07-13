@@ -26,7 +26,7 @@ public:
     SimulationCellDebugger& ModifyCellDebugger() { return _debugger; }
 
     void Run(CellId id, CellBrain& brain);
-    ProcedureContext RestoreDeferredExecution(CellId id, CellBrain& brain);
+    void CompletePendingProcedure(CellId id, CellBrain& brain, const ProcedureContext & context);
 
     ProcedureId GetProcedureId(ProcedureType type) const;
     const SimulationProcedureInfo* FindProcedureInfo(ProcedureType type) const;

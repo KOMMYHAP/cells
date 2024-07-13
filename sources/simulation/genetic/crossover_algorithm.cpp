@@ -1,9 +1,9 @@
 #include "crossover_algorithm.h"
 
-#include "procedures/pending_procedure_id.h"
 #include "procedures/procedure_context.h"
 #include "processor/processor_control_block.h"
 #include "processor/processor_memory.h"
+#include "processor/processor_state.h"
 
 CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBrain& parentRight)
 {
@@ -24,7 +24,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
     ProcessorMemory memory { brain.data };
     ProcessorControlBlock controlBlock {
         static_cast<std::underlying_type_t<ProcessorState>>(ProcessorState::Good),
-        static_cast<std::underlying_type_t<PendingProcedureId>>(PendingProcedureId::Invalid),
+        static_cast<std::underlying_type_t<ProcedureId>>(ProcedureId::Invalid),
         0,
         0,
         {},

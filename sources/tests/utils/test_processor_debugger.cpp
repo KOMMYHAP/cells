@@ -14,8 +14,8 @@ void TestProcessorDebugger::AttachDebugger(ProcessorContext& context)
 
 void TestProcessorDebugger::DetachDebugger(ProcessorContext& context)
 {
-    _state = context.GetState();
-    if (_state == ProcessorState::Good) {
+    _processorState = context.GetState();
+    if (_processorState == ProcessorState::Good) {
         return;
     }
 
@@ -24,6 +24,21 @@ void TestProcessorDebugger::DetachDebugger(ProcessorContext& context)
     }
 
     context.ModifyControlBlock() = _initialControlBlock;
+}
+
+void TestProcessorDebugger::ProcedureWillStarted(ProcessorContext& processorContext, ProcedureContext& procedureContext)
+{
+    _procedureState = procedureContext.GetState();
+}
+
+void TestProcessorDebugger::ProcedureWasDeferred(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+{
+    _procedureState = procedureContext.GetState();
+}
+
+void TestProcessorDebugger::ProcedureWasCompleted(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+{
+    _procedureState = procedureContext.GetState();
 }
 
 bool TestProcessorDebugger::SetAbortOnBadProcessorState(bool value)

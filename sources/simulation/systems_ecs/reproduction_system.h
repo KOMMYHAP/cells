@@ -12,7 +12,7 @@ class ReproductionSystem final : public SimulationEcsSystem<ReproductionSystem, 
 public:
     ReproductionSystem(EcsWorld& ecsWorld, SimulationVirtualMachine& vm, const CellLocator& locator);
 
-    void DoProcessComponents(CellId id, CellPosition position, ReproductionDirection direction, CellBrain& brain);
+    void DoProcessComponents(CellId id, CellPosition position, ReproductionDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure);
 
 private:
     gsl::not_null<const CellLocator*> _locator;

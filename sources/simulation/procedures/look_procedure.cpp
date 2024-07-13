@@ -28,5 +28,4 @@ void LookProcedure::Execute(ProcedureContext& procedureContext)
 
     _world->emplace<LookDirection>(id, direction);
     _world->emplace<DeferredProcedureExecution>(id);
-    procedureContext.DeferExecution();
 }

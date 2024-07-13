@@ -2,25 +2,16 @@
 
 #include "procedure_external_context.h"
 #include "procedure_id.h"
+#include "procedure_state.h"
 #include "processor/processor_stack.h"
 
 class ProcedureContext {
 public:
+    using State = ProcedureState;
+
     struct ArgumentsStatus {
         uint8_t input { 0 };
         uint8_t output { 0 };
-    };
-
-    enum class State : uint8_t {
-        Initial,
-        Aborted,
-        FailedMissingInput,
-        FailedStackUnderflow,
-        FailedTooMuchInputRequested,
-        FailedIgnoreInput,
-        FailedMissingOutput,
-        FailedTooMuchOutput,
-        FailedStackOverflow,
     };
 
     ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, ArgumentsStatus arguments);

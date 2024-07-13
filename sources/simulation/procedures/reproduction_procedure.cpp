@@ -27,7 +27,6 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
     const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
     _world->emplace<ReproductionDirection>(id, direction);
     _world->emplace<DeferredProcedureExecution>(id, context);
-    context.DeferExecution();
 
     // constexpr CellHealth healthPerAction { 50 };
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

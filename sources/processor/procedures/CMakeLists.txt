@@ -2,7 +2,6 @@
 target_sources(${PROJECT_NAME} PRIVATE
         procedure_table.cpp
         procedure_context.cpp
-        procedure_context_placeholder.cpp
 )
 
 
@@ -10,10 +9,9 @@ target_sources(${PROJECT_NAME} PRIVATE
 target_sources(${PROJECT_NAME} PUBLIC
         procedure.h
         procedure_id.h
+        procedure_state.h
         procedure_table.h
         procedure_context.h
         procedure_context.hpp
-        pending_procedure_id.h
-        procedure_context_placeholder.h
         procedure_external_context.h
 )

@@ -10,18 +10,16 @@ ReproductionSystem::ReproductionSystem(EcsWorld& ecsWorld, SimulationVirtualMach
 {
 }
 
-void ReproductionSystem::DoProcessComponents(CellId id, CellPosition position, ReproductionDirection direction, CellBrain& brain)
+void ReproductionSystem::DoProcessComponents(CellId id, CellPosition position, ReproductionDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure)
 {
-    ProcedureContext context = _vm->RestoreDeferredExecution(id, brain);
-
     const CellPosition childPosition = _locator->TryApplyDirection(position, direction.value);
     if (childPosition == InvalidCellPosition) {
-        context.AbortProcedure();
+        procedure.context.AbortProcedure();
         return;
     }
 
     if (const CellId targetId = _locator->Find(childPosition); targetId != CellId::Invalid) {
-        context.AbortProcedure();
+        procedure.context.AbortProcedure();
         return;
     }
 
@@ -29,5 +27,5 @@ void ReproductionSystem::DoProcessComponents(CellId id, CellPosition position, R
     const CellId child = world.create();
     world.emplace<CellBrain>(child, MakePatrolCell(*_vm));
     world.emplace<CellPosition>(child, childPosition);
-    context.CompleteProcedure();
+    _vm->CompletePendingProcedure(id, brain, procedure.context);
 }

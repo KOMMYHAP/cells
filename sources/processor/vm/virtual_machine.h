@@ -1,8 +1,6 @@
 #pragma once
 
-#include "procedures/pending_procedure_id.h"
 #include "procedures/procedure.h"
-#include "procedures/procedure_context_placeholder.h"
 #include "procedures/procedure_table.h"
 #include "processor/processor_debugger.h"
 #include "processor/processor_memory.h"
@@ -16,15 +14,6 @@ public:
     void CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& procedureContext);
 
 private:
-    // ProcedureContext ExtractProcedureContext(PendingProcedureId id);
-    // PendingProcedureId AllocatePendingProcedureId();
-    // PendingProcedurePlaceholder& GetPendingProcedureContext(PendingProcedureId id);
-    // void FreePendingProcedureId(PendingProcedureId id);
-
     ProcedureTable _procedureTable;
     ProcessorDebugger* _debugger { nullptr };
-
-    PendingProcedureId _nextFreeId { 0 };
-    std::stack<PendingProcedureId, std::vector<PendingProcedureId>> _freeIds;
-    std::vector<PendingProcedurePlaceholder> _pendingProcedures;
 };

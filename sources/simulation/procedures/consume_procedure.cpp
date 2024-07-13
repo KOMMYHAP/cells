@@ -16,18 +16,17 @@ ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& vm, CellLocat
 void ConsumeProcedure::Execute(ProcedureContext& context)
 {
     ASSERT_FAIL("Not implemented!");
-    const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
-    if (!readArgs) {
-        return;
-    }
-    Direction direction;
-    if (!TryParseDirection(rawDirection, direction)) {
-        context.AbortProcedure();
-        return;
-    }
-
-    const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
-    context.DeferExecution();
+    // const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
+    // if (!readArgs) {
+    //     return;
+    // }
+    // Direction direction;
+    // if (!TryParseDirection(rawDirection, direction)) {
+    //     context.AbortProcedure();
+    //     return;
+    // }
+    //
+    // const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
 
     // constexpr CellHealth healthPerAction { 5 };
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {

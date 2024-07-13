@@ -31,13 +31,20 @@ void Processor::CompletePendingProcedure(ProcessorContext& context, const Proced
         context.SetState(ProcessorState::InvalidInstruction);
         return;
     }
+
     if (procedureContext.IsFailed()) {
         context.SetState(ProcessorState::AbortedProcedure);
+        if (_debugger) {
+            _debugger->ProcedureWasCompleted(context, procedureContext);
+        }
         return;
     }
 
     context.SetPendingProcedure(ProcedureId::Invalid);
     context.SetState(ProcessorState::Good);
+    if (_debugger) {
+        _debugger->ProcedureWasCompleted(context, procedureContext);
+    }
 }
 
 bool Processor::StartProcedure(ProcessorContext& context, ProcedureId id)
@@ -50,19 +57,32 @@ bool Processor::StartProcedure(ProcessorContext& context, ProcedureId id)
 
     ProcedureContext& procedureContext = *mbProcedureContext;
     ProcedureBase& procedureBase = context.GetProcedure(id);
+
+    if (_debugger) {
+        _debugger->ProcedureWillStarted(context, procedureContext);
+    }
     procedureBase.Execute(procedureContext);
 
     if (procedureContext.IsSucceeded()) {
+        if (_debugger) {
+            _debugger->ProcedureWasCompleted(context, procedureContext);
+        }
         return true;
     }
 
     if (procedureContext.IsPending()) {
         context.SetPendingProcedure(id);
         context.SetState(ProcessorState::PendingProcedure);
+        if (_debugger) {
+            _debugger->ProcedureWasDeferred(context, procedureContext);
+        }
         return true;
     }
 
     context.SetState(ProcessorState::AbortedProcedure);
+    if (_debugger) {
+        _debugger->ProcedureWasCompleted(context, procedureContext);
+    }
     return false;
 }
 

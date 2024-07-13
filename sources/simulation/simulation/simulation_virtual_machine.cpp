@@ -11,7 +11,7 @@ SimulationVirtualMachine::SimulationVirtualMachine(EcsWorld& world)
     , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
 {
     _virtualMachine.SetDebugger(&_debugger);
-    _debugger.SetWatchingCell(CellId{99});
+    _debugger.SetWatchingCell(CellId { 99 });
 }
 
 void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)
@@ -20,12 +20,10 @@ void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)
     _virtualMachine.Run(memory, std::make_any<SimulationProcedureContext>(id));
 }
 
-ProcedureContext SimulationVirtualMachine::RestoreDeferredExecution(const CellId id, CellBrain& brain)
+void SimulationVirtualMachine::CompletePendingProcedure(CellId id, CellBrain& brain, const ProcedureContext& context)
 {
     const ProcessorMemory memory { brain.data };
-    const ProcedureContext context = _virtualMachine.RestoreDeferredExecution(memory);
-    ASSERT(context.GetExternalContext<SimulationProcedureContext>().id == id);
-    return context;
+    _virtualMachine.CompleteDeferredExecution(memory, context);
 }
 
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const
