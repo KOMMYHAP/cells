@@ -27,5 +27,5 @@ void LookProcedure::Execute(ProcedureContext& procedureContext)
     auto&& [id] = procedureContext.GetExternalContext<SimulationProcedureContext>();
 
     _world->emplace<LookDirection>(id, direction);
-    _world->emplace<DeferredProcedureExecution>(id);
+    _world->emplace<DeferredProcedureExecution>(id, procedureContext);
 }

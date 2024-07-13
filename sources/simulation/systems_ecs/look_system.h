@@ -13,9 +13,11 @@ class LookSystem final : public SimulationEcsSystem<LookSystem, const CellPositi
 public:
     LookSystem(EcsWorld& ecsWorld, CellLocator& locator, SimulationVirtualMachine& vm);
 
-    void DoProcessComponents(CellId id, CellPosition position, LookDirection direction, CellBrain& brain);
+    void DoProcessComponents(CellId id, CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure);
 
 private:
+    void Look(CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure);
+    
     gsl::not_null<CellLocator*> _locator;
     gsl::not_null<SimulationVirtualMachine*> _vm;
 };
