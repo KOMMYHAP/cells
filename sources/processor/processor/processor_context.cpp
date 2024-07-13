@@ -125,7 +125,7 @@ std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(Procedure
         return {};
     }
     const ProcedureContext::ArgumentsStatus arguments { info->inputArgsCount, info->outputArgsCount };
-    ProcedureExternalContext externalContext = _params.externalContext ? _params.externalContext : ProcedureExternalContext {};
+    ProcedureExternalContext externalContext = _params.externalContext ? *_params.externalContext : ProcedureExternalContext {};
     return ProcedureContext { id, std::move(externalContext), _stack, arguments };
 }
 

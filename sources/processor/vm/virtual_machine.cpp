@@ -1,6 +1,5 @@
 #include "virtual_machine.h"
 
-#include "procedures/procedure_context.h"
 #include "processor/processor.h"
 #include "processor/processor_control_block.h"
 
@@ -26,20 +25,31 @@ void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalConte
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     ASSERT(controlBlockRead);
 
+    ProcedureExternalContext externalContext { std::move(procedureExternalContext) };
     ProcessorContext::Params params {
         &_procedureTable,
         controlBlock,
-        ProcedureExternalContext { std::move(procedureExternalContext) },
+        &externalContext,
         memory
     };
     ProcessorContext context { std::move(params) };
-
     Processor processor;
-    processor.SetDebugger(_debugger);
+
+    const bool debuggerEnabled = _debugger && _debugger->ShouldAttachDebugger(context);
+    if (debuggerEnabled) {
+        _debugger->AttachDebugger(context);
+        processor.SetDebugger(_debugger);
+    }
+
     processor.Execute(context);
+
+    if (debuggerEnabled) {
+        processor.SetDebugger(nullptr);
+        _debugger->DetachDebugger(context);
+    }
 }
 
-void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& context)
+void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& procedureContext)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     ASSERT(controlBlockRead);
@@ -47,60 +57,24 @@ void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const Pro
     ProcessorContext::Params params {
         &_procedureTable,
         controlBlock,
-        {},
+        nullptr,
         memory
     };
     ProcessorContext processorContext { std::move(params) };
-    processorContext.CompletePendingProcedure();
-
     Processor processor;
-    processor.SetDebugger(_debugger);
-    processor.Execute(context);
-}
 
-ProcedureContext VirtualMachine::RestoreDeferredExecution(ProcessorMemory memory)
-{
-    const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
-    ASSERT(controlBlockRead);
-    static constexpr auto RawInvalidPendingProcedureId = static_cast<std::underlying_type_t<PendingProcedureId>>(PendingProcedureId::Invalid);
-    const auto rawPendingProcedureId = std::exchange(controlBlock->pendingProcedureId, RawInvalidPendingProcedureId);
-    const auto pendingProcedureId = static_cast<PendingProcedureId>(rawPendingProcedureId);
-    ASSERT(pendingProcedureId != PendingProcedureId::Invalid);
-    return ExtractProcedureContext(pendingProcedureId);
-}
-
-ProcedureContext VirtualMachine::ExtractProcedureContext(PendingProcedureId id)
-{
-    const size_t index { static_cast<std::underlying_type_t<PendingProcedureId>>(id) };
-    PendingProcedurePlaceholder& placeholder = _pendingProcedures[index];
-    const ProcedureContext context = placeholder.Extract();
-    FreePendingProcedureId(id);
-    return context;
-}
-
-PendingProcedureId VirtualMachine::AllocatePendingProcedureId()
-{
-    if (_freeIds.empty()) {
-        ASSERT(_nextFreeId != PendingProcedureId::Invalid);
-        _freeIds.push(_nextFreeId);
-        _pendingProcedures.emplace_back();
-        const auto rawNextFreeId = static_cast<std::underlying_type_t<PendingProcedureId>>(_nextFreeId) + 1;
-        _nextFreeId = static_cast<PendingProcedureId>(rawNextFreeId);
+    const bool debuggerEnabled = _debugger && _debugger->ShouldAttachDebugger(processorContext);
+    if (debuggerEnabled) {
+        _debugger->AttachDebugger(processorContext);
+        processor.SetDebugger(_debugger);
     }
-    const PendingProcedureId id = _freeIds.top();
-    _freeIds.pop();
-    return id;
-}
 
-PendingProcedurePlaceholder& VirtualMachine::GetPendingProcedureContext(PendingProcedureId id)
-{
-    const size_t index { static_cast<std::underlying_type_t<PendingProcedureId>>(id) };
-    return _pendingProcedures[index];
-}
+    processor.CompletePendingProcedure(processorContext, procedureContext);
 
-void VirtualMachine::FreePendingProcedureId(const PendingProcedureId id)
-{
-    _freeIds.push(id);
+    if (debuggerEnabled) {
+        processor.SetDebugger(nullptr);
+        _debugger->DetachDebugger(processorContext);
+    }
 }
 
 void VirtualMachine::SetDebugger(ProcessorDebugger* debugger)

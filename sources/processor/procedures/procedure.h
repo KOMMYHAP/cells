@@ -1,6 +1,6 @@
 #pragma once
 
-class ProcedureContext;
+#include "procedures/procedure_context.h"
 
 class ProcedureBase {
 public:

@@ -1,16 +1,14 @@
 #pragma once
 
+#include "procedures/procedure.h"
 #include "procedures/procedure_context.h"
 #include "procedures/procedure_external_context.h"
 #include "procedures/procedure_id.h"
+#include "procedures/procedure_table.h"
 #include "processor_control_block.h"
 #include "processor_memory.h"
 #include "processor_stack.h"
 #include "processor_state.h"
-
-class ProcedureBase;
-class ProcedureContext;
-class ProcedureTable;
 
 class ProcessorContext {
 public:

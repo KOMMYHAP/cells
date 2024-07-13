@@ -14,17 +14,7 @@ void Processor::SetDebugger(ProcessorDebugger* debugger)
 void Processor::Execute(ProcessorContext& context)
 {
     common::ProfileScope processorProfileScope { "Processor", ProcessorProfileCategory };
-
-    const bool debuggerEnabled = _debugger && _debugger->ShouldAttachDebugger(context);
-    if (debuggerEnabled) {
-        _debugger->AttachDebugger(context);
-    }
-
     ProcessInstruction(context);
-
-    if (debuggerEnabled) {
-        _debugger->DetachDebugger(context);
-    }
 }
 
 void Processor::CompletePendingProcedure(ProcessorContext& context, const ProcedureContext& procedureContext)

@@ -13,7 +13,7 @@ public:
     void SetDebugger(ProcessorDebugger* debugger);
 
     void Run(ProcessorMemory memory, std::any procedureExternalContext = {});
-    void CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& context);
+    void CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& procedureContext);
 
 private:
     // ProcedureContext ExtractProcedureContext(PendingProcedureId id);
