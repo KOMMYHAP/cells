@@ -13,13 +13,13 @@ public:
     void SetDebugger(ProcessorDebugger* debugger);
 
     void Run(ProcessorMemory memory, std::any procedureExternalContext = {});
-    ProcedureContext RestoreDeferredExecution(ProcessorMemory memory);
+    void CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& context);
 
 private:
-    ProcedureContext ExtractProcedureContext(PendingProcedureId id);
-    PendingProcedureId AllocatePendingProcedureId();
-    PendingProcedurePlaceholder& GetPendingProcedureContext(PendingProcedureId id);
-    void FreePendingProcedureId(PendingProcedureId id);
+    // ProcedureContext ExtractProcedureContext(PendingProcedureId id);
+    // PendingProcedureId AllocatePendingProcedureId();
+    // PendingProcedurePlaceholder& GetPendingProcedureContext(PendingProcedureId id);
+    // void FreePendingProcedureId(PendingProcedureId id);
 
     ProcedureTable _procedureTable;
     ProcessorDebugger* _debugger { nullptr };

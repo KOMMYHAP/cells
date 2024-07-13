@@ -2,15 +2,13 @@
 
 namespace {
 
-// todo: remove this hack, add default ctor for ProcessorStack
-uint8_t g_invalidStackOffsetStub;
-const ProcessorStack g_invalidProcessorStack { {}, g_invalidStackOffsetStub };
-
+ProcessorStack MakeInvalidProcessorStack()
+{
+    // todo: remove this hack, add default ctor for ProcessorStack
+    static uint8_t invalidStackOffsetStub;
+    return ProcessorStack { {}, invalidStackOffsetStub };
 }
 
-ProcedureContext::ProcedureContext()
-    : _stack(g_invalidProcessorStack)
-{
 }
 
 ProcedureContext::ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, const ArgumentsStatus arguments)
@@ -28,7 +26,19 @@ void ProcedureContext::AbortProcedure()
 
 bool ProcedureContext::IsCompleted() const
 {
-    return _arguments.input == 0 && _arguments.output == 0 && _state == State::Initial;
+    return _arguments.input == 0 && _arguments.output == 0;
+}
+
+bool ProcedureContext::IsSucceeded() const
+{
+    // We don't want to force user explicitly marks procedure as 'Succeeded' or 'Pending' to simplify its code flow.
+    // Time will show if explicit is better than implicit.
+    return IsCompleted() && _state == State::Initial;
+}
+
+bool ProcedureContext::IsFailed() const
+{
+    return IsCompleted() && _state != State::Initial;
 }
 
 bool ProcedureContext::IsPending() const

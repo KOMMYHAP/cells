@@ -14,7 +14,7 @@ constexpr uint8_t ProcessorStackSize = 5;
 #pragma pack(push, 1)
 struct ProcessorControlBlock {
     uint8_t state;
-    uint32_t pendingProcedureId;
+    uint8_t pendingProcedureId;
     uint8_t flags;
     uint8_t nextCommand;
     std::array<std::byte, ProcessorRegistryCount> registry;

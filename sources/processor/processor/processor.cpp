@@ -1,5 +1,6 @@
 #include "processor.h"
 
+#include "procedures/procedure_table.h"
 #include "processor_debugger.h"
 #include "processor_instruction.h"
 #include "processor_profile_category.h"
@@ -26,12 +27,58 @@ void Processor::Execute(ProcessorContext& context)
     }
 }
 
+void Processor::CompletePendingProcedure(ProcessorContext& context, const ProcedureContext& procedureContext)
+{
+    if (!context.IsState(ProcessorState::PendingProcedure)) {
+        context.SetState(ProcessorState::InvalidInstruction);
+        return;
+    }
+    if (procedureContext.GetId() != context.GetPendingProcedure()) {
+        context.SetState(ProcessorState::InvalidInstruction);
+        return;
+    }
+    if (procedureContext.IsPending()) {
+        context.SetState(ProcessorState::InvalidInstruction);
+        return;
+    }
+    if (procedureContext.IsFailed()) {
+        context.SetState(ProcessorState::AbortedProcedure);
+        return;
+    }
+
+    context.SetPendingProcedure(ProcedureId::Invalid);
+    context.SetState(ProcessorState::Good);
+}
+
+bool Processor::StartProcedure(ProcessorContext& context, ProcedureId id)
+{
+    auto mbProcedureContext = context.MakeProcedureContext(id);
+    if (!mbProcedureContext) {
+        context.SetState(ProcessorState::UnknownProcedure);
+        return false;
+    }
+
+    ProcedureContext& procedureContext = *mbProcedureContext;
+    ProcedureBase& procedureBase = context.GetProcedure(id);
+    procedureBase.Execute(procedureContext);
+
+    if (procedureContext.IsSucceeded()) {
+        return true;
+    }
+
+    if (procedureContext.IsPending()) {
+        context.SetPendingProcedure(id);
+        context.SetState(ProcessorState::PendingProcedure);
+        return true;
+    }
+
+    context.SetState(ProcessorState::AbortedProcedure);
+    return false;
+}
+
 std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorContext& context)
 {
-    ASSERT(context.IsState(ProcessorState::Good));
-
-    if (context.HasPendingProcedure()) {
-        context.SetState(ProcessorState::IncompletePendingProcedure);
+    if (!context.IsState(ProcessorState::Good)) {
         return {};
     }
 
@@ -234,7 +281,7 @@ bool Processor::ProcessOneOperand(OneOperandContext instructionContext, Processo
     } break;
     case ProcessorInstruction::Call: {
         const auto procedureIdx = static_cast<ProcedureId>(instructionContext.operand1);
-        if (!context.StartProcedure(procedureIdx)) {
+        if (!StartProcedure(context, procedureIdx)) {
             return false;
         }
     } break;

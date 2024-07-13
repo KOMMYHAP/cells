@@ -7,7 +7,7 @@
 static_assert(ProcessorStackSize >= std::max(ProcedureInputArgsCountLimit, ProcedureOutputArgsCountLimit),
     "Register overflow! Processor use registries to pass args to or obtain args from procedure");
 
-static_assert(sizeof(ProcessorControlBlock::pendingProcedureId) == sizeof(std::underlying_type_t<PendingProcedureId>));
+static_assert(sizeof(ProcessorControlBlock::pendingProcedureId) == sizeof(std::underlying_type_t<ProcedureId>));
 static_assert(sizeof(ProcessorControlBlock::state) == sizeof(std::underlying_type_t<ProcessorState>));
 
 static_assert(std::is_trivial_v<ProcessorControlBlock>, "As part of memory view ProcessorControlBlock must be trivial");
@@ -26,13 +26,9 @@ void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalConte
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     ASSERT(controlBlockRead);
 
-    const PendingProcedureId pendingProcedureId = AllocatePendingProcedureId();
-    PendingProcedurePlaceholder& placeholder = GetPendingProcedureContext(pendingProcedureId);
-
     ProcessorContext::Params params {
         &_procedureTable,
         controlBlock,
-        &placeholder,
         ProcedureExternalContext { std::move(procedureExternalContext) },
         memory
     };
@@ -41,10 +37,25 @@ void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalConte
     Processor processor;
     processor.SetDebugger(_debugger);
     processor.Execute(context);
+}
 
-    if (!context.HasPendingProcedure()) {
-        FreePendingProcedureId(pendingProcedureId);
-    }
+void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& context)
+{
+    const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
+    ASSERT(controlBlockRead);
+
+    ProcessorContext::Params params {
+        &_procedureTable,
+        controlBlock,
+        {},
+        memory
+    };
+    ProcessorContext processorContext { std::move(params) };
+    processorContext.CompletePendingProcedure();
+
+    Processor processor;
+    processor.SetDebugger(_debugger);
+    processor.Execute(context);
 }
 
 ProcedureContext VirtualMachine::RestoreDeferredExecution(ProcessorMemory memory)

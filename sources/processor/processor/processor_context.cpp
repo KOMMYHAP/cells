@@ -85,43 +85,19 @@ std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
     return { true, _params.controlBlock->registry[index] };
 }
 
-bool ProcessorContext::StartProcedure(const ProcedureId id)
+bool ProcessorContext::HasPendingProcedure() const
 {
-    ASSERT(id != ProcedureId::Invalid);
-
-    const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
-    if (!info) {
-        SetState(ProcessorState::UnknownProcedure);
-        return false;
-    }
-
-    const ProcedureContext::ArgumentsStatus arguments { info->inputArgsCount, info->outputArgsCount };
-    ProcedureContext procedureContext { id, _params.externalContext, _stack, arguments };
-    info->procedure->Execute(procedureContext);
-
-    if (procedureContext.IsCompleted()) {
-        return true;
-    }
-
-    _pendingProcedureId = id;
-    if (procedureContext.GetState() == ProcedureContext::State::Initial) {
-        SetState(ProcessorState::PendingProcedure);
-        return true;
-    }
-    SetState(ProcessorState::AbortedProcedure);
-    return false;
+    return IsState(ProcessorState::PendingProcedure);
 }
 
-bool ProcessorContext::CompletePendingProcedure(const ProcedureContext& context)
+void ProcessorContext::SetPendingProcedure(ProcedureId id)
 {
-    ASSERT(HasPendingProcedure() && _pendingProcedureId == context.GetId());
-    _pendingProcedureId = ProcedureId::Invalid;
-    if (context.IsCompleted()) {
-        SetState(ProcessorState::Good);
-        return true;
-    }
-    SetState(ProcessorState::AbortedProcedure);
-    return false;
+    _params.controlBlock->pendingProcedureId = static_cast<std::underlying_type_t<ProcedureId>>(id);
+}
+
+ProcedureId ProcessorContext::GetPendingProcedure() const
+{
+    return static_cast<ProcedureId>(_params.controlBlock->pendingProcedureId);
 }
 
 bool ProcessorContext::PushStack(std::byte data)
@@ -140,6 +116,24 @@ std::pair<bool, std::byte> ProcessorContext::PopStack()
         SetState(ProcessorState::StackUnderflow);
     }
     return { success, data };
+}
+
+std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(ProcedureId id) const
+{
+    const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
+    if (!info) {
+        return {};
+    }
+    const ProcedureContext::ArgumentsStatus arguments { info->inputArgsCount, info->outputArgsCount };
+    ProcedureExternalContext externalContext = _params.externalContext ? _params.externalContext : ProcedureExternalContext {};
+    return ProcedureContext { id, std::move(externalContext), _stack, arguments };
+}
+
+ProcedureBase& ProcessorContext::GetProcedure(ProcedureId id)
+{
+    const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
+    ASSERT(info != nullptr);
+    return *info->procedure;
 }
 
 void ProcessorContext::SetFlag(ProcessorFlags flag, bool value)

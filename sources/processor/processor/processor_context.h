@@ -8,6 +8,7 @@
 #include "processor_stack.h"
 #include "processor_state.h"
 
+class ProcedureBase;
 class ProcedureContext;
 class ProcedureTable;
 
@@ -16,15 +17,15 @@ public:
     struct Params {
         gsl::not_null<const ProcedureTable*> procedureTable;
         gsl::not_null<ProcessorControlBlock*> controlBlock;
-        ProcedureExternalContext externalContext;
+        ProcedureExternalContext* externalContext { nullptr };
         ProcessorMemory memory;
     };
 
     explicit ProcessorContext(Params params);
 
-    bool StartProcedure(ProcedureId id);
-    bool CompletePendingProcedure(const ProcedureContext& context);
-    bool HasPendingProcedure() const { return _pendingProcedureId != ProcedureId::Invalid; }
+    bool HasPendingProcedure() const;
+    void SetPendingProcedure(ProcedureId id);
+    ProcedureId GetPendingProcedure() const;
 
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();
@@ -49,11 +50,13 @@ public:
     const ProcessorControlBlock& GetControlBlock() const { return *_params.controlBlock; }
     ProcessorControlBlock& ModifyControlBlock() { return *_params.controlBlock; }
 
+    std::optional<ProcedureContext> MakeProcedureContext(ProcedureId id) const;
+    ProcedureBase& GetProcedure(ProcedureId id);
+
 private:
     Params _params;
     ProcessorMemory _initialMemory;
     ProcessorStack _stack;
-    ProcedureId _pendingProcedureId { ProcedureId::Invalid };
 };
 
 #include "processor_context.hpp"

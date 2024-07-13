@@ -7,9 +7,13 @@ class ProcessorDebugger;
 class Processor {
 public:
     void SetDebugger(ProcessorDebugger* debugger);
+    
     void Execute(ProcessorContext& context);
+    void CompletePendingProcedure(ProcessorContext& context, const ProcedureContext& procedureContext);
 
 private:
+    bool StartProcedure(ProcessorContext& context, ProcedureId id);
+    
     std::optional<ProcessorInstruction> ProcessInstruction(ProcessorContext& context);
 
     struct TwoOperandsContext {

@@ -10,6 +10,7 @@ public:
         uint8_t input { 0 };
         uint8_t output { 0 };
     };
+
     enum class State : uint8_t {
         Initial,
         Aborted,
@@ -22,7 +23,6 @@ public:
         FailedStackOverflow,
     };
 
-    ProcedureContext();
     ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, ArgumentsStatus arguments);
 
     template <MemoryType... Ts>
@@ -44,13 +44,15 @@ public:
     ProcedureId GetId() const { return _id; }
     State GetState() const { return _state; }
     ProcessorStack GetStack() const { return _stack; }
-    
-    bool IsCompleted() const;
+
+    bool IsSucceeded() const;
+    bool IsFailed() const;
     bool IsPending() const;
 
 private:
     void SetState(State state);
     bool IsInitialState() const { return _state == State::Initial; }
+    bool IsCompleted() const;
 
     ProcedureId _id { ProcedureId::Invalid };
     ArgumentsStatus _arguments;
