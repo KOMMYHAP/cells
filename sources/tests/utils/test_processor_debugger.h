@@ -15,6 +15,8 @@ public:
     void ProcedureWasCompleted(ProcessorContext& processorContext, const ProcedureContext& procedureContext) override;
 
     bool SetAbortOnBadProcessorState(bool value);
+    bool EnableRollbackOnBadProcessorState(bool value);
+    
     ProcessorState GetLastProcessorState() const { return _processorState; }
     ProcedureState GetLastProcedureState() const { return _procedureState; }
 
@@ -23,4 +25,5 @@ private:
     ProcedureState _procedureState { ProcedureState::Initial };
     ProcessorControlBlock _initialControlBlock {};
     bool _shouldAbortOnErrorState { false };
+    bool _shouldRollbackOnErrorState { true };
 };

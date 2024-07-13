@@ -4,7 +4,7 @@ class TestProcessorDebugger;
 
 class TestProcessorStateGuard {
 public:
-    TestProcessorStateGuard(TestProcessorDebugger& debugger, bool enableAssert);
+    TestProcessorStateGuard(TestProcessorDebugger& debugger, bool enableAssert, bool enableRollback);
     ~TestProcessorStateGuard();
 
     TestProcessorStateGuard(const TestProcessorStateGuard& other) = delete;
@@ -15,4 +15,5 @@ public:
 private:
     gsl::not_null<TestProcessorDebugger*> _debugger;
     bool _initialAssertState{false};
+    bool _initialRollbackState{false};
 };

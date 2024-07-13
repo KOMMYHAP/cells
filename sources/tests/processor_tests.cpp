@@ -29,14 +29,9 @@ public:
         return _debugger.GetLastProcessorState();
     }
 
-    ProcedureState GetLastProcedureState()
-    {
-        return _debugger.GetLastProcedureState();
-    }
-
     TestProcessorStateGuard MakeScopeWithoutAssert()
     {
-        return { _debugger, false };
+        return { _debugger, false, true };
     }
 
     void Tick()

@@ -4,6 +4,10 @@
 template <MemoryType... Ts>
 std::tuple<bool, Ts...> ProcedureContext::TryPopArgs()
 {
+    if (!IsInitialState()) {
+        return { false, Ts {}... };
+    }
+
     if (sizeof...(Ts) > _arguments.input) {
         SetState(State::FailedTooMuchInputRequested);
         return { false, Ts {}... };

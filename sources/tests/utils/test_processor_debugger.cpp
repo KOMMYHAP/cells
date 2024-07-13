@@ -15,7 +15,7 @@ void TestProcessorDebugger::AttachDebugger(ProcessorContext& context)
 void TestProcessorDebugger::DetachDebugger(ProcessorContext& context)
 {
     _processorState = context.GetState();
-    if (_processorState == ProcessorState::Good) {
+    if (_processorState == ProcessorState::Good || context.HasPendingProcedure()) {
         return;
     }
 
@@ -23,7 +23,9 @@ void TestProcessorDebugger::DetachDebugger(ProcessorContext& context)
         ASSERT_FAIL("Bad error state!");
     }
 
-    context.ModifyControlBlock() = _initialControlBlock;
+    if (_shouldRollbackOnErrorState) {
+        context.ModifyControlBlock() = _initialControlBlock;
+    }
 }
 
 void TestProcessorDebugger::ProcedureWillStarted(ProcessorContext& processorContext, ProcedureContext& procedureContext)
@@ -44,4 +46,9 @@ void TestProcessorDebugger::ProcedureWasCompleted(ProcessorContext& processorCon
 bool TestProcessorDebugger::SetAbortOnBadProcessorState(bool value)
 {
     return std::exchange(_shouldAbortOnErrorState, value);
+}
+
+bool TestProcessorDebugger::EnableRollbackOnBadProcessorState(bool value)
+{
+    return std::exchange(_shouldRollbackOnErrorState, value);
 }
