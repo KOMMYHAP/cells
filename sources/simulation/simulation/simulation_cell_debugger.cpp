@@ -34,3 +34,15 @@ void SimulationCellDebugger::DetachDebugger(ProcessorContext& context)
     const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
     _world->destroy(id);
 }
+
+void SimulationCellDebugger::ProcedureWillStarted(ProcessorContext& processorContext, ProcedureContext& procedureContext)
+{
+}
+
+void SimulationCellDebugger::ProcedureWasDeferred(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+{
+}
+
+void SimulationCellDebugger::ProcedureWasCompleted(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+{
+}

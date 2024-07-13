@@ -48,6 +48,9 @@ public:
     const ProcessorControlBlock& GetControlBlock() const { return *_params.controlBlock; }
     ProcessorControlBlock& ModifyControlBlock() { return *_params.controlBlock; }
 
+    bool HasExternalContext() const { return _params.externalContext != nullptr; }
+    const ProcedureExternalContext& GetExternalContext() const { return *_params.externalContext; }
+
     std::optional<ProcedureContext> MakeProcedureContext(ProcedureId id) const;
     ProcedureBase& GetProcedure(ProcedureId id);
 
