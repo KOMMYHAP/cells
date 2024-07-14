@@ -63,9 +63,9 @@ public:
         return { _debugger, false, false };
     }
 
-    void Tick(std::any externalContext = {})
+    void Tick(ProcessorUserData userData = {})
     {
-        _vm->Run({ _memoryBuffer }, std::move(externalContext));
+        _vm->Run({ _memoryBuffer }, userData);
     }
 
     void CompleteDeferred(const ProcedureContext& context)
@@ -449,23 +449,23 @@ TEST_F(ProcedureFixture, DeferredExecution_Abort)
     ASSERT_EQ(GetLastProcedureState(), ProcedureState::Aborted);
 }
 
-TEST_F(ProcedureFixture, ExternalContext)
+TEST_F(ProcedureFixture, UserData)
 {
     auto accessor = GetMemory();
     auto procedure = std::make_unique<TestProcedure>();
-    struct TestExternalContext {
-        std::string value;
+    struct TestUserData {
+        uint32_t value;
     };
-    TestExternalContext outContext;
+    TestUserData outUserData;
     procedure->func = [&](const ProcedureContext& context) {
-        outContext = context.GetExternalContext<TestExternalContext>();
+        outUserData = context.GetUserData().Get<TestUserData>();
     };
 
     const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, 0);
     accessor.Write(ProcessorInstruction::Call, id);
-    Tick(std::make_any<TestExternalContext>("hello"));
+    Tick(ProcessorUserData(123));
     ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
-    ASSERT_EQ(outContext.value, "hello");
+    ASSERT_EQ(outUserData.value, 123);
 }
 
 TEST_F(ProcedureFixture, ProcessorStackUpdated)

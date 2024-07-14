@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "procedure_external_context.h"
 #include "procedure_id.h"
 #include "procedure_state.h"
 #include "processor/processor_stack.h"
+#include "processor/processor_user_data.h"
 
 class ProcedureContext {
 public:
@@ -14,7 +14,8 @@ public:
         uint8_t output { 0 };
     };
 
-    ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, ArgumentsStatus arguments);
+    // ProcedureContext() = default;
+    ProcedureContext(ProcedureId id, ProcessorUserData userData, ProcessorStack stack, ArgumentsStatus arguments);
 
     template <MemoryType... Ts>
     std::tuple<bool, Ts...> TryPopArgs();
@@ -25,12 +26,7 @@ public:
 
     void AbortProcedure();
 
-    template <class T>
-    T& ModifyExternalContext() { return _externalContext.Modify<T>(); }
-
-    template <class T>
-    const T& GetExternalContext() const { return _externalContext.Get<T>(); }
-
+    const ProcessorUserData& GetUserData() const { return _userData; }
     ArgumentsStatus GetRestArgumentsCount() const { return _arguments; }
     ProcedureId GetId() const { return _id; }
     State GetState() const { return _state; }
@@ -49,7 +45,7 @@ private:
     ArgumentsStatus _arguments;
     State _state { State::Initial };
     ProcessorStack _stack;
-    ProcedureExternalContext _externalContext;
+    ProcessorUserData _userData;
 };
 
 #include "procedure_context.hpp"

@@ -17,7 +17,8 @@ SimulationVirtualMachine::SimulationVirtualMachine(EcsWorld& world)
 void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)
 {
     const ProcessorMemory memory { brain.data };
-    _virtualMachine.Run(memory, std::make_any<SimulationProcedureContext>(id));
+    const SimulationProcedureContext simulationContext { id };
+    _virtualMachine.Run(memory, ProcessorUserData { simulationContext });
 }
 
 void SimulationVirtualMachine::CompletePendingProcedure(CellId id, CellBrain& brain, const ProcedureContext& context)

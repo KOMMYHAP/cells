@@ -15,7 +15,8 @@ void SimulationCellDebugger::SetWatchingCell(CellId id)
 
 bool SimulationCellDebugger::ShouldAttachDebugger(const ProcessorContext& context) const
 {
-    return context.GetExternalContext().Get<SimulationProcedureContext>().id == _watchingCell;
+    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
+    return id == _watchingCell;
 }
 
 void SimulationCellDebugger::AttachDebugger(ProcessorContext& context)
@@ -31,7 +32,7 @@ void SimulationCellDebugger::DetachDebugger(ProcessorContext& context)
 
     context.ModifyControlBlock() = _initialControlBlock;
 
-    const CellId id = context.GetExternalContext().Get<SimulationProcedureContext>().id;
+    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
     _world->destroy(id);
 }
 

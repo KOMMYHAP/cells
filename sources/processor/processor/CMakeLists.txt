@@ -23,4 +23,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         processor_memory_type.h
         processor_instruction.h
         processor_debugger.h
+        processor_user_data.h
 )

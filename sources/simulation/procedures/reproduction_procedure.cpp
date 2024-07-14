@@ -24,7 +24,7 @@ void ReproductionProcedure::Execute(ProcedureContext& context)
         context.AbortProcedure();
         return;
     }
-    const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
+    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
     _world->emplace<ReproductionDirection>(id, direction);
     _world->emplace<DeferredProcedureExecution>(id, context);
 

@@ -2,7 +2,6 @@
 
 #include "procedures/procedure.h"
 #include "procedures/procedure_context.h"
-#include "procedures/procedure_external_context.h"
 #include "procedures/procedure_id.h"
 #include "procedures/procedure_table.h"
 #include "processor_control_block.h"
@@ -15,7 +14,7 @@ public:
     struct Params {
         gsl::not_null<const ProcedureTable*> procedureTable;
         gsl::not_null<ProcessorControlBlock*> controlBlock;
-        ProcedureExternalContext* externalContext { nullptr };
+        ProcessorUserData userData;
         ProcessorMemory memory;
     };
 
@@ -47,9 +46,9 @@ public:
 
     const ProcessorControlBlock& GetControlBlock() const { return *_params.controlBlock; }
     ProcessorControlBlock& ModifyControlBlock() { return *_params.controlBlock; }
-
-    bool HasExternalContext() const { return _params.externalContext != nullptr; }
-    const ProcedureExternalContext& GetExternalContext() const { return *_params.externalContext; }
+    
+    const ProcessorUserData& GetUserData() const { return _params.userData; }
+    ProcessorUserData& ModifyUserData() { return _params.userData; }
 
     std::optional<ProcedureContext> MakeProcedureContext(ProcedureId id) const;
     ProcedureBase& GetProcedure(ProcedureId id);

@@ -21,6 +21,6 @@ void MoveProcedure::Execute(ProcedureContext& context)
         return;
     }
 
-    const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
+    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
     _world->emplace<MoveDirection>(id, direction);
 }

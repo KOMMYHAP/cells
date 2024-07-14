@@ -20,16 +20,15 @@ ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t 
     return id;
 }
 
-void VirtualMachine::Run(ProcessorMemory memory, std::any procedureExternalContext /*= {}*/)
+void VirtualMachine::Run(ProcessorMemory memory, ProcessorUserData userData /*= {}*/)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
     ASSERT(controlBlockRead);
 
-    ProcedureExternalContext externalContext { std::move(procedureExternalContext) };
     ProcessorContext::Params params {
         &_procedureTable,
         controlBlock,
-        &externalContext,
+        userData,
         memory
     };
     ProcessorContext context { std::move(params) };
@@ -57,7 +56,7 @@ void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const Pro
     ProcessorContext::Params params {
         &_procedureTable,
         controlBlock,
-        nullptr,
+        procedureContext.GetUserData(),
         memory
     };
     ProcessorContext processorContext { std::move(params) };

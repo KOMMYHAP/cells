@@ -2,6 +2,7 @@
 target_sources(${PROJECT_NAME} PRIVATE
         procedure_table.cpp
         procedure_context.cpp
+        procedure_executor.cpp
 )
 
 
@@ -13,5 +14,5 @@ target_sources(${PROJECT_NAME} PUBLIC
         procedure_table.h
         procedure_context.h
         procedure_context.hpp
-        procedure_external_context.h
+        procedure_executor.h
 )

@@ -1,10 +1,10 @@
 ﻿#include "procedure_context.h"
 
-ProcedureContext::ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, const ArgumentsStatus arguments)
+ProcedureContext::ProcedureContext(ProcedureId id, ProcessorUserData userData, ProcessorStack stack, const ArgumentsStatus arguments)
     : _id(id)
     , _arguments(arguments)
     , _stack(std::move(stack))
-    , _externalContext(std::move(externalContext))
+    , _userData(userData)
 {
 }
 

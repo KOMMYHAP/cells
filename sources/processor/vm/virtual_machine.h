@@ -10,7 +10,7 @@ public:
     ProcedureId RegisterProcedure(ProcedureBase* procedure, uint8_t inputArgs, uint8_t outputArgs);
     void SetDebugger(ProcessorDebugger* debugger);
 
-    void Run(ProcessorMemory memory, std::any procedureExternalContext = {});
+    void Run(ProcessorMemory memory, ProcessorUserData userData = {});
     void CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& procedureContext);
 
 private:

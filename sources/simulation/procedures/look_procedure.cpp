@@ -24,8 +24,7 @@ void LookProcedure::Execute(ProcedureContext& procedureContext)
         return;
     }
 
-    auto&& [id] = procedureContext.GetExternalContext<SimulationProcedureContext>();
-
+    const CellId id = procedureContext.GetUserData().Get<SimulationProcedureContext>().id;
     _world->emplace<LookDirection>(id, direction);
     _world->emplace<DeferredProcedureExecution>(id, procedureContext);
 }
