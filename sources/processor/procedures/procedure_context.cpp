@@ -1,16 +1,5 @@
 ﻿#include "procedure_context.h"
 
-namespace {
-
-ProcessorStack MakeInvalidProcessorStack()
-{
-    // todo: remove this hack, add default ctor for ProcessorStack
-    static uint8_t invalidStackOffsetStub;
-    return ProcessorStack { {}, invalidStackOffsetStub };
-}
-
-}
-
 ProcedureContext::ProcedureContext(ProcedureId id, ProcedureExternalContext externalContext, ProcessorStack stack, const ArgumentsStatus arguments)
     : _id(id)
     , _arguments(arguments)
@@ -38,7 +27,7 @@ bool ProcedureContext::IsSucceeded() const
 
 bool ProcedureContext::IsFailed() const
 {
-    return IsCompleted() && _state != State::Initial;
+    return _state != State::Initial;
 }
 
 bool ProcedureContext::IsPending() const
