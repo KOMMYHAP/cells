@@ -3,22 +3,32 @@
 #include "procedures/procedure_table.h"
 #include "processor_debugger.h"
 #include "processor_instruction.h"
-#include "processor_profile_category.h"
 #include "processor_state.h"
 
-void Processor::SetDebugger(ProcessorDebugger* debugger)
+Processor::Processor(ProcessorContext& context, ProcessorDebugger* debugger)
+    : _debugger(debugger)
+    , _processorContext(&context)
 {
-    _debugger = debugger;
+    if (_debugger) {
+        _debugger->AttachDebugger(context);
+    }
 }
 
-void Processor::Execute(ProcessorContext& context)
+Processor::~Processor() noexcept
 {
-    common::ProfileScope processorProfileScope { "Processor", ProcessorProfileCategory };
-    ProcessInstruction(context);
+    if (_debugger) {
+        _debugger->DetachDebugger(*_processorContext);
+    }
 }
 
-void Processor::CompletePendingProcedure(ProcessorContext& context, const ProcedureContext& procedureContext)
+void Processor::Execute()
 {
+    ProcessInstruction();
+}
+
+void Processor::CompletePendingProcedure(const ProcedureContext& procedureContext)
+{
+    ProcessorContext& context = *_processorContext;
     if (!context.IsState(ProcessorState::PendingProcedure)) {
         context.SetState(ProcessorState::InvalidInstruction);
         return;
@@ -32,23 +42,43 @@ void Processor::CompletePendingProcedure(ProcessorContext& context, const Proced
         return;
     }
 
-    if (procedureContext.IsFailed()) {
+    CompleteProcedure(procedureContext);
+}
+
+bool Processor::CompleteProcedure(const ProcedureContext& procedureContext)
+{
+    ProcessorContext& context = *_processorContext;
+    const bool wasSucceeded = procedureContext.IsSucceeded();
+    if (wasSucceeded) {
+        context.SetPendingProcedure(ProcedureId::Invalid);
+        context.SetState(ProcessorState::Good);
+    } else {
         context.SetState(ProcessorState::AbortedProcedure);
-        if (_debugger) {
-            _debugger->ProcedureWasCompleted(context, procedureContext);
-        }
-        return;
     }
 
-    context.SetPendingProcedure(ProcedureId::Invalid);
-    context.SetState(ProcessorState::Good);
+    procedureContext.GetStack().CopyTo(context.ModifyControlBlock());
+
     if (_debugger) {
         _debugger->ProcedureWasCompleted(context, procedureContext);
     }
+    return wasSucceeded;
 }
 
-bool Processor::StartProcedure(ProcessorContext& context, ProcedureId id)
+void Processor::DeferProcedure(const ProcedureContext& procedureContext)
 {
+    ProcessorContext& context = *_processorContext;
+    context.SetPendingProcedure(procedureContext.GetId());
+    context.SetState(ProcessorState::PendingProcedure);
+    if (_debugger) {
+        _debugger->ProcedureWasDeferred(context, procedureContext);
+    }
+    procedureContext.GetStack().CopyTo(context.ModifyControlBlock());
+}
+
+bool Processor::RunProcedure(ProcedureId id)
+{
+    ProcessorContext& context = *_processorContext;
+
     auto mbProcedureContext = context.MakeProcedureContext(id);
     if (!mbProcedureContext) {
         context.SetState(ProcessorState::UnknownProcedure);
@@ -63,31 +93,17 @@ bool Processor::StartProcedure(ProcessorContext& context, ProcedureId id)
     }
     procedureBase.Execute(procedureContext);
 
-    if (procedureContext.IsSucceeded()) {
-        if (_debugger) {
-            _debugger->ProcedureWasCompleted(context, procedureContext);
-        }
-        return true;
-    }
-
     if (procedureContext.IsPending()) {
-        context.SetPendingProcedure(id);
-        context.SetState(ProcessorState::PendingProcedure);
-        if (_debugger) {
-            _debugger->ProcedureWasDeferred(context, procedureContext);
-        }
+        DeferProcedure(procedureContext);
         return true;
     }
 
-    context.SetState(ProcessorState::AbortedProcedure);
-    if (_debugger) {
-        _debugger->ProcedureWasCompleted(context, procedureContext);
-    }
-    return false;
+    return CompleteProcedure(procedureContext);
 }
 
-std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorContext& context)
+std::optional<ProcessorInstruction> Processor::ProcessInstruction()
 {
+    ProcessorContext& context = *_processorContext;
     if (!context.IsState(ProcessorState::Good)) {
         return {};
     }
@@ -117,7 +133,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
             arg1,
             arg2,
         };
-        if (!ProcessTwoOperands(instructionContext, context)) {
+        if (!ProcessTwoOperands(instructionContext)) {
             return {};
         }
     } break;
@@ -142,7 +158,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
             instruction,
             arg,
         };
-        if (!ProcessOneOperand(instructionContext, context)) {
+        if (!ProcessOneOperand(instructionContext)) {
             return {};
         }
     } break;
@@ -162,8 +178,9 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
     return instruction;
 }
 
-bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, ProcessorContext& context)
+bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext)
 {
+    ProcessorContext& context = *_processorContext;
     ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2);
 
     /// Data extraction
@@ -234,7 +251,7 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, Proces
             destinationData,
             sourceData
         };
-        UpdateFlags(flagsContext, context);
+        UpdateFlags(flagsContext);
     } break;
     default:
         break;
@@ -251,8 +268,9 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, Proces
     return true;
 }
 
-bool Processor::ProcessOneOperand(OneOperandContext instructionContext, ProcessorContext& context)
+bool Processor::ProcessOneOperand(OneOperandContext instructionContext)
 {
+    ProcessorContext& context = *_processorContext;
     ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
 
     /// Data extraction
@@ -291,7 +309,7 @@ bool Processor::ProcessOneOperand(OneOperandContext instructionContext, Processo
     } break;
     case ProcessorInstruction::Call: {
         const auto procedureIdx = static_cast<ProcedureId>(instructionContext.operand1);
-        if (!StartProcedure(context, procedureIdx)) {
+        if (!RunProcedure(procedureIdx)) {
             return false;
         }
     } break;
@@ -345,8 +363,10 @@ bool Processor::ProcessOneOperand(OneOperandContext instructionContext, Processo
     return context.MoveCommandPointer(1 /* instruction */ + 1 /* operand */);
 }
 
-void Processor::UpdateFlags(FlagsContext flagsContext, ProcessorContext& context)
+void Processor::UpdateFlags(FlagsContext flagsContext)
 {
+    ProcessorContext& context = *_processorContext;
+
     int result { 0 };
     switch (flagsContext.instruction) {
     case ProcessorInstruction::CompareRegistryValue:

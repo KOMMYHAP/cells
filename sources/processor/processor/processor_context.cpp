@@ -41,7 +41,6 @@ ProcessorState ProcessorContext::GetState() const
 
 void ProcessorContext::SetState(ProcessorState state)
 {
-    ASSERT(state != ProcessorState::Good || GetState() == ProcessorState::PendingProcedure);
     _params.controlBlock->state = static_cast<std::underlying_type_t<ProcessorState>>(state);
 }
 

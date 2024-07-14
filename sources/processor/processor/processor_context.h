@@ -6,7 +6,6 @@
 #include "procedures/procedure_table.h"
 #include "processor_control_block.h"
 #include "processor_memory.h"
-#include "processor_stack.h"
 #include "processor_state.h"
 
 class ProcessorContext {

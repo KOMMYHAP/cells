@@ -34,20 +34,14 @@ void VirtualMachine::Run(ProcessorMemory memory, ProcessorUserData userData /*= 
         memory
     };
     ProcessorContext context { std::move(params) };
-    Processor processor;
 
-    const bool debuggerEnabled = _debugger && _debugger->ShouldAttachDebugger(context);
-    if (debuggerEnabled) {
-        _debugger->AttachDebugger(context);
-        processor.SetDebugger(_debugger);
+    ProcessorDebugger* debugger { nullptr };
+    if (_debugger && _debugger->ShouldAttachDebugger(context)) {
+        debugger = _debugger;
     }
 
-    processor.Execute(context);
-
-    if (debuggerEnabled) {
-        processor.SetDebugger(nullptr);
-        _debugger->DetachDebugger(context);
-    }
+    Processor processor { context, debugger };
+    processor.Execute();
 }
 
 void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& procedureContext)
@@ -62,20 +56,13 @@ void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const Pro
         memory
     };
     ProcessorContext processorContext { std::move(params) };
-    Processor processor;
-
-    const bool debuggerEnabled = _debugger && _debugger->ShouldAttachDebugger(processorContext);
-    if (debuggerEnabled) {
-        _debugger->AttachDebugger(processorContext);
-        processor.SetDebugger(_debugger);
+    ProcessorDebugger* debugger { nullptr };
+    if (_debugger && _debugger->ShouldAttachDebugger(processorContext)) {
+        debugger = _debugger;
     }
 
-    processor.CompletePendingProcedure(processorContext, procedureContext);
-
-    if (debuggerEnabled) {
-        processor.SetDebugger(nullptr);
-        _debugger->DetachDebugger(processorContext);
-    }
+    Processor processor { processorContext, debugger };
+    processor.CompletePendingProcedure(procedureContext);
 }
 
 void VirtualMachine::SetDebugger(ProcessorDebugger* debugger)
