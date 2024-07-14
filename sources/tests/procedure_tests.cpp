@@ -467,3 +467,39 @@ TEST_F(ProcedureFixture, ExternalContext)
     ASSERT_EQ(GetLastProcessorState(), ProcessorState::Good);
     ASSERT_EQ(outContext.value, "hello");
 }
+
+TEST_F(ProcedureFixture, ProcessorStackUpdated)
+{
+    auto accessor = GetMemory();
+    auto sumProcedure = std::make_unique<TestProcedure>();
+    sumProcedure->func = [&](ProcedureContext& context) {
+        const auto [popped, arg1, arg2] = context.TryPopArgs<uint8_t, uint8_t>();
+        ASSERT_TRUE(popped);
+        const uint8_t sum = arg1 + arg2;
+        context.TryPushResult(sum);
+    };
+    uint8_t extractedValue = 0;
+    auto extractStackProcedure = std::make_unique<TestProcedure>();
+    extractStackProcedure->func = [&](ProcedureContext& context) {
+        const auto [poped, stackValue] = context.TryPopArgs<uint8_t>();
+        ASSERT_TRUE(poped);
+        extractedValue = stackValue;
+    };
+
+    const ProcedureId sumProcedureId = vm->RegisterProcedure(sumProcedure.get(), 2, 1);
+    const ProcedureId extractedProcedureId = vm->RegisterProcedure(extractStackProcedure.get(), 1, 0);
+    accessor.Write(ProcessorInstruction::PushStackValue, uint8_t { 10 });
+    Tick();
+    accessor.Write(ProcessorInstruction::PushStackValue, uint8_t { 20 });
+    Tick();
+    accessor.Write(ProcessorInstruction::PushStackValue, uint8_t { 30 });
+    Tick();
+    accessor.Write(ProcessorInstruction::Call, sumProcedureId);
+    Tick();
+    accessor.Write(ProcessorInstruction::Call, sumProcedureId);
+    Tick();
+    accessor.Write(ProcessorInstruction::Call, extractedProcedureId);
+    Tick();
+
+    ASSERT_EQ(extractedValue, uint8_t { 60 });
+}
