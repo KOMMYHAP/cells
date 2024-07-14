@@ -40,7 +40,7 @@ public:
     ProcessorStack GetStack()
     {
         ProcessorControlBlock& controlBlock = AccessControlBlock();
-        ProcessorStack stack { controlBlock.stack, controlBlock.stackOffset };
+        ProcessorStack stack { controlBlock };
         return stack;
     }
 

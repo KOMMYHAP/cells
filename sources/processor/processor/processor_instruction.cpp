@@ -31,7 +31,6 @@ ProcessorInstructionDescription GetProcessorInstructionDescription(ProcessorInst
     case ProcessorInstruction::Nope:
         description.argumentsCount = 0;
         break;
-    case ProcessorInstruction::LastProcessorInstruction:
     default:
         ASSERT_FAIL("Unknown instruction!", instruction);
     }

@@ -46,7 +46,7 @@ public:
 
     const ProcessorControlBlock& GetControlBlock() const { return *_params.controlBlock; }
     ProcessorControlBlock& ModifyControlBlock() { return *_params.controlBlock; }
-    
+
     const ProcessorUserData& GetUserData() const { return _params.userData; }
     ProcessorUserData& ModifyUserData() { return _params.userData; }
 

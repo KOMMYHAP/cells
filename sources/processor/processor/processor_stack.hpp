@@ -1,17 +1,4 @@
 #pragma once
-#include "utils/narrow_cast.h"
-
-#include <gsl/narrow>
-
-inline bool ProcessorStack::CanPush(uint8_t bytes) const
-{
-    return GetPushedBytesCount() + bytes <= GetBytesCapacity();
-}
-
-inline bool ProcessorStack::CanPop(uint8_t count) const
-{
-    return count <= GetPushedBytesCount();
-}
 
 template <MemoryType... Ts>
 std::tuple<bool, Ts...> ProcessorStack::TryPop()
@@ -26,10 +13,9 @@ template <MemoryType T>
 T ProcessorStack::Pop()
 {
     ASSERT(CanPop<T>());
-    uint8_t& offset = *_offset;
-    offset -= sizeof(T);
+    _offset -= sizeof(T);
     T value;
-    memcpy(&value, &_buffer[offset], sizeof(T));
+    memcpy(&value, &_buffer[_offset], sizeof(T));
     return value;
 }
 
@@ -38,9 +24,8 @@ template <class T>
 void ProcessorStack::Push(T&& value)
 {
     ASSERT(CanPush<std::decay_t<T>>());
-    uint8_t& offset = *_offset;
-    new (&_buffer[offset]) std::decay_t<T>(std::forward<T>(value));
-    offset += sizeof(T);
+    new (&_buffer[_offset]) std::decay_t<T>(std::forward<T>(value));
+    _offset += sizeof(T);
 }
 
 template <class... Ts>
@@ -52,22 +37,6 @@ bool ProcessorStack::TryPush(Ts&&... ts)
     }
     (Push(std::forward<Ts>(ts)), ...);
     return true;
-}
-
-inline ProcessorStack::ProcessorStack(std::span<std::byte> buffer, uint8_t& offset)
-    : _buffer(buffer)
-    , _offset(&offset)
-{
-}
-
-inline uint8_t ProcessorStack::GetPushedBytesCount() const
-{
-    return *_offset;
-}
-
-inline uint8_t ProcessorStack::GetBytesCapacity() const
-{
-    return NarrowCast<uint8_t>(_buffer.size());
 }
 
 template <MemoryType... Ts>

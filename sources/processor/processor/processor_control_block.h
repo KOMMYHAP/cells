@@ -11,7 +11,6 @@ enum class ProcessorFlags : uint8_t {
 constexpr uint8_t ProcessorRegistryCount = 4;
 constexpr uint8_t ProcessorStackSize = 5;
 
-#pragma pack(push, 1)
 struct ProcessorControlBlock {
     uint8_t state;
     uint8_t pendingProcedureId;
@@ -21,4 +20,3 @@ struct ProcessorControlBlock {
     uint8_t stackOffset;
     std::array<std::byte, ProcessorStackSize> stack;
 };
-#pragma pack(pop)

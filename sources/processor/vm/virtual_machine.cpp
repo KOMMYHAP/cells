@@ -6,12 +6,14 @@
 static_assert(ProcessorStackSize >= std::max(ProcedureInputArgsCountLimit, ProcedureOutputArgsCountLimit),
     "Register overflow! Processor use registries to pass args to or obtain args from procedure");
 
+static_assert(std::is_trivial_v<ProcessorControlBlock> && std::has_unique_object_representations_v<ProcessorControlBlock> && alignof(ProcessorControlBlock) == 1,
+    "As part of memory view ProcessorControlBlock must be tightly packed and should not have a padding");
+
 static_assert(sizeof(ProcessorControlBlock::pendingProcedureId) == sizeof(std::underlying_type_t<ProcedureId>));
 static_assert(sizeof(ProcessorControlBlock::state) == sizeof(std::underlying_type_t<ProcessorState>));
 
-static_assert(std::is_trivial_v<ProcessorControlBlock>, "As part of memory view ProcessorControlBlock must be trivial");
-static_assert(std::is_trivial_v<ProcessorInstruction>, "As part of memory view ProcessorInstruction must be trivial");
-static_assert(std::is_trivial_v<ProcessorFlags>, "As part of memory view ProcessorFlags must be trivial");
+static_assert(std::is_enum_v<ProcessorInstruction>, "As part of memory view ProcessorInstruction must be trivial");
+static_assert(std::is_enum_v<ProcessorFlags>, "As part of memory view ProcessorFlags must be trivial");
 
 ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t inputArgs, uint8_t outputArgs)
 {

@@ -5,6 +5,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         processor_control_block.cpp
         processor_control_block_guard.cpp
         processor_instruction.cpp
+        processor_stack.cpp
 )
 
 

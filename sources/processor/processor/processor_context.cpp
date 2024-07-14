@@ -8,7 +8,7 @@
 ProcessorContext::ProcessorContext(Params params)
     : _params(std::move(params))
     , _initialMemory(_params.memory)
-    , _stack(_params.controlBlock->stack, _params.controlBlock->stackOffset)
+    , _stack(*_params.controlBlock)
 {
     if (!SetCommandPointer(_params.controlBlock->nextCommand)) {
         ASSERT_FAIL("Invalid command pointer!");
