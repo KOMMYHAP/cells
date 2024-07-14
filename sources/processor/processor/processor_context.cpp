@@ -8,7 +8,6 @@
 ProcessorContext::ProcessorContext(Params params)
     : _params(std::move(params))
     , _initialMemory(_params.memory)
-    , _stack(*_params.controlBlock)
 {
     if (!SetCommandPointer(_params.controlBlock->nextCommand)) {
         ASSERT_FAIL("Invalid command pointer!");
@@ -102,20 +101,23 @@ ProcedureId ProcessorContext::GetPendingProcedure() const
 
 bool ProcessorContext::PushStack(std::byte data)
 {
-    const bool success = _stack.TryPush(data);
-    if (!success) {
-        SetState(ProcessorState::StackOverflow);
+    if (ProcessorStack stack { *_params.controlBlock }; stack.TryPush(data)) {
+        stack.CopyTo(*_params.controlBlock);
+        return true;
     }
-    return success;
+    SetState(ProcessorState::StackOverflow);
+    return false;
 }
 
 std::pair<bool, std::byte> ProcessorContext::PopStack()
 {
-    const auto [success, data] = _stack.TryPop<std::byte>();
-    if (!success) {
-        SetState(ProcessorState::StackUnderflow);
+    ProcessorStack stack { *_params.controlBlock };
+    if (const auto [success, data] = stack.TryPop<std::byte>(); success) {
+        stack.CopyTo(*_params.controlBlock);
+        return { success, data };
     }
-    return { success, data };
+    SetState(ProcessorState::StackUnderflow);
+    return { false, std::byte {} };
 }
 
 std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(ProcedureId id) const
@@ -125,7 +127,8 @@ std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(Procedure
         return {};
     }
     const ProcedureContext::ArgumentsStatus arguments { info->inputArgsCount, info->outputArgsCount };
-    return ProcedureContext { id, _params.userData, _stack, arguments };
+    const ProcessorStack stack { *_params.controlBlock };
+    return ProcedureContext { id, _params.userData, stack, arguments };
 }
 
 ProcedureBase& ProcessorContext::GetProcedure(ProcedureId id)

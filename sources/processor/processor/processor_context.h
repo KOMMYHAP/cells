@@ -56,7 +56,6 @@ public:
 private:
     Params _params;
     ProcessorMemory _initialMemory;
-    ProcessorStack _stack;
 };
 
 #include "processor_context.hpp"
