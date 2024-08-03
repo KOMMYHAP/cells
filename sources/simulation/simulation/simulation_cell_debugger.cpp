@@ -8,29 +8,20 @@ SimulationCellDebugger::SimulationCellDebugger(EcsWorld& world)
 {
 }
 
-void SimulationCellDebugger::SetWatchingCell(CellId id)
-{
-    _watchingCell = id;
-}
-
 bool SimulationCellDebugger::ShouldAttachDebugger(const ProcessorContext& context) const
 {
-    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
-    return id == _watchingCell;
+    return true;
 }
 
 void SimulationCellDebugger::AttachDebugger(ProcessorContext& context)
 {
-    _initialControlBlock = context.GetControlBlock();
 }
 
 void SimulationCellDebugger::DetachDebugger(ProcessorContext& context)
 {
-    if (context.IsState(ProcessorState::Good)) {
+    if (context.IsState(ProcessorState::Good) || context.IsState(ProcessorState::PendingProcedure)) {
         return;
     }
-
-    context.ModifyControlBlock() = _initialControlBlock;
 
     const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
     _world->destroy(id);

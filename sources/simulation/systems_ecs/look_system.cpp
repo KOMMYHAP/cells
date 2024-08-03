@@ -12,12 +12,12 @@ LookSystem::LookSystem(EcsWorld& ecsWorld, CellLocator& locator, SimulationVirtu
 
 void LookSystem::DoProcessComponents(CellId id, CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure)
 {
-    Look(position, direction, brain, procedure);
+    Look(position, direction, procedure);
     _vm->CompletePendingProcedure(id, brain, procedure.context);
     AccessEcsWorld().remove<LookDirection, DeferredProcedureExecution>(id);
 }
 
-void LookSystem::Look(CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure)
+void LookSystem::Look(CellPosition position, LookDirection direction, DeferredProcedureExecution& procedure)
 {
     const CellPosition lookPosition = _locator->TryApplyDirection(position, direction.value);
     if (lookPosition == InvalidCellPosition) {

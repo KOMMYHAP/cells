@@ -14,7 +14,7 @@ public:
         uint8_t output { 0 };
     };
 
-    // ProcedureContext() = default;
+    ProcedureContext() = default;
     ProcedureContext(ProcedureId id, ProcessorUserData userData, ProcessorStack stack, ArgumentsStatus arguments);
 
     template <MemoryType... Ts>

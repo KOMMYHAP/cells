@@ -11,7 +11,6 @@ SimulationVirtualMachine::SimulationVirtualMachine(EcsWorld& world)
     , _procedureTypeMapping(ProcedureTableLimit, ProcedureId::Invalid)
 {
     _virtualMachine.SetDebugger(&_debugger);
-    _debugger.SetWatchingCell(CellId { 99 });
 }
 
 void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)

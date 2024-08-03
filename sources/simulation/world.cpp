@@ -35,7 +35,8 @@ World::World()
         _ecsWorld.emplace<CellPosition>(child, x, y);
         _ecsWorld.emplace<CellType>(child, CellType::Unit);
     };
-    for (int i = 0; i < 100; ++i) {
+    static constexpr int CellsCount = 100;
+    for (int i = 0; i < CellsCount; ++i) {
         int x = i % _worldSize.x;
         int y = i % _worldSize.y;
         createCell(x, y);
@@ -62,8 +63,7 @@ void World::Warmup()
 
 sf::Time World::GetTickTime() const
 {
-    return sf::seconds(1);
-    // return sf::seconds(_tickSampler.CalcMedian());
+    return sf::seconds(_tickSampler.CalcMedian());
 }
 
 void World::Tick()

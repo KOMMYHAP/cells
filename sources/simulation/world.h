@@ -28,7 +28,7 @@ private:
     void Tick();
 
     EcsWorld _ecsWorld;
-    common::SampleCounter<float, 100> _tickSampler;
+    common::SampleCounter<float, 20> _tickSampler;
     SimulationTickCalculator _tickCalculator;
     std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;
     sf::Vector2u _worldSize;

@@ -16,7 +16,7 @@ public:
     void DoProcessComponents(CellId id, CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure);
 
 private:
-    void Look(CellPosition position, LookDirection direction, CellBrain& brain, DeferredProcedureExecution& procedure);
+    void Look(CellPosition position, LookDirection direction, DeferredProcedureExecution& procedure);
     
     gsl::not_null<CellLocator*> _locator;
     gsl::not_null<SimulationVirtualMachine*> _vm;
