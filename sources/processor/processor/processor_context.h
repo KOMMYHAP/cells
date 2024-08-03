@@ -1,17 +1,27 @@
 #pragma once
 
+#include "procedures/procedure.h"
+#include "procedures/procedure_context.h"
+#include "procedures/procedure_id.h"
 #include "procedures/procedure_table.h"
 #include "processor_control_block.h"
-#include "processor_control_block_guard.h"
 #include "processor_memory.h"
 #include "processor_state.h"
 
 class ProcessorContext {
 public:
-    ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory);
+    struct Params {
+        gsl::not_null<const ProcedureTable*> procedureTable;
+        gsl::not_null<ProcessorControlBlock*> controlBlock;
+        ProcessorUserData userData;
+        ProcessorMemory memory;
+    };
 
-    ProcessorControlBlockGuard MakeGuard();
-    bool RunProcedure(ProcedureId id);
+    explicit ProcessorContext(Params params);
+
+    bool HasPendingProcedure() const;
+    void SetPendingProcedure(ProcedureId id);
+    ProcedureId GetPendingProcedure() const;
 
     template <class... Ts>
     std::tuple<bool, Ts...> TryReadMemory();
@@ -25,6 +35,7 @@ public:
     void ResetFlag(ProcessorFlags flag);
 
     bool IsState(ProcessorState state) const;
+    ProcessorState GetState() const;
     void SetState(ProcessorState state);
 
     bool WriteRegistry(uint8_t index, std::byte data);
@@ -32,13 +43,18 @@ public:
     bool PushStack(std::byte data);
     std::pair<bool, std::byte> PopStack();
 
+    const ProcessorControlBlock& GetControlBlock() const { return *_params.controlBlock; }
+    ProcessorControlBlock& ModifyControlBlock() { return *_params.controlBlock; }
+
+    const ProcessorUserData& GetUserData() const { return _params.userData; }
+    ProcessorUserData& ModifyUserData() { return _params.userData; }
+
+    std::optional<ProcedureContext> MakeProcedureContext(ProcedureId id) const;
+    ProcedureBase& GetProcedure(ProcedureId id);
+
 private:
-    ProcessorControlBlock& _controlBlock;
-    const ProcedureTable& _procedureTable;
-    const ProcessorMemory _initialMemory;
-    ProcessorMemory _memory;
-    ProcessorStack _stack;
-    const std::function<void(ProcessorState)>& _watcher;
+    Params _params;
+    ProcessorMemory _initialMemory;
 };
 
 #include "processor_context.hpp"

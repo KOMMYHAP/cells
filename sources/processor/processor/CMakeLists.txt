@@ -5,6 +5,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         processor_control_block.cpp
         processor_control_block_guard.cpp
         processor_instruction.cpp
+        processor_stack.cpp
 )
 
 
@@ -22,4 +23,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         processor_stack.hpp
         processor_memory_type.h
         processor_instruction.h
+        processor_debugger.h
+        processor_user_data.h
 )

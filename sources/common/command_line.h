@@ -6,7 +6,7 @@ class CommandLine {
 public:
     CommandLine(int argc, char** argv);
 
-    std::optional<std::string_view> FindValue(const std::string_view key) const;
+    std::optional<std::string_view> FindValue(std::string_view key) const;
 
 private:
     int _argc { 0 };

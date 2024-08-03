@@ -3,17 +3,16 @@
 #include "procedures/procedure.h"
 
 class SimulationVirtualMachine;
-class PositionSystem;
+class CellLocator;
 class TypeSystem;
 
 class LookProcedure final : public ProcedureBase {
 public:
-    LookProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, TypeSystem& typeSystem);
+    LookProcedure(EcsWorld& world, const CellLocator& locator);
 
-    void Execute(ProcedureContext& context) override;
+    void Execute(ProcedureContext& procedureContext) override;
 
 private:
-    const SimulationVirtualMachine& _vm;
-    PositionSystem& _positionSystem;
-    TypeSystem& _typeSystem;
+    gsl::not_null<EcsWorld*> _world;
+    gsl::not_null<const CellLocator*> _locator;
 };

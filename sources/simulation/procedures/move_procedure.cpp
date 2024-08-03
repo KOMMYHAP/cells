@@ -1,10 +1,11 @@
 #include "move_procedure.h"
-#include "systems/position_system.h"
-#include "systems/simulation_virtual_machine.h"
 
-MoveProcedure::MoveProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem)
-    : _positionSystem(positionSystem)
-    , _vm(vm)
+#include "procedures/procedure_context.h"
+#include "simulation/cell_locator.h"
+#include "simulation/simulation_procedure_context.h"
+
+MoveProcedure::MoveProcedure(EcsWorld& world)
+    : _world(&world)
 {
 }
 
@@ -15,22 +16,11 @@ void MoveProcedure::Execute(ProcedureContext& context)
         return;
     }
     Direction direction;
-    if (!TryParse(rawDirection, direction)) {
-        context.MarkProcedureAsInvalid();
+    if (!TryParseDirection(rawDirection, direction)) {
+        context.AbortProcedure();
         return;
     }
 
-    const CellId id = _vm.GetRunningCellId();
-    const CellPosition position = _positionSystem.Get(id);
-    const CellPosition newPosition = _positionSystem.TryApplyDirection(position, direction);
-    if (newPosition == InvalidCellPosition) {
-        return;
-    }
-
-    const CellId anotherCell = _positionSystem.Find(newPosition);
-    if (anotherCell != CellId::Invalid) {
-        return;
-    }
-
-    _positionSystem.Set(id, newPosition);
+    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
+    _world->emplace<MoveDirection>(id, direction);
 }

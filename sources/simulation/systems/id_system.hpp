@@ -8,7 +8,7 @@ void IdSystem::Iterate(Func&& func)
         if (!_validCells[idx]) {
             continue;
         }
-        const CellId id = static_cast<CellId>(idx);
+        const auto id = static_cast<CellId>(idx);
         func(id);
     }
 }

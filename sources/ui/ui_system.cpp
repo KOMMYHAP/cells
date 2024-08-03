@@ -7,39 +7,65 @@
 #include "world.h"
 #include "world_widget.h"
 
-#include "systems/id_system.h"
-#include "systems/position_system.h"
-#include "systems/type_system.h"
+#include "utils/stub_error_code.h"
 
-static const std::string_view FontArgument = "--font";
-static const std::string_view FragmentShaderArgument = "--fragment-shader";
+static constexpr std::string_view FontArgument = "--font";
+static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
 
 std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
-    const auto& layout = storage.Get<UiLayout>();
+    UiLayout layout;
+    layout.screenWidth = 800;
+    layout.screenHeight = 600;
+    layout.fieldOffset = 20;
+    layout.fieldWidth = layout.screenWidth - 2 * layout.fieldOffset;
+    layout.fieldHeight = layout.screenHeight - 2 * layout.fieldOffset;
+    layout.statusTextOffset = 5;
+    layout.statusTextSize = 10;
+    layout.cellPadding = 0;
+    
+    // ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
+    // ASSERT(layout.fieldWidth % (CellSize + CellPadding) == 0);
+    // ASSERT(layout.fieldHeight % (CellSize + CellPadding) == 0);
+    
     _window.create(sf::VideoMode(layout.screenWidth, layout.screenHeight), "Cells", sf::Style::Titlebar | sf::Style::Close);
     ASSERT(_window.isOpen());
 
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
 
-    auto* world = storage.Get<World*>();
-    const common::StackStorage& systems = world->GetSystems();
+    auto& world = storage.Modify<World>();
 
-    const common::CommandLine& commandLine = storage.Get<common::CommandLine>();
+    const auto& commandLine = storage.Get<common::CommandLine>();
     auto mbFontPath = commandLine.FindValue(FontArgument);
-    ASSERT(mbFontPath.has_value(), "you should specify font path via --font argument!");
+    if (!mbFontPath.has_value()) {
+        ASSERT_FAIL("Stub: pass font path to cmd line!");
+        return common::MakeStubErrorCode();
+    }
 
     _font = std::make_unique<sf::Font>();
     const bool fontLoaded = _font->loadFromFile(std::string { *mbFontPath });
-    ASSERT(fontLoaded, "invalid font!");
+    if (!fontLoaded) {
+        ASSERT_FAIL("Stub: invalid font by specified path!");
+        return common::MakeStubErrorCode();
+    }
 
     storage.Store<UiSystem*>(this);
 
     {
-        auto statusPanel = std::make_unique<StatusPanel>(layout, *_font, *world);
+        auto statusPanel = std::make_unique<StatusPanel>(layout, *_font, world);
         AddWidget(std::move(statusPanel));
     }
+
+    auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
+    ASSERT(mbFragmentShaderPath.has_value());
+
+    auto shader = std::make_unique<sf::Shader>();
+    const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
+    ASSERT(loaded);
+
+    EcsWorld& ecsWorld = world.ModifyEcsWorld();
+    _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
 
     {
         auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
@@ -50,23 +76,21 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         ASSERT(loaded);
 
         WorldWidget::Config worldRenderConfig {
+            _renderSystem.get(),
             std::move(shader),
-            { sf::Color::Yellow, sf::Color::White, sf::Color::White, sf::Color::White },
             sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
             sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
-            systems.Modify<PositionSystem>(),
-            systems.Modify<IdSystem>(),
-            systems.Modify<TypeSystem>()
         };
         auto worldWidget = std::make_unique<WorldWidget>(std::move(worldRenderConfig));
         AddWidget(std::move(worldWidget));
     }
 
-    return std::error_code();
+    return {};
 }
 
 void UiSystem::TerminateSystem()
 {
+    _renderSystem.reset();
     for (auto&& [_, widget] : std::ranges::reverse_view(_widgets)) {
         widget.reset();
     }

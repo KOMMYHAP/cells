@@ -2,5 +2,9 @@
 
 #include <SFML/System.hpp>
 
-#include "basic_defines.h"
+#include "common.h"
 #include "common_fwd.h"
+
+#include "systems_ecs/simulation_ecs_config.h"
+
+#include "entt/entt.hpp"

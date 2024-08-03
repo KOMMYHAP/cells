@@ -1,7 +1,6 @@
 #include "spawn_system.h"
 
 #include "cell_factories/cell_factory_interface.h"
-#include "random.h"
 #include "spawn_properties.h"
 #include "storage/storage.h"
 #include "systems/id_system.h"
@@ -22,7 +21,7 @@ void SpawnSystem::SpawnN(uint32_t cellsCount)
     }
 
     std::vector<CellPosition> positions = _positionSystem.CollectFreePositions();
-    std::shuffle(positions.begin(), positions.end(), common::GetRandomEngine());
+    // common::Shuffle(positions);
     uint32_t spawnedCount { 0 };
 
     constexpr CellHealth initialHealth { 100 };

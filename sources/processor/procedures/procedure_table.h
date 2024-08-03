@@ -7,13 +7,8 @@ inline constexpr uint8_t ProcedureInputArgsCountLimit = 2;
 inline constexpr uint8_t ProcedureOutputArgsCountLimit = 1;
 
 struct ProcedureTableEntry {
-    bool IsValid() const { return procedure != nullptr; }
-
     uint8_t inputArgsCount { 0 };
     uint8_t outputArgsCount { 0 };
-
-    /// Procedure is heavy command, which can be called once per simulation tick,
-    /// so we can ignore overhead of virtual call.
     ProcedureBase* procedure { nullptr };
 };
 
@@ -21,6 +16,7 @@ class ProcedureTable {
 public:
     ProcedureId RegisterProcedure(const ProcedureTableEntry& info);
 
+    /// If entry found, it will be valid
     const ProcedureTableEntry* FindProcedure(ProcedureId procedureId) const;
 
 private:

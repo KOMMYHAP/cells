@@ -9,7 +9,7 @@ target_sources(${PROJECT_NAME} PUBLIC profile.h)
 
 
 # generate configuration header
-option(ENABLE_PROFILE "Enable profiling" OFF)
+option(COMMON_PROFILE_ENABLED "Enable profiling" OFF)
 configure_file(profile_config.h.in profile_config.h @ONLY)
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}")
 

@@ -1,25 +1,77 @@
 #include "world.h"
 
-#include "simulation_parameters.h"
-#include "storage/stack_storage.h"
+#include "SFML/Graphics/Shader.hpp"
+#include "cell_factories/patrol_cell.h"
+#include "components/cell_type.h"
+#include "procedures/look_procedure.h"
+#include "procedures/move_procedure.h"
+#include "simulation/simulation_procedure_context.h"
 
-std::error_code World::InitializeSystem(common::StackStorage& storage)
+#include "systems_ecs/brain_simulation_system.h"
+#include "systems_ecs/look_system.h"
+#include "systems_ecs/movement_system.h"
+#include "systems_ecs/reproduction_system.h"
+#include "systems_ecs/spawn_system.h"
+
+World::World()
+    : _worldSize(100, 100)
+    , _cellsLocator(_worldSize.x, _worldSize.y)
+    , _simulationVm(_ecsWorld)
+    , _randomEngine(Random::MakeEngine("white"))
 {
-    _parameters = &storage.Modify<WorldParameters>();
-    const auto& simulationParameters = storage.Get<SimulationParameters>();
-    _simulation = std::make_unique<Simulation>(*_parameters->simulationScript);
-    _simulation->SetAutoMode(simulationParameters.targetSimulationTime);
-    storage.Store<World*>(this);
-    return {};
+    const sf::Time targetSimulationTime = sf::milliseconds(30);
+
+    _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _ecsWorld);
+    _simulationVm.RegisterProcedure<LookProcedure>(ProcedureType::Look, 1, 1, "look", _ecsWorld, _cellsLocator);
+
+    _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsLocator));
+    _simulationSystems.emplace_back(std::make_unique<LookSystem>(_ecsWorld, _cellsLocator, _simulationVm));
+    _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator));
+    _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
+
+    auto createCell = [this](int16_t x, int16_t y) {
+        const CellId child = _ecsWorld.create();
+        _ecsWorld.emplace<CellBrain>(child, MakePatrolCell(_simulationVm));
+        _ecsWorld.emplace<CellPosition>(child, x, y);
+        _ecsWorld.emplace<CellType>(child, CellType::Unit);
+    };
+    static constexpr int CellsCount = 100;
+    for (int i = 0; i < CellsCount; ++i) {
+        int x = i % _worldSize.x;
+        int y = i % _worldSize.y;
+        createCell(x, y);
+    }
+    _tickCalculator.Setup(targetSimulationTime);
 }
 
-void World::TerminateSystem()
+void World::Update(const sf::Time elapsedTime)
 {
-    _simulation.reset();
-    _parameters = nullptr;
+    Warmup();
+
+    const uint32_t ticks = _tickCalculator.CalculateElapsedTicks(GetTickTime(), elapsedTime);
+    for (uint32_t i { 0 }; i < ticks; ++i) {
+        Tick();
+    }
 }
 
-void World::Update(sf::Time elapsedTime)
+void World::Warmup()
 {
-    _simulation->Run(elapsedTime);
+    while (!_tickSampler.IsFull()) {
+        Tick();
+    }
+}
+
+sf::Time World::GetTickTime() const
+{
+    return sf::seconds(_tickSampler.CalcMedian());
+}
+
+void World::Tick()
+{
+    const sf::Clock clock;
+    for (const auto& system : _simulationSystems) {
+        system->DoSystemUpdate();
+    }
+    const float seconds = clock.getElapsedTime().asSeconds();
+    _tickSampler.AddSample(seconds);
 }

@@ -9,7 +9,7 @@ AgeSystem::AgeSystem(uint32_t capacity, HealthSystem& healthSystem)
 
 void AgeSystem::Increment(CellId id, CellAge limitAge)
 {
-     if (_healthSystem.IsZero(id)) {
+    if (_healthSystem.IsZero(id)) {
         // cell is dead
         return;
     }

@@ -2,16 +2,14 @@
 
 #include "procedures/procedure.h"
 
-class PositionSystem;
-class SimulationVirtualMachine;
+class CellLocator;
 
 class MoveProcedure final : public ProcedureBase {
 public:
-    MoveProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem);
+    MoveProcedure(EcsWorld& world);
 
     void Execute(ProcedureContext& context) override;
 
 private:
-    PositionSystem& _positionSystem;
-    const SimulationVirtualMachine& _vm;
+    gsl::not_null<EcsWorld*> _world;
 };

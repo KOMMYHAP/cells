@@ -1,19 +1,12 @@
 #include "processor/processor_control_block.h"
 #include "processor/processor_instruction.h"
+#include "utils/test_processor_debugger.h"
+#include "utils/test_processor_state_guard.h"
 #include "vm/virtual_machine.h"
 
 namespace {
 
 class ProcessorFixture;
-
-class DisabledAssertScope {
-public:
-    DisabledAssertScope(ProcessorFixture& fixture);
-    ~DisabledAssertScope();
-
-private:
-    ProcessorFixture& _fixture;
-};
 
 class ProcessorFixture : public testing::Test {
 public:
@@ -32,17 +25,12 @@ public:
 
     ProcessorState GetLastProcessorState()
     {
-        return _lastProcessorState;
+        return _debugger.GetLastProcessorState();
     }
 
-    DisabledAssertScope MakeScopeWithoutAssert()
+    TestProcessorStateGuard MakeScopeWithoutAssert()
     {
-        return { *this };
-    }
-
-    void EnableAssertsOnBadProcessorState(bool value)
-    {
-        _assertOnBadState = value;
+        return { _debugger, false, true };
     }
 
     void Tick()
@@ -50,15 +38,10 @@ public:
         _vm->Run({ _memoryBuffer });
     }
 
-    void MakeVmWithCustomSystemInstructionPerTick(uint8_t count)
-    {
-        _vm = MakeVm(count);
-    }
-
 protected:
-    virtual void SetUp()
+    void SetUp() override
     {
-        _vm = MakeVm(1);
+        _vm = MakeVm();
         MakeMemory(255);
 
         ProcessorMemory rawMemory { _memoryBuffer };
@@ -66,57 +49,30 @@ protected:
         rawMemory.Write(controlBlock);
     }
 
-    virtual void TearDown()
-    {
-    }
+    void TearDown() override { }
 
 private:
-    std::unique_ptr<VirtualMachine> MakeVm(uint8_t systemInstructionPerTick)
+    std::unique_ptr<VirtualMachine> MakeVm()
     {
         auto vm = std::make_unique<VirtualMachine>();
-        vm->SetWatcher(MakeKiller());
-        vm->SetInstructionsPerStep(systemInstructionPerTick);
+        vm->SetDebugger(&_debugger);
         return vm;
-    }
-
-    ProcessorStateWatcher MakeKiller()
-    {
-        return [this](ProcessorState state) {
-            if (_assertOnBadState) {
-                ASSERT(state != ProcessorState::Good);
-            }
-            _lastProcessorState = state;
-        };
     }
 
     void MakeMemory(uint8_t size)
     {
         _memoryBuffer.resize(size);
-        std::fill(_memoryBuffer.begin(), _memoryBuffer.end(), std::byte { 0xDD });
+        std::ranges::fill(_memoryBuffer, std::byte { 0xDD });
     }
 
     std::vector<std::byte> _memoryBuffer;
     std::unique_ptr<VirtualMachine> _vm;
-    bool _assertOnBadState { true };
-    ProcessorState _lastProcessorState { ProcessorState::Good };
+    TestProcessorDebugger _debugger;
 };
 
-DisabledAssertScope::DisabledAssertScope(ProcessorFixture& fixture)
-    : _fixture(fixture)
-{
-    fixture.EnableAssertsOnBadProcessorState(false);
 }
 
-DisabledAssertScope::~DisabledAssertScope()
-{
-    _fixture.EnableAssertsOnBadProcessorState(true);
-}
-
-}
-
-TEST_F(ProcessorFixture, Processor_Init_Term)
-{
-}
+TEST_F(ProcessorFixture, Processor_Init_Term) { }
 
 TEST_F(ProcessorFixture, Processor_Nope)
 {
@@ -175,33 +131,4 @@ TEST_F(ProcessorFixture, Processor_PopStackToInvalidRegister)
         Tick();
     }
     ASSERT_EQ(GetLastProcessorState(), ProcessorState::InvalidInstruction);
-}
-
-TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick)
-{
-    MakeVmWithCustomSystemInstructionPerTick(2);
-
-    auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 24 });
-
-    ASSERT_EQ(AccessControlBlock().stackOffset, 0);
-    Tick();
-    ASSERT_EQ(AccessControlBlock().stackOffset, 2);
-}
-
-TEST_F(ProcessorFixture, Processor_SystemInstructionPerTick_WithJump)
-{
-    MakeVmWithCustomSystemInstructionPerTick(3);
-
-    auto accessor = GetMemory();
-    accessor.Write(ProcessorInstruction::PushStackValue, std::byte { 42 });
-    accessor.Write(ProcessorInstruction::Jump, std::byte { 0 });
-    accessor.Write(ProcessorInstruction::Nope);
-
-    ASSERT_EQ(AccessControlBlock().stackOffset, 0);
-    ASSERT_EQ(AccessControlBlock().nextCommand, 0);
-    Tick();
-    ASSERT_EQ(AccessControlBlock().stackOffset, 2);
-    ASSERT_EQ(AccessControlBlock().nextCommand, 2);
 }

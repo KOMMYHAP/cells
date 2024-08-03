@@ -1,18 +1,12 @@
 #pragma once
 
-enum class ProcessorState : unsigned char {
+enum class ProcessorState : uint8_t {
     Good,
     InvalidInstruction,
-    InvalidProcedure,
-    ProcedureMissingInput,
-    ProcedureTooMuchInputRequested,
-    ProcedureIgnoreInput,
-    ProcedureMissingOutput,
-    ProcedureTooMuchOutput,
+    UnknownProcedure,
+    PendingProcedure,
+    AbortedProcedure,
     StackOverflow,
     StackUnderflow,
     OutOfMemory,
-    UnknownProcedure,
 };
-
-using ProcessorStateWatcher = std::function<void(ProcessorState)>;

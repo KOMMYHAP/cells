@@ -13,7 +13,7 @@ public:
     void Run();
 
 private:
-    UiSystem* _uiSystem{nullptr};
-    World* _world{nullptr};
+    UiSystem* _uiSystem { nullptr };
+    World* _world { nullptr };
     bool _stopRequested { false };
 };

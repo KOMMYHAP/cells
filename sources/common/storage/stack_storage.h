@@ -13,7 +13,6 @@ public:
     StackStorage& operator=(StackStorage&& other) noexcept = default;
     ~StackStorage() noexcept;
 
-public:
     template <class T>
     T& Modify() const;
 

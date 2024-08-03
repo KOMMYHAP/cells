@@ -58,7 +58,7 @@ CellHealth HealthSystem::Decrement(CellId id, CellHealth health)
 
     const auto healthCurrent = static_cast<int32_t>(_healthList[index]);
     auto healthDiff = static_cast<int32_t>(health);
-    const auto healthLimit = static_cast<int32_t>(CellHealth::Zero);
+    constexpr auto healthLimit = static_cast<int32_t>(CellHealth::Zero);
 
     if (healthCurrent - healthDiff < healthLimit) {
         healthDiff = healthCurrent;

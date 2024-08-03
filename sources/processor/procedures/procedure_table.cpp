@@ -32,7 +32,7 @@ const ProcedureTableEntry* ProcedureTable::FindProcedure(ProcedureId procedureId
     }
 
     const ProcedureTableEntry* info = &_procedures[id];
-    if (!info->IsValid()) {
+    if (!info->procedure) {
         return nullptr;
     }
 

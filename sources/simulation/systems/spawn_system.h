@@ -6,7 +6,7 @@ class IdSystem;
 class TypeSystem;
 class HealthSystem;
 class ICellFactory;
-class CellBrain;
+struct CellBrain;
 class Spawner;
 enum class CellId : uint32_t;
 

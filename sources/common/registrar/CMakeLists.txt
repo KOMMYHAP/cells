@@ -7,5 +7,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
         registrar.h
+        registrar.hpp
         registrable_system.h
 )

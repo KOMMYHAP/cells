@@ -1,12 +1,13 @@
 #pragma once
 
 #include "components/cell_id.h"
+#include "simulation_system.h"
 
-class IdSystem {
+class IdSystem : public SimulationSystem {
 public:
     IdSystem(uint32_t capacity);
 
-    uint32_t GetCellsCount() const { return _capacity - _freeIds.size(); }
+    uint32_t GetCellsCount() const { return _capacity - NarrowCast<uint32_t>(_freeIds.size()); }
     uint32_t GetCellsCountLimit() const { return _capacity; }
 
     CellId Create();
@@ -15,6 +16,8 @@ public:
     template <class Func>
         requires std::invocable<Func, CellId>
     void Iterate(Func&& func);
+
+    
 
 private:
     CellId MakeNextId();

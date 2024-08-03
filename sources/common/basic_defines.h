@@ -22,7 +22,6 @@
 #include <cwchar>
 #include <cwctype>
 
-
 // C++
 #include <algorithm>
 #include <any>
@@ -61,6 +60,7 @@
 #include <regex>
 #include <scoped_allocator>
 #include <set>
+#include <shared_mutex>
 #include <span>
 #include <sstream>
 #include <stack>
@@ -76,7 +76,14 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+#include <xutility>
 #include <valarray>
 #include <vector>
-// External libraries
-#include "libassert/assert.hpp"
+#include <variant>
+
+// GSL
+#include <gsl/pointers> // owner, not_null
+#undef GSL_ASSUME
+#undef GSL_LIKELY
+#undef Expects
+#undef Ensures

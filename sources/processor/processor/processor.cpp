@@ -1,37 +1,112 @@
 #include "processor.h"
+
+#include "procedures/procedure_table.h"
+#include "processor_debugger.h"
 #include "processor_instruction.h"
-#include "processor_profile_category.h"
 #include "processor_state.h"
 
-Processor::Processor(uint8_t systemInstructionToPerform)
-    : _systemInstructionToPerform(systemInstructionToPerform)
+Processor::Processor(ProcessorContext& context, ProcessorDebugger* debugger)
+    : _debugger(debugger)
+    , _processorContext(&context)
 {
-    DEBUG_ASSERT(_systemInstructionToPerform > 0);
-}
-
-void Processor::Execute(ProcessorContext& context)
-{
-    common::ProfileScope processorProfileScope { "Processor", ProcessorProfileCategory };
-
-    for (int i = 0; i < _systemInstructionToPerform; ++i) {
-        auto mbInstruction = ProcessInstruction(context);
-        if (!mbInstruction.has_value()) {
-            // no completed instruction
-            break;
-        }
-        const ProcessorInstruction completedInstruction = *mbInstruction;
-        if (completedInstruction == ProcessorInstruction::Call) {
-            // one heavy instruction per execution is enough
-            break;
-        }
+    if (_debugger) {
+        _debugger->AttachDebugger(context);
     }
 }
 
-std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorContext& context)
+Processor::~Processor() noexcept
 {
-    ASSUME(context.IsState(ProcessorState::Good));
+    if (_debugger) {
+        _debugger->DetachDebugger(*_processorContext);
+    }
+}
 
-    ProcessorControlBlockGuard controlBlockGuard = context.MakeGuard();
+void Processor::Execute()
+{
+    ProcessInstruction();
+}
+
+void Processor::CompletePendingProcedure(const ProcedureContext& procedureContext)
+{
+    ProcessorContext& context = *_processorContext;
+    if (!context.IsState(ProcessorState::PendingProcedure)) {
+        context.SetState(ProcessorState::InvalidInstruction);
+        return;
+    }
+    if (procedureContext.GetId() != context.GetPendingProcedure()) {
+        context.SetState(ProcessorState::InvalidInstruction);
+        return;
+    }
+    if (procedureContext.IsPending()) {
+        context.SetState(ProcessorState::InvalidInstruction);
+        return;
+    }
+
+    CompleteProcedure(procedureContext);
+}
+
+bool Processor::CompleteProcedure(const ProcedureContext& procedureContext)
+{
+    ProcessorContext& context = *_processorContext;
+    const bool wasSucceeded = procedureContext.IsSucceeded();
+    if (wasSucceeded) {
+        context.SetPendingProcedure(ProcedureId::Invalid);
+        context.SetState(ProcessorState::Good);
+    } else {
+        context.SetState(ProcessorState::AbortedProcedure);
+    }
+
+    procedureContext.GetStack().CopyTo(context.ModifyControlBlock());
+
+    if (_debugger) {
+        _debugger->ProcedureWasCompleted(context, procedureContext);
+    }
+    return wasSucceeded;
+}
+
+void Processor::DeferProcedure(const ProcedureContext& procedureContext)
+{
+    ProcessorContext& context = *_processorContext;
+    context.SetPendingProcedure(procedureContext.GetId());
+    context.SetState(ProcessorState::PendingProcedure);
+    if (_debugger) {
+        _debugger->ProcedureWasDeferred(context, procedureContext);
+    }
+    procedureContext.GetStack().CopyTo(context.ModifyControlBlock());
+}
+
+bool Processor::RunProcedure(ProcedureId id)
+{
+    ProcessorContext& context = *_processorContext;
+
+    auto mbProcedureContext = context.MakeProcedureContext(id);
+    if (!mbProcedureContext) {
+        context.SetState(ProcessorState::UnknownProcedure);
+        return false;
+    }
+
+    ProcedureContext& procedureContext = *mbProcedureContext;
+    ProcedureBase& procedureBase = context.GetProcedure(id);
+
+    if (_debugger) {
+        _debugger->ProcedureWillStarted(context, procedureContext);
+    }
+    procedureBase.Execute(procedureContext);
+
+    if (procedureContext.IsPending()) {
+        DeferProcedure(procedureContext);
+        return true;
+    }
+
+    return CompleteProcedure(procedureContext);
+}
+
+std::optional<ProcessorInstruction> Processor::ProcessInstruction()
+{
+    ProcessorContext& context = *_processorContext;
+    if (!context.IsState(ProcessorState::Good)) {
+        return {};
+    }
 
     const auto [instructionRead, rawInstruction] = context.TryReadMemory<uint8_t>();
     if (!instructionRead) {
@@ -40,7 +115,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
     const auto instruction = static_cast<ProcessorInstruction>(rawInstruction);
 
     switch (instruction) {
-        /// instructions with two operands:
+    /// instructions with two operands:
     case ProcessorInstruction::WriteRegistryRegistry:
     case ProcessorInstruction::CompareRegistryRegistry:
     case ProcessorInstruction::AddRegistryRegistry:
@@ -58,12 +133,12 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
             arg1,
             arg2,
         };
-        if (!ProcessTwoOperands(instructionContext, context)) {
+        if (!ProcessTwoOperands(instructionContext)) {
             return {};
         }
     } break;
 
-        /// instructions with one operand:
+    /// instructions with one operand:
     case ProcessorInstruction::PushStackRegistry:
     case ProcessorInstruction::PushStackValue:
     case ProcessorInstruction::PopStackRegistry:
@@ -83,31 +158,30 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction(ProcessorConte
             instruction,
             arg,
         };
-        if (!ProcessOneOperand(instructionContext, context)) {
+        if (!ProcessOneOperand(instructionContext)) {
             return {};
         }
     } break;
 
-        /// instructions without operand:
+    /// instructions without operand:
     case ProcessorInstruction::Nope:
-        ASSUME(GetProcessorInstructionDescription(instruction).argumentsCount == 0);
+        ASSERT(GetProcessorInstructionDescription(instruction).argumentsCount == 0);
         if (!context.MoveCommandPointer(1)) {
             return {};
         }
         break;
-    default:
     case ProcessorInstruction::LastProcessorInstruction:
         context.SetState(ProcessorState::InvalidInstruction);
         return {};
     }
 
-    controlBlockGuard.Submit();
     return instruction;
 }
 
-bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, ProcessorContext& context)
+bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext)
 {
-    ASSUME(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2);
+    ProcessorContext& context = *_processorContext;
+    ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2);
 
     /// Data extraction
     const uint8_t destinationIdx = instructionContext.operand1;
@@ -177,7 +251,7 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, Proces
             destinationData,
             sourceData
         };
-        UpdateFlags(flagsContext, context);
+        UpdateFlags(flagsContext);
     } break;
     default:
         break;
@@ -194,9 +268,10 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext, Proces
     return true;
 }
 
-bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContext, ProcessorContext& context)
+bool Processor::ProcessOneOperand(OneOperandContext instructionContext)
 {
-    ASSUME(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
+    ProcessorContext& context = *_processorContext;
+    ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
 
     /// Data extraction
     uint8_t sourceData { instructionContext.operand1 };
@@ -234,12 +309,12 @@ bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContex
     } break;
     case ProcessorInstruction::Call: {
         const auto procedureIdx = static_cast<ProcedureId>(instructionContext.operand1);
-        if (!context.RunProcedure(procedureIdx)) {
+        if (!RunProcedure(procedureIdx)) {
             return false;
         }
     } break;
 
-        /// https://www.felixcloutier.com/x86/jcc
+    /// https://www.felixcloutier.com/x86/jcc
     case ProcessorInstruction::JumpIfEqual: {
         const bool shouldJump = context.HasFlag(ProcessorFlags::Zero);
         if (!shouldJump) {
@@ -282,14 +357,16 @@ bool Processor::ProcessOneOperand(Processor::OneOperandContext instructionContex
     }
     default:
         // Seems like a new instruction was added to ProcessInstruction, but wasn't processed here.
-        UNREACHABLE("Unknown instruction", instructionContext.instruction);
+        ASSERT_FAIL("Unknown instruction", instructionContext.instruction);
     }
 
     return context.MoveCommandPointer(1 /* instruction */ + 1 /* operand */);
 }
 
-void Processor::UpdateFlags(FlagsContext flagsContext, ProcessorContext& context)
+void Processor::UpdateFlags(FlagsContext flagsContext)
 {
+    ProcessorContext& context = *_processorContext;
+
     int result { 0 };
     switch (flagsContext.instruction) {
     case ProcessorInstruction::CompareRegistryValue:
@@ -303,7 +380,7 @@ void Processor::UpdateFlags(FlagsContext flagsContext, ProcessorContext& context
         result = flagsContext.operand1 + flagsContext.operand2;
         break;
     default:
-        UNREACHABLE("Unknown instruction", flagsContext.instruction);
+        ASSERT_FAIL("Unknown instruction", flagsContext.instruction);
     }
 
     context.SetFlag(ProcessorFlags::Zero, result == 0);

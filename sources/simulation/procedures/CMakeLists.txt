@@ -4,15 +4,9 @@ target_sources(${PROJECT_NAME} PRIVATE
         consume_procedure.cpp
         reproduction_procedure.cpp
         look_procedure.cpp
-        direction.cpp
-)
-
-
-# add headers
-target_sources(${PROJECT_NAME} PUBLIC
+        procedure_type.h
         move_procedure.h
         consume_procedure.h
-        direction.h
         reproduction_procedure.h
         look_procedure.h
 )

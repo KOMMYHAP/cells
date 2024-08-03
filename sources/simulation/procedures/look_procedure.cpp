@@ -1,42 +1,30 @@
 #include "look_procedure.h"
 
-#include "systems/position_system.h"
-#include "systems/simulation_virtual_machine.h"
-#include "systems/type_system.h"
+#include "components/deferred_procedure_execution.h"
+#include "components/look_direction.h"
+#include "procedures/procedure_context.h"
+#include "simulation/cell_locator.h"
+#include "simulation/simulation_procedure_context.h"
 
-LookProcedure::LookProcedure(const SimulationVirtualMachine& vm, PositionSystem& positionSystem, TypeSystem& typeSystem)
-    : _vm(vm)
-    , _positionSystem(positionSystem)
-    , _typeSystem(typeSystem)
+LookProcedure::LookProcedure(EcsWorld& world, const CellLocator& locator)
+    : _world(&world)
+    , _locator(&locator)
 {
 }
 
-void LookProcedure::Execute(ProcedureContext& context)
+void LookProcedure::Execute(ProcedureContext& procedureContext)
 {
-    const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
+    const auto [readArgs, rawDirection] = procedureContext.TryPopArgs<uint8_t>();
     if (!readArgs) {
         return;
     }
     Direction direction;
-    if (!TryParse(rawDirection, direction)) {
-        context.MarkProcedureAsInvalid();
+    if (!TryParseDirection(rawDirection, direction)) {
+        procedureContext.AbortProcedure();
         return;
     }
 
-    const CellId id = _vm.GetRunningCellId();
-    const CellPosition position = _positionSystem.Get(id);
-    const CellPosition lookPosition = _positionSystem.TryApplyDirection(position, direction);
-    if (lookPosition == InvalidCellPosition) {
-        context.TryPushResult(CellType::Wall);
-        return;
-    }
-
-    const CellId anotherCell = _positionSystem.Find(lookPosition);
-    if (anotherCell == CellId::Invalid) {
-        context.TryPushResult(CellType::Dummy);
-        return;
-    }
-
-    const CellType anotherCellType = _typeSystem.Get(anotherCell);
-    context.TryPushResult(anotherCellType);
+    const CellId id = procedureContext.GetUserData().Get<SimulationProcedureContext>().id;
+    _world->emplace<LookDirection>(id, direction);
+    _world->emplace<DeferredProcedureExecution>(id, procedureContext);
 }

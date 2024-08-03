@@ -31,7 +31,6 @@ public:
 
     size_t Count() const;
 
-public:
     using ItemType = std::type_index;
     using Item = std::unique_ptr<impl::StorageItemHolderBase>;
 

@@ -1,47 +1,47 @@
 #include "processor_context.h"
 
 #include "flags.h"
+#include "procedures/procedure_context.h"
+#include "procedures/procedure_table.h"
 #include "processor_state.h"
 
-ProcessorContext::ProcessorContext(const ProcedureTable& procedureTable, const ProcessorStateWatcher& stateWatcher, ProcessorControlBlock& controlBlock, const ProcessorMemory& memory)
-    : _procedureTable(procedureTable)
-    , _controlBlock(controlBlock)
-    , _initialMemory(memory)
-    , _memory(_initialMemory)
-    , _watcher(stateWatcher)
-    , _stack(_controlBlock.stack, _controlBlock.stackOffset)
+ProcessorContext::ProcessorContext(Params params)
+    : _params(std::move(params))
+    , _initialMemory(_params.memory)
 {
-    if (!SetCommandPointer(_controlBlock.nextCommand)) {
-        UNREACHABLE("Invalid command pointer!");
+    if (!SetCommandPointer(_params.controlBlock->nextCommand)) {
+        ASSERT_FAIL("Invalid command pointer!");
     }
 }
 
 bool ProcessorContext::HasFlag(ProcessorFlags flag) const
 {
-    return common::HasFlag(_controlBlock.flags, flag);
+    return common::HasFlag(_params.controlBlock->flags, flag);
 }
 
 void ProcessorContext::SetFlag(ProcessorFlags flag)
 {
-    common::SetFlag(_controlBlock.flags, flag);
+    common::SetFlag(_params.controlBlock->flags, flag);
 }
 
 void ProcessorContext::ResetFlag(ProcessorFlags flag)
 {
-    common::ResetFlag(_controlBlock.flags, flag);
+    common::ResetFlag(_params.controlBlock->flags, flag);
 }
 
 bool ProcessorContext::IsState(ProcessorState state) const
 {
-    return _controlBlock.state == static_cast<uint8_t>(state);
+    return static_cast<std::underlying_type_t<ProcessorState>>(state) == _params.controlBlock->state;
+}
+
+ProcessorState ProcessorContext::GetState() const
+{
+    return static_cast<ProcessorState>(_params.controlBlock->state);
 }
 
 void ProcessorContext::SetState(ProcessorState state)
 {
-    _controlBlock.state = static_cast<uint8_t>(state);
-    if (_watcher) {
-        _watcher(state);
-    }
+    _params.controlBlock->state = static_cast<std::underlying_type_t<ProcessorState>>(state);
 }
 
 bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
@@ -50,93 +50,91 @@ bool ProcessorContext::SetCommandPointer(uint8_t nextCommand)
         SetState(ProcessorState::OutOfMemory);
         return false;
     }
-    _controlBlock.nextCommand = nextCommand;
-    _memory = ProcessorMemory { _initialMemory.MakeSpan(_controlBlock.nextCommand) };
+    _params.controlBlock->nextCommand = nextCommand;
+    _params.memory = ProcessorMemory { _initialMemory.MakeSpan(_params.controlBlock->nextCommand) };
     return true;
 }
 
 bool ProcessorContext::MoveCommandPointer(uint8_t offset)
 {
-    if (_controlBlock.nextCommand + offset <= _controlBlock.nextCommand) {
+    if (_params.controlBlock->nextCommand + offset <= _params.controlBlock->nextCommand) {
         SetState(ProcessorState::OutOfMemory);
         return false;
     }
-    return SetCommandPointer(_controlBlock.nextCommand + offset);
+    return SetCommandPointer(_params.controlBlock->nextCommand + offset);
 }
 
 bool ProcessorContext::WriteRegistry(uint8_t index, std::byte data)
 {
-    if (index >= _controlBlock.registry.size()) {
+    if (index >= _params.controlBlock->registry.size()) {
         SetState(ProcessorState::InvalidInstruction);
         return false;
     }
-    _controlBlock.registry[index] = data;
+    _params.controlBlock->registry[index] = data;
     return true;
 }
 
 std::pair<bool, std::byte> ProcessorContext::ReadRegistry(uint8_t index)
 {
-    if (index >= _controlBlock.registry.size()) {
+    if (index >= _params.controlBlock->registry.size()) {
         SetState(ProcessorState::InvalidInstruction);
         return { false, std::byte {} };
     }
-    return { true, _controlBlock.registry[index] };
+    return { true, _params.controlBlock->registry[index] };
 }
 
-bool ProcessorContext::RunProcedure(ProcedureId id)
+bool ProcessorContext::HasPendingProcedure() const
 {
-    const ProcedureTableEntry* info = _procedureTable.FindProcedure(id);
-    if (!info) {
-        SetState(ProcessorState::UnknownProcedure);
-        return false;
-    }
+    return IsState(ProcessorState::PendingProcedure);
+}
 
-    uint8_t inputArgsCount = info->inputArgsCount;
-    uint8_t outputArgsCount = info->outputArgsCount;
-    const uint8_t initialStackOffset = _controlBlock.stackOffset;
+void ProcessorContext::SetPendingProcedure(ProcedureId id)
+{
+    _params.controlBlock->pendingProcedureId = static_cast<std::underlying_type_t<ProcedureId>>(id);
+}
 
-    if (initialStackOffset < inputArgsCount) {
-        SetState(ProcessorState::ProcedureMissingInput);
-        return false;
-    }
-
-    ProcedureContext procedureContext { *this, _stack, inputArgsCount, outputArgsCount };
-    info->procedure->Execute(procedureContext);
-    if (!IsState(ProcessorState::Good)) {
-        return false;
-    }
-    if (inputArgsCount != 0) {
-        SetState(ProcessorState::ProcedureIgnoreInput);
-        return false;
-    }
-    if (outputArgsCount != 0) {
-        SetState(ProcessorState::ProcedureMissingOutput);
-        return false;
-    }
-    return true;
+ProcedureId ProcessorContext::GetPendingProcedure() const
+{
+    return static_cast<ProcedureId>(_params.controlBlock->pendingProcedureId);
 }
 
 bool ProcessorContext::PushStack(std::byte data)
 {
-    const bool success = _stack.TryPush(data);
-    if (!success) {
-        SetState(ProcessorState::StackOverflow);
+    if (ProcessorStack stack { *_params.controlBlock }; stack.TryPush(data)) {
+        stack.CopyTo(*_params.controlBlock);
+        return true;
     }
-    return success;
+    SetState(ProcessorState::StackOverflow);
+    return false;
 }
 
 std::pair<bool, std::byte> ProcessorContext::PopStack()
 {
-    const auto [success, data] = _stack.TryPop<std::byte>();
-    if (!success) {
-        SetState(ProcessorState::StackUnderflow);
+    ProcessorStack stack { *_params.controlBlock };
+    if (const auto [success, data] = stack.TryPop<std::byte>(); success) {
+        stack.CopyTo(*_params.controlBlock);
+        return { success, data };
     }
-    return { success, data };
+    SetState(ProcessorState::StackUnderflow);
+    return { false, std::byte {} };
 }
 
-ProcessorControlBlockGuard ProcessorContext::MakeGuard()
+std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(ProcedureId id) const
 {
-    return { _controlBlock };
+    const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
+    if (!info) {
+        return {};
+    }
+    const ProcedureContext::ArgumentsStatus arguments { info->inputArgsCount, info->outputArgsCount };
+    const ProcessorStack stack { *_params.controlBlock };
+    return ProcedureContext { id, _params.userData, stack, arguments };
+}
+
+ProcedureBase& ProcessorContext::GetProcedure(ProcedureId id)
+{
+    const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
+    ASSERT(info != nullptr);
+    return *info->procedure;
 }
 
 void ProcessorContext::SetFlag(ProcessorFlags flag, bool value)

@@ -1,22 +1,38 @@
 #pragma once
 
-#include "registrar/registrable_system.h"
-#include "simulation.h"
-#include "world_parameters.h"
+#include "systems_ecs/simulation_ecs_system.h"
 
-class World : public common::RegistrableSystem {
+#include "random/random.h"
+#include "sample_counter.h"
+
+#include "simulation/cell_locator.h"
+#include "simulation/simulation_system.h"
+#include "simulation/simulation_virtual_machine.h"
+
+#include "tick_calculator.h"
+
+class World {
 public:
-    std::error_code InitializeSystem(common::StackStorage& storage) override;
-    void TerminateSystem() override;
+    World();
 
     void Update(sf::Time elapsedTime);
 
-    const Simulation& GetSimulation() const { return *_simulation; }
-    Simulation& ModifySimulation() { return *_simulation; }
+    const EcsWorld& GetEcsWorld() const { return _ecsWorld; }
+    EcsWorld& ModifyEcsWorld() { return _ecsWorld; }
 
-    const common::StackStorage& GetSystems() const { return _parameters->systems; }
+    sf::Vector2u GetWorldSize() const { return _worldSize; }
 
 private:
-    WorldParameters* _parameters { nullptr };
-    std::unique_ptr<Simulation> _simulation;
+    void Warmup();
+    sf::Time GetTickTime() const;
+    void Tick();
+
+    EcsWorld _ecsWorld;
+    common::SampleCounter<float, 20> _tickSampler;
+    SimulationTickCalculator _tickCalculator;
+    std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;
+    sf::Vector2u _worldSize;
+    CellLocator _cellsLocator;
+    SimulationVirtualMachine _simulationVm;
+    Random::Engine _randomEngine;
 };
