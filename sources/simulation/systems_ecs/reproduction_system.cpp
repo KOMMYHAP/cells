@@ -1,6 +1,6 @@
 ﻿#include "reproduction_system.h"
 
-#include "cell_factories/patrol_cell.h"
+#include "cell_factories/patrol_cell_factory.h"
 #include "components/cell_type.h"
 #include "procedures/procedure_context.h"
 

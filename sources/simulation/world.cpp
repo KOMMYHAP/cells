@@ -1,7 +1,7 @@
 #include "world.h"
 
 #include "SFML/Graphics/Shader.hpp"
-#include "cell_factories/patrol_cell.h"
+#include "cell_factories/patrol_cell_factory.h"
 #include "components/cell_type.h"
 #include "procedures/look_procedure.h"
 #include "procedures/move_procedure.h"
