@@ -6,9 +6,17 @@
 #include "processor/processor_instruction.h"
 #include "processor/processor_state.h"
 
-CellBrain MakePatrolCell(const SimulationVirtualMachine& vm)
+PatrolCellFactory::PatrolCellFactory(const SimulationVirtualMachine& vm)
+    : _vm(&vm)
 {
-    CellBrain brain;
+}
+
+ICellFactory::Result PatrolCellFactory::Make(const Parent& parent)
+{
+    Result child;
+    child.success = true;
+
+    CellBrain& brain = child.brain;
     ProcessorMemory memory { brain.data };
     ProcessorControlBlock controlBlock {
         static_cast<std::underlying_type_t<ProcessorState>>(ProcessorState::Good),
@@ -23,8 +31,8 @@ CellBrain MakePatrolCell(const SimulationVirtualMachine& vm)
 
     ASSERT(ProcessorRegistryCount >= 1);
 
-    const ProcedureId move = vm.GetProcedureId(ProcedureType::Move);
-    const ProcedureId look = vm.GetProcedureId(ProcedureType::Look);
+    const ProcedureId move = _vm->GetProcedureId(ProcedureType::Move);
+    const ProcedureId look = _vm->GetProcedureId(ProcedureType::Look);
 
     constexpr int moveCommandCount { 10 };
     for (int i = 0; i < moveCommandCount; ++i) {
@@ -42,5 +50,6 @@ CellBrain MakePatrolCell(const SimulationVirtualMachine& vm)
         memory.Write(ProcessorInstruction::Call, move);
     }
     memory.Write(ProcessorInstruction::Jump, std::byte { 0 });
-    return brain;
+
+    return child;
 }

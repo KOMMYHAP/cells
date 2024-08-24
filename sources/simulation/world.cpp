@@ -18,6 +18,7 @@ World::World()
     , _cellsLocator(_worldSize.x, _worldSize.y)
     , _simulationVm(_ecsWorld)
     , _randomEngine(Random::MakeEngine("white"))
+    , _cellFactory(_simulationVm)
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
@@ -26,14 +27,19 @@ World::World()
 
     _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsLocator));
     _simulationSystems.emplace_back(std::make_unique<LookSystem>(_ecsWorld, _cellsLocator, _simulationVm));
-    _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator));
+    _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator, _cellFactory));
     _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
 
     auto createCell = [this](int16_t x, int16_t y) {
-        const CellId child = _ecsWorld.create();
-        _ecsWorld.emplace<CellBrain>(child, MakePatrolCell(_simulationVm));
-        _ecsWorld.emplace<CellPosition>(child, x, y);
-        _ecsWorld.emplace<CellType>(child, CellType::Unit);
+        static constexpr CellBrain FakeParentBrain {};
+        static constexpr ICellFactory::Parent FakeParent { CellId::Invalid, &FakeParentBrain };
+
+        const auto [brain, success] = _cellFactory.Make(FakeParent);
+        ASSERT(success);
+        const CellId childId = _ecsWorld.create();
+        _ecsWorld.emplace<CellBrain>(childId, brain);
+        _ecsWorld.emplace<CellPosition>(childId, x, y);
+        _ecsWorld.emplace<CellType>(childId, CellType::Unit);
     };
     static constexpr int CellsCount = 100;
     for (int i = 0; i < CellsCount; ++i) {

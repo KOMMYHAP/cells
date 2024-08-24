@@ -1,19 +1,20 @@
-// #pragma once
-//
-// #include "components/cell_brain.h"
-//
-// class ICellFactory {
-// public:
-//     virtual ~ICellFactory() = default;
-//
-//     enum class Status : uint8_t {
-//         Success,
-//         FailedToCreate,
-//         TryLater
-//     };
-//     struct Result {
-//         Status status { Status::TryLater };
-//         CellBrain brain;
-//     };
-//     virtual Result Make() = 0;
-// };
+#pragma once
+
+#include "components/cell_brain.h"
+#include "components/cell_position.h"
+
+class ICellFactory {
+public:
+    virtual ~ICellFactory() = default;
+
+    struct Parent {
+        CellId id;
+        gsl::not_null<const CellBrain*> brain;
+        CellPosition position;
+    };
+    struct Result {
+        CellBrain brain;
+        bool success { false };
+    };
+    virtual Result Make(const Parent& parent) = 0;
+};
