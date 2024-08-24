@@ -9,7 +9,7 @@
 #include "simulation/simulation_system.h"
 #include "simulation/simulation_virtual_machine.h"
 
-#include "cell_factories/patrol_cell_factory.h"
+#include "cell_factories/cell_factory_interface.h"
 #include "tick_calculator.h"
 
 class World {
@@ -36,5 +36,5 @@ private:
     CellLocator _cellsLocator;
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
-    PatrolCellFactory _cellFactory;
+    std::unique_ptr<ICellFactory> _cellFactory;
 };

@@ -2,9 +2,11 @@
 
 #include "SFML/Graphics/Shader.hpp"
 #include "cell_factories/patrol_cell_factory.h"
+#include "cell_factories/random_cell_factory.h"
 #include "components/cell_type.h"
 #include "procedures/look_procedure.h"
 #include "procedures/move_procedure.h"
+#include "procedures/reproduction_procedure.h"
 #include "simulation/simulation_procedure_context.h"
 
 #include "systems_ecs/brain_simulation_system.h"
@@ -18,23 +20,25 @@ World::World()
     , _cellsLocator(_worldSize.x, _worldSize.y)
     , _simulationVm(_ecsWorld)
     , _randomEngine(Random::MakeEngine("white"))
-    , _cellFactory(_simulationVm)
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
+    _cellFactory = std::make_unique<RandomCellFactory>(_simulationVm, _randomEngine);
+
     _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _ecsWorld);
     _simulationVm.RegisterProcedure<LookProcedure>(ProcedureType::Look, 1, 1, "look", _ecsWorld, _cellsLocator);
+    _simulationVm.RegisterProcedure<ReproductionProcedure>(ProcedureType::Reproduction, 1, 0, "reproduction", _ecsWorld);
 
     _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsLocator));
     _simulationSystems.emplace_back(std::make_unique<LookSystem>(_ecsWorld, _cellsLocator, _simulationVm));
-    _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator, _cellFactory));
+    _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator, *_cellFactory));
     _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
 
     auto createCell = [this](int16_t x, int16_t y) {
         static constexpr CellBrain FakeParentBrain {};
         static constexpr ICellFactory::Parent FakeParent { CellId::Invalid, &FakeParentBrain };
 
-        const auto [brain, success] = _cellFactory.Make(FakeParent);
+        const auto [brain, success] = _cellFactory->Make(FakeParent);
         ASSERT(success);
         const CellId childId = _ecsWorld.create();
         _ecsWorld.emplace<CellBrain>(childId, brain);
