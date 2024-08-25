@@ -7,6 +7,13 @@ CellLocator::CellLocator(uint32_t width, uint32_t height)
 {
 }
 
+void CellLocator::Set(CellPosition position, CellId id)
+{
+    const uint32_t index = ToGridIndex(position);
+    ASSERT(_grid[index] == CellId::Invalid, "Specified position contains another cell!");
+    _grid[index] = id;
+}
+
 void CellLocator::Replace(const CellPosition oldPosition, const CellPosition newPosition)
 {
     const uint32_t index = ToGridIndex(oldPosition);

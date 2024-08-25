@@ -10,6 +10,8 @@
 #include "simulation/simulation_virtual_machine.h"
 
 #include "cell_factories/cell_factory_interface.h"
+#include "cell_factories/random_cell_factory.h"
+#include "simulation/spawner.h"
 #include "tick_calculator.h"
 
 class World {
@@ -31,10 +33,12 @@ private:
     EcsWorld _ecsWorld;
     common::SampleCounter<float, 20> _tickSampler;
     SimulationTickCalculator _tickCalculator;
+    CellLocator _cellsLocator;
+    Spawner _spawner;
     std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;
     sf::Vector2u _worldSize;
-    CellLocator _cellsLocator;
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
-    std::unique_ptr<ICellFactory> _cellFactory;
+    RandomCellFactory _randomCellFactory;
+    ;
 };

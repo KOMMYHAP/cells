@@ -11,13 +11,12 @@ RandomCellFactory::RandomCellFactory(const SimulationVirtualMachine& vm, Random:
     , _random(&random)
 {
 }
-ICellFactory::Result RandomCellFactory::Make(const Parent& parent)
-{
-    Result result;
 
-    ProcessorMemory memory { result.brain.data };
+bool RandomCellFactory::Make(CellBrain& childBrainOut)
+{
+    ProcessorMemory memory { childBrainOut.data };
     if (!InitMemory(memory)) {
-        return result;
+        return false;
     }
 
     while (true) {
@@ -40,8 +39,7 @@ ICellFactory::Result RandomCellFactory::Make(const Parent& parent)
         }
     }
 
-    result.success = true;
-    return result;
+    return true;
 }
 
 bool RandomCellFactory::InitMemory(ProcessorMemory& memory)

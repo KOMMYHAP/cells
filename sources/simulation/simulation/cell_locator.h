@@ -8,6 +8,7 @@ class CellLocator {
 public:
     CellLocator(uint32_t width, uint32_t height);
 
+    void Set(CellPosition position, CellId id);
     void Replace(CellPosition oldPosition, CellPosition newPosition);
     void Reset(CellPosition position);
 

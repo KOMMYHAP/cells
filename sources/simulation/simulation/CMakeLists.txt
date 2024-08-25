@@ -8,4 +8,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     simulation_virtual_machine.h
     simulation_virtual_machine.hpp
     simulation_procedure_context.h
+    spawner.h
+    spawner.cpp
+    spawner.hpp
 )

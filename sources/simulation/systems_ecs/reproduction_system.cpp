@@ -1,10 +1,10 @@
 ﻿#include "reproduction_system.h"
 
 #include "cell_factories/patrol_cell_factory.h"
-#include "components/cell_type.h"
 
-ReproductionSystem::ReproductionSystem(EcsWorld& ecsWorld, SimulationVirtualMachine& vm, const CellLocator& locator, ICellFactory& factory)
+ReproductionSystem::ReproductionSystem(EcsWorld& ecsWorld, SimulationVirtualMachine& vm, const CellLocator& locator, RandomCellFactory& factory, Spawner& spawner)
     : SimulationEcsSystem(ecsWorld)
+    , _spawner(&spawner)
     , _factory(&factory)
     , _locator(&locator)
     , _vm(&vm)
@@ -22,24 +22,5 @@ void ReproductionSystem::MakeClone(CellId id, CellPosition position, Reproductio
     // Make brain of parent cell more stable before making a child.
     _vm->CompletePendingProcedure(id, brain, procedure.context);
 
-    const CellPosition childPosition = _locator->TryApplyDirection(position, direction.value);
-    if (childPosition == InvalidCellPosition) {
-        return;
-    }
-
-    if (const CellId targetId = _locator->Find(childPosition); targetId != CellId::Invalid) {
-        return;
-    }
-
-    const ICellFactory::Parent parent { id, &brain, position };
-    const auto [childBrain, success] = _factory->Make(parent);
-    if (!success) {
-        return;
-    }
-
-    EcsWorld& world = AccessEcsWorld();
-    const CellId child = world.create();
-    world.emplace<CellBrain>(child, childBrain);
-    world.emplace<CellPosition>(child, childPosition);
-    world.emplace<CellType>(child, CellType::Unit);
+    _spawner->TrySpawn(position, direction.value, [this](CellBrain& childBrain) { return _factory->Make(childBrain); });
 }
