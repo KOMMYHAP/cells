@@ -16,9 +16,9 @@
 #include "systems_ecs/spawn_system.h"
 
 World::World()
-    : _cellsLocator(_worldSize.x, _worldSize.y)
+    : _worldSize(100, 100)
+    , _cellsLocator(_worldSize.x, _worldSize.y)
     , _spawner(_ecsWorld, _cellsLocator)
-    , _worldSize(100, 100)
     , _simulationVm(_ecsWorld)
     , _randomEngine(Random::MakeEngine("white"))
     , _randomCellFactory(_simulationVm, _randomEngine)

@@ -33,10 +33,10 @@ private:
     EcsWorld _ecsWorld;
     common::SampleCounter<float, 20> _tickSampler;
     SimulationTickCalculator _tickCalculator;
+    sf::Vector2u _worldSize;
     CellLocator _cellsLocator;
     Spawner _spawner;
     std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;
-    sf::Vector2u _worldSize;
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
     RandomCellFactory _randomCellFactory;
