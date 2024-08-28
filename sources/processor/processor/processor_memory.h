@@ -2,7 +2,7 @@
 
 #include "processor_memory_type.h"
 
-namespace details {
+namespace Details {
 
 template <class Unit>
 class MemoryBase {
@@ -39,7 +39,7 @@ protected:
 
 }
 
-class ProcessorMemory : public details::MemoryBase<std::byte> {
+class ProcessorMemory : public Details::MemoryBase<std::byte> {
 public:
     ProcessorMemory() = default;
     ProcessorMemory(std::span<std::byte> memory);
@@ -64,7 +64,7 @@ private:
     void WriteOne(Arg&& data);
 };
 
-class ProcessorConstMemory : public details::MemoryBase<const std::byte> {
+class ProcessorConstMemory : public Details::MemoryBase<const std::byte> {
 public:
     ProcessorConstMemory() = default;
     ProcessorConstMemory(std::span<std::byte> memory);

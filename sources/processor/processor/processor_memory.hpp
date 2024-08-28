@@ -1,6 +1,6 @@
 #pragma once
 
-namespace details {
+namespace Details {
 
 template <class Unit>
 bool MemoryBase<Unit>::HasBytes(uint8_t count) const

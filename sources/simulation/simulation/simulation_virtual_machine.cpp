@@ -35,7 +35,7 @@ ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const
     return id;
 }
 
-const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(ProcedureType type) const
+auto SimulationVirtualMachine::FindProcedureInfo(ProcedureType type) const -> const SimulationProcedureInfo*
 {
     const ProcedureId procedureId = GetProcedureId(type);
     const auto id = static_cast<uint8_t>(procedureId);
@@ -48,4 +48,26 @@ const SimulationProcedureInfo* SimulationVirtualMachine::FindProcedureInfo(Proce
     }
 
     return &info.info;
+}
+
+void SimulationVirtualMachine::RegisterProcedure(ProcedureType type, ProcedureBase* procedure, uint8_t inputCount, uint8_t outputCount, std::string name)
+{
+    const auto procedureId = _virtualMachine.RegisterProcedure(procedure, inputCount, outputCount);
+    ASSERT(procedureId != ProcedureId::Invalid);
+
+    {
+        // Register procedure info
+        const auto index = static_cast<uint16_t>(procedureId);
+        ASSERT(_procedureDataList[index].procedure == nullptr, "Another procedure registered by the same index!", procedureId);
+
+        SimulationProcedureInfo info { std::move(name), inputCount, outputCount, type };
+        _procedureDataList[index] = ProcedureData { std::move(info), {}, std::move(procedure) };
+    }
+
+    {
+        // Register procedure type
+        const auto index = static_cast<uint8_t>(type);
+        ASSERT(_procedureTypeMapping[index] == ProcedureId::Invalid, "Another procedure id bound with the same type!", procedureId);
+        _procedureTypeMapping[index] = procedureId;
+    }
 }

@@ -3,7 +3,6 @@
 #include "asserts/assert.h"
 
 #define ENTT_NOEXCEPTION
-#define ENTT_USE_ATOMIC
 #define ENTT_ASSERT(expression, message) ASSERT(expression, message)
 
 #ifdef ENTT_CONFIG_CONFIG_H

@@ -19,7 +19,7 @@ add_subdirectory(utils)
 target_precompile_headers(${PROJECT_NAME} PRIVATE tests_pch.h)
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     cells-processor 
-    #cells-simulation 
+    cells-simulation 
     #cells-scripts 
     gtest
     sol2::sol2

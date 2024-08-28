@@ -16,8 +16,8 @@ public:
 
     void DoSystemUpdate() final
     {
-        _ecsWorld->view<Components...>().each([this]<typename... T0>(const CellId& id, T0&&... components) {
-            DowncastToImpl().DoProcessComponents(id, std::forward<T0>(components)...);
+        _ecsWorld->view<Components...>().each([this]<typename... T0>(const CellId& id, T0&&... components) noexcept {
+            static_cast<Derived&>(*this).DoProcessComponents(id, std::forward<T0>(components)...);
         });
     }
 
@@ -25,10 +25,5 @@ public:
     EcsWorld& AccessEcsWorld() { return *_ecsWorld; }
 
 private:
-    Derived& DowncastToImpl()
-    {
-        return static_cast<Derived&>(*this);
-    }
-
     gsl::not_null<EcsWorld*> _ecsWorld;
 };

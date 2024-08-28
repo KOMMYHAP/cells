@@ -16,4 +16,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         energy_system.cpp
         reproduction_system.h
         reproduction_system.cpp
+        simulation_ecs_procedure.h
+        simulation_ecs_procedure.hpp
 )
