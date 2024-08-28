@@ -11,7 +11,7 @@ Spawner::Spawner(EcsWorld& world, CellLocator& locator)
 bool Spawner::CanSpawnAtPosition(CellPosition position) const
 {
     const CellId targetId = _locator->Find(position);
-    return targetId != CellId::Invalid;
+    return targetId == CellId::Invalid;
 }
 
 void Spawner::Spawn(const CellBrain& brain, CellPosition position)
