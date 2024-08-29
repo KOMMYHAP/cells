@@ -11,5 +11,5 @@ target_sources(${PROJECT_NAME} PRIVATE
         deferred_procedure_execution.h
         cell_energy.h
         cell_energy_change.h
-        cell_energy_empty.h
+        graveyard_tag.h
 )

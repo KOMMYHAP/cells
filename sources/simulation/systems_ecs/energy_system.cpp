@@ -1,6 +1,6 @@
 ﻿#include "energy_system.h"
 
-#include "components/cell_energy_empty.h"
+#include "components/graveyard_tag.h"
 
 EnergySystem::EnergySystem(EcsWorld& ecsWorld)
     : SimulationEcsSystem(ecsWorld)
@@ -18,6 +18,6 @@ void EnergySystem::DoProcessComponents(const CellId id, CellEnergy& energy, cons
 
     if (energy.value == 0) {
         EcsWorld& world = AccessEcsWorld();
-        world.emplace<CellEnergyEmpty>(id);
+        world.emplace<GraveyardTag>(id);
     }
 }

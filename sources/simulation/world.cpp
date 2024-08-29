@@ -3,12 +3,12 @@
 #include "SFML/Graphics/Shader.hpp"
 #include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
-#include "components/cell_type.h"
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
 #include "procedures/random_cell_spawn_procedure_system.h"
 
 #include "systems_ecs/brain_simulation_system.h"
+#include "systems_ecs/energy_system.h"
 #include "systems_ecs/spawn_system.h"
 
 World::World()
@@ -25,7 +25,8 @@ World::World()
     RegisterProcedureSystem<MoveProcedureSystem>(ProcedureType::Move, 1, 0, "Move", _ecsWorld, _simulationVm, _cellsLocator);
     RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", _ecsWorld, _simulationVm, _cellsLocator, _spawner, _randomCellFactory);
 
-    _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
+    RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
+    RegisterSystem<EnergySystem>(_ecsWorld);
 
     auto factory = [this](CellBrain& brain) {
         return _randomCellFactory.Make(brain);
@@ -78,4 +79,11 @@ void World::RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint
     T* weakProcedure = procedure.get();
     _simulationVm.RegisterProcedure(type, weakProcedure, inputCount, outputCount, std::move(name));
     _simulationSystems.emplace_back(std::move(procedure));
+}
+
+template <class T, class... Args>
+    requires std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
+void World::RegisterSystem(Args&&... args)
+{
+    _simulationSystems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
 }

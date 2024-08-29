@@ -7,4 +7,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         brain_simulation_system.cpp
         energy_system.h
         energy_system.cpp
+        graveyard_system.cpp
+        graveyard_system.h
 )

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "components/graveyard_tag.h"
 #include "simulation/simulation_virtual_machine.h"
 #include "simulation_ecs_procedure.h"
 
@@ -28,10 +29,10 @@ ProcedureImpl& DeferredProcedureProxy<ProcedureImpl>::CastToImpl()
 
 template <class EcsProcedureImpl, SimulationComponentType... Components>
 void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoSystemUpdate()
-{  
-    CastToImpl()
-        .AccessEcsWorld()
-        .template view<CellBrain, DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>, Components...>()
+{
+    EcsWorld& world = CastToImpl().AccessEcsWorld();
+    constexpr static auto ExcludeDeadCells = entt::exclude_t<GraveyardTag> {};
+    world.view<CellBrain, DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>, Components...>(ExcludeDeadCells)
         .each([this]<typename... T0>(const CellId& id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, T0&&... components) noexcept {
             DoProcessComponents(id, brain, deferredExecution, std::forward<T0>(components)...);
         });
@@ -48,14 +49,18 @@ void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoProcessComponents(Cel
 
     ProcedureContext& context = deferredExecution.context;
     const ExecutionStatus status = CastToImpl().ExecuteProcedure(id, context, brain, std::forward<FilteredComponents>(components)...);
+
+    EcsWorld& world = CastToImpl().AccessEcsWorld();
     if (status == ExecutionStatus::Success) {
-        CastToImpl().AccessVirtualMachine().CompletePendingProcedure(id, brain, context);
+        SimulationVirtualMachine& vm = CastToImpl().AccessVirtualMachine();
+        vm.CompletePendingProcedure(id, brain, context);
     } else if (status == ExecutionStatus::Error) {
         if (!context.IsFailed()) {
             context.AbortProcedure();
         }
+        world.emplace<GraveyardTag>(id);
     }
-    CastToImpl().AccessEcsWorld().template remove<DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>>(id);
+    world.remove<DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>>(id);
 }
 
 template <class EcsProcedureImpl, SimulationComponentType... Components>
