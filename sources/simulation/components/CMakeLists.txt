@@ -6,9 +6,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_age.h
         cell_health.h
         cell_position.cpp
-        spawn_data.h
-        look_direction.h
-        move_direction.h
         direction.h
         direction.cpp
         deferred_procedure_execution.h
