@@ -6,7 +6,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         id_system.cpp
         spawn_system.cpp
         selection_system.cpp
-        age_system.cpp
         spawner.cpp
         destroyer.cpp
 )
@@ -21,7 +20,6 @@ target_sources(${PROJECT_NAME} PUBLIC
         health_system.h
         spawn_system.h
         selection_system.h
-        age_system.h
         spawner.h
         destroyer.h
         spawn_properties.h

@@ -1,5 +1,5 @@
 #pragma once
 
-enum class CellAge : uint16_t {
-    Zero
+struct CellAge {
+    uint16_t value;
 };
