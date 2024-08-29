@@ -14,7 +14,7 @@ RandomCellSpawnProcedureSystem::RandomCellSpawnProcedureSystem(EcsWorld& world, 
     , _factory(&factory)
 {
 }
-RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position)
+RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyChange& energyChange)
 {
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
@@ -25,9 +25,7 @@ RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::
         return ExecutionStatus::Error;
     }
     _spawner->TrySpawn(position, direction, [this](CellBrain& childBrain) { return _factory->Make(childBrain); });
-    _world->patch<CellEnergyChange>(id, [](CellEnergyChange& change) {
-        change.value -= 50;
-    });
+    energyChange.value -= 50;
     return ExecutionStatus::Success;
 }
 

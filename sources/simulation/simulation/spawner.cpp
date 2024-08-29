@@ -1,6 +1,7 @@
 ﻿#include "spawner.h"
 
 #include "components/cell_energy.h"
+#include "components/cell_energy_change.h"
 #include "components/cell_type.h"
 
 Spawner::Spawner(EcsWorld& world, CellLocator& locator)
@@ -22,5 +23,6 @@ void Spawner::Spawn(const CellBrain& brain, CellPosition position)
     _world->emplace<CellPosition>(child, position);
     _world->emplace<CellType>(child, CellType::Unit);
     _world->emplace<CellEnergy>(child, CellEnergy { 100 });
+    _world->emplace<CellEnergyChange>(child, CellEnergyChange { 0 });
     _locator->Set(position, child);
 }
