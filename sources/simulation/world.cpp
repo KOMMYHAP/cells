@@ -5,7 +5,7 @@
 #include "cell_factories/random_cell_factory.h"
 #include "components/cell_type.h"
 #include "procedures/look_procedure_system.h"
-#include "procedures/move_procedure.h"
+#include "procedures/move_procedure_system.h"
 #include "procedures/reproduction_procedure.h"
 #include "simulation/simulation_procedure_context.h"
 
@@ -24,12 +24,11 @@ World::World()
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
-    RegisterProcedure<LookProcedureSystem>(ProcedureType::Look, 1, 1, "Look", _ecsWorld, _simulationVm, _cellsLocator);
+    RegisterProcedureSystem<LookProcedureSystem>(ProcedureType::Look, 1, 1, "Look", _ecsWorld, _simulationVm, _cellsLocator);
+    RegisterProcedureSystem<MoveProcedureSystem>(ProcedureType::Move, 1, 0, "Move", _ecsWorld, _simulationVm, _cellsLocator);
 
-    _simulationVm.RegisterProcedure<MoveProcedure>(ProcedureType::Move, 1, 0, "move", _ecsWorld);
     _simulationVm.RegisterProcedure<ReproductionProcedure>(ProcedureType::Reproduction, 1, 0, "reproduction", _ecsWorld);
 
-    _simulationSystems.emplace_back(std::make_unique<MovementSystem>(_ecsWorld, _cellsLocator));
     _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator, _randomCellFactory, _spawner));
     _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
 
@@ -78,9 +77,9 @@ void World::Tick()
 
 template <class T, class... Args>
     requires std::is_base_of_v<ProcedureBase, T> && std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-void World::RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
+void World::RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
 {
-    auto procedure = std::make_unique<T>(std::forward<Args>(args));
+    auto procedure = std::make_unique<T>(std::forward<Args>(args)...);
     T* weakProcedure = procedure.get();
     _simulationVm.RegisterProcedure(type, weakProcedure, inputCount, outputCount, std::move(name));
     _simulationSystems.emplace_back(std::move(procedure));

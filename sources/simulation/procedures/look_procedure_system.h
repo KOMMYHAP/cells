@@ -3,7 +3,7 @@
 #include "simulation/cell_locator.h"
 #include "systems_ecs/simulation_ecs_procedure.h"
 
-class LookProcedureSystem final : public EcsProcedureProxy<LookProcedureSystem, CellPosition> {
+class LookProcedureSystem final : public EcsProcedureProxy<LookProcedureSystem, const CellPosition> {
 public:
     LookProcedureSystem(EcsWorld& world, SimulationVirtualMachine& vm, const CellLocator& locator);
     ExecutionStatus ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position);
