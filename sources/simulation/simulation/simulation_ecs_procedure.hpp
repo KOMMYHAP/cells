@@ -3,6 +3,7 @@
 #include "components/graveyard_tag.h"
 #include "simulation/simulation_virtual_machine.h"
 #include "simulation_ecs_procedure.h"
+#include "systems_ecs/graveyarded_cell_exclude.h"
 
 namespace Details {
 
@@ -31,8 +32,7 @@ template <class EcsProcedureImpl, SimulationComponentType... Components>
 void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoSystemUpdate()
 {
     EcsWorld& world = CastToImpl().AccessEcsWorld();
-    constexpr static auto ExcludeDeadCells = entt::exclude_t<GraveyardTag> {};
-    world.view<CellBrain, DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>, Components...>(ExcludeDeadCells)
+    world.view<CellBrain, DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>, Components...>(ExcludeGraveyardedCells)
         .each([this]<typename... T0>(const CellId& id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, T0&&... components) noexcept {
             DoProcessComponents(id, brain, deferredExecution, std::forward<T0>(components)...);
         });

@@ -5,6 +5,7 @@
 
 #include "simulation/simulation_system.h"
 #include "simulation_component_type.h"
+#include "systems_ecs/graveyarded_cell_exclude.h"
 
 template <typename Derived, SimulationComponentType... Components>
 class SimulationEcsSystem : public SimulationSystem {
@@ -16,7 +17,7 @@ public:
 
     void DoSystemUpdate() final
     {
-        _ecsWorld->view<Components...>().each([this]<typename... T0>(const CellId& id, T0&&... components) noexcept {
+        _ecsWorld->view<Components...>(ExcludeGraveyardedCells).each([this]<typename... T0>(const CellId& id, T0&&... components) noexcept {
             static_cast<Derived&>(*this).DoProcessComponents(id, std::forward<T0>(components)...);
         });
     }
