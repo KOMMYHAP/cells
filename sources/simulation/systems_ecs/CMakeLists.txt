@@ -10,8 +10,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         simulation_component_type.h
         brain_simulation_system.h
         brain_simulation_system.cpp
-        look_system.h
-        look_system.cpp
         energy_system.h
         energy_system.cpp
         reproduction_system.h

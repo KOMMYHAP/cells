@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "direction.h"
 
-struct LookDirection {
-    Direction value;
-};
+// remove me
+//
+// struct LookDirection {
+//     Direction value;
+// };

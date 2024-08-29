@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "simulation_ecs_procedure.h"
 #include "simulation/simulation_virtual_machine.h"
+#include "simulation_ecs_procedure.h"
 
 namespace Details {
 
@@ -39,7 +39,9 @@ void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoProcessComponents(Cel
     if (status == ExecutionStatus::Success) {
         CastToImpl().AccessVirtualMachine().CompletePendingProcedure(id, brain, context);
     } else if (status == ExecutionStatus::Error) {
-        context.AbortProcedure();
+        if (!context.IsFailed()) {
+            context.AbortProcedure();
+        }
     }
     CastToImpl().AccessEcsWorld().template remove<DeferredProcedureExecution>(id);
 }

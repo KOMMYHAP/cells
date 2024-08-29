@@ -30,6 +30,10 @@ private:
     sf::Time GetTickTime() const;
     void Tick();
 
+    template <class T, class... Args>
+        requires std::is_base_of_v<ProcedureBase, T> && std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
+    void RegisterProcedure(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&...);
+
     EcsWorld _ecsWorld;
     common::SampleCounter<float, 20> _tickSampler;
     SimulationTickCalculator _tickCalculator;
@@ -40,5 +44,4 @@ private:
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
     RandomCellFactory _randomCellFactory;
-    ;
 };
