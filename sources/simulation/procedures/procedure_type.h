@@ -1,5 +1,6 @@
 #pragma once
 
+// todo: remove constants, move to runtime
 enum class ProcedureType : uint8_t {
     Move,
     Look,
