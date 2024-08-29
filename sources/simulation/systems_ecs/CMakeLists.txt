@@ -9,4 +9,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         graveyard_system.h
         age_system.cpp
         age_system.h
+        cell_statistics_system.h
+        cell_statistics_system.cpp
 )

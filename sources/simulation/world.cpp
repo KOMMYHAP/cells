@@ -1,16 +1,23 @@
 #include "world.h"
 
 #include "SFML/Graphics/Shader.hpp"
+
 #include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
+
+#include "components/spawn_place_tag.h"
+
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
 #include "procedures/random_cell_spawn_procedure_system.h"
-#include "systems_ecs/age_system.h"
 
+#include "systems_ecs/age_system.h"
 #include "systems_ecs/brain_simulation_system.h"
+#include "systems_ecs/cell_statistics_system.h"
 #include "systems_ecs/energy_system.h"
 #include "systems_ecs/graveyard_system.h"
+
+#include "simulation/simulation_statistics_provider.h"
 
 World::World()
     : _worldSize(100, 100)
@@ -30,6 +37,16 @@ World::World()
     RegisterSystem<EnergySystem>(_ecsWorld);
     RegisterSystem<GraveyardSystem>(_ecsWorld, _cellsLocator);
     RegisterSystem<AgeSystem>(_ecsWorld);
+    auto& aliveCellsStatisticsSystem = RegisterSystem<AliveCellsStatisticsSystem>(_ecsWorld);
+
+    for (uint32_t y = 0; y < _cellsLocator.GetHeight(); ++y) {
+        for (uint32_t x = 0; x < _cellsLocator.GetWidth(); ++x) {
+            const CellPosition position { NarrowCast<int16_t>(x), NarrowCast<int16_t>(y) };
+            const CellId id = _ecsWorld.create();
+            _ecsWorld.emplace<SpawnPlaceTag>(id);
+            _ecsWorld.emplace<CellPosition>(id, position);
+        }
+    }
 
     auto factory = [this](CellBrain& brain) {
         return _randomCellFactory.Make(brain);
@@ -40,6 +57,8 @@ World::World()
         _spawner.TrySpawn(position, factory);
     }
     _tickCalculator.Setup(targetSimulationTime);
+
+    _statistics = std::make_unique<SimulationStatisticsProvider>(_cellsLocator, aliveCellsStatisticsSystem);
 }
 
 void World::Update(const sf::Time elapsedTime)
@@ -76,17 +95,19 @@ void World::Tick()
 
 template <class T, class... Args>
     requires std::is_base_of_v<ProcedureBase, T> && std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-void World::RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
+T& World::RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
 {
     auto procedure = std::make_unique<T>(std::forward<Args>(args)...);
     T* weakProcedure = procedure.get();
     _simulationVm.RegisterProcedure(type, weakProcedure, inputCount, outputCount, std::move(name));
     _simulationSystems.emplace_back(std::move(procedure));
+    return *weakProcedure;
 }
 
 template <class T, class... Args>
     requires std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-void World::RegisterSystem(Args&&... args)
+T& World::RegisterSystem(Args&&... args)
 {
-    _simulationSystems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+    auto& procedure = _simulationSystems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+    return *procedure;
 }

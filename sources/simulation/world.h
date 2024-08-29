@@ -12,6 +12,8 @@
 #include "simulation/spawner.h"
 #include "tick_calculator.h"
 
+class SimulationStatisticsProvider;
+
 class World {
 public:
     World();
@@ -22,9 +24,7 @@ public:
     EcsWorld& ModifyEcsWorld() { return _ecsWorld; }
 
     sf::Vector2u GetWorldSize() const { return _worldSize; }
-
-    size_t GetCellsCount() const { return _cellsLocator.GetCellsCount(); }
-    size_t GetCellsCapacity() const { return _cellsLocator.GetCellsCapacity(); }
+    const SimulationStatisticsProvider& GetSimulationStatistics() const { return *_statistics; }
 
 private:
     void Warmup();
@@ -33,11 +33,11 @@ private:
 
     template <class T, class... Args>
         requires std::is_base_of_v<ProcedureBase, T> && std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-    void RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args);
+    T& RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args);
 
     template <class T, class... Args>
         requires std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-    void RegisterSystem(Args&&... args);
+    T& RegisterSystem(Args&&... args);
 
     EcsWorld _ecsWorld;
     common::SampleCounter<float, 20> _tickSampler;
@@ -49,4 +49,5 @@ private:
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
     RandomCellFactory _randomCellFactory;
+    std::unique_ptr<SimulationStatisticsProvider> _statistics;
 };

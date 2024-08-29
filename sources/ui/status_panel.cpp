@@ -1,4 +1,5 @@
 #include "status_panel.h"
+#include "simulation/simulation_statistics_provider.h"
 #include "world.h"
 
 constexpr uint16_t StatusMessageBufferLimit = 200;
@@ -39,9 +40,9 @@ void StatusPanel::Update(sf::Time elapsedTime)
     const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
     const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
-    const size_t cellsCount = _world.GetCellsCount();
-    const size_t cellsCapacity = _world.GetCellsCapacity();
-    const float cellsCountPercent = static_cast<uint8_t>(static_cast<float>(cellsCount) / (cellsCapacity) * 100.0f);
+    const SimulationStatisticsProvider& statistics = _world.GetSimulationStatistics();
+    const size_t cellsCount = statistics.GetCellsCount();
+    const float cellsCountPercent = static_cast<uint8_t>(static_cast<float>(cellsCount) / (statistics.GetCellsCapacity()) * 100.0f);
 
     _buffer.clear();
     std::format_to_n(std::back_inserter(_buffer), _buffer.capacity(),

@@ -12,24 +12,22 @@ void CellLocator::Set(CellPosition position, CellId id)
     const uint32_t index = ToGridIndex(position);
     ASSERT(_grid[index] == CellId::Invalid, "Specified position contains another cell!");
     _grid[index] = id;
-    _activeCellsCount += 1;
 }
 
 void CellLocator::Replace(const CellPosition oldPosition, const CellPosition newPosition)
 {
     const uint32_t index = ToGridIndex(oldPosition);
     const uint32_t newIndex = ToGridIndex(newPosition);
+    ASSERT(_grid[index] != CellId::Invalid, "There is no cell on old position!");
     ASSERT(_grid[newIndex] == CellId::Invalid, "Two cells placed on the same position!");
     _grid[newIndex] = std::exchange(_grid[index], CellId::Invalid);
 }
 
-void CellLocator::Reset(const CellPosition position)
+void CellLocator::Reset(const CellPosition position, CellId id)
 {
     const uint32_t index = ToGridIndex(position);
     ASSERT(_grid[index] != CellId::Invalid, "Specified position contains noone!");
-    _grid[index] = CellId::Invalid;
-    ASSERT(_activeCellsCount > 0, "There are no active cells already!");
-    _activeCellsCount -= 1;
+    _grid[index] = id;
 }
 
 CellId CellLocator::Find(CellPosition position) const

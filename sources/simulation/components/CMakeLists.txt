@@ -3,6 +3,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_id.h
         cell_position.h
         cell_type.h
+        cell_unit_tag.h
         cell_age.h
         cell_health.h
         cell_position.cpp
@@ -12,4 +13,5 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_energy.h
         cell_energy_change.h
         graveyard_tag.h
+        spawn_place_tag.h
 )
