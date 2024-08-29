@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "cell_locator.h"
 #include "components/cell_brain.h"
+#include "components/direction.h"
 
 template <class Func>
 concept CellFactory = std::is_invocable_r_v<bool, Func, CellBrain&>;

@@ -1,5 +1,7 @@
 #include "random_cell_spawn_procedure_system.h"
 
+#include "components/cell_energy_change.h"
+#include "components/direction.h"
 #include "procedures/procedure_context.h"
 
 #include "simulation/cell_locator.h"
@@ -23,6 +25,9 @@ RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::
         return ExecutionStatus::Error;
     }
     _spawner->TrySpawn(position, direction, [this](CellBrain& childBrain) { return _factory->Make(childBrain); });
+    _world->patch<CellEnergyChange>(id, [](CellEnergyChange& change) {
+        change.value -= 50;
+    });
     return ExecutionStatus::Success;
 }
 

@@ -9,6 +9,7 @@
 
 #include "systems_ecs/brain_simulation_system.h"
 #include "systems_ecs/energy_system.h"
+#include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/spawn_system.h"
 
 World::World()
@@ -27,6 +28,7 @@ World::World()
 
     RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
     RegisterSystem<EnergySystem>(_ecsWorld);
+    RegisterSystem<GraveyardSystem>(_ecsWorld);
 
     auto factory = [this](CellBrain& brain) {
         return _randomCellFactory.Make(brain);
