@@ -12,7 +12,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         direction.h
         direction.cpp
         deferred_procedure_execution.h
-        reproduction_direction.h
         cell_energy.h
         cell_energy_change.h
         cell_energy_empty.h

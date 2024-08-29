@@ -1,8 +1,6 @@
 target_sources(${PROJECT_NAME} PRIVATE
         spawn_system.cpp
         spawn_system.h
-        movement_system.cpp
-        movement_system.h
         render_system.cpp
         render_system.h
         simulation_ecs_config.h
@@ -12,8 +10,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         brain_simulation_system.cpp
         energy_system.h
         energy_system.cpp
-        reproduction_system.h
-        reproduction_system.cpp
         simulation_ecs_procedure.h
         simulation_ecs_procedure.hpp
 )
