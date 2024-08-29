@@ -6,6 +6,7 @@
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
 #include "procedures/random_cell_spawn_procedure_system.h"
+#include "systems_ecs/age_system.h"
 
 #include "systems_ecs/brain_simulation_system.h"
 #include "systems_ecs/energy_system.h"
@@ -29,6 +30,7 @@ World::World()
     RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
     RegisterSystem<EnergySystem>(_ecsWorld);
     RegisterSystem<GraveyardSystem>(_ecsWorld);
+    RegisterSystem<AgeSystem>(_ecsWorld);
 
     auto factory = [this](CellBrain& brain) {
         return _randomCellFactory.Make(brain);
