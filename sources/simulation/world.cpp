@@ -11,7 +11,6 @@
 #include "systems_ecs/brain_simulation_system.h"
 #include "systems_ecs/energy_system.h"
 #include "systems_ecs/graveyard_system.h"
-#include "systems_ecs/spawn_system.h"
 
 World::World()
     : _worldSize(100, 100)
