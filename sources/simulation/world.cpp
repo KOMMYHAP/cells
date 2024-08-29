@@ -61,6 +61,8 @@ World::World()
     _statistics = std::make_unique<SimulationStatisticsProvider>(_cellsLocator, aliveCellsStatisticsSystem);
 }
 
+World::~World() = default;
+
 void World::Update(const sf::Time elapsedTime)
 {
     Warmup();
@@ -108,6 +110,6 @@ template <class T, class... Args>
     requires std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
 T& World::RegisterSystem(Args&&... args)
 {
-    auto& procedure = _simulationSystems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
-    return *procedure;
+    auto& procedure = _simulationSystems.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+    return static_cast<T&>(*procedure);
 }

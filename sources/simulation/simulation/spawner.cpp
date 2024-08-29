@@ -23,7 +23,6 @@ void Spawner::Spawn(const CellBrain& brain, CellPosition position)
     _world->emplace<CellBrain>(id, brain);
     _world->emplace<CellPosition>(id, position);
     _world->emplace<CellType>(id, CellType::Unit);
-    _world->emplace<CellUnitTag>(id);
     _world->emplace<CellEnergy>(id, CellEnergy { 100 });
     _world->emplace<CellEnergyChange>(id, CellEnergyChange { 0 });
     _world->emplace<CellAge>(id, CellAge { 0 });

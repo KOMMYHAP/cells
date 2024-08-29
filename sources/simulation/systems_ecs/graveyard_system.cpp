@@ -8,11 +8,13 @@ GraveyardSystem::GraveyardSystem(EcsWorld& world, CellLocator& locator)
     , _locator(&locator)
 {
 }
+
 void GraveyardSystem::DoSystemUpdate()
 {
     const auto graveyardedCells = _world->view<GraveyardTag, const CellPosition>();
-    graveyardedCells.each([this](CellPosition position) {
-        _locator->Reset(position);
+    graveyardedCells.each([this](const CellId id, const CellPosition position) {
+        _locator->Reset(position, id);
     });
+
     _world->destroy(graveyardedCells.begin(), graveyardedCells.end());
 }

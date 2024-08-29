@@ -17,6 +17,7 @@ class SimulationStatisticsProvider;
 class World {
 public:
     World();
+    ~World();
 
     void Update(sf::Time elapsedTime);
 
