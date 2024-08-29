@@ -10,7 +10,7 @@ SimulationCellDebugger::SimulationCellDebugger(EcsWorld& world)
 
 bool SimulationCellDebugger::ShouldAttachDebugger(const ProcessorContext& context) const
 {
-    return true;
+    return false;
 }
 
 void SimulationCellDebugger::AttachDebugger(ProcessorContext& context)
@@ -19,12 +19,6 @@ void SimulationCellDebugger::AttachDebugger(ProcessorContext& context)
 
 void SimulationCellDebugger::DetachDebugger(ProcessorContext& context)
 {
-    if (context.IsState(ProcessorState::Good) || context.IsState(ProcessorState::PendingProcedure)) {
-        return;
-    }
-
-    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
-    _world->destroy(id);
 }
 
 void SimulationCellDebugger::ProcedureWillStarted(ProcessorContext& processorContext, ProcedureContext& procedureContext)

@@ -5,12 +5,10 @@
 #include "random/random.h"
 #include "sample_counter.h"
 
+#include "cell_factories/random_cell_factory.h"
 #include "simulation/cell_locator.h"
 #include "simulation/simulation_system.h"
 #include "simulation/simulation_virtual_machine.h"
-
-#include "cell_factories/cell_factory_interface.h"
-#include "cell_factories/random_cell_factory.h"
 #include "simulation/spawner.h"
 #include "tick_calculator.h"
 
@@ -24,6 +22,9 @@ public:
     EcsWorld& ModifyEcsWorld() { return _ecsWorld; }
 
     sf::Vector2u GetWorldSize() const { return _worldSize; }
+
+    size_t GetCellsCount() const { return _cellsLocator.GetCellsCount(); }
+    size_t GetCellsCapacity() const { return _cellsLocator.GetCellsCapacity(); }
 
 private:
     void Warmup();

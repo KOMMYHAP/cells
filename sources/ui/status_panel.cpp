@@ -39,16 +39,9 @@ void StatusPanel::Update(sf::Time elapsedTime)
     const auto [frameTimeValue, frameUnit] = GetTimeInfo(frameTime);
     const auto fps = static_cast<uint16_t>(1.0f / frameTime.asSeconds());
 
-    // todo:
-    // convert to native component?
-    // extract debug system to lua?
-    //
-    //    auto& idSystem = _world.GetSystems().Get(_idSystem);
-    //    const uint32_t cellsCount = idSystem.GetCellsCount();
-    //    const float cellsCountPercent = static_cast<uint8_t>(static_cast<float>(idSystem.GetCellsCount()) / (idSystem.GetCellsCountLimit()) * 100.0f);
-    //
-    constexpr uint32_t cellsCount = 0;
-    constexpr float cellsCountPercent = 0.0f;
+    const size_t cellsCount = _world.GetCellsCount();
+    const size_t cellsCapacity = _world.GetCellsCapacity();
+    const float cellsCountPercent = static_cast<uint8_t>(static_cast<float>(cellsCount) / (cellsCapacity) * 100.0f);
 
     _buffer.clear();
     std::format_to_n(std::back_inserter(_buffer), _buffer.capacity(),

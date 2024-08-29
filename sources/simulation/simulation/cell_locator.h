@@ -22,11 +22,14 @@ public:
     bool IsValidPosition(CellPosition position) const;
     CellPosition TryApplyDirection(CellPosition position, Direction direction) const;
 
+    size_t GetCellsCount() const { return _activeCellsCount; }
+    size_t GetCellsCapacity() const { return _width * _height; }
+
 private:
     uint32_t ToGridIndex(CellPosition position) const;
 
     uint32_t _width { 0 };
     uint32_t _height { 0 };
-
+    size_t _activeCellsCount { 0 };
     std::vector<CellId> _grid;
 };
