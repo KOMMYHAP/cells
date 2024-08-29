@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "cell_locator.h"
-#include "systems_ecs/cell_statistics_system.h"
+#include "systems_ecs/alive_cells_statistics_system.h"
 
 class SimulationStatisticsProvider {
 public:

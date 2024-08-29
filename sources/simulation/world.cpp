@@ -12,8 +12,8 @@
 #include "procedures/random_cell_spawn_procedure_system.h"
 
 #include "systems_ecs/age_system.h"
+#include "systems_ecs/alive_cells_statistics_system.h"
 #include "systems_ecs/brain_simulation_system.h"
-#include "systems_ecs/cell_statistics_system.h"
 #include "systems_ecs/energy_system.h"
 #include "systems_ecs/graveyard_system.h"
 
