@@ -1,6 +1,6 @@
 #pragma once
 
-#include "systems_ecs/simulation_ecs_system.h"
+#include "simulation/simulation_ecs_system.h"
 
 #include "random/random.h"
 #include "sample_counter.h"

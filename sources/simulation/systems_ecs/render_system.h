@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics/Color.hpp>
 
-#include "simulation_ecs_system.h"
+#include "simulation/simulation_ecs_system.h"
 
 #include "components/cell_position.h"
 #include "components/cell_type.h"

@@ -3,7 +3,7 @@
 #include "cell_factories/random_cell_factory.h"
 #include "simulation/cell_locator.h"
 #include "simulation/spawner.h"
-#include "systems_ecs/simulation_ecs_procedure.h"
+#include "simulation/simulation_ecs_procedure.h"
 
 class RandomCellSpawnProcedureSystem final : public EcsProcedureProxy<RandomCellSpawnProcedureSystem, const CellPosition> {
 public:

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "simulation_ecs_system.h"
+#include "simulation/simulation_ecs_system.h"
 #include "simulation/simulation_virtual_machine.h"
 
 #include "components/cell_brain.h"

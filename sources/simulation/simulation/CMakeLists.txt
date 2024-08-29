@@ -11,4 +11,9 @@ target_sources(${PROJECT_NAME} PRIVATE
     spawner.h
     spawner.cpp
     spawner.hpp
+    simulation_ecs_config.h
+    simulation_ecs_system.h
+    simulation_component_type.h
+    simulation_ecs_procedure.h
+    simulation_ecs_procedure.hpp
 )

@@ -4,7 +4,7 @@
 #include "components/deferred_procedure_execution.h"
 #include "procedures/procedure.h"
 #include "simulation/simulation_procedure_context.h"
-#include "systems_ecs/simulation_ecs_system.h"
+#include "simulation/simulation_ecs_system.h"
 
 namespace Details {
 

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "systems_ecs/simulation_ecs_config.h"
+#include "simulation/simulation_ecs_config.h"
 
 #include "processor/processor_control_block.h"
 #include "processor/processor_debugger.h"

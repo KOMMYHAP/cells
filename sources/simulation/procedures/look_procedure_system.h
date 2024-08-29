@@ -1,7 +1,7 @@
 #pragma once
 
 #include "simulation/cell_locator.h"
-#include "systems_ecs/simulation_ecs_procedure.h"
+#include "simulation/simulation_ecs_procedure.h"
 
 class LookProcedureSystem final : public EcsProcedureProxy<LookProcedureSystem, const CellPosition> {
 public:

@@ -4,7 +4,7 @@
 enum class ProcedureType : uint8_t {
     Move,
     Look,
-    Reproduction,
+    SpawnRandomCell,
     LastProcedureType
 };
 

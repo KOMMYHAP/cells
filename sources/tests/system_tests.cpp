@@ -1,4 +1,4 @@
-#include "systems_ecs/simulation_ecs_procedure.h"
+#include "simulation/simulation_ecs_procedure.h"
 
 namespace {
 struct TestComponent {
