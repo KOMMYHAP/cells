@@ -6,13 +6,18 @@
 #include "simulation/simulation_procedure_context.h"
 #include "systems_ecs/simulation_ecs_system.h"
 
-
 namespace Details {
+
+template <class T>
+struct ProcedureImplTag { };
 
 template <class ProcedureImpl>
 class DeferredProcedureProxy : public ProcedureBase {
 public:
     void Execute(ProcedureContext& context) final;
+
+private:
+    ProcedureImpl& CastToImpl();
 };
 }
 

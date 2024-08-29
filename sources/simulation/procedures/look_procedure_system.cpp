@@ -32,7 +32,6 @@ auto LookProcedureSystem::ExecuteProcedure(CellId /*id*/, ProcedureContext& cont
     if (const CellId anotherCell = _locator->Find(lookPosition); anotherCell == CellId::Invalid) {
         context.TryPushResult(CellType::Dummy);
         return ExecutionStatus::Success;
-        ;
     }
 
     context.TryPushResult(CellType::Unit);

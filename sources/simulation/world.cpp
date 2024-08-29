@@ -6,12 +6,9 @@
 #include "components/cell_type.h"
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
-#include "procedures/reproduction_procedure.h"
-#include "simulation/simulation_procedure_context.h"
+#include "procedures/random_cell_spawn_procedure_system.h"
 
 #include "systems_ecs/brain_simulation_system.h"
-#include "systems_ecs/movement_system.h"
-#include "systems_ecs/reproduction_system.h"
 #include "systems_ecs/spawn_system.h"
 
 World::World()
@@ -26,10 +23,8 @@ World::World()
 
     RegisterProcedureSystem<LookProcedureSystem>(ProcedureType::Look, 1, 1, "Look", _ecsWorld, _simulationVm, _cellsLocator);
     RegisterProcedureSystem<MoveProcedureSystem>(ProcedureType::Move, 1, 0, "Move", _ecsWorld, _simulationVm, _cellsLocator);
+    RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(ProcedureType::Reproduction, 1, 0, "SpawnRandomCell", _ecsWorld, _simulationVm, _cellsLocator, _spawner, _randomCellFactory);
 
-    _simulationVm.RegisterProcedure<ReproductionProcedure>(ProcedureType::Reproduction, 1, 0, "reproduction", _ecsWorld);
-
-    _simulationSystems.emplace_back(std::make_unique<ReproductionSystem>(_ecsWorld, _simulationVm, _cellsLocator, _randomCellFactory, _spawner));
     _simulationSystems.emplace_back(std::make_unique<BrainSimulationSystem>(_ecsWorld, _simulationVm));
 
     auto factory = [this](CellBrain& brain) {

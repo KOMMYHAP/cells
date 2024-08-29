@@ -1,67 +1,29 @@
-#include "reproduction_procedure.h"
+#include "random_cell_spawn_procedure_system.h"
 
-#include "components/deferred_procedure_execution.h"
-#include "components/reproduction_direction.h"
 #include "procedures/procedure_context.h"
 
 #include "simulation/cell_locator.h"
-#include "simulation/simulation_procedure_context.h"
-#include "simulation/simulation_virtual_machine.h"
 
-ReproductionProcedure::ReproductionProcedure(EcsWorld& world)
+RandomCellSpawnProcedureSystem::RandomCellSpawnProcedureSystem(EcsWorld& world, SimulationVirtualMachine& vm, const CellLocator& locator, Spawner& spawner, RandomCellFactory& factory)
     : _world(&world)
+    , _vm(&vm)
+    , _locator(&locator)
+    , _spawner(&spawner)
+    , _factory(&factory)
 {
 }
-
-void ReproductionProcedure::Execute(ProcedureContext& context)
+RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position)
 {
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
-        return;
+        return ExecutionStatus::Error;
     }
     Direction direction;
     if (!TryParseDirection(rawDirection, direction)) {
-        context.AbortProcedure();
-        return;
+        return ExecutionStatus::Error;
     }
-    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
-    _world->emplace<ReproductionDirection>(id, direction);
-    _world->emplace<DeferredProcedureExecution>(id, context);
-
-    // constexpr CellHealth healthPerAction { 50 };
-    // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
-    //     return;
-    // }
-    //
-    // const CellPosition position = _positionSystem.Get(id);
-    // const CellPosition secondParentPosition = _positionSystem.TryApplyDirection(position, direction);
-    // if (secondParentPosition == InvalidCellPosition) {
-    //     return;
-    // }
-    //
-    // const CellId secondParentId = _positionSystem.Find(secondParentPosition);
-    // if (secondParentId == CellId::Invalid) {
-    //     return;
-    // }
-    // const CellType secondParentType = _typeSystem.Get(secondParentId);
-    // if (secondParentType != CellType::Unit) {
-    //     // Hmm... Does cell try to reproduce with ... food?
-    //     return;
-    // }
-    //
-    // const CellPosition childPosition = SelectPosition(position, secondParentPosition);
-    // if (childPosition == InvalidCellPosition) {
-    //     return;
-    // }
-    //
-    // constexpr CellHealth childInitialHealth { 35 };
-    //
-    // SpawnProperties properties;
-    // properties.position = childPosition;
-    // properties.health = childInitialHealth;
-    // properties.type = CellType::Unit;
-    // properties.brain = MakeChildBrain(id, secondParentId);
-    // _spawner.TrySpawn(properties);
+    _spawner->TrySpawn(position, direction, [this](CellBrain& childBrain) { return _factory->Make(childBrain); });
+    return ExecutionStatus::Success;
 }
 
 // CellPosition ReproductionProcedure::SelectPosition(CellPosition lhs, CellPosition rhs) const

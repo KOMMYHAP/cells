@@ -6,7 +6,7 @@
 #include "simulation/simulation_virtual_machine.h"
 
 #include "components/deferred_procedure_execution.h"
-#include "components/reproduction_direction.h"
+#include "components/random_cell_spawn_tag.h"
 #include "simulation/spawner.h"
 
 class ReproductionSystem final : public SimulationEcsSystem<ReproductionSystem, const CellPosition, const ReproductionDirection, CellBrain, DeferredProcedureExecution> {

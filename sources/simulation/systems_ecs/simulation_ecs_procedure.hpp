@@ -9,9 +9,21 @@ template <class ProcedureImpl>
 void DeferredProcedureProxy<ProcedureImpl>::Execute(ProcedureContext& context)
 {
     const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
-    EcsWorld& world = static_cast<ProcedureImpl&>(*this).AccessEcsWorld();
+    ProcedureImpl& impl = CastToImpl();
+    EcsWorld& world = impl.AccessEcsWorld();
+    world.emplace<ProcedureImplTag<ProcedureImpl>>(id);
     world.emplace<DeferredProcedureExecution>(id, context);
 }
+
+template <class ProcedureImpl>
+ProcedureImpl& DeferredProcedureProxy<ProcedureImpl>::CastToImpl()
+{
+    static_assert(
+        std::is_invocable_r_v<EcsWorld&, decltype(&ProcedureImpl::AccessEcsWorld), ProcedureImpl>,
+        "ProcedureImpl must have method EcsWorld& AccessEcsWorld();");
+    return static_cast<ProcedureImpl&>(*this);
+}
+
 }
 
 template <class EcsProcedureImpl, SimulationComponentType... Components>
@@ -43,7 +55,7 @@ void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoProcessComponents(Cel
             context.AbortProcedure();
         }
     }
-    CastToImpl().AccessEcsWorld().template remove<DeferredProcedureExecution>(id);
+    CastToImpl().AccessEcsWorld().template remove<DeferredProcedureExecution, Details::ProcedureImplTag<EcsProcedureImpl>>(id);
 }
 
 template <class EcsProcedureImpl, SimulationComponentType... Components>
