@@ -18,6 +18,6 @@ void EnergySystem::DoProcessComponents(const CellId id, CellEnergy& energy, cons
 
     if (energy.value == 0) {
         EcsWorld& world = AccessEcsWorld();
-        world.emplace<GraveyardTag>(id);
+        world.emplace_or_replace<GraveyardTag>(id);
     }
 }
