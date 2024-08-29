@@ -28,7 +28,7 @@ World::World()
 
     RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
     RegisterSystem<EnergySystem>(_ecsWorld);
-    RegisterSystem<GraveyardSystem>(_ecsWorld);
+    RegisterSystem<GraveyardSystem>(_ecsWorld, _cellsLocator);
     RegisterSystem<AgeSystem>(_ecsWorld);
 
     auto factory = [this](CellBrain& brain) {
