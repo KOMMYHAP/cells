@@ -11,7 +11,7 @@ void DeferredProcedureProxy<ProcedureImpl>::Execute(ProcedureContext& context)
     const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
     ProcedureImpl& impl = CastToImpl();
     EcsWorld& world = impl.AccessEcsWorld();
-    world.emplace<ProcedureImplTag<ProcedureImpl>>(id);
+    world.emplace<ProcedureTag<ProcedureImpl>>(id);
     world.emplace<DeferredProcedureExecution>(id, context);
 }
 
@@ -28,10 +28,10 @@ ProcedureImpl& DeferredProcedureProxy<ProcedureImpl>::CastToImpl()
 
 template <class EcsProcedureImpl, SimulationComponentType... Components>
 void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoSystemUpdate()
-{
+{  
     CastToImpl()
         .AccessEcsWorld()
-        .template view<CellBrain, DeferredProcedureExecution, Components...>()
+        .template view<CellBrain, DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>, Components...>()
         .each([this]<typename... T0>(const CellId& id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, T0&&... components) noexcept {
             DoProcessComponents(id, brain, deferredExecution, std::forward<T0>(components)...);
         });
@@ -55,7 +55,7 @@ void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoProcessComponents(Cel
             context.AbortProcedure();
         }
     }
-    CastToImpl().AccessEcsWorld().template remove<DeferredProcedureExecution, Details::ProcedureImplTag<EcsProcedureImpl>>(id);
+    CastToImpl().AccessEcsWorld().template remove<DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>>(id);
 }
 
 template <class EcsProcedureImpl, SimulationComponentType... Components>

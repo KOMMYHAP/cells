@@ -9,7 +9,9 @@
 namespace Details {
 
 template <class T>
-struct ProcedureImplTag { };
+struct ProcedureTag {
+    using ProcedureType = T;
+};
 
 template <class ProcedureImpl>
 class DeferredProcedureProxy : public ProcedureBase {
@@ -37,4 +39,5 @@ private:
 
     EcsProcedureImpl& CastToImpl();
 };
+
 #include "simulation_ecs_procedure.hpp"
