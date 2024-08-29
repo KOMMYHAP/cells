@@ -1,6 +1,4 @@
 target_sources(${PROJECT_NAME} PRIVATE
-        spawn_system.cpp
-        spawn_system.h
         render_system.cpp
         render_system.h
         brain_simulation_system.h
