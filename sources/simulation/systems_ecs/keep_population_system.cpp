@@ -7,14 +7,16 @@ KeepPopulationSystem::KeepPopulationSystem(Config config)
 
 void KeepPopulationSystem::DoSystemUpdate()
 {
-    static constexpr size_t TargetCellsCount = { 100 };
+    static constexpr size_t TargetCellsCount = { 1'000 };
+    static constexpr size_t SpawnPlacesBatchLimit = { 100 };
+
     const size_t expectedCellsCount = _config.stats->GetCellsCount() + _config.stats->GetSpawnPlacesCount();
     if (expectedCellsCount >= TargetCellsCount) {
         return;
     }
 
-    const size_t spawnPlaceToCreate = TargetCellsCount - expectedCellsCount;
-    std::array<CellPosition, TargetCellsCount> spawnPlacesBuffer;
+    const size_t spawnPlaceToCreate = std::min(TargetCellsCount - expectedCellsCount, SpawnPlacesBatchLimit);
+    std::array<CellPosition, SpawnPlacesBatchLimit> spawnPlacesBuffer;
 
     Random::Accessor random { *_config.random };
     const uint32_t width = _config.locator->GetWidth();
