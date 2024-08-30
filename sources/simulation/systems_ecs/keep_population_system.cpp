@@ -1,20 +1,20 @@
 #include "keep_population_system.h"
 
-KeepPopulationSystem::KeepPopulationSystem(const Config& config)
-    : _config(config)
+KeepPopulationSystem::KeepPopulationSystem(Config config)
+    : _config(std::move(config))
 {
 }
 
 void KeepPopulationSystem::DoSystemUpdate()
 {
-    static constexpr size_t TargetCellsCount = { 10 };
+    static constexpr size_t TargetCellsCount = { 100 };
     const size_t expectedCellsCount = _config.stats->GetCellsCount() + _config.stats->GetSpawnPlacesCount();
     if (expectedCellsCount >= TargetCellsCount) {
         return;
     }
 
     const size_t spawnPlaceToCreate = TargetCellsCount - expectedCellsCount;
-    std::array<CellPosition, TargetCellsCount> spawnPlaces;
+    std::array<CellPosition, TargetCellsCount> spawnPlacesBuffer;
 
     Random::Accessor random { *_config.random };
     const uint32_t width = _config.locator->GetWidth();
@@ -24,11 +24,13 @@ void KeepPopulationSystem::DoSystemUpdate()
         const uint32_t cellsIndex = random.GetValue(0, NarrowCast<uint32_t>(_config.stats->GetCellsCapacity()));
         const auto x = NarrowCast<int16_t>(cellsIndex / width);
         const auto y = NarrowCast<int16_t>(cellsIndex % height);
-        spawnPlaces[i] = CellPosition { x, y };
+        spawnPlacesBuffer[i] = CellPosition { x, y };
     }
 
+    auto spawnPlaces = spawnPlacesBuffer | std::views::take(spawnPlaceToCreate);
     std::ranges::sort(spawnPlaces);
-    const auto uniqueSpawnPlaces = std::ranges::unique(spawnPlaces);
+    const auto duplicates = std::ranges::unique(spawnPlaces);
+    const auto uniqueSpawnPlaces = spawnPlaces | std::views::take(spawnPlaces.size() - duplicates.size());
     std::ranges::for_each(uniqueSpawnPlaces, [this](CellPosition position) {
         Spawn(position);
     });

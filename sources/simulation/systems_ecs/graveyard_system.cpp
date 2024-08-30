@@ -13,7 +13,7 @@ void GraveyardSystem::DoSystemUpdate()
 {
     const auto graveyardedCells = _world->view<GraveyardTag, const CellPosition>();
     graveyardedCells.each([this](const CellId id, const CellPosition position) {
-        _locator->Reset(position, id);
+        _locator->Reset(position);
     });
 
     _world->destroy(graveyardedCells.begin(), graveyardedCells.end());

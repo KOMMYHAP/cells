@@ -15,7 +15,7 @@ public:
         gsl::not_null<SimulationStatisticsProvider*> stats;
         gsl::not_null<Random::Engine*> random;
     };
-    explicit KeepPopulationSystem(const Config& config);
+    explicit KeepPopulationSystem(Config config);
 
     void DoSystemUpdate() override;
 

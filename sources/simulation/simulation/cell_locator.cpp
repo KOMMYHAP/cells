@@ -23,11 +23,11 @@ void CellLocator::Replace(const CellPosition oldPosition, const CellPosition new
     _grid[newIndex] = std::exchange(_grid[index], CellId::Invalid);
 }
 
-void CellLocator::Reset(const CellPosition position, CellId id)
+void CellLocator::Reset(const CellPosition position)
 {
     const uint32_t index = ToGridIndex(position);
     ASSERT(_grid[index] != CellId::Invalid, "Specified position contains noone!");
-    _grid[index] = id;
+    _grid[index] = CellId::Invalid;
 }
 
 CellId CellLocator::Find(CellPosition position) const

@@ -10,7 +10,7 @@ public:
 
     void Set(CellPosition position, CellId id);
     void Replace(CellPosition oldPosition, CellPosition newPosition);
-    void Reset(CellPosition position, CellId id);
+    void Reset(CellPosition position);
 
     CellId Find(CellPosition position) const;
 

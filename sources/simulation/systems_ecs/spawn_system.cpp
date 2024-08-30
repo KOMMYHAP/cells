@@ -4,6 +4,7 @@
 #include "components/cell_energy.h"
 #include "components/cell_energy_change.h"
 #include "components/cell_type.h"
+#include "components/cell_unit_tag.h"
 
 SpawnSystem::SpawnSystem(EcsWorld& world, CellLocator& locator)
     : SimulationEcsSystem(world)
@@ -21,6 +22,7 @@ void SpawnSystem::DoProcessComponents(CellId id, CellPosition position)
     }
     world.remove<SpawnPlaceTag>(id);
     world.emplace<CellType>(id, CellType::Unit);
+    world.emplace<CellUnitTag>(id);
     world.emplace<CellEnergy>(id, CellEnergy { 100 });
     world.emplace<CellEnergyChange>(id, CellEnergyChange { 0 });
     world.emplace<CellAge>(id, CellAge { 0 });
