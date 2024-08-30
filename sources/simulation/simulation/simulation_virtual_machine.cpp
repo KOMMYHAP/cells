@@ -3,7 +3,7 @@
 #include "procedures/procedure_context.h"
 #include "simulation_procedure_context.h"
 #include "storage/storage.h"
-#include "systems/brain_system.h"
+#include "components/cell_brain.h"
 
 SimulationVirtualMachine::SimulationVirtualMachine(EcsWorld& world)
     : _debugger(world)
