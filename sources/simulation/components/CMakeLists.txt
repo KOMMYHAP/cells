@@ -14,4 +14,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_energy_change.h
         graveyard_tag.h
         spawn_place_tag.h
+        death_from_age_tag.h
+        death_from_empty_energy_tag.h
 )

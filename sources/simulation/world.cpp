@@ -15,6 +15,8 @@
 #include "systems_ecs/graveyard_system.h"
 
 #include "simulation/simulation_statistics_provider.h"
+#include "systems_ecs/death_from_age_statistics_system.h"
+#include "systems_ecs/death_from_empty_energy_statistics_system.h"
 #include "systems_ecs/keep_population_system.h"
 #include "systems_ecs/spawn_places_statistics_system.h"
 #include "systems_ecs/spawn_system.h"
@@ -26,6 +28,7 @@ World::World()
     , _simulationVm(_ecsWorld)
     , _randomEngine(Random::MakeEngine("white"))
     , _randomCellFactory(_simulationVm, _randomEngine)
+    , _statistics(_cellsLocator)
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
@@ -36,24 +39,18 @@ World::World()
     RegisterSystem<AgeSystem>(_ecsWorld);
     RegisterProcedureSystem<LookProcedureSystem>(ProcedureType::Look, 1, 1, "Look", _ecsWorld, _simulationVm, _cellsLocator);
     RegisterProcedureSystem<MoveProcedureSystem>(ProcedureType::Move, 1, 0, "Move", _ecsWorld, _simulationVm, _cellsLocator);
+    RegisterSystem<AliveCellsStatisticsSystem>(_ecsWorld, _statistics);
+    RegisterSystem<SpawnPlacesStatisticsSystem>(_ecsWorld, _statistics);
+    RegisterSystem<DeathFromAgeStatisticsSystem>(_ecsWorld, _statistics);
+    RegisterSystem<DeathFromEmptyEnergySystem>(_ecsWorld, _statistics);
     RegisterSystem<GraveyardSystem>(_ecsWorld, _cellsLocator);
-    auto& aliveCellsStatisticsSystem = RegisterSystem<AliveCellsStatisticsSystem>(_ecsWorld);
-    auto& spawnPlacesStatisticsSystem = RegisterSystem<SpawnPlacesStatisticsSystem>(_ecsWorld);
-    {
-        SimulationStatisticsProvider::Config statsConfig {
-            &_cellsLocator,
-            &aliveCellsStatisticsSystem,
-            &spawnPlacesStatisticsSystem
-        };
-        _statistics = std::make_unique<SimulationStatisticsProvider>(statsConfig);
-    }
     {
         KeepPopulationSystem::Config config {
             &_ecsWorld,
             &_cellsLocator,
             &_spawner,
             &_randomCellFactory,
-            _statistics.get(),
+            &_statistics,
             &_randomEngine
         };
         RegisterSystem<KeepPopulationSystem>(config);
@@ -68,8 +65,6 @@ World::World()
     }
     _tickCalculator.Setup(targetSimulationTime);
 }
-
-World::~World() = default;
 
 void World::Update(const sf::Time elapsedTime)
 {

@@ -17,4 +17,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         spawn_places_statistics_system.cpp
         keep_population_system.h
         keep_population_system.cpp
+        death_from_age_statistics_system.h
+        death_from_age_statistics_system.cpp
+        death_from_empty_energy_statistics_system.h
+        death_from_empty_energy_statistics_system.cpp
 )

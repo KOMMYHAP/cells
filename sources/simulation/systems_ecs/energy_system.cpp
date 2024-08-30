@@ -1,5 +1,6 @@
 ﻿#include "energy_system.h"
 
+#include "components/death_from_empty_energy_tag.h"
 #include "components/graveyard_tag.h"
 
 EnergySystem::EnergySystem(EcsWorld& ecsWorld)
@@ -19,5 +20,6 @@ void EnergySystem::DoProcessComponents(const CellId id, CellEnergy& energy, cons
     if (energy.value == 0) {
         EcsWorld& world = AccessEcsWorld();
         world.emplace_or_replace<GraveyardTag>(id);
+        world.emplace<DeathFromEmptyEnergyTag>(id);
     }
 }

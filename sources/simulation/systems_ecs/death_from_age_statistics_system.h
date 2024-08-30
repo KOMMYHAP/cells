@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "simulation/simulation_ecs_system.h"
 #include "simulation/simulation_statistics_provider.h"
 
-class SpawnPlacesStatisticsSystem final : public SimulationSystem {
+class DeathFromAgeStatisticsSystem final : public SimulationSystem {
 public:
-    explicit SpawnPlacesStatisticsSystem(EcsWorld& world, SimulationStatisticsProvider& stats);
+    explicit DeathFromAgeStatisticsSystem(EcsWorld& world, SimulationStatisticsProvider& stats);
 
     void DoSystemUpdate() override;
 

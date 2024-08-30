@@ -7,17 +7,15 @@
 
 #include "cell_factories/random_cell_factory.h"
 #include "simulation/cell_locator.h"
+#include "simulation/simulation_statistics_provider.h"
 #include "simulation/simulation_system.h"
 #include "simulation/simulation_virtual_machine.h"
 #include "simulation/spawner.h"
 #include "tick_calculator.h"
 
-class SimulationStatisticsProvider;
-
 class World {
 public:
     World();
-    ~World();
 
     void Update(sf::Time elapsedTime);
 
@@ -25,7 +23,7 @@ public:
     EcsWorld& ModifyEcsWorld() { return _ecsWorld; }
 
     sf::Vector2u GetWorldSize() const { return _worldSize; }
-    const SimulationStatisticsProvider& GetSimulationStatistics() const { return *_statistics; }
+    const SimulationStatisticsProvider& GetSimulationStatistics() const { return _statistics; }
 
 private:
     void Warmup();
@@ -50,5 +48,5 @@ private:
     SimulationVirtualMachine _simulationVm;
     Random::Engine _randomEngine;
     RandomCellFactory _randomCellFactory;
-    std::unique_ptr<SimulationStatisticsProvider> _statistics;
+    SimulationStatisticsProvider _statistics;
 };

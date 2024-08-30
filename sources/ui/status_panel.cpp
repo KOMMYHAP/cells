@@ -46,10 +46,14 @@ void StatusPanel::Update(sf::Time elapsedTime)
 
     _buffer.clear();
     std::format_to_n(std::back_inserter(_buffer), _buffer.capacity(),
-        "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%)",
+        "FPS {:4} | Frame {:4}{:2} | Cells {:8} ({:2}%) | Spawns {:3} | Death Age {:3} | Death Energy {:3}",
         fps,
         frameTimeValue, frameUnit,
-        cellsCount, cellsCountPercent);
+        cellsCount, cellsCountPercent,
+        statistics.GetSpawnPlacesCount(),
+        statistics.GetDeathFromAge(),
+        statistics.GetDeathFromEmptyEnergy());
+    
     _text.setString(sf::String(_buffer));
 }
 
