@@ -4,7 +4,6 @@ add_library(${PROJECT_NAME} STATIC)
 
 # add sub sources
 add_subdirectory(components)
-#add_subdirectory(systems)
 add_subdirectory(procedures)
 add_subdirectory(genetic)
 add_subdirectory(cell_factories)
