@@ -58,13 +58,6 @@ World::World()
         RegisterSystem<KeepPopulationSystem>(config);
     }
 
-    static constexpr int CellsCount = 100;
-    for (int i = 0; i < CellsCount; ++i) {
-        const CellPosition position { NarrowCast<int16_t>(i % _worldSize.x), NarrowCast<int16_t>(i % _worldSize.y) };
-        const EcsEntity childId = _spawner.ScheduleSpawn(position);
-        CellBrain& childBrain = _ecsWorld.emplace<CellBrain>(childId);
-        _randomCellFactory.Make(childBrain);
-    }
     _tickCalculator.Setup(targetSimulationTime);
 }
 
