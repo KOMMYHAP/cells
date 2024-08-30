@@ -2,10 +2,7 @@
 
 #include "SFML/Graphics/Shader.hpp"
 
-#include "cell_factories/patrol_cell_factory.h"
 #include "cell_factories/random_cell_factory.h"
-
-#include "components/spawn_place_tag.h"
 
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
@@ -18,47 +15,58 @@
 #include "systems_ecs/graveyard_system.h"
 
 #include "simulation/simulation_statistics_provider.h"
+#include "systems_ecs/keep_population_system.h"
+#include "systems_ecs/spawn_places_statistics_system.h"
+#include "systems_ecs/spawn_system.h"
 
 World::World()
     : _worldSize(100, 100)
     , _cellsLocator(_worldSize.x, _worldSize.y)
-    , _spawner(_ecsWorld, _cellsLocator)
+    , _spawner(_ecsWorld)
     , _simulationVm(_ecsWorld)
     , _randomEngine(Random::MakeEngine("white"))
     , _randomCellFactory(_simulationVm, _randomEngine)
 {
     const sf::Time targetSimulationTime = sf::milliseconds(30);
 
+    RegisterSystem<SpawnSystem>(_ecsWorld, _cellsLocator);
+    RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
+    RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", _ecsWorld, _simulationVm, _cellsLocator, _spawner, _randomCellFactory);
+    RegisterSystem<EnergySystem>(_ecsWorld);
+    RegisterSystem<AgeSystem>(_ecsWorld);
     RegisterProcedureSystem<LookProcedureSystem>(ProcedureType::Look, 1, 1, "Look", _ecsWorld, _simulationVm, _cellsLocator);
     RegisterProcedureSystem<MoveProcedureSystem>(ProcedureType::Move, 1, 0, "Move", _ecsWorld, _simulationVm, _cellsLocator);
-    RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", _ecsWorld, _simulationVm, _cellsLocator, _spawner, _randomCellFactory);
-
-    RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
-    RegisterSystem<EnergySystem>(_ecsWorld);
     RegisterSystem<GraveyardSystem>(_ecsWorld, _cellsLocator);
-    RegisterSystem<AgeSystem>(_ecsWorld);
     auto& aliveCellsStatisticsSystem = RegisterSystem<AliveCellsStatisticsSystem>(_ecsWorld);
-
-    for (uint32_t y = 0; y < _cellsLocator.GetHeight(); ++y) {
-        for (uint32_t x = 0; x < _cellsLocator.GetWidth(); ++x) {
-            const CellPosition position { NarrowCast<int16_t>(x), NarrowCast<int16_t>(y) };
-            const CellId id = _ecsWorld.create();
-            _ecsWorld.emplace<SpawnPlaceTag>(id);
-            _ecsWorld.emplace<CellPosition>(id, position);
-        }
+    auto& spawnPlacesStatisticsSystem = RegisterSystem<SpawnPlacesStatisticsSystem>(_ecsWorld);
+    {
+        SimulationStatisticsProvider::Config statsConfig {
+            &_cellsLocator,
+            &aliveCellsStatisticsSystem,
+            &spawnPlacesStatisticsSystem
+        };
+        _statistics = std::make_unique<SimulationStatisticsProvider>(statsConfig);
+    }
+    {
+        KeepPopulationSystem::Config config {
+            &_ecsWorld,
+            &_cellsLocator,
+            &_spawner,
+            &_randomCellFactory,
+            _statistics.get(),
+            &_randomEngine
+        };
+        RegisterSystem<KeepPopulationSystem>(config);
     }
 
-    auto factory = [this](CellBrain& brain) {
-        return _randomCellFactory.Make(brain);
-    };
     static constexpr int CellsCount = 100;
     for (int i = 0; i < CellsCount; ++i) {
         const CellPosition position { NarrowCast<int16_t>(i % _worldSize.x), NarrowCast<int16_t>(i % _worldSize.y) };
-        _spawner.TrySpawn(position, factory);
+        const CellId childId = _spawner.ScheduleSpawn(position);
+        CellBrain& childBrain = _ecsWorld.emplace<CellBrain>(childId);
+        _randomCellFactory.Make(childBrain);
     }
     _tickCalculator.Setup(targetSimulationTime);
-
-    _statistics = std::make_unique<SimulationStatisticsProvider>(_cellsLocator, aliveCellsStatisticsSystem);
 }
 
 World::~World() = default;

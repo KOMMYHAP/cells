@@ -24,7 +24,11 @@ RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::
     if (!TryParseDirection(rawDirection, direction)) {
         return ExecutionStatus::Error;
     }
-    _spawner->TrySpawn(position, direction, [this](CellBrain& childBrain) { return _factory->Make(childBrain); });
+
+    const CellId childId = _spawner->ScheduleSpawn(position);
+    CellBrain& childBrain = _world->emplace<CellBrain>(childId);
+    _factory->Make(childBrain);
+
     energyChange.value -= 50;
     return ExecutionStatus::Success;
 }

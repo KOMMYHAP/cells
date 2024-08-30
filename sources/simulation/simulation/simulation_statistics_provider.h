@@ -1,15 +1,22 @@
 ﻿#pragma once
-#include "cell_locator.h"
-#include "systems_ecs/alive_cells_statistics_system.h"
+
+class SpawnPlacesStatisticsSystem;
+class AliveCellsStatisticsSystem;
+class CellLocator;
 
 class SimulationStatisticsProvider {
 public:
-    SimulationStatisticsProvider(CellLocator& locator, AliveCellsStatisticsSystem& aliveCellsSystem);
+    struct Config {
+        gsl::not_null<CellLocator*> locator;
+        gsl::not_null<AliveCellsStatisticsSystem*> aliveCellsStats;
+        gsl::not_null<SpawnPlacesStatisticsSystem*> spawnPlacesStats;
+    };
+    SimulationStatisticsProvider(const Config& config);
 
-    size_t GetCellsCount() const { return _aliveCellsSystem->GetAliveCellsCount(); }
-    size_t GetCellsCapacity() const { return _cellLocator->GetHeight() * _cellLocator->GetWidth(); }
+    size_t GetCellsCount() const;
+    size_t GetSpawnPlacesCount() const;
+    size_t GetCellsCapacity() const;
 
 private:
-    gsl::not_null<AliveCellsStatisticsSystem*> _aliveCellsSystem;
-    gsl::not_null<CellLocator*> _cellLocator;
+    Config _config;
 };

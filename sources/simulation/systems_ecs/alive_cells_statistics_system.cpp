@@ -8,5 +8,5 @@ AliveCellsStatisticsSystem::AliveCellsStatisticsSystem(EcsWorld& ecsWorld)
 }
 void AliveCellsStatisticsSystem::DoSystemUpdate()
 {
-    _aliveCells = _world->view<CellUnitTag>(ExcludeGraveyardedCells).size_hint();
+    _aliveCells = _world->view<const CellUnitTag>(ExcludeGraveyardedCells).size_hint();
 }
