@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/cell_id.h"
+#include "simulation/simulation_ecs_config.h"
 #include "procedures/procedure_type.h"
 #include "simulation_cell_debugger.h"
 #include "vm/virtual_machine.h"

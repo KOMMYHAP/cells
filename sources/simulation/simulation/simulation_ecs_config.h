@@ -13,3 +13,5 @@
 #include <entt/entt.hpp>
 
 using EcsWorld = entt::registry;
+using EcsEntity = EcsWorld::entity_type;
+inline constexpr EcsEntity InvalidEcsEntity { entt::null };

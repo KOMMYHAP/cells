@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/cell_id.h"
+#include "simulation/simulation_ecs_config.h"
 #include "components/cell_position.h"
 #include "components/direction.h"
 

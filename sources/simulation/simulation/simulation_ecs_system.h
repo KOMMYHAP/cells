@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "simulation_ecs_config.h"
-#include "components/cell_id.h"
 
 #include "simulation/simulation_system.h"
 #include "simulation_component_type.h"

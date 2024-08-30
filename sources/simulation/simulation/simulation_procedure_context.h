@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "components/cell_id.h"
+#include "simulation/simulation_ecs_config.h"
 
 struct SimulationProcedureContext {
     EcsEntity id;
