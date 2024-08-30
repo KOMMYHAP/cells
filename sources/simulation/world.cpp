@@ -11,12 +11,13 @@
 #include "systems_ecs/age_system.h"
 #include "systems_ecs/alive_cells_statistics_system.h"
 #include "systems_ecs/brain_simulation_system.h"
-#include "systems_ecs/energy_system.h"
+#include "systems_ecs/energy_decrease_system.h"
 #include "systems_ecs/graveyard_system.h"
 
 #include "simulation/simulation_statistics_provider.h"
 #include "systems_ecs/death_from_age_statistics_system.h"
 #include "systems_ecs/death_from_empty_energy_statistics_system.h"
+#include "systems_ecs/energy_leak_system.h"
 #include "systems_ecs/keep_population_system.h"
 #include "systems_ecs/spawn_places_statistics_system.h"
 #include "systems_ecs/spawn_system.h"
@@ -35,7 +36,8 @@ World::World()
     RegisterSystem<SpawnSystem>(_ecsWorld, _cellsLocator);
     RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
     RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", _ecsWorld, _simulationVm, _cellsLocator, _spawner, _randomCellFactory);
-    RegisterSystem<EnergySystem>(_ecsWorld);
+    RegisterSystem<EnergyLeakSystem>(_ecsWorld);
+    RegisterSystem<EnergyDecreaseSystem>(_ecsWorld);
     RegisterSystem<AgeSystem>(_ecsWorld);
     RegisterProcedureSystem<LookProcedureSystem>(ProcedureType::Look, 1, 1, "Look", _ecsWorld, _simulationVm, _cellsLocator);
     RegisterProcedureSystem<MoveProcedureSystem>(ProcedureType::Move, 1, 0, "Move", _ecsWorld, _simulationVm, _cellsLocator);

@@ -6,12 +6,12 @@
 #include "simulation/simulation_ecs_procedure.h"
 #include "simulation/spawner.h"
 
-class RandomCellSpawnProcedureSystem final : public EcsProcedureProxy<RandomCellSpawnProcedureSystem, const CellPosition, CellEnergyChange> {
+class RandomCellSpawnProcedureSystem final : public EcsProcedureProxy<RandomCellSpawnProcedureSystem, const CellPosition, CellEnergyDecrease> {
 public:
     using EcsProcedureProxy::ExecutionStatus;
 
     RandomCellSpawnProcedureSystem(EcsWorld& world, SimulationVirtualMachine& vm, const CellLocator& locator, Spawner& spawner, RandomCellFactory& factory);
-    ExecutionStatus ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyChange & energyChange);
+    ExecutionStatus ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyDecrease & energyChange);
 
     EcsWorld& AccessEcsWorld() { return *_world; }
     SimulationVirtualMachine& AccessVirtualMachine() { return *_vm; }

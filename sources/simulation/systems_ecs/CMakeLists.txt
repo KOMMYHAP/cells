@@ -3,8 +3,10 @@ target_sources(${PROJECT_NAME} PRIVATE
         render_system.h
         brain_simulation_system.h
         brain_simulation_system.cpp
-        energy_system.h
-        energy_system.cpp
+        energy_leak_system.h
+        energy_leak_system.cpp
+        energy_decrease_system.h
+        energy_decrease_system.cpp
         graveyard_system.cpp
         graveyard_system.h
         age_system.cpp

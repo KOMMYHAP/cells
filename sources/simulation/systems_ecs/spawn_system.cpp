@@ -23,8 +23,9 @@ void SpawnSystem::DoProcessComponents(CellId id, CellPosition position)
     world.remove<SpawnPlaceTag>(id);
     world.emplace<CellType>(id, CellType::Unit);
     world.emplace<CellUnitTag>(id);
-    world.emplace<CellEnergy>(id, CellEnergy { 100 });
-    world.emplace<CellEnergyChange>(id, CellEnergyChange { 0 });
+    static constexpr uint8_t StartupEnergy { 255 };
+    world.emplace<CellEnergy>(id, CellEnergy { StartupEnergy });
+    world.emplace<CellEnergyDecrease>(id, CellEnergyDecrease { 0 });
     world.emplace<CellAge>(id, CellAge { 0 });
     _locator->Set(position, id);
 }
