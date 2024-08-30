@@ -7,9 +7,9 @@ Spawner::Spawner(EcsWorld& world)
 {
 }
 
-CellId Spawner::ScheduleSpawn(CellPosition position)
+EcsEntity Spawner::ScheduleSpawn(CellPosition position)
 {
-    const CellId id = _world->create();
+    const EcsEntity id = _world->create();
     _world->emplace<SpawnPlaceTag>(id);
     _world->emplace<CellPosition>(id, position);
     return id;

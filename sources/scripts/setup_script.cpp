@@ -133,7 +133,7 @@
 //             return;
 //         }
 //         // Cell's brain has illegal instruction, make insult as punishment
-//         const CellId id = simulationVm.GetRunningCellId();
+//         const EcsEntity id = simulationVm.GetRunningCellId();
 //         healthSystem.Set(id, CellHealth::Zero);
 //     };
 //     simulationVm.SetWatcher(std::move(watcher));

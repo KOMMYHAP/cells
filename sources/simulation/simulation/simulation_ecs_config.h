@@ -9,9 +9,7 @@
 #error "You should include simulation_ecs_config.h before any include from entt/*!"
 #endif
 
-#include "entt/config/config.h"
-#include "entt/fwd.hpp"
+#include <entt/config/config.h>
+#include <entt/entt.hpp>
 
-#include "components/cell_id.h"
-
-using EcsWorld = entt::basic_registry<CellId>;
+using EcsWorld = entt::registry;

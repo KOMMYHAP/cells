@@ -13,14 +13,14 @@ SimulationVirtualMachine::SimulationVirtualMachine(EcsWorld& world)
     _virtualMachine.SetDebugger(&_debugger);
 }
 
-void SimulationVirtualMachine::Run(const CellId id, CellBrain& brain)
+void SimulationVirtualMachine::Run(const EcsEntity id, CellBrain& brain)
 {
     const ProcessorMemory memory { brain.data };
     const SimulationProcedureContext simulationContext { id };
     _virtualMachine.Run(memory, ProcessorUserData { simulationContext });
 }
 
-void SimulationVirtualMachine::CompletePendingProcedure(CellId id, CellBrain& brain, const ProcedureContext& context)
+void SimulationVirtualMachine::CompletePendingProcedure(EcsEntity id, CellBrain& brain, const ProcedureContext& context)
 {
     const ProcessorMemory memory { brain.data };
     _virtualMachine.CompleteDeferredExecution(memory, context);

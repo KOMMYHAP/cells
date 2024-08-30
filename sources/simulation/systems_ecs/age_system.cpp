@@ -7,7 +7,7 @@ AgeSystem::AgeSystem(EcsWorld& ecsWorld)
     : SimulationEcsSystem(ecsWorld)
 {
 }
-void AgeSystem::DoProcessComponents(CellId id, CellAge& age)
+void AgeSystem::DoProcessComponents(EcsEntity id, CellAge& age)
 {
     age.value += 1;
 

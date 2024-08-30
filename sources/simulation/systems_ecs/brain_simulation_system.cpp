@@ -6,7 +6,7 @@ BrainSimulationSystem::BrainSimulationSystem(EcsWorld& ecsWorld, SimulationVirtu
 {
 }
 
-void BrainSimulationSystem::DoProcessComponents(const CellId id, CellBrain& brain)
+void BrainSimulationSystem::DoProcessComponents(const EcsEntity id, CellBrain& brain)
 {
     _vm->Run(id, brain);
 }

@@ -11,5 +11,5 @@ class AgeSystem final : public SimulationEcsSystem<AgeSystem, CellAge> {
 public:
     explicit AgeSystem(EcsWorld& ecsWorld);
 
-    void DoProcessComponents(CellId id, CellAge& age);
+    void DoProcessComponents(EcsEntity id, CellAge& age);
 };

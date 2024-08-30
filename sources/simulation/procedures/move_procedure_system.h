@@ -8,7 +8,7 @@ public:
     using EcsProcedureProxy::ExecutionStatus;
 
     MoveProcedureSystem(EcsWorld& world, SimulationVirtualMachine& vm, CellLocator& locator);
-    ExecutionStatus ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition& position);
+    ExecutionStatus ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, CellPosition& position);
 
     EcsWorld& AccessEcsWorld() { return *_world; }
     SimulationVirtualMachine& AccessVirtualMachine() { return *_vm; }

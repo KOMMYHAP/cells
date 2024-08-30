@@ -12,11 +12,11 @@ SpawnSystem::SpawnSystem(EcsWorld& world, CellLocator& locator)
 {
 }
 
-void SpawnSystem::DoProcessComponents(CellId id, CellPosition position)
+void SpawnSystem::DoProcessComponents(EcsEntity id, CellPosition position)
 {
     EcsWorld& world = AccessEcsWorld();
-    const CellId targetId = _locator->Find(position);
-    if (const bool canSpawnAtPosition = targetId == CellId::Invalid; !canSpawnAtPosition) {
+    const EcsEntity targetId = _locator->Find(position);
+    if (const bool canSpawnAtPosition = targetId == InvalidEcsEntity; !canSpawnAtPosition) {
         world.destroy(id);
         return;
     }

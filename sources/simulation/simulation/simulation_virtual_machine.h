@@ -19,8 +19,8 @@ public:
 
     SimulationCellDebugger& ModifyCellDebugger() { return _debugger; }
 
-    void Run(CellId id, CellBrain& brain);
-    void CompletePendingProcedure(CellId id, CellBrain& brain, const ProcedureContext& context);
+    void Run(EcsEntity id, CellBrain& brain);
+    void CompletePendingProcedure(EcsEntity id, CellBrain& brain, const ProcedureContext& context);
 
     ProcedureId GetProcedureId(ProcedureType type) const;
 

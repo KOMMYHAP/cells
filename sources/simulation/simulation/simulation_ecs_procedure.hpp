@@ -10,7 +10,7 @@ namespace Details {
 template <class ProcedureImpl>
 void DeferredProcedureProxy<ProcedureImpl>::Execute(ProcedureContext& context)
 {
-    const CellId id = context.GetUserData().Get<SimulationProcedureContext>().id;
+    const EcsEntity id = context.GetUserData().Get<SimulationProcedureContext>().id;
     ProcedureImpl& impl = CastToImpl();
     EcsWorld& world = impl.AccessEcsWorld();
     world.emplace<ProcedureTag<ProcedureImpl>>(id);
@@ -33,18 +33,18 @@ void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoSystemUpdate()
 {
     EcsWorld& world = CastToImpl().AccessEcsWorld();
     world.view<CellBrain, DeferredProcedureExecution, Details::ProcedureTag<EcsProcedureImpl>, Components...>(ExcludeGraveyardedCells)
-        .each([this]<typename... T0>(const CellId& id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, T0&&... components) noexcept {
+        .each([this]<typename... T0>(const EcsEntity& id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, T0&&... components) noexcept {
             DoProcessComponents(id, brain, deferredExecution, std::forward<T0>(components)...);
         });
 }
 
 template <class EcsProcedureImpl, SimulationComponentType... Components>
 template <class... FilteredComponents>
-void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoProcessComponents(CellId id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, FilteredComponents&&... components)
+void EcsProcedureProxy<EcsProcedureImpl, Components...>::DoProcessComponents(EcsEntity id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, FilteredComponents&&... components)
 {
     static_assert(
-        std::is_invocable_r_v<ExecutionStatus, decltype(&EcsProcedureImpl::ExecuteProcedure), EcsProcedureImpl, CellId, ProcedureContext&, CellBrain&, FilteredComponents...>,
-        "EcsProcedureImpl must have method ExecutionStatus ExecuteProcedure(CellId, ProcedureContext&, CellBrain&, FilteredComponents...);\n"
+        std::is_invocable_r_v<ExecutionStatus, decltype(&EcsProcedureImpl::ExecuteProcedure), EcsProcedureImpl, EcsEntity, ProcedureContext&, CellBrain&, FilteredComponents...>,
+        "EcsProcedureImpl must have method ExecutionStatus ExecuteProcedure(EcsEntity, ProcedureContext&, CellBrain&, FilteredComponents...);\n"
         "Where FilteredComponent is non-empty data structures");
 
     ProcedureContext& context = deferredExecution.context;

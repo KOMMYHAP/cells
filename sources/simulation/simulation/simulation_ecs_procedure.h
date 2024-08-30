@@ -35,7 +35,7 @@ public:
 
 private:
     template <class... FilteredComponents>
-    void DoProcessComponents(CellId id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, FilteredComponents&&... components);
+    void DoProcessComponents(EcsEntity id, CellBrain& brain, DeferredProcedureExecution& deferredExecution, FilteredComponents&&... components);
 
     EcsProcedureImpl& CastToImpl();
 };

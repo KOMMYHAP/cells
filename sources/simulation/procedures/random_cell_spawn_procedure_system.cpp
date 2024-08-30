@@ -14,7 +14,7 @@ RandomCellSpawnProcedureSystem::RandomCellSpawnProcedureSystem(EcsWorld& world, 
     , _factory(&factory)
 {
 }
-RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyDecrease& energyChange)
+RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyDecrease& energyChange)
 {
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
@@ -25,7 +25,7 @@ RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::
         return ExecutionStatus::Error;
     }
 
-    const CellId childId = _spawner->ScheduleSpawn(position);
+    const EcsEntity childId = _spawner->ScheduleSpawn(position);
     CellBrain& childBrain = _world->emplace<CellBrain>(childId);
     _factory->Make(childBrain);
 
@@ -75,8 +75,8 @@ RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::
 //     // for (uint8_t i = 0; i < testPositionSize; ++i) {
 //     //     const uint8_t index = (i + offset) % testPositionSize;
 //     //     const CellPosition position = testPositions[index];
-//     //     const CellId id = _positionSystem.Find(position);
-//     //     const bool emptyPosition = id == CellId::Invalid;
+//     //     const EcsEntity id = _positionSystem.Find(position);
+//     //     const bool emptyPosition = id == InvalidEcsEntity;
 //     //     if (emptyPosition) {
 //     //         return position;
 //     //     }
@@ -85,7 +85,7 @@ RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::
 //     return InvalidCellPosition;
 // }
 //
-// CellBrain ReproductionProcedure::MakeChildBrain(CellId lhs, CellId rhs) const
+// CellBrain ReproductionProcedure::MakeChildBrain(EcsEntity lhs, EcsEntity rhs) const
 // {
 //     // constexpr uint8_t crossoverPoint = 10;
 //     // CrossoverAlgorithm crossover { crossoverPoint };

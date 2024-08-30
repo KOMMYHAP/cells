@@ -12,9 +12,9 @@
 //     ASSERT_EQ(storage.GetCellsCount(), 100);
 //     ASSERT_EQ(storage.GetMetaInfo().sizeInBytes, info.sizeInBytes);
 //
-//     TestData& data = storage.Modify<TestData>(CellId { 0 });
+//     TestData& data = storage.Modify<TestData>(EcsEntity { 0 });
 //     data.value = 42;
-//     ASSERT_EQ(storage.Get<TestData>(CellId { 0 }).value, 42);
+//     ASSERT_EQ(storage.Get<TestData>(EcsEntity { 0 }).value, 42);
 // }
 //
 // TEST(ComponentStorageTest, Foreach)
@@ -51,8 +51,8 @@
 //     ComponentStorage storage { info, 10 };
 //
 //     for (uint32_t i = 0; i < storage.GetCellsCount() - 1; ++i) {
-//         const int* p1 = &storage.Get<int>(CellId { i });
-//         const int* p2 = &storage.Get<int>(CellId { i + 1 });
+//         const int* p1 = &storage.Get<int>(EcsEntity { i });
+//         const int* p2 = &storage.Get<int>(EcsEntity { i + 1 });
 //         ASSERT_EQ(p1 + 1, p2);
 //     }
 // }
@@ -66,7 +66,7 @@
 //     Component info { "test", sizeof(TestData) };
 //     ComponentStorage storage { info, 100 };
 //
-//     EXPECT_DEATH(storage.Get<TestData>(CellId { 100 }), "");
-//     EXPECT_DEATH(storage.Modify<TestData>(CellId { 100 }), "");
-//     EXPECT_DEATH(storage.Get<double>(CellId { 0 }), "");
+//     EXPECT_DEATH(storage.Get<TestData>(EcsEntity { 100 }), "");
+//     EXPECT_DEATH(storage.Modify<TestData>(EcsEntity { 100 }), "");
+//     EXPECT_DEATH(storage.Get<double>(EcsEntity { 0 }), "");
 // }

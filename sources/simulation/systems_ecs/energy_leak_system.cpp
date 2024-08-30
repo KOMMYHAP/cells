@@ -5,7 +5,7 @@ EnergyLeakSystem::EnergyLeakSystem(EcsWorld& ecsWorld)
 {
 }
 
-void EnergyLeakSystem::DoProcessComponents(const CellId /*id*/, CellEnergyDecrease& change)
+void EnergyLeakSystem::DoProcessComponents(const EcsEntity /*id*/, CellEnergyDecrease& change)
 {
     static constexpr uint8_t LeakValue = 1;
     if (std::numeric_limits<uint8_t>::max() - LeakValue < change.value) {

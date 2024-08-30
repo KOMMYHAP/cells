@@ -7,5 +7,5 @@ class EnergyLeakSystem final : public SimulationEcsSystem<EnergyLeakSystem, Cell
 public:
     explicit EnergyLeakSystem(EcsWorld& ecsWorld);
 
-    void DoProcessComponents(CellId id, CellEnergyDecrease& change);
+    void DoProcessComponents(EcsEntity id, CellEnergyDecrease& change);
 };

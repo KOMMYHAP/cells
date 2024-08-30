@@ -30,12 +30,12 @@
 //     auto& selectionSystem = _systems.Modify<SelectionSystem>();
 //
 //     // Process brain of each cell.
-//     idSystem.Iterate([&](const CellId id) {
+//     idSystem.Iterate([&](const EcsEntity id) {
 //         simulationVm.Run(id);
 //     });
 //
 //     // Kill too old cells
-//     idSystem.Iterate([&](const CellId id) {
+//     idSystem.Iterate([&](const EcsEntity id) {
 //         ageSystem.Increment(id, _parameters.limitCellAge);
 //     });
 //
@@ -44,7 +44,7 @@
 //
 //     // Spawn more if needed
 //     auto respawn = [&]() {
-//         idSystem.Iterate([&](const CellId id) {
+//         idSystem.Iterate([&](const EcsEntity id) {
 //             graveyardSystem.Bury(id);
 //         });
 //         graveyardSystem.Cleanup();

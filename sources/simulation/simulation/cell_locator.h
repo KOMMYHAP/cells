@@ -8,11 +8,11 @@ class CellLocator {
 public:
     CellLocator(uint32_t width, uint32_t height);
 
-    void Set(CellPosition position, CellId id);
+    void Set(CellPosition position, EcsEntity id);
     void Replace(CellPosition oldPosition, CellPosition newPosition);
     void Reset(CellPosition position);
 
-    CellId Find(CellPosition position) const;
+    EcsEntity Find(CellPosition position) const;
 
     uint32_t GetWidth() const { return _width; }
     uint32_t GetHeight() const { return _height; }
@@ -27,5 +27,5 @@ private:
 
     uint32_t _width { 0 };
     uint32_t _height { 0 };
-    std::vector<CellId> _grid;
+    std::vector<EcsEntity> _grid;
 };

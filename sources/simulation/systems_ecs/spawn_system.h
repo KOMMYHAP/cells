@@ -9,7 +9,7 @@
 class SpawnSystem final : public SimulationEcsSystem<SpawnSystem, SpawnPlaceTag, const CellPosition> {
 public:
     SpawnSystem(EcsWorld& world, CellLocator& locator);
-    void DoProcessComponents(CellId id, CellPosition position);
+    void DoProcessComponents(EcsEntity id, CellPosition position);
 
 private:
     gsl::not_null<CellLocator*> _locator;

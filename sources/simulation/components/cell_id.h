@@ -1,5 +1,6 @@
 #pragma once
 
-enum class CellId : uint32_t {
-    Invalid = std::numeric_limits<uint32_t>::max()
-};
+#include "simulation/simulation_ecs_config.h"
+
+using EcsEntity = EcsWorld::entity_type;
+inline constexpr EcsEntity InvalidEcsEntity { entt::null };

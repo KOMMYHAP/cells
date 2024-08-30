@@ -3,14 +3,14 @@
 CellLocator::CellLocator(uint32_t width, uint32_t height)
     : _width(width)
     , _height(height)
-    , _grid(NarrowCast<size_t>(width * height), CellId::Invalid)
+    , _grid(NarrowCast<size_t>(width * height), InvalidEcsEntity)
 {
 }
 
-void CellLocator::Set(CellPosition position, CellId id)
+void CellLocator::Set(CellPosition position, EcsEntity id)
 {
     const uint32_t index = ToGridIndex(position);
-    ASSERT(_grid[index] == CellId::Invalid, "Specified position contains another cell!");
+    ASSERT(_grid[index] == InvalidEcsEntity, "Specified position contains another cell!");
     _grid[index] = id;
 }
 
@@ -18,19 +18,19 @@ void CellLocator::Replace(const CellPosition oldPosition, const CellPosition new
 {
     const uint32_t index = ToGridIndex(oldPosition);
     const uint32_t newIndex = ToGridIndex(newPosition);
-    ASSERT(_grid[index] != CellId::Invalid, "There is no cell on old position!");
-    ASSERT(_grid[newIndex] == CellId::Invalid, "Two cells placed on the same position!");
-    _grid[newIndex] = std::exchange(_grid[index], CellId::Invalid);
+    ASSERT(_grid[index] != InvalidEcsEntity, "There is no cell on old position!");
+    ASSERT(_grid[newIndex] == InvalidEcsEntity, "Two cells placed on the same position!");
+    _grid[newIndex] = std::exchange(_grid[index], InvalidEcsEntity);
 }
 
 void CellLocator::Reset(const CellPosition position)
 {
     const uint32_t index = ToGridIndex(position);
-    ASSERT(_grid[index] != CellId::Invalid, "Specified position contains noone!");
-    _grid[index] = CellId::Invalid;
+    ASSERT(_grid[index] != InvalidEcsEntity, "Specified position contains noone!");
+    _grid[index] = InvalidEcsEntity;
 }
 
-CellId CellLocator::Find(CellPosition position) const
+EcsEntity CellLocator::Find(CellPosition position) const
 {
     const uint32_t index = ToGridIndex(position);
     return _grid[index];

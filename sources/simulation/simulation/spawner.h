@@ -5,7 +5,7 @@ class Spawner {
 public:
     explicit Spawner(EcsWorld& world);
 
-    CellId ScheduleSpawn(CellPosition position);
+    EcsEntity ScheduleSpawn(CellPosition position);
 
 private:
     gsl::not_null<EcsWorld*> _world;

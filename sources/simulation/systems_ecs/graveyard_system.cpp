@@ -12,7 +12,7 @@ GraveyardSystem::GraveyardSystem(EcsWorld& world, CellLocator& locator)
 void GraveyardSystem::DoSystemUpdate()
 {
     const auto graveyardedCells = _world->view<GraveyardTag, const CellPosition>();
-    graveyardedCells.each([this](const CellId id, const CellPosition position) {
+    graveyardedCells.each([this](const EcsEntity id, const CellPosition position) {
         _locator->Reset(position);
     });
 

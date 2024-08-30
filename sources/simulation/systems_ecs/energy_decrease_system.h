@@ -8,5 +8,5 @@ class EnergyDecreaseSystem final : public SimulationEcsSystem<EnergyDecreaseSyst
 public:
     explicit EnergyDecreaseSystem(EcsWorld& ecsWorld);
 
-    void DoProcessComponents(CellId id, CellEnergy& energy, CellEnergyDecrease& change);
+    void DoProcessComponents(EcsEntity id, CellEnergy& energy, CellEnergyDecrease& change);
 };

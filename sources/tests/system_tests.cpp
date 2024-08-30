@@ -1,3 +1,4 @@
+#include "simulation/simulation_ecs_config.h"
 #include "simulation/simulation_ecs_procedure.h"
 
 namespace {
@@ -16,7 +17,7 @@ public:
     EcsWorld& AccessEcsWorld() { return *_world; }
     SimulationVirtualMachine& AccessVirtualMachine() { return *_vm; }
 
-    ExecutionStatus ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, TestComponent& component)
+    ExecutionStatus ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, TestComponent& component)
     {
         return ExecutionStatus::Success;
     }

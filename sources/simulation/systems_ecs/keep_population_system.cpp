@@ -38,7 +38,7 @@ void KeepPopulationSystem::DoSystemUpdate()
 
 void KeepPopulationSystem::Spawn(CellPosition position)
 {
-    const CellId id = _config.spawner->ScheduleSpawn(position);
+    const EcsEntity id = _config.spawner->ScheduleSpawn(position);
     CellBrain& brain = _config.world->emplace<CellBrain>(id);
     _config.factory->Make(brain);
 }

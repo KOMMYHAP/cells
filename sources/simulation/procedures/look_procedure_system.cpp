@@ -11,7 +11,7 @@ LookProcedureSystem::LookProcedureSystem(EcsWorld& world, SimulationVirtualMachi
 {
 }
 
-auto LookProcedureSystem::ExecuteProcedure(CellId /*id*/, ProcedureContext& context, CellBrain& /*brain*/, CellPosition position) -> ExecutionStatus
+auto LookProcedureSystem::ExecuteProcedure(EcsEntity /*id*/, ProcedureContext& context, CellBrain& /*brain*/, CellPosition position) -> ExecutionStatus
 {
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
@@ -29,7 +29,7 @@ auto LookProcedureSystem::ExecuteProcedure(CellId /*id*/, ProcedureContext& cont
         return ExecutionStatus::Success;
     }
 
-    if (const CellId anotherCell = _locator->Find(lookPosition); anotherCell == CellId::Invalid) {
+    if (const EcsEntity anotherCell = _locator->Find(lookPosition); anotherCell == InvalidEcsEntity) {
         context.TryPushResult(CellType::Dummy);
         return ExecutionStatus::Success;
     }

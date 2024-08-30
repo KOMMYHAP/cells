@@ -11,7 +11,7 @@ public:
     using EcsProcedureProxy::ExecutionStatus;
 
     RandomCellSpawnProcedureSystem(EcsWorld& world, SimulationVirtualMachine& vm, const CellLocator& locator, Spawner& spawner, RandomCellFactory& factory);
-    ExecutionStatus ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyDecrease & energyChange);
+    ExecutionStatus ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyDecrease & energyChange);
 
     EcsWorld& AccessEcsWorld() { return *_world; }
     SimulationVirtualMachine& AccessVirtualMachine() { return *_vm; }

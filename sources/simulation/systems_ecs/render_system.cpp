@@ -29,7 +29,7 @@ sf::Color RenderSystem::GetColor(const CellType type) const
     return sf::Color::Magenta;
 }
 
-void RenderSystem::DoProcessComponents(CellId /*id*/, const CellType type, const CellPosition position)
+void RenderSystem::DoProcessComponents(EcsEntity /*id*/, const CellType type, const CellPosition position)
 {
     const auto pixelIndex = position.y * _fieldSize.x + position.x;
     ASSERT(pixelIndex < _textureData.size());

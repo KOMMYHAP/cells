@@ -8,7 +8,7 @@ EnergyDecreaseSystem::EnergyDecreaseSystem(EcsWorld& ecsWorld)
 {
 }
 
-void EnergyDecreaseSystem::DoProcessComponents(const CellId id, CellEnergy& energy, CellEnergyDecrease& change)
+void EnergyDecreaseSystem::DoProcessComponents(const EcsEntity id, CellEnergy& energy, CellEnergyDecrease& change)
 {
     if (change.value == 0) {
         return;

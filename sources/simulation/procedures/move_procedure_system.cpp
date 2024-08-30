@@ -7,7 +7,7 @@ MoveProcedureSystem::MoveProcedureSystem(EcsWorld& world, SimulationVirtualMachi
 {
 }
 
-MoveProcedureSystem::ExecutionStatus MoveProcedureSystem::ExecuteProcedure(CellId id, ProcedureContext& context, CellBrain& brain, CellPosition& position)
+MoveProcedureSystem::ExecutionStatus MoveProcedureSystem::ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, CellPosition& position)
 {
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
@@ -22,7 +22,7 @@ MoveProcedureSystem::ExecutionStatus MoveProcedureSystem::ExecuteProcedure(CellI
     if (nextPosition == InvalidCellPosition) {
         return ExecutionStatus::Success;
     }
-    if (const CellId targetCell = _locator->Find(nextPosition); targetCell != CellId::Invalid) {
+    if (const EcsEntity targetCell = _locator->Find(nextPosition); targetCell != InvalidEcsEntity) {
         return ExecutionStatus::Success;
     }
 

@@ -15,7 +15,7 @@ public:
     std::span<const uint32_t> GetTextureData() const { return _textureData; }
     sf::Vector2u GetTextureSize() const { return _fieldSize; }
 
-    void DoProcessComponents(CellId id, CellType type, CellPosition position);
+    void DoProcessComponents(EcsEntity id, CellType type, CellPosition position);
 private:
     sf::Color GetColor(CellType type) const;
 

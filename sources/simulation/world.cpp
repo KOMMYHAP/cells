@@ -61,7 +61,7 @@ World::World()
     static constexpr int CellsCount = 100;
     for (int i = 0; i < CellsCount; ++i) {
         const CellPosition position { NarrowCast<int16_t>(i % _worldSize.x), NarrowCast<int16_t>(i % _worldSize.y) };
-        const CellId childId = _spawner.ScheduleSpawn(position);
+        const EcsEntity childId = _spawner.ScheduleSpawn(position);
         CellBrain& childBrain = _ecsWorld.emplace<CellBrain>(childId);
         _randomCellFactory.Make(childBrain);
     }

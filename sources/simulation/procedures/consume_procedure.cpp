@@ -26,7 +26,7 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
     //     return;
     // }
     //
-    // const CellId id = context.GetExternalContext<SimulationProcedureContext>().id;
+    // const EcsEntity id = context.GetExternalContext<SimulationProcedureContext>().id;
 
     // constexpr CellHealth healthPerAction { 5 };
     // if (_healthSystem.Decrement(id, healthPerAction) == CellHealth::Zero) {
@@ -39,8 +39,8 @@ void ConsumeProcedure::Execute(ProcedureContext& context)
     //     context.MarkProcedureAsInvalid();
     //     return;
     // }
-    // const CellId anotherCell = _positionSystem.Find(newPosition);
-    // if (anotherCell == CellId::Invalid) {
+    // const EcsEntity anotherCell = _positionSystem.Find(newPosition);
+    // if (anotherCell == InvalidEcsEntity) {
     //     return;
     // }
 
