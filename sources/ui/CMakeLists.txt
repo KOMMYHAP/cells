@@ -14,11 +14,16 @@ target_sources(${PROJECT_NAME} PUBLIC
         status_panel.h
         ui_widget.h
         world_widget.h
+        root_widget.h
+        root_widget.cpp
 )
+
+add_subdirectory(widgets)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
         cells-simulation
         sfml-graphics
+        ImGui-SFML
 )
 target_precompile_headers(${PROJECT_NAME} PRIVATE ui_pch.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
