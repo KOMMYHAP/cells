@@ -2,9 +2,7 @@
 
 #include "registrar/registrable_system.h"
 #include "root_widget.h"
-#include "status_panel.h"
 #include "systems_ecs/render_system.h"
-#include "ui_widget.h"
 
 class UiSystem : public common::RegistrableSystem {
 public:

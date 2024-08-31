@@ -2,16 +2,16 @@
 
 #include "sample_counter.h"
 #include "ui_layout.h"
-#include "ui_widget.h"
+#include "custom_render_widget.h"
 
 class World;
 
-class StatusPanel : public UiWidget {
+class StatusPanel final : public CustomRenderWidget {
 public:
     StatusPanel(const UiLayout& layout, const sf::Font& font, World& world);
 
-    void Update(sf::Time elapsedTime) override;
-    void Draw(sf::RenderTarget& target) override;
+    void UpdateWidget(sf::Time elapsedTime) override;
+    void RenderWidget(sf::RenderTarget& target) override;
 
 private:
     sf::Text _text;

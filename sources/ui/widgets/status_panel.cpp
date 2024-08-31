@@ -32,7 +32,7 @@ StatusPanel::StatusPanel(const UiLayout& layout, const sf::Font& font, World& wo
     _buffer.reserve(StatusMessageBufferLimit);
 }
 
-void StatusPanel::Update(sf::Time elapsedTime)
+void StatusPanel::UpdateWidget(sf::Time elapsedTime)
 {
     _frameTimeCounter.AddSample(elapsedTime.asSeconds());
     sf::Time frameTime = sf::seconds(_frameTimeCounter.CalcMedian());
@@ -53,11 +53,11 @@ void StatusPanel::Update(sf::Time elapsedTime)
         statistics.GetSpawnPlacesCount(),
         statistics.GetDeathFromAge(),
         statistics.GetDeathFromEmptyEnergy());
-    
+
     _text.setString(sf::String(_buffer));
 }
 
-void StatusPanel::Draw(sf::RenderTarget& target)
+void StatusPanel::RenderWidget(sf::RenderTarget& target)
 {
     target.draw(_text);
 }

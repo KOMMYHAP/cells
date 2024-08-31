@@ -26,7 +26,7 @@ WorldWidget::WorldWidget(Config&& config)
     ASSERT(vertexBufferUpdated);
 }
 
-void WorldWidget::Draw(sf::RenderTarget& target)
+void WorldWidget::RenderWidget(sf::RenderTarget& target)
 {
     _texture.update(reinterpret_cast<const uint8_t*>(_config.renderSystem->GetTextureData().data()));
 
@@ -36,7 +36,7 @@ void WorldWidget::Draw(sf::RenderTarget& target)
     target.draw(_vertexBuffer, states);
 }
 
-void WorldWidget::Update(sf::Time elapsedTime)
+void WorldWidget::UpdateWidget(sf::Time elapsedTime)
 {
     _config.renderSystem->ClearTextureData();
     _config.renderSystem->DoSystemUpdate();

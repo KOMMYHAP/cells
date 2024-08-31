@@ -1,10 +1,10 @@
 ﻿#pragma once
+#include "base_widget.h"
 #include "sample_counter.h"
-#include "simple_widget.h"
 
-class FpsWidget final : public SimpleWidget {
+class FpsWidget final : public BaseWidget {
 public:
-    void Update(sf::Time elapsedTime) override;
+    void UpdateWidget(sf::Time elapsedTime) override;
 
 private:
     common::SampleCounter<int32_t, 30> _frameTimeCounter;

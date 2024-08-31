@@ -11,18 +11,18 @@ RootWidget::~RootWidget()
     }
 }
 
-void RootWidget::Update(sf::Time elapsedTime)
+void RootWidget::UpdateWidget(sf::Time elapsedTime)
 {
     ImGui::SFML::Update(*_window, elapsedTime);
     for (const auto& widget : _widgets) {
-        widget->Update(elapsedTime);
+        widget->UpdateWidget(elapsedTime);
     }
 }
 
-void RootWidget::Draw(sf::RenderTarget& target)
+void RootWidget::RenderWidget(sf::RenderTarget& target)
 {
-    for (const auto& widget : _widgets) {
-        widget->Draw(target);
+    for (CustomRenderWidget* widget : _customRenderWidgets) {
+        widget->RenderWidget(target);
     }
     ImGui::SFML::Render(*_window);
 }

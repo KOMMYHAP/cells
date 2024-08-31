@@ -1,9 +1,9 @@
 #pragma once
 
+#include "custom_render_widget.h"
 #include "systems_ecs/render_system.h"
-#include "ui_widget.h"
 
-class WorldWidget : public UiWidget {
+class WorldWidget final : public CustomRenderWidget {
 public:
     struct Config {
         gsl::not_null<RenderSystem*> renderSystem;
@@ -14,8 +14,8 @@ public:
 
     WorldWidget(Config&& config);
 
-    void Draw(sf::RenderTarget& target) override;
-    void Update(sf::Time elapsedTime) override;
+    void RenderWidget(sf::RenderTarget& target) override;
+    void UpdateWidget(sf::Time elapsedTime) override;
 
 private:
     Config _config;

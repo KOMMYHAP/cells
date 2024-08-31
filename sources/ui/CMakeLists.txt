@@ -3,19 +3,16 @@ add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME} PRIVATE
         ui_system.cpp
-        status_panel.cpp
-        world_widget.cpp
+        custom_render_widget.h
+        base_widget.h
+        root_widget.h
+        root_widget.cpp
 )
 
 target_sources(${PROJECT_NAME} PUBLIC
         ui_pch.h
         ui_layout.h
         ui_system.h
-        status_panel.h
-        ui_widget.h
-        world_widget.h
-        root_widget.h
-        root_widget.cpp
 )
 
 add_subdirectory(widgets)

@@ -5,10 +5,10 @@
 
 #include "ui_layout.h"
 #include "world.h"
-#include "world_widget.h"
 
 #include "utils/stub_error_code.h"
 #include "widgets/fps_widget.h"
+#include "widgets/world_widget.h"
 
 static constexpr std::string_view FontArgument = "--font";
 static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -34,6 +34,11 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
+
+    if (!ImGui::SFML::Init(_window)) {
+        ASSERT_FAIL("Failed to init ImGui SFML!");
+        return common::MakeStubErrorCode();
+    }
 
     auto& world = storage.Modify<World>();
 
@@ -68,7 +73,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     EcsWorld& ecsWorld = world.ModifyEcsWorld();
     _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
 
-    auto rootWidget = std::make_unique<RootWidget>(_window);
+    _rootWidget = std::make_unique<RootWidget>(_window);
     {
         auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
         ASSERT(mbFragmentShaderPath.has_value());
@@ -83,10 +88,10 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
             sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
             sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
         };
-        rootWidget->AddWidget<WorldWidget>(std::move(worldRenderConfig));
+        _rootWidget->AddWidget<WorldWidget>(std::move(worldRenderConfig));
     }
 
-    rootWidget->AddWidget<FpsWidget>();
+    _rootWidget->AddWidget<FpsWidget>();
 
     return {};
 }
@@ -95,6 +100,7 @@ void UiSystem::TerminateSystem()
 {
     _renderSystem.reset();
     _rootWidget.reset();
+    ImGui::SFML::Shutdown();
     _window.close();
 }
 
@@ -113,7 +119,7 @@ UiSystem::MainLoopFeedback UiSystem::ProcessInput()
 
 void UiSystem::Update(sf::Time elapsedTime)
 {
-    _rootWidget->Update(elapsedTime);
+    _rootWidget->UpdateWidget(elapsedTime);
 }
 
 void UiSystem::Render()
@@ -124,6 +130,6 @@ void UiSystem::Render()
 
     const sf::Color gray { 0xCCCCCCFF };
     _window.clear(gray);
-    _rootWidget->Draw(_window);
+    _rootWidget->RenderWidget(_window);
     _window.display();
 }

@@ -1,6 +1,6 @@
 ﻿#include "fps_widget.h"
 
-void FpsWidget::Update(sf::Time elapsedTime)
+void FpsWidget::UpdateWidget(sf::Time elapsedTime)
 {
     _frameTimeCounter.AddSample(elapsedTime.asMilliseconds());
     const int32_t frameDuration = _frameTimeCounter.CalcMedian();

@@ -1,7 +1,8 @@
 ﻿#pragma once
-#include "ui_widget.h"
+#include "base_widget.h"
+#include "custom_render_widget.h"
 
-class RootWidget final : public UiWidget {
+class RootWidget final : public CustomRenderWidget {
 public:
     explicit RootWidget(sf::RenderWindow& window);
     ~RootWidget() override;
@@ -10,12 +11,13 @@ public:
         requires std::is_constructible_v<WidgetType, Args...>
     WidgetType& AddWidget(Args&&... args);
 
-    void Update(sf::Time elapsedTime) override;
-    void Draw(sf::RenderTarget& target) override;
+    void UpdateWidget(sf::Time elapsedTime) override;
+    void RenderWidget(sf::RenderTarget& target) override;
 
 private:
     gsl::not_null<sf::RenderWindow*> _window;
-    std::vector<std::unique_ptr<UiWidget>> _widgets;
+    std::vector<std::unique_ptr<BaseWidget>> _widgets;
+    std::vector<CustomRenderWidget*> _customRenderWidgets;
 };
 
 template <class WidgetType, class... Args>
@@ -25,5 +27,8 @@ WidgetType& RootWidget::AddWidget(Args&&... args)
     auto widget = std::make_unique<WidgetType>(std::forward<Args>(args)...);
     WidgetType& widgetRef = *widget;
     _widgets.emplace_back(std::move(widget));
+    if constexpr (std::is_base_of_v<CustomRenderWidget, WidgetType>) {
+        _customRenderWidgets.emplace_back(&widgetRef);
+    }
     return widgetRef;
 }
