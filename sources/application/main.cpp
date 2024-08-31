@@ -28,18 +28,19 @@ private:
 int main(int argc, char** argv)
 {
     common::Registrar registrar;
-    registrar.Register(std::make_unique<StubCmdLine>(argc, argv));
-    registrar.Register(std::make_unique<SimulationRegistrableSystem>());
-    registrar.Register(std::make_unique<UiSystem>());
-    auto& mainLoop = registrar.Register(std::make_unique<MainLoop>());
+    registrar.Register<StubCmdLine>(argc, argv);
+    registrar.Register<SimulationRegistrableSystem>();
+    registrar.Register<UiSystem>();
+    auto& mainLoop = registrar.Register<MainLoop>();
 
     if (const std::error_code error = registrar.RunInit()) {
-        std::cerr << std::format("Failed to initialize systems: {}", error.message()) << std::endl;
+        std::cerr << std::format("Failed to initialize systems: {}", error.message()) << '\n';
         return -1;
     }
 
     mainLoop.Run();
 
+    registrar.RunTerm();
     return 0;
     //
     //    sf::Clock frameClock;
