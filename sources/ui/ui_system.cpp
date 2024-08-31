@@ -1,5 +1,7 @@
 #include "ui_system.h"
 
+#include "SDL2/SDL_config.h"
+
 #include "command_line.h"
 #include "storage/stack_storage.h"
 

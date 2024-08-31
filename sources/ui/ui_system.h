@@ -20,6 +20,7 @@ public:
     const sf::Font& GetDefaultFont() const { return *_font; }
 
 private:
+    
     sf::RenderWindow _window;
     std::unique_ptr<sf::Font> _font;
     std::unique_ptr<RenderSystem> _renderSystem;
