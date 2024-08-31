@@ -63,13 +63,6 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     //     AddWidget(std::move(statusPanel));
     // }
 
-    auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
-    ASSERT(mbFragmentShaderPath.has_value());
-
-    auto shader = std::make_unique<sf::Shader>();
-    const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
-    ASSERT(loaded);
-
     EcsWorld& ecsWorld = world.ModifyEcsWorld();
     _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
 
@@ -98,8 +91,9 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
 void UiSystem::TerminateSystem()
 {
-    _renderSystem.reset();
     _rootWidget.reset();
+    _renderSystem.reset();
+    _font.reset();
     ImGui::SFML::Shutdown();
     _window.close();
 }
