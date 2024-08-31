@@ -54,3 +54,16 @@ TEST(StdRanges, Sample)
     ASSERT_EQ(uniqueSpawnPlaces[2], 2);
     ASSERT_EQ(uniqueSpawnPlaces[3], 3);
 }
+
+TEST(StdRanges, ReverseViewIteration)
+{
+    std::vector nums { 0, 1, 2 };
+    auto reversedNums = nums | std::views::reverse;
+    ASSERT_EQ(reversedNums[0], 2);
+    ASSERT_EQ(reversedNums[1], 1);
+    ASSERT_EQ(reversedNums[2], 0);
+
+    for (const int i : nums | std::views::reverse) {
+        ASSERT_EQ(nums[i], i);
+    }
+}

@@ -39,32 +39,26 @@ void RegistrarTestSystem::TerminateSystem()
 TEST(RegistrarTest, InitTermOneSystem)
 {
     common::Registrar registrar;
-    auto system = std::make_unique<RegistrarTestSystem>();
-    auto* ptr = system.get();
-    registrar.Register(std::move(system));
-    ASSERT_EQ(ptr->state, RegistrarTestSystem::State::JustCreated);
+    auto& system = registrar.Register<RegistrarTestSystem>();
+    ASSERT_EQ(system.state, RegistrarTestSystem::State::JustCreated);
     const std::error_code error = registrar.RunInit();
     ASSERT_FALSE(error);
-    ASSERT_EQ(ptr->state, RegistrarTestSystem::State::Initialized);
+    ASSERT_EQ(system.state, RegistrarTestSystem::State::Initialized);
     registrar.RunTerm();
 }
 
 TEST(RegistrarTest, AbortInitOnError)
 {
     common::Registrar registrar;
-    auto system = std::make_unique<RegistrarTestSystem>();
-    system->simulateError = true;
-    auto* errorSystem = system.get();
-    registrar.Register(std::move(system));
+    auto& errorSystem = registrar.Register<RegistrarTestSystem>();
+    errorSystem.simulateError = true;
 
-    system = std::make_unique<RegistrarTestSystem>();
-    auto* skippedSystem = system.get();
-    registrar.Register(std::move(system));
+    auto& okSystem = registrar.Register<RegistrarTestSystem>();
 
     const std::error_code error = registrar.RunInit();
     ASSERT_TRUE(error);
-    ASSERT_EQ(errorSystem->state, RegistrarTestSystem::State::JustCreated);
-    ASSERT_EQ(skippedSystem->state, RegistrarTestSystem::State::JustCreated);
+    ASSERT_EQ(errorSystem.state, RegistrarTestSystem::State::JustCreated);
+    ASSERT_EQ(okSystem.state, RegistrarTestSystem::State::JustCreated);
 }
 
 TEST(RegistrarTest, ReverseTerminationOrder)
@@ -73,15 +67,14 @@ TEST(RegistrarTest, ReverseTerminationOrder)
     std::stack<RegistrarTestSystem*> systems;
 
     auto addSystem = [&]() {
-        auto system = std::make_unique<RegistrarTestSystem>();
-        system->onInit = [system = system.get(), &systems]() {
-            systems.push(system);
+        auto& system = registrar.Register<RegistrarTestSystem>();
+        system.onInit = [&]() {
+            systems.push(&system);
         };
-        system->onTerm = [system = system.get(), &systems]() {
-            ASSERT_EQ(system, systems.top());
+        system.onTerm = [&]() {
+            ASSERT_EQ(&system, systems.top());
             systems.pop();
         };
-        registrar.Register(std::move(system));
     };
 
     addSystem();
