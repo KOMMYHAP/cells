@@ -2,13 +2,14 @@
 
 namespace common {
 
-template <class T>
-    requires std::derived_from<T, RegistrableSystem>
-T& Registrar::Register(std::unique_ptr<T> system)
+template <class T, class... Args>
+    requires std::is_base_of_v<RegistrableSystem, T> && std::is_constructible_v<T, Args...>
+T& Registrar::Register(Args&&... args)
 {
-    std::unique_ptr<RegistrableSystem> rawSystem { system.release() };
-    RegistrableSystem& reference = Register(std::move(rawSystem));
-    return static_cast<T&>(reference);
+    auto system = std::make_unique<T>(std::forward<Args>(args)...);
+    auto& systemRef = *system;
+    _systems.emplace_back(std::move(system));
+    return systemRef;
 }
 
 }

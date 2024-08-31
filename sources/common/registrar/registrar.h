@@ -7,11 +7,9 @@ namespace common {
 
 class Registrar {
 public:
-    template <class T>
-        requires std::derived_from<T, RegistrableSystem>
-    T& Register(std::unique_ptr<T> system);
-
-    RegistrableSystem& Register(std::unique_ptr<RegistrableSystem> system);
+    template <class T, class... Args>
+        requires std::is_base_of_v<RegistrableSystem, T> && std::is_constructible_v<T, Args...>
+    T& Register(Args&&... args);
 
     std::error_code RunInit();
     void RunTerm();
