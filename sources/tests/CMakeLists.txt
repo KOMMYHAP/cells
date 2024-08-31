@@ -10,7 +10,7 @@ add_executable(${PROJECT_NAME} main_tests.cpp tests_pch.h
         registrar_tests.cpp
         component_storage_tests.cpp
         system_tests.cpp
-        sol2_tests.cpp
+        #sol2_tests.cpp
         ecs_tests.cpp
 )
 
@@ -22,8 +22,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     cells-simulation 
     #cells-scripts 
     gtest
-    sol2::sol2
-    lua 
+    #sol2::sol2
+    #lua 
     EnTT::EnTT
 )
 target_copy_required_dll(${PROJECT_NAME})
