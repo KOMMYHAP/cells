@@ -9,12 +9,12 @@
 #include "world.h"
 
 #include "utils/stub_error_code.h"
-#include "widgets/menu_root_widget.h"
+// #include "widgets/menu_root_widget.h"
 #include "widgets/world_widget.h"
 
-#include "menu_widgets/fps_widget.h"
-#include "menu_widgets/group_menu_widget.h"
-#include "menu_widgets/imgui_demo_menu_widget.h"
+// #include "menu_widgets/fps_widget.h"
+// #include "menu_widgets/group_menu_widget.h"
+// #include "menu_widgets/imgui_demo_menu_widget.h"
 
 static constexpr std::string_view FontArgument = "--font";
 static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -41,10 +41,10 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     _window.setVerticalSyncEnabled(false);
     _window.setFramerateLimit(60);
 
-    if (!ImGui::SFML::Init(_window)) {
-        ASSERT_FAIL("Failed to init ImGui SFML!");
-        return common::MakeStubErrorCode();
-    }
+    // if (!ImGui::SFML::Init(_window)) {
+    //     ASSERT_FAIL("Failed to init ImGui SFML!");
+    //     return common::MakeStubErrorCode();
+    // }
 
     auto& world = storage.Modify<World>();
 
@@ -90,10 +90,10 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         _rootWidget->AddWidget<WorldWidget>(std::move(worldRenderConfig));
     }
 
-    MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
-    const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
-    menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
-    menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
+    // MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
+    // const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
+    // menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
+    // menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
 
     return {};
 }
@@ -103,7 +103,7 @@ void UiSystem::TerminateSystem()
     _rootWidget.reset();
     _renderSystem.reset();
     _font.reset();
-    ImGui::SFML::Shutdown();
+    // ImGui::SFML::Shutdown();
     _window.close();
 }
 
@@ -112,7 +112,7 @@ UiSystem::MainLoopFeedback UiSystem::ProcessInput()
     auto feedback { MainLoopFeedback::ShouldRun };
     sf::Event event {};
     while (_window.pollEvent(event)) {
-        ImGui::SFML::ProcessEvent(_window, event);
+        // ImGui::SFML::ProcessEvent(_window, event);
         if (event.type == sf::Event::Closed) {
             feedback = MainLoopFeedback::ShouldStop;
         }

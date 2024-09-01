@@ -12,7 +12,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         ui_system.h
 )
 
-add_subdirectory(menu_widgets)
+# add_subdirectory(menu_widgets)
 add_subdirectory(widgets)
 
 # SDL2::SDL2main may or may not be available. It is e.g. required by Windows GUI applications

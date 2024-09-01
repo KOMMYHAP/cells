@@ -13,7 +13,7 @@ RootWidget::~RootWidget()
 
 void RootWidget::UpdateWidget(sf::Time elapsedTime)
 {
-    ImGui::SFML::Update(*_window, elapsedTime);
+    // ImGui::SFML::Update(*_window, elapsedTime);
     for (const auto& widget : _widgets) {
         widget->UpdateWidget(elapsedTime);
     }
@@ -24,5 +24,5 @@ void RootWidget::RenderWidget(sf::RenderTarget& target)
     for (CustomRenderWidget* widget : _customRenderWidgets) {
         widget->RenderWidget(target);
     }
-    ImGui::SFML::Render(*_window);
+    // ImGui::SFML::Render(*_window);
 }

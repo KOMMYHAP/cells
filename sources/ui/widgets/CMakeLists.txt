@@ -7,7 +7,7 @@
     status_panel.cpp
     world_widget.h
     world_widget.cpp
-    menu_root_widget.h
-    menu_root_widget.hpp
-    menu_root_widget.cpp
+    #menu_root_widget.h
+    #menu_root_widget.hpp
+    #menu_root_widget.cpp
 )
