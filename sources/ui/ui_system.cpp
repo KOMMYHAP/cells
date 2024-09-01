@@ -12,22 +12,10 @@
 
 #include "menu_widgets/fps_widget.h"
 #include "menu_widgets/group_menu_widget.h"
+#include "menu_widgets/imgui_demo_menu_widget.h"
 
 static constexpr std::string_view FontArgument = "--font";
 static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
-
-namespace {
-
-class ImguiDemoMenuWidget final : public BaseMenuWidget {
-public:
-    MenuWidgetAction ProcessMenuItem(sf::Time elapsedTime) override
-    {
-        bool opened = true;
-        ImGui::ShowDemoWindow(&opened);
-        return opened ? MenuWidgetAction::KeepOpen : MenuWidgetAction::ShouldClose;
-    }
-};
-}
 
 std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
@@ -103,7 +91,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
     const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
     menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
-    menuRootWidget.AddWidget<ImguiDemoMenuWidget>("ImGui Demo");
+    menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
 
     return {};
 }
