@@ -11,7 +11,7 @@ public:
     WidgetType& AddWidget(Args&&... args);
 
     void UpdateWidget(sf::Time elapsedTime) override;
-    void RenderWidget(SDL_Renderer& renderer) override;
+    void RenderWidget() override;
 
 private:
     std::vector<std::unique_ptr<BaseWidget>> _widgets;

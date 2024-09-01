@@ -76,10 +76,10 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <xutility>
 #include <valarray>
-#include <vector>
 #include <variant>
+#include <vector>
+#include <xutility>
 
 // GSL
 #include <gsl/pointers> // owner, not_null
@@ -87,3 +87,5 @@
 #undef GSL_LIKELY
 #undef Expects
 #undef Ensures
+
+using std::literals::string_view_literals::operator""sv;

@@ -1,12 +1,8 @@
 #pragma once
 
-
 #include "registrar/registrable_system.h"
-#include "systems_ecs/render_system.h"
 #include "widgets/root_widget.h"
-
-struct SDL_Window;
-struct SDL_Renderer;
+#include "widgets/world/world_rasterization_system.h"
 
 class UiSystem final : public common::RegistrableSystem {
 public:
@@ -24,6 +20,6 @@ public:
 private:
     SDL_Window* _window { nullptr };
     SDL_Renderer* _renderer { nullptr };
-    std::unique_ptr<RenderSystem> _renderSystem;
+    std::unique_ptr<WorldRasterizationSystem> _renderSystem;
     std::unique_ptr<RootWidget> _rootWidget;
 };

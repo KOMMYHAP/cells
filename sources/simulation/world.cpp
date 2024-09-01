@@ -1,20 +1,18 @@
 #include "world.h"
 
-#include "SFML/Graphics/Shader.hpp"
-
 #include "cell_factories/random_cell_factory.h"
 
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
 #include "procedures/random_cell_spawn_procedure_system.h"
 
+#include "simulation/simulation_statistics_provider.h"
+
 #include "systems_ecs/age_system.h"
 #include "systems_ecs/alive_cells_statistics_system.h"
 #include "systems_ecs/brain_simulation_system.h"
 #include "systems_ecs/energy_decrease_system.h"
 #include "systems_ecs/graveyard_system.h"
-
-#include "simulation/simulation_statistics_provider.h"
 #include "systems_ecs/death_from_age_statistics_system.h"
 #include "systems_ecs/death_from_empty_energy_statistics_system.h"
 #include "systems_ecs/energy_leak_system.h"

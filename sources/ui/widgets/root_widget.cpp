@@ -14,9 +14,9 @@ void RootWidget::UpdateWidget(sf::Time elapsedTime)
     }
 }
 
-void RootWidget::RenderWidget(SDL_Renderer& renderer)
+void RootWidget::RenderWidget()
 {
     for (CustomRenderWidget* widget : _customRenderWidgets) {
-        widget->RenderWidget(renderer);
+        widget->RenderWidget();
     }
 }

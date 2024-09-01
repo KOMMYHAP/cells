@@ -6,19 +6,18 @@
 #include "storage/stack_storage.h"
 
 #include "ui_layout.h"
-#include "world.h"
-
 #include "utils/stub_error_code.h"
-#include "widgets/menu_root_widget.h"
-// #include "widgets/world_widget.h"
+#include "world.h"
 
 #include "menu_widgets/fps_widget.h"
 #include "menu_widgets/group_menu_widget.h"
 #include "menu_widgets/imgui_demo_menu_widget.h"
 #include "menu_widgets/implot_demo_menu_widget.h"
+#include "widgets/menu_root_widget.h"
+#include "widgets/world/world_rasterization_system.h"
+#include "widgets/world/world_widget.h"
 
 static constexpr std::string_view FontArgument = "--font";
-static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
 
 std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
@@ -28,8 +27,6 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     layout.fieldOffset = 20;
     layout.fieldWidth = layout.screenWidth - 2 * layout.fieldOffset;
     layout.fieldHeight = layout.screenHeight - 2 * layout.fieldOffset;
-    layout.statusTextOffset = 5;
-    layout.statusTextSize = 10;
     layout.cellPadding = 0;
 
     // ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
@@ -72,35 +69,14 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         return common::MakeStubErrorCode();
     }
 
-    // _font = std::make_unique<sf::Font>();
-    // const bool fontLoaded = _font->loadFromFile(std::string { *mbFontPath });
-    // if (!fontLoaded) {
-    //     ASSERT_FAIL("Stub: invalid font by specified path!");
-    //     return common::MakeStubErrorCode();
-    // }
-
     storage.Store<UiSystem*>(this);
 
-    EcsWorld& ecsWorld = world.ModifyEcsWorld();
-    _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
-
     _rootWidget = std::make_unique<RootWidget>();
-    {
-        // auto mbFragmentShaderPath = commandLine.FindValue(FragmentShaderArgument);
-        // ASSERT(mbFragmentShaderPath.has_value());
-        //
-        // auto shader = std::make_unique<sf::Shader>();
-        // const bool loaded = shader->loadFromFile(std::string { *mbFragmentShaderPath }, sf::Shader::Fragment);
-        // ASSERT(loaded);
-        //
-        // WorldWidget::Config worldRenderConfig {
-        //     _renderSystem.get(),
-        //     std::move(shader),
-        //     sf::Vector2u { layout.fieldWidth, layout.fieldHeight },
-        //     sf::Vector2u { layout.fieldOffset, layout.fieldOffset },
-        // };
-        // _rootWidget->AddWidget<WorldWidget>(std::move(worldRenderConfig));
-    }
+
+    EcsWorld& ecsWorld = world.ModifyEcsWorld();
+    _renderSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld);
+    const SDL_Rect worldRect { layout.fieldOffset, layout.fieldOffset, layout.fieldWidth, layout.fieldHeight };
+    _rootWidget->AddWidget<WorldWidget>(*_renderer, *_renderSystem, worldRect);
 
     MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
     const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
@@ -150,9 +126,9 @@ void UiSystem::Update(sf::Time elapsedTime)
 
 void UiSystem::Render()
 {
-    _rootWidget->RenderWidget(*_renderer);
+    _rootWidget->RenderWidget();
     ImGui::Render();
-    
+
     SDL_RenderSetScale(_renderer, ImGui::GetIO().DisplayFramebufferScale.x, ImGui::GetIO().DisplayFramebufferScale.y);
     SDL_SetRenderDrawColor(_renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(_renderer);

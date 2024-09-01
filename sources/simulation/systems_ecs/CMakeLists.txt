@@ -1,6 +1,4 @@
 target_sources(${PROJECT_NAME} PRIVATE
-        render_system.cpp
-        render_system.h
         brain_simulation_system.h
         brain_simulation_system.cpp
         energy_leak_system.h

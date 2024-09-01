@@ -4,6 +4,8 @@ add_library(${PROJECT_NAME} STATIC)
 target_sources(${PROJECT_NAME} PRIVATE
         ui_system.cpp
         base_widget.h
+        sdl_utils.h
+        sdl_utils.cpp
 )
 
 target_sources(${PROJECT_NAME} PUBLIC
