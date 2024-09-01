@@ -3,5 +3,5 @@
 
 class GroupMenuWidget final : public BaseMenuWidget {
 public:
-    MenuWidgetAction ProcessMenuItem(sf::Time elapsedTime) override {return MenuWidgetAction::KeepOpen;}
+    MenuWidgetAction ProcessMenuItem(sf::Time elapsedTime) override { return MenuWidgetAction::KeepOpen; }
 };
