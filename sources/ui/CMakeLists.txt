@@ -3,11 +3,7 @@ add_library(${PROJECT_NAME} STATIC)
 
 target_sources(${PROJECT_NAME} PRIVATE
         ui_system.cpp
-        custom_render_widget.h
         base_widget.h
-        root_widget.h
-        root_widget.hpp
-        root_widget.cpp
 )
 
 target_sources(${PROJECT_NAME} PUBLIC
@@ -16,6 +12,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         ui_system.h
 )
 
+add_subdirectory(menu_widgets)
 add_subdirectory(widgets)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

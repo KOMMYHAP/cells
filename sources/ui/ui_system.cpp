@@ -7,8 +7,10 @@
 #include "world.h"
 
 #include "utils/stub_error_code.h"
-#include "widgets/fps_widget.h"
+#include "widgets/menu_root_widget.h"
 #include "widgets/world_widget.h"
+
+#include "menu_widgets/fps_widget.h"
 
 static constexpr std::string_view FontArgument = "--font";
 static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -84,7 +86,8 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         _rootWidget->AddWidget<WorldWidget>(std::move(worldRenderConfig));
     }
 
-    _rootWidget->AddWidget<FpsWidget>();
+    MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
+    menuRootWidget.AddWidget<FpsWidget>("FPS");
 
     return {};
 }
