@@ -6,4 +6,6 @@
     group_menu_widget.h
     imgui_demo_menu_widget.h
     imgui_demo_menu_widget.cpp
+    test_menu_widget.h
+    test_menu_widget.cpp
 )
