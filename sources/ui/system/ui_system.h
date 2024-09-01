@@ -1,23 +1,25 @@
 #pragma once
 
-#include "registrar/registrable_system.h"
+#include "ui_application_interface.h"
 #include "widgets/root_widget.h"
 #include "widgets/world/world_rasterization_system.h"
+#include "world.h"
 
-class UiSystem final : public common::RegistrableSystem {
+class UiSystem final : public UiApplicationInterface {
 public:
-    std::error_code InitializeSystem(common::StackStorage& storage) override;
-    void TerminateSystem() override;
+    explicit UiSystem(common::StackStorage& storage);
+    ~UiSystem() override;
 
-    enum class MainLoopFeedback {
-        ShouldStop,
-        ShouldRun
-    };
-    MainLoopFeedback ProcessInput();
-    void Update(sf::Time elapsedTime);
-    void Render();
+    void ApplicationRunMainLoop() override;
 
 private:
+    void ProcessInput();
+    void StartFrame();
+    void Update(sf::Time elapsedTime);
+    void Render();
+    void EndFrame();
+
+    bool _shouldStopMainLoop { false };
     SDL_Window* _window { nullptr };
     SDL_Renderer* _renderer { nullptr };
     std::unique_ptr<WorldRasterizationSystem> _renderSystem;

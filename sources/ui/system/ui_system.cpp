@@ -1,12 +1,9 @@
 #include "ui_system.h"
 
-#include "SDL2/SDL.h"
-
-#include "command_line.h"
 #include "storage/stack_storage.h"
 
+#include "sdl_panic.h"
 #include "ui_layout.h"
-#include "utils/stub_error_code.h"
 #include "world.h"
 
 #include "menu_widgets/fps_widget.h"
@@ -17,9 +14,7 @@
 #include "widgets/world/world_rasterization_system.h"
 #include "widgets/world/world_widget.h"
 
-static constexpr std::string_view FontArgument = "--font";
-
-std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
+UiSystem::UiSystem(common::StackStorage& storage)
 {
     UiLayout layout;
     layout.screenWidth = 800;
@@ -27,28 +22,20 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     layout.fieldOffset = 20;
     layout.fieldWidth = layout.screenWidth - 2 * layout.fieldOffset;
     layout.fieldHeight = layout.screenHeight - 2 * layout.fieldOffset;
-    layout.cellPadding = 0;
-
-    // ASSERT(StatusTextOffset * 2 + StatusTextSize <= FieldOffset);
-    // ASSERT(layout.fieldWidth % (CellSize + CellPadding) == 0);
-    // ASSERT(layout.fieldHeight % (CellSize + CellPadding) == 0);
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER)) {
-        std::cerr << std::format("SDL_Init failed: %s!", SDL_GetError()) << std::endl;
-        return common::MakeStubErrorCode();
+        PanicOnSdlError("SDL_Init"sv);
     }
 
     static constexpr auto WindowFlags = static_cast<SDL_WindowFlags>(SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
     _window = SDL_CreateWindow("Cells", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, layout.screenWidth, layout.screenHeight, WindowFlags);
     if (_window == nullptr) {
-        std::cerr << std::format("SDL_CreateWindow failed: %s!", SDL_GetError()) << std::endl;
-        return common::MakeStubErrorCode();
+        PanicOnSdlError("SDL_CreateWindow"sv);
     }
 
     _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (_renderer == nullptr) {
-        std::cerr << std::format("SDL_CreateRenderer failed: %s!", SDL_GetError()) << std::endl;
-        return common::MakeStubErrorCode();
+        PanicOnSdlError("SDL_CreateRenderer"sv);
     }
 
     IMGUI_CHECKVERSION();
@@ -57,22 +44,18 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 
-    ImGui_ImplSDL2_InitForSDLRenderer(_window, _renderer);
-    ImGui_ImplSDLRenderer2_Init(_renderer);
-
-    auto& world = storage.Modify<World>();
-
-    const auto& commandLine = storage.Get<common::CommandLine>();
-    auto mbFontPath = commandLine.FindValue(FontArgument);
-    if (!mbFontPath.has_value()) {
-        ASSERT_FAIL("Stub: pass font path to cmd line!");
-        return common::MakeStubErrorCode();
+    if (!ImGui_ImplSDL2_InitForSDLRenderer(_window, _renderer)) {
+        ASSERT_FAIL("ImGui_ImplSDL2_InitForSDLRenderer failed!");
+        return;
     }
-
-    storage.Store<UiSystem*>(this);
+    if (!ImGui_ImplSDLRenderer2_Init(_renderer)) {
+        ASSERT_FAIL("ImGui_ImplSDLRenderer2_Init failed!");
+        return;
+    }
 
     _rootWidget = std::make_unique<RootWidget>();
 
+    auto& world = storage.Modify<World>();
     EcsWorld& ecsWorld = world.ModifyEcsWorld();
     _renderSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld);
     const SDL_Rect worldRect { layout.fieldOffset, layout.fieldOffset, layout.fieldWidth, layout.fieldHeight };
@@ -83,11 +66,9 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
     menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
     menuRootWidget.AddWidget<ImPlotDemoMenuWidget>("ImPlot Demo");
-
-    return {};
 }
 
-void UiSystem::TerminateSystem()
+UiSystem::~UiSystem()
 {
     _rootWidget.reset();
     _renderSystem.reset();
@@ -100,23 +81,25 @@ void UiSystem::TerminateSystem()
     SDL_Quit();
 }
 
-UiSystem::MainLoopFeedback UiSystem::ProcessInput()
+void UiSystem::ProcessInput()
 {
-    auto feedback { MainLoopFeedback::ShouldRun };
+    bool shouldStopMainLoop = false;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         ImGui_ImplSDL2_ProcessEvent(&event);
         const bool stopByQuitEvent = event.type == SDL_QUIT;
         const bool stopByWindowEvent = event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(_window);
-        feedback = (stopByQuitEvent || stopByWindowEvent) ? MainLoopFeedback::ShouldStop : MainLoopFeedback::ShouldRun;
+        shouldStopMainLoop |= stopByQuitEvent || stopByWindowEvent;
     }
 
-    // Start the Dear ImGui frame
+    _shouldStopMainLoop = shouldStopMainLoop;
+}
+
+void UiSystem::StartFrame()
+{
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-
-    return feedback;
 }
 
 void UiSystem::Update(sf::Time elapsedTime)
@@ -134,4 +117,21 @@ void UiSystem::Render()
     SDL_RenderClear(_renderer);
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(_renderer);
+}
+
+void UiSystem::EndFrame()
+{
+}
+
+void UiSystem::ApplicationRunMainLoop()
+{
+    sf::Clock frameClock;
+    while (!_shouldStopMainLoop) {
+        const sf::Time elapsedTime = frameClock.restart();
+        ProcessInput();
+        StartFrame();
+        Update(elapsedTime);
+        Render();
+        EndFrame();
+    }
 }

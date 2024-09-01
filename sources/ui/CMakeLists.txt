@@ -1,20 +1,12 @@
 project(cells-ui)
-add_library(${PROJECT_NAME} STATIC)
-
-target_sources(${PROJECT_NAME} PRIVATE
-        ui_system.cpp
-        base_widget.h
-        sdl_utils.h
-        sdl_utils.cpp
-)
-
-target_sources(${PROJECT_NAME} PUBLIC
-        ui_pch.h
-        ui_layout.h
-        ui_system.h
+add_library(${PROJECT_NAME} STATIC
+    ui_registrable_system.cpp
+    ui_registrable_system.h
+    ui_application_interface.h
 )
 
 add_subdirectory(menu_widgets)
+add_subdirectory(system)
 add_subdirectory(widgets)
 
 # SDL2::SDL2main may or may not be available. It is e.g. required by Windows GUI applications
@@ -23,11 +15,13 @@ if(TARGET SDL2::SDL2main)
     target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2main)
 endif()
 
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    cells-simulation
+    sfml-system
+)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        cells-simulation
-        sfml-system
         SDL2::SDL2
         ImGuiLib
 )
-target_precompile_headers(${PROJECT_NAME} PRIVATE ui_pch.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

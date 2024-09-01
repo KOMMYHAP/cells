@@ -1,6 +1,6 @@
 #include "world_widget.h"
 
-#include "sdl_utils.h"
+#include "system/sdl_panic.h"
 
 WorldWidget::WorldWidget(SDL_Renderer& renderer, WorldRasterizationSystem& worldRasterizationSystem, SDL_Rect textureRect)
     : _renderer(&renderer)
@@ -18,7 +18,7 @@ WorldWidget::WorldWidget(SDL_Renderer& renderer, WorldRasterizationSystem& world
     }
 
     uint32_t pixelFormat { 0 };
-    if (!SDL_QueryTexture(_texture, &pixelFormat, nullptr, nullptr, nullptr)) {
+    if (SDL_QueryTexture(_texture, &pixelFormat, nullptr, nullptr, nullptr)) {
         PanicOnSdlError("SDL_QueryTexture"sv);
     }
     _texturePixelFormat = SDL_AllocFormat(pixelFormat);
@@ -35,7 +35,7 @@ WorldWidget::~WorldWidget()
 
 void WorldWidget::RenderWidget()
 {
-    if (!SDL_RenderCopy(_renderer, _texture, nullptr, &_textureRect)) {
+    if (SDL_RenderCopy(_renderer, _texture, nullptr, &_textureRect)) {
         PanicOnSdlError("SDL_RenderCopy"sv);
     }
 }
@@ -44,7 +44,7 @@ void WorldWidget::UpdateWidget(sf::Time elapsedTime)
 {
     void* pixels { nullptr };
     int pitch { 0 };
-    if (!SDL_LockTexture(_texture, nullptr, &pixels, &pitch)) {
+    if (SDL_LockTexture(_texture, nullptr, &pixels, &pitch)) {
         PanicOnSdlError("SDL_LockTexture"sv);
     }
     const size_t totalPixelsCount = NarrowCast<size_t>(pitch) * _textureRect.h * _texturePixelFormat->BytesPerPixel;
