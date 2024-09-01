@@ -50,33 +50,35 @@ const MenuRootWidget::WidgetsGroup* MenuRootWidget::FindWidgetGroup(MenuWidgetId
     return &group;
 }
 
-bool MenuRootWidget::UpdateWidgetsGroup(MenuWidgetId id)
+void MenuRootWidget::UpdateWidgetsGroup(MenuWidgetId id)
 {
     const WidgetsGroup* group = FindWidgetGroup(id);
     if (!group) {
-        return ProcessWidgetState(id);
+        ProcessWidgetState(id);
+        return;
     }
 
-    bool shouldProcessChild = false;
     for (const MenuWidgetId childId : group->items) {
         const WidgetData& widgetData = GetWidgetData(id);
         if (!ImGui::BeginMenu(widgetData.name.c_str())) {
             continue;
         }
-        shouldProcessChild = UpdateWidgetsGroup(childId);
+        UpdateWidgetsGroup(childId);
         ImGui::EndMenu();
     }
-    return shouldProcessChild;
 }
 
-bool MenuRootWidget::ProcessWidgetState(MenuWidgetId id)
+void MenuRootWidget::ProcessWidgetState(MenuWidgetId id)
 {
     WidgetData& widgetData = ModifyWidgetData(id);
     WidgetState& widgetState = widgetData.state;
 
     const bool wasOpen = widgetState.opened;
+    if (!ImGui::MenuItem(widgetData.name.c_str(), nullptr, &widgetState.opened)) {
+        return;
+    }
 
-    if (ImGui::MenuItem(widgetData.name.c_str(), nullptr, &widgetState.opened)) {
+    if (widgetState.opened) {
         if (!widgetState.wasOpenedAtLeastOnce) {
             widgetState.wasOpenedAtLeastOnce = true;
             widgetState.justOpenedFirstTime = true;
@@ -85,20 +87,21 @@ bool MenuRootWidget::ProcessWidgetState(MenuWidgetId id)
         if (widgetState.justOpened) {
             _openedWidgets.emplace_back(id);
         }
-        return true;
     }
 
-    return false;
+    widgetState.justClosed = wasOpen && !widgetState.opened;
 }
+
 void MenuRootWidget::UpdateOpenedWidgets(sf::Time elapsedTime)
 {
     auto it = std::ranges::remove_if(_openedWidgets, [this, elapsedTime](const MenuWidgetId id) {
-        return ProcessOpenedWidgetState(id, elapsedTime);
+        const bool shouldClose = ProcessOpenedWidgetState(id, elapsedTime);
+        return shouldClose;
     });
     _openedWidgets.erase(it.begin(), it.end());
 }
 
-bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, sf::Time elapsedTime)
+bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, const sf::Time elapsedTime)
 {
     WidgetData& widgetData = ModifyWidgetData(id);
     BaseMenuWidget& widget = *widgetData.widget;
@@ -112,13 +115,15 @@ bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, sf::Time el
         widgetState.justOpened = false;
         widget.OnMenuItemJustOpened();
     }
-
-    const BaseMenuWidget::MenuWidgetAction action = widget.ProcessMenuItem(elapsedTime);
-    widgetState.opened = action == BaseMenuWidget::MenuWidgetAction::KeepOpen;
-
-    if (!widgetState.opened) {
-        widget.OnMenuItemJustClosed();
+    if (widgetState.opened) {
+        const BaseMenuWidget::MenuWidgetAction action = widget.ProcessMenuItem(elapsedTime);
+        widgetState.justClosed = action == BaseMenuWidget::MenuWidgetAction::ShouldClose;
     }
-
-    return !widgetState.opened;
+    if (widgetState.justClosed) {
+        widgetState.justClosed = false;
+        widgetState.opened = false;
+        widget.OnMenuItemJustClosed();
+        return true;
+    }
+    return false;
 }

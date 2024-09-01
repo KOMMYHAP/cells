@@ -20,8 +20,9 @@ private:
 
     struct WidgetState {
         bool opened { false };
-        bool justOpened { false };
         bool justOpenedFirstTime { false };
+        bool justOpened { false };
+        bool justClosed { false };
         bool wasOpenedAtLeastOnce { false };
     };
     struct WidgetData {
@@ -39,8 +40,8 @@ private:
     const WidgetData& GetWidgetData(MenuWidgetId id) const;
     const WidgetsGroup* FindWidgetGroup(MenuWidgetId id) const;
 
-    bool UpdateWidgetsGroup(MenuWidgetId id);
-    bool ProcessWidgetState(MenuWidgetId id);
+    void UpdateWidgetsGroup(MenuWidgetId id);
+    void ProcessWidgetState(MenuWidgetId id);
 
     void UpdateOpenedWidgets(sf::Time elapsedTime);
     bool ProcessOpenedWidgetState(MenuWidgetId id, sf::Time elapsedTime);
