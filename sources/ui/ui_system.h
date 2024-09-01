@@ -4,8 +4,14 @@
 #include "systems_ecs/render_system.h"
 #include "widgets/root_widget.h"
 
-class UiSystem : public common::RegistrableSystem {
+struct SDL_Window;
+struct SDL_Renderer;
+
+class UiSystem final : public common::RegistrableSystem {
 public:
+    UiSystem();
+    ~UiSystem();
+    
     std::error_code InitializeSystem(common::StackStorage& storage) override;
     void TerminateSystem() override;
 
@@ -17,12 +23,9 @@ public:
     void Update(sf::Time elapsedTime);
     void Render();
 
-    const sf::Font& GetDefaultFont() const { return *_font; }
-
 private:
-    
-    sf::RenderWindow _window;
-    std::unique_ptr<sf::Font> _font;
+    SDL_Window* _window { nullptr };
+    SDL_Renderer* _renderer { nullptr };
     std::unique_ptr<RenderSystem> _renderSystem;
     std::unique_ptr<RootWidget> _rootWidget;
 };

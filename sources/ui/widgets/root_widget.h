@@ -4,7 +4,6 @@
 
 class RootWidget final : public CustomRenderWidget {
 public:
-    explicit RootWidget(sf::RenderWindow& window);
     ~RootWidget() override;
 
     template <class WidgetType, class... Args>
@@ -15,7 +14,6 @@ public:
     void RenderWidget(sf::RenderTarget& target) override;
 
 private:
-    gsl::not_null<sf::RenderWindow*> _window;
     std::vector<std::unique_ptr<BaseWidget>> _widgets;
     std::vector<CustomRenderWidget*> _customRenderWidgets;
 };

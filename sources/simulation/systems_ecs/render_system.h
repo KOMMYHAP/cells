@@ -17,7 +17,7 @@ public:
 
     void DoProcessComponents(EcsEntity id, CellType type, CellPosition position);
 private:
-    sf::Color GetColor(CellType type) const;
+    // sf::Color GetColor(CellType type) const;
 
     std::vector<uint32_t> _textureData;
     sf::Vector2u _fieldSize;
