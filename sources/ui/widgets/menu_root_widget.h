@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "base_widget.h"
-#include "menu_widgets/menu_widget_id.h"
 #include "menu_widgets/base_menu_widget.h"
+#include "menu_widgets/menu_widget_id.h"
 
 class MenuRootWidget final : public BaseWidget {
 public:
@@ -11,7 +11,7 @@ public:
 
     template <class T, class... Args>
         requires std::is_base_of_v<BaseMenuWidget, T> && std::is_constructible_v<T, Args...>
-    MenuWidgetId LinkWidget(MenuWidgetId parent, std::string name, Args&&... args);
+    MenuWidgetId AddWidget(MenuWidgetId parent, std::string name, Args&&... args);
 
     void UpdateWidget(sf::Time elapsedTime) override;
 
@@ -30,18 +30,18 @@ private:
     struct WidgetsGroup {
         std::vector<MenuWidgetId> items;
     };
-    using WidgetNextGroup = std::optional<MenuWidgetId>;
 
     MenuWidgetId AddWidget(MenuWidgetId parent, WidgetData widgetData);
 
-    void UpdateWidgetsGroup(MenuWidgetId id, sf::Time elapsedTime);
-    WidgetNextGroup UpdateWidget(MenuWidgetId id, sf::Time elapsedTime);
+    WidgetData& ModifyWidgetData(MenuWidgetId id);
+    const WidgetsGroup* FindWidgetGroup(MenuWidgetId id) const;
 
-    void ProcessWidgetAction(WidgetData& widgetData, sf::Time elapsedTime);
+    bool UpdateWidgetsGroup(MenuWidgetId id, sf::Time elapsedTime);
+    bool ProcessWidgetAction(WidgetData& widgetData, sf::Time elapsedTime);
 
     std::vector<WidgetData> _widgets;
     std::map<MenuWidgetId, WidgetsGroup> _indexedGroups;
-    MenuWidgetId _rootEntry { RootWidgetId };
+    MenuWidgetId _rootWidgetId { RootWidgetId };
 };
 
 #include "menu_root_widget.hpp"
