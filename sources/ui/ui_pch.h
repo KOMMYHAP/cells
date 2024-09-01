@@ -1,9 +1,6 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
-
-#include "SDL2/SDL.h"
+#include "SFML/System.hpp"
 
 #include "imgui.h"
 #include "implot.h"

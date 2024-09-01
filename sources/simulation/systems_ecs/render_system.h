@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <SFML/Graphics/Color.hpp>
-
 #include "simulation/simulation_ecs_system.h"
 
 #include "components/cell_position.h"
@@ -16,6 +14,7 @@ public:
     sf::Vector2u GetTextureSize() const { return _fieldSize; }
 
     void DoProcessComponents(EcsEntity id, CellType type, CellPosition position);
+
 private:
     // sf::Color GetColor(CellType type) const;
 

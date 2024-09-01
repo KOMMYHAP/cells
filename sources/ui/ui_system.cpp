@@ -10,7 +10,7 @@
 
 #include "utils/stub_error_code.h"
 #include "widgets/menu_root_widget.h"
-#include "widgets/world_widget.h"
+// #include "widgets/world_widget.h"
 
 #include "menu_widgets/fps_widget.h"
 #include "menu_widgets/group_menu_widget.h"
@@ -19,9 +19,6 @@
 
 static constexpr std::string_view FontArgument = "--font";
 static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
-
-UiSystem::UiSystem() = default;
-UiSystem::~UiSystem() = default;
 
 std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 {
@@ -153,7 +150,9 @@ void UiSystem::Update(sf::Time elapsedTime)
 
 void UiSystem::Render()
 {
+    _rootWidget->RenderWidget(*_renderer);
     ImGui::Render();
+    
     SDL_RenderSetScale(_renderer, ImGui::GetIO().DisplayFramebufferScale.x, ImGui::GetIO().DisplayFramebufferScale.y);
     SDL_SetRenderDrawColor(_renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(_renderer);

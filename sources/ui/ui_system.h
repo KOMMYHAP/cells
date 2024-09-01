@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "registrar/registrable_system.h"
 #include "systems_ecs/render_system.h"
 #include "widgets/root_widget.h"
@@ -9,9 +10,6 @@ struct SDL_Renderer;
 
 class UiSystem final : public common::RegistrableSystem {
 public:
-    UiSystem();
-    ~UiSystem();
-    
     std::error_code InitializeSystem(common::StackStorage& storage) override;
     void TerminateSystem() override;
 
