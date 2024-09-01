@@ -43,12 +43,18 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
         return common::MakeStubErrorCode();
     }
 
-    static constexpr auto WindowFlags = static_cast<SDL_WindowFlags>(SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    if (SDL_CreateWindowAndRenderer(layout.screenWidth, layout.screenHeight, WindowFlags, &_window, &_renderer) != 0) {
-        std::cerr << std::format("SDL_CreateWindowAndRenderer failed: %s!", SDL_GetError()) << std::endl;
+    static constexpr auto WindowFlags = static_cast<SDL_WindowFlags>(SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
+    _window = SDL_CreateWindow("Cells", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, layout.screenWidth, layout.screenHeight, WindowFlags);
+    if (_window == nullptr) {
+        std::cerr << std::format("SDL_CreateWindow failed: %s!", SDL_GetError()) << std::endl;
         return common::MakeStubErrorCode();
     }
-    SDL_SetWindowTitle(_window, "Cells");
+
+    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+    if (_renderer == nullptr) {
+        std::cerr << std::format("SDL_CreateRenderer failed: %s!", SDL_GetError()) << std::endl;
+        return common::MakeStubErrorCode();
+    }
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
