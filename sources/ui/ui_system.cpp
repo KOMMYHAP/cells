@@ -22,8 +22,9 @@ class ImguiDemoMenuWidget final : public BaseMenuWidget {
 public:
     MenuWidgetAction ProcessMenuItem(sf::Time elapsedTime) override
     {
-        ImGui::ShowDemoWindow(nullptr);
-        return MenuWidgetAction::KeepOpen;
+        bool opened = true;
+        ImGui::ShowDemoWindow(&opened);
+        return opened ? MenuWidgetAction::KeepOpen : MenuWidgetAction::ShouldClose;
     }
 };
 }
@@ -100,8 +101,8 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     }
 
     MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
-    // const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
-    // menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
+    const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
+    menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
     menuRootWidget.AddWidget<ImguiDemoMenuWidget>("ImGui Demo");
 
     return {};

@@ -19,8 +19,10 @@ private:
     static constexpr auto RootWidgetId = static_cast<MenuWidgetId>(std::numeric_limits<std::underlying_type_t<MenuWidgetId>>::max());
 
     struct WidgetState {
+        bool opened { false };
+        bool justOpened { false };
+        bool justOpenedFirstTime { false };
         bool wasOpenedAtLeastOnce { false };
-        bool wasOpened { false };
     };
     struct WidgetData {
         WidgetState state;
@@ -34,14 +36,19 @@ private:
     MenuWidgetId AddWidget(MenuWidgetId parent, WidgetData widgetData);
 
     WidgetData& ModifyWidgetData(MenuWidgetId id);
+    const WidgetData& GetWidgetData(MenuWidgetId id) const;
     const WidgetsGroup* FindWidgetGroup(MenuWidgetId id) const;
 
-    bool UpdateWidgetsGroup(MenuWidgetId id, sf::Time elapsedTime);
-    bool ProcessWidgetAction(WidgetData& widgetData, sf::Time elapsedTime);
+    bool UpdateWidgetsGroup(MenuWidgetId id);
+    bool ProcessWidgetState(MenuWidgetId id);
+
+    void UpdateOpenedWidgets(sf::Time elapsedTime);
+    bool ProcessOpenedWidgetState(MenuWidgetId id, sf::Time elapsedTime);
 
     std::vector<WidgetData> _widgets;
     std::map<MenuWidgetId, WidgetsGroup> _indexedGroups;
     MenuWidgetId _rootWidgetId { RootWidgetId };
+    std::vector<MenuWidgetId> _openedWidgets;
 };
 
 #include "menu_root_widget.hpp"
