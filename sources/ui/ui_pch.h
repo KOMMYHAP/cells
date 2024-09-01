@@ -6,6 +6,7 @@
 #include "SDL2/SDL.h"
 
 #include "imgui.h"
+#include "implot.h"
 
 #include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_sdlrenderer2.h"

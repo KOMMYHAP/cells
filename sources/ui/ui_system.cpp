@@ -15,6 +15,7 @@
 #include "menu_widgets/fps_widget.h"
 #include "menu_widgets/group_menu_widget.h"
 #include "menu_widgets/imgui_demo_menu_widget.h"
+#include "menu_widgets/implot_demo_menu_widget.h"
 
 static constexpr std::string_view FontArgument = "--font";
 static constexpr std::string_view FragmentShaderArgument = "--fragment-shader";
@@ -58,6 +59,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 
@@ -112,6 +114,7 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
     const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
     menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
     menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
+    menuRootWidget.AddWidget<ImPlotDemoMenuWidget>("ImPlot Demo");
 
     return {};
 }
@@ -122,6 +125,7 @@ void UiSystem::TerminateSystem()
     _renderSystem.reset();
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
+    ImPlot::DestroyContext();
     ImGui::DestroyContext();
     SDL_DestroyRenderer(_renderer);
     SDL_DestroyWindow(_window);

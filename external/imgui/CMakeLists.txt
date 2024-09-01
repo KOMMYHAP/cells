@@ -48,5 +48,5 @@ target_sources(${PROJECT_NAME} PUBLIC
     ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer2.h
     ${IMPLOT_DIR}/implot.h
 )
-target_include_directories(${PROJECT_NAME} PUBLIC ${IMGUI_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${IMGUI_DIR} ${IMPLOT_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC SDL2::SDL2)
