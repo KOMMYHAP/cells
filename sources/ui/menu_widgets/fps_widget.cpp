@@ -2,8 +2,8 @@
 
 BaseMenuWidget::MenuWidgetAction FpsWidget::ProcessMenuItem(sf::Time elapsedTime)
 {
-    const bool opened = ImGui::Begin("FPS");
-    if (opened) {
+    bool opened = true;
+    if (ImGui::Begin("FPS", &opened)) {
         _frameTimeCounter.AddSample(elapsedTime.asMilliseconds());
         const int32_t frameDuration = _frameTimeCounter.CalcMedian();
         const int32_t fps = static_cast<int32_t>(std::round(1000.0f / static_cast<float>(frameDuration)));
