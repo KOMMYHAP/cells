@@ -84,11 +84,6 @@ std::error_code UiSystem::InitializeSystem(common::StackStorage& storage)
 
     storage.Store<UiSystem*>(this);
 
-    // {
-    //     auto statusPanel = std::make_unique<StatusPanel>(layout, *_font, world);
-    //     AddWidget(std::move(statusPanel));
-    // }
-
     EcsWorld& ecsWorld = world.ModifyEcsWorld();
     _renderSystem = std::make_unique<RenderSystem>(ecsWorld, world.GetWorldSize());
 
