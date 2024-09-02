@@ -24,6 +24,11 @@ uint32_t WorldRasterizationSystem::GetColor(const CellType type) const
 void WorldRasterizationSystem::SetDestination(const WorldRasterizationData& rasterizationData)
 {
     _rasterizationData = &rasterizationData;
+
+    const size_t bpp = _rasterizationData->pixelFormat->BytesPerPixel;
+    const uint32_t color = GetColor(CellType::Dummy);
+    ASSERT(bpp == 4);
+    SDL_memset4(rasterizationData.rawPixelData, color, _rasterizationData->pixelDataBytesCount / bpp);
 }
 
 void WorldRasterizationSystem::ResetDestination()
@@ -38,11 +43,11 @@ void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellT
     // todo: ask EnTT to sort CellPosition to increase data locality?
 
     const size_t bpp = _rasterizationData->pixelFormat->BytesPerPixel;
-    const size_t pixelDataOffset = position.y * _rasterizationData->pitch + position.x * bpp;
-    ASSERT(pixelDataOffset < _rasterizationData->totalPixelsCount);
-    ASSERT(pixelDataOffset + bpp <= _rasterizationData->totalPixelsCount);
+    const size_t pixelDataOffset = static_cast<size_t>(position.y) * _rasterizationData->pitch + position.x * bpp;
+    ASSERT(pixelDataOffset < _rasterizationData->pixelDataBytesCount);
+    ASSERT(pixelDataOffset + bpp <= _rasterizationData->pixelDataBytesCount);
 
     const uint32_t color = GetColor(type);
     ASSERT(bpp <= sizeof(color));
-    std::memcpy(&_rasterizationData->rawPixels[pixelDataOffset], &color, bpp);
+    SDL_memcpy(&_rasterizationData->rawPixelData[pixelDataOffset], &color, bpp);
 }

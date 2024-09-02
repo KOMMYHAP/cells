@@ -10,7 +10,7 @@ WorldWidget::WorldWidget(SDL_Renderer& renderer, World& world, WorldRasterizatio
 {
     _texture = SDL_CreateTexture(
         _renderer,
-        SDL_PIXELFORMAT_RGB555,
+        SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
         NarrowCast<int>(textureRect.w),
         NarrowCast<int>(textureRect.h));
@@ -48,11 +48,10 @@ void WorldWidget::UpdateWidget(sf::Time elapsedTime)
     if (SDL_LockTexture(_texture, nullptr, &pixels, &pitch)) {
         PanicOnSdlError("SDL_LockTexture"sv);
     }
-    const size_t totalPixelsCount = NarrowCast<size_t>(pitch) * _textureRect.h * _texturePixelFormat->BytesPerPixel;
     const WorldRasterizationData data {
         static_cast<std::byte*>(pixels),
+        NarrowCast<size_t>(pitch) * _textureRect.h,
         NarrowCast<uint32_t>(pitch),
-        totalPixelsCount,
         _texturePixelFormat
     };
     _rasterizationSystem->SetDestination(data);
