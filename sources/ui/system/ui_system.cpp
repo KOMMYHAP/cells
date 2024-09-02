@@ -14,7 +14,7 @@
 #include "widgets/world/world_rasterization_system.h"
 #include "widgets/world/world_widget.h"
 
-UiSystem::UiSystem(common::StackStorage& storage)
+UiSystem::UiSystem(World& world)
 {
     UiLayout layout;
     layout.screenWidth = 800;
@@ -55,11 +55,10 @@ UiSystem::UiSystem(common::StackStorage& storage)
 
     _rootWidget = std::make_unique<RootWidget>();
 
-    auto& world = storage.Modify<World>();
     EcsWorld& ecsWorld = world.ModifyEcsWorld();
     _renderSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld);
     const SDL_Rect worldRect { layout.fieldOffset, layout.fieldOffset, layout.fieldWidth, layout.fieldHeight };
-    _rootWidget->AddWidget<WorldWidget>(*_renderer, *_renderSystem, worldRect);
+    _rootWidget->AddWidget<WorldWidget>(*_renderer, world, *_renderSystem, worldRect);
 
     MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
     const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");

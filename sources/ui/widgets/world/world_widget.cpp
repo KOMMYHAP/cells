@@ -2,14 +2,15 @@
 
 #include "system/sdl_panic.h"
 
-WorldWidget::WorldWidget(SDL_Renderer& renderer, WorldRasterizationSystem& worldRasterizationSystem, SDL_Rect textureRect)
-    : _renderer(&renderer)
+WorldWidget::WorldWidget(SDL_Renderer& renderer, World& world, WorldRasterizationSystem& worldRasterizationSystem, SDL_Rect textureRect)
+    : _world(&world)
+    , _renderer(&renderer)
     , _textureRect(textureRect)
     , _rasterizationSystem(&worldRasterizationSystem)
 {
     _texture = SDL_CreateTexture(
         _renderer,
-        SDL_PIXELFORMAT_RGB555,
+        SDL_PIXELFORMAT_RGBA32,
         SDL_TEXTUREACCESS_STREAMING,
         NarrowCast<int>(textureRect.w),
         NarrowCast<int>(textureRect.h));
@@ -56,6 +57,7 @@ void WorldWidget::UpdateWidget(sf::Time elapsedTime)
     };
     _rasterizationSystem->SetDestination(data);
 
+    _world->Update(elapsedTime);
     _rasterizationSystem->DoSystemUpdate();
 
     _rasterizationSystem->ResetDestination();

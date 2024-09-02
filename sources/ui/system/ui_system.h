@@ -7,7 +7,7 @@
 
 class UiSystem final : public UiApplicationInterface {
 public:
-    explicit UiSystem(common::StackStorage& storage);
+    explicit UiSystem(World& world);
     ~UiSystem() override;
 
     void ApplicationRunMainLoop() override;

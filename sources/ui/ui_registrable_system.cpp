@@ -7,7 +7,8 @@ UiRegistrableSystem::~UiRegistrableSystem() = default;
 
 std::error_code UiRegistrableSystem::InitializeSystem(ApplicationStorage& storage)
 {
-    _uiSystem = std::make_unique<UiSystem>(storage);
+    World& world = storage.Modify<World>();
+    _uiSystem = std::make_unique<UiSystem>(world);
     return {};
 }
 
