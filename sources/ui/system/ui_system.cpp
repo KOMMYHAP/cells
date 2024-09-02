@@ -94,32 +94,26 @@ void UiSystem::ProcessInput()
     _shouldStopMainLoop = shouldStopMainLoop;
 }
 
-void UiSystem::StartFrame()
+void UiSystem::Update(sf::Time elapsedTime)
 {
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-}
-
-void UiSystem::Update(sf::Time elapsedTime)
-{
+    
     _rootWidget->UpdateWidget(elapsedTime);
+
+    ImGui::Render();
 }
 
 void UiSystem::Render()
 {
-    _rootWidget->RenderWidget();
-    ImGui::Render();
-
     SDL_RenderSetScale(_renderer, ImGui::GetIO().DisplayFramebufferScale.x, ImGui::GetIO().DisplayFramebufferScale.y);
     SDL_SetRenderDrawColor(_renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(_renderer);
+    
+    _rootWidget->RenderWidget();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(_renderer);
-}
-
-void UiSystem::EndFrame()
-{
 }
 
 void UiSystem::ApplicationRunMainLoop()
@@ -128,9 +122,7 @@ void UiSystem::ApplicationRunMainLoop()
     while (!_shouldStopMainLoop) {
         const sf::Time elapsedTime = frameClock.restart();
         ProcessInput();
-        StartFrame();
         Update(elapsedTime);
         Render();
-        EndFrame();
     }
 }

@@ -14,10 +14,8 @@ public:
 
 private:
     void ProcessInput();
-    void StartFrame();
     void Update(sf::Time elapsedTime);
     void Render();
-    void EndFrame();
 
     bool _shouldStopMainLoop { false };
     SDL_Window* _window { nullptr };

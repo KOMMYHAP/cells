@@ -10,7 +10,7 @@ WorldWidget::WorldWidget(SDL_Renderer& renderer, World& world, WorldRasterizatio
 {
     _texture = SDL_CreateTexture(
         _renderer,
-        SDL_PIXELFORMAT_RGBA32,
+        SDL_PIXELFORMAT_RGB555,
         SDL_TEXTUREACCESS_STREAMING,
         NarrowCast<int>(textureRect.w),
         NarrowCast<int>(textureRect.h));
