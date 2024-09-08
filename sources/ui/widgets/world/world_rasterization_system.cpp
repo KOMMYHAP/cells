@@ -2,6 +2,7 @@
 
 WorldRasterizationSystem::WorldRasterizationSystem(EcsWorld& ecsWorld)
     : SimulationEcsSystem(ecsWorld)
+    , _cellSizeInPixels(4)
 {
 }
 
@@ -43,11 +44,25 @@ void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellT
     // todo: ask EnTT to sort CellPosition to increase data locality?
 
     const size_t bpp = _rasterizationData->pixelFormat->BytesPerPixel;
-    const size_t pixelDataOffset = static_cast<size_t>(position.y) * _rasterizationData->pitch + position.x * bpp;
-    ASSERT(pixelDataOffset < _rasterizationData->pixelDataBytesCount);
-    ASSERT(pixelDataOffset + bpp <= _rasterizationData->pixelDataBytesCount);
-
     const uint32_t color = GetColor(type);
-    ASSERT(bpp <= sizeof(color));
-    SDL_memcpy(&_rasterizationData->rawPixelData[pixelDataOffset], &color, bpp);
+
+    auto FillPixelsRow = [&](const int32_t pixelX, const int32_t pixelY, const uint32_t pixelsCount) {
+        const size_t pixelDataOffset = static_cast<size_t>(pixelY) * _rasterizationData->pitch + pixelX * bpp;
+        ASSERT(pixelDataOffset < _rasterizationData->pixelDataBytesCount);
+        ASSERT(pixelDataOffset + bpp <= _rasterizationData->pixelDataBytesCount);
+
+        ASSERT(bpp == 4, "Only 4 bytes per pixel supported now!");
+        const size_t bytesPerRow = pixelsCount * bpp;
+        ASSERT(bytesPerRow % 4 == 0, "Pixels row should be multiple of 4 bytes now!");
+
+        void* pixelDestination = &_rasterizationData->rawPixelData[pixelDataOffset];
+        ASSERT(reinterpret_cast<uintptr_t>(pixelDestination) % 4 == 0, "memset4 requires alignment of 4-bytes");
+        SDL_memset4(pixelDestination, color, bytesPerRow / 4);
+    };
+
+    const int32_t pixelX = position.x * _cellSizeInPixels;
+    const int32_t pixelY = position.y * _cellSizeInPixels;
+    for (int32_t rowIndex = 0; rowIndex < _cellSizeInPixels; ++rowIndex) {
+        FillPixelsRow(pixelX, pixelY + rowIndex, _cellSizeInPixels);
+    }
 }

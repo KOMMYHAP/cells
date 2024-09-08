@@ -19,4 +19,5 @@ private:
     uint32_t GetColor(CellType type) const;
 
     const WorldRasterizationData* _rasterizationData { nullptr };
+    uint16_t _cellSizeInPixels { 0 };
 };
