@@ -1,9 +1,10 @@
 message(STATUS "Fetching SFML...")
 
-# We don't need to build audio and network modules
+# We need only system submodule for usefull sf::Clock, sf::Vector and sf::Time
 set(SFML_BUILD_AUDIO FALSE)
 set(SFML_BUILD_NETWORK FALSE)
 set(SFML_BUILD_GRAPHICS FALSE)
+set(SFML_BUILD_WINDOW FALSE)
 
 FetchContent_Declare(
         sfml
