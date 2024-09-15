@@ -3,6 +3,7 @@ add_library(${PROJECT_NAME} STATIC
     ui_registrable_system.cpp
     ui_registrable_system.h
     ui_application_interface.h
+    ui_config.h
 )
 
 add_subdirectory(menu_widgets)

@@ -3,7 +3,6 @@
 #include "storage/stack_storage.h"
 
 #include "sdl_panic.h"
-#include "ui_layout.h"
 #include "world.h"
 
 #include "menu_widgets/fps_widget.h"
@@ -14,21 +13,14 @@
 #include "widgets/world/world_rasterization_system.h"
 #include "widgets/world/world_widget.h"
 
-UiSystem::UiSystem(World& world)
+UiSystem::UiSystem(World& world, const UiConfig& uiConfig)
 {
-    UiLayout layout;
-    layout.screenWidth = 800;
-    layout.screenHeight = 600;
-    layout.fieldOffset = 20;
-    layout.fieldWidth = layout.screenWidth - 2 * layout.fieldOffset;
-    layout.fieldHeight = layout.screenHeight - 2 * layout.fieldOffset;
-
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER)) {
         PanicOnSdlError("SDL_Init"sv);
     }
 
-    static constexpr auto WindowFlags = static_cast<SDL_WindowFlags>(SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
-    _window = SDL_CreateWindow("Cells", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, layout.screenWidth, layout.screenHeight, WindowFlags);
+    static constexpr uint32_t WindowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+    _window = SDL_CreateWindow("Cells", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, uiConfig.windowSizeX, uiConfig.windowSizeY, WindowFlags);
     if (_window == nullptr) {
         PanicOnSdlError("SDL_CreateWindow"sv);
     }
@@ -56,8 +48,8 @@ UiSystem::UiSystem(World& world)
     _rootWidget = std::make_unique<RootWidget>();
 
     EcsWorld& ecsWorld = world.ModifyEcsWorld();
-    _renderSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld);
-    const SDL_Rect worldRect { layout.fieldOffset, layout.fieldOffset, layout.fieldWidth, layout.fieldHeight };
+    _renderSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld, uiConfig.cellPixelsSize);
+    const SDL_Rect worldRect { uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY };
     _rootWidget->AddWidget<WorldWidget>(*_renderer, world, *_renderSystem, worldRect);
 
     MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
@@ -99,7 +91,7 @@ void UiSystem::Update(sf::Time elapsedTime)
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
-    
+
     _rootWidget->UpdateWidget(elapsedTime);
 
     ImGui::Render();
@@ -110,7 +102,7 @@ void UiSystem::Render()
     SDL_RenderSetScale(_renderer, ImGui::GetIO().DisplayFramebufferScale.x, ImGui::GetIO().DisplayFramebufferScale.y);
     SDL_SetRenderDrawColor(_renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(_renderer);
-    
+
     _rootWidget->RenderWidget();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
     SDL_RenderPresent(_renderer);

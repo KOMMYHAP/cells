@@ -11,18 +11,19 @@
 #include "simulation/simulation_system.h"
 #include "simulation/simulation_virtual_machine.h"
 #include "simulation/spawner.h"
+#include "simulation_config.h"
 #include "tick_calculator.h"
 
 class World {
 public:
-    World();
+    explicit World(const SimulationConfig& config);
 
     void Update(sf::Time elapsedTime);
 
     const EcsWorld& GetEcsWorld() const { return _ecsWorld; }
     EcsWorld& ModifyEcsWorld() { return _ecsWorld; }
 
-    sf::Vector2u GetWorldSize() const { return _worldSize; }
+    sf::Vector2u GetWorldSize() const { return { _cellsLocator.GetWidth(), _cellsLocator.GetHeight() }; }
     const SimulationStatisticsProvider& GetSimulationStatistics() const { return _statistics; }
 
 private:
@@ -41,7 +42,6 @@ private:
     EcsWorld _ecsWorld;
     common::SampleCounter<float, 20> _tickSampler;
     SimulationTickCalculator _tickCalculator;
-    sf::Vector2u _worldSize;
     CellLocator _cellsLocator;
     Spawner _spawner;
     std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;

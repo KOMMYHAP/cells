@@ -8,7 +8,7 @@
 
 class WorldRasterizationSystem final : public SimulationEcsSystem<WorldRasterizationSystem, const CellType, const CellPosition> {
 public:
-    explicit WorldRasterizationSystem(EcsWorld& ecsWorld);
+    explicit WorldRasterizationSystem(EcsWorld& ecsWorld, uint16_t cellSize);
 
     void SetDestination(const WorldRasterizationData& rasterizationData);
     void ResetDestination();

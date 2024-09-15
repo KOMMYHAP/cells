@@ -23,6 +23,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 
 # add headers
 target_sources(${PROJECT_NAME} PUBLIC
+        simulation_config.h
         simulation_registrable_system.h
         world.h
 )

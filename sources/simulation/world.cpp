@@ -11,18 +11,17 @@
 #include "systems_ecs/age_system.h"
 #include "systems_ecs/alive_cells_statistics_system.h"
 #include "systems_ecs/brain_simulation_system.h"
-#include "systems_ecs/energy_decrease_system.h"
-#include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/death_from_age_statistics_system.h"
 #include "systems_ecs/death_from_empty_energy_statistics_system.h"
+#include "systems_ecs/energy_decrease_system.h"
 #include "systems_ecs/energy_leak_system.h"
+#include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/keep_population_system.h"
 #include "systems_ecs/spawn_places_statistics_system.h"
 #include "systems_ecs/spawn_system.h"
 
-World::World()
-    : _worldSize(100, 100)
-    , _cellsLocator(_worldSize.x, _worldSize.y)
+World::World(const SimulationConfig& config)
+    : _cellsLocator(config.cellsCountX, config.cellsCountY)
     , _spawner(_ecsWorld)
     , _simulationVm(_ecsWorld)
     , _randomEngine(Random::MakeEngine("white"))

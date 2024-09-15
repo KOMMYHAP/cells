@@ -1,8 +1,8 @@
 ﻿#include "world_rasterization_system.h"
 
-WorldRasterizationSystem::WorldRasterizationSystem(EcsWorld& ecsWorld)
+WorldRasterizationSystem::WorldRasterizationSystem(EcsWorld& ecsWorld, uint16_t cellSize)
     : SimulationEcsSystem(ecsWorld)
-    , _cellSizeInPixels(4)
+    , _cellSizeInPixels(cellSize)
 {
 }
 
@@ -26,10 +26,10 @@ void WorldRasterizationSystem::SetDestination(const WorldRasterizationData& rast
 {
     _rasterizationData = &rasterizationData;
 
-    const size_t bpp = _rasterizationData->pixelFormat->BytesPerPixel;
     const uint32_t color = GetColor(CellType::Dummy);
-    ASSERT(bpp == 4);
-    SDL_memset4(rasterizationData.rawPixelData, color, _rasterizationData->pixelDataBytesCount / bpp);
+    ASSERT(_rasterizationData->pixelDataBytesCount % 4 == 0,
+        "Optimized version of fucntion to clear render texture requires size of texture in bytes to be multiple of 4!");
+    SDL_memset4(rasterizationData.rawPixelData, color, _rasterizationData->pixelDataBytesCount / 4);
 }
 
 void WorldRasterizationSystem::ResetDestination()
@@ -49,7 +49,7 @@ void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellT
     auto FillPixelsRow = [&](const int32_t pixelX, const int32_t pixelY, const uint32_t pixelsCount) {
         const size_t pixelDataOffset = static_cast<size_t>(pixelY) * _rasterizationData->pitch + pixelX * bpp;
         ASSERT(pixelDataOffset < _rasterizationData->pixelDataBytesCount);
-        ASSERT(pixelDataOffset + bpp <= _rasterizationData->pixelDataBytesCount);
+        ASSERT(pixelDataOffset + bpp * pixelsCount <= _rasterizationData->pixelDataBytesCount);
 
         ASSERT(bpp == 4, "Only 4 bytes per pixel supported now!");
         const size_t bytesPerRow = pixelsCount * bpp;
