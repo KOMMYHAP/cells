@@ -1,4 +1,4 @@
-﻿#include "time.h"
+﻿#include "time/time.h"
 
 #include "utils/narrow_cast.h"
 
@@ -14,8 +14,8 @@ Time Time::FromSeconds(float seconds)
     return Time { NarrowCast<uint64_t>(roundedMicroseconds) };
 }
 
-Time::Time(uint64_t microseconds)
-    : _microseconds(microseconds)
+Time::Time(uint64_t us)
+    : _microseconds(us)
 {
 }
 
@@ -43,6 +43,102 @@ uint64_t Time::AsMilliseconds() const
 uint64_t Time::AsMicroseconds() const
 {
     return _microseconds;
+}
+
+bool operator==(Time left, Time right)
+{
+    return left.AsMicroseconds() == right.AsMicroseconds();
+}
+
+bool operator!=(Time left, Time right)
+{
+    return left.AsMicroseconds() != right.AsMicroseconds();
+}
+
+bool operator<(Time left, Time right)
+{
+    return left.AsMicroseconds() < right.AsMicroseconds();
+}
+
+bool operator>(Time left, Time right)
+{
+    return left.AsMicroseconds() > right.AsMicroseconds();
+}
+
+bool operator<=(Time left, Time right)
+{
+    return left.AsMicroseconds() <= right.AsMicroseconds();
+}
+
+bool operator>=(Time left, Time right)
+{
+    return left.AsMicroseconds() >= right.AsMicroseconds();
+}
+
+Time operator+(Time left, Time right)
+{
+    return Time::FromMicroseconds(left.AsMicroseconds() + right.AsMicroseconds());
+}
+
+Time& operator+=(Time& left, Time right)
+{
+    return left = left + right;
+}
+
+Time operator-(Time left, Time right)
+{
+    const uint64_t usLeft = left.AsMicroseconds();
+    const uint64_t usRight = right.AsMicroseconds();
+    ASSERT(usLeft >= usRight, "negative time");
+    return Time::FromMicroseconds(usLeft - usRight);
+}
+
+Time& operator-=(Time& left, Time right)
+{
+    return left = left - right;
+}
+
+Time operator*(Time left, float right)
+{
+    return Time::FromSeconds(left.AsSeconds() * right);
+}
+
+Time operator*(float left, Time right)
+{
+    return right * left;
+}
+
+Time& operator*=(Time& left, float right)
+{
+    return left = left * right;
+}
+
+Time operator/(Time left, float right)
+{
+    ASSERT(right != 0.0f);
+    return Time::FromSeconds(left.AsSeconds() / right);
+}
+
+Time& operator/=(Time& left, float right)
+{
+    return left = left / right;
+}
+
+float operator/(Time left, Time right)
+{
+    ASSERT(right != Time::Zero);
+    return left.AsSeconds() / right.AsSeconds();
+}
+
+Time operator%(Time left, Time right)
+{
+    ASSERT(right != Time::Zero);
+    return Time::FromMicroseconds(left.AsMicroseconds() % right.AsMicroseconds());
+}
+
+Time& operator%=(Time& left, Time right)
+{
+    return left = left % right;
 }
 
 }
