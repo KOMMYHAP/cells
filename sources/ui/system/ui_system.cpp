@@ -2,6 +2,7 @@
 
 #include "storage/stack_storage.h"
 
+#include "clock/clock.h"
 #include "sdl_panic.h"
 #include "world.h"
 
@@ -110,9 +111,9 @@ void UiSystem::Render()
 
 void UiSystem::ApplicationRunMainLoop()
 {
-    sf::Clock frameClock;
+    Common::Clock frameClock;
     while (!_shouldStopMainLoop) {
-        const Common::Time elapsedTime = frameClock.restart();
+        const Common::Time elapsedTime = frameClock.Restart();
         ProcessInput();
         Update(elapsedTime);
         Render();
