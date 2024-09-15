@@ -7,18 +7,18 @@ public:
     Time() = default;
 
     static Time FromSeconds(float seconds);
-    static Time FromMilliseconds(uint64_t ms);
-    static Time FromMicroseconds(uint64_t us);
+    static Time FromMilliseconds(int64_t ms);
+    static Time FromMicroseconds(int64_t us);
 
     float AsSeconds() const;
-    uint64_t AsMilliseconds() const;
-    uint64_t AsMicroseconds() const;
+    int64_t AsMilliseconds() const;
+    int64_t AsMicroseconds() const;
     bool IsZero() const;
 
 private:
-    explicit Time(uint64_t us);
+    explicit Time(int64_t us);
 
-    uint64_t _microseconds { 0 };
+    int64_t _microseconds { 0 };
 };
 
 bool operator==(Time left, Time right);
@@ -30,7 +30,7 @@ bool operator>(Time left, Time right);
 bool operator<=(Time left, Time right);
 bool operator>=(Time left, Time right);
 
-Time operator-(Time right) = delete;
+Time operator-(Time right);
 
 Time operator+(Time left, Time right);
 Time& operator+=(Time& left, Time right);
