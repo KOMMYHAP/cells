@@ -23,7 +23,6 @@ public:
     const EcsWorld& GetEcsWorld() const { return _ecsWorld; }
     EcsWorld& ModifyEcsWorld() { return _ecsWorld; }
 
-    sf::Vector2u GetWorldSize() const { return { _cellsLocator.GetWidth(), _cellsLocator.GetHeight() }; }
     const SimulationStatisticsProvider& GetSimulationStatistics() const { return _statistics; }
 
 private:
