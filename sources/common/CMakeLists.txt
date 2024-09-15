@@ -15,6 +15,8 @@ add_subdirectory(utils)
 add_subdirectory(asserts)
 add_subdirectory(mt)
 add_subdirectory(random)
+add_subdirectory(time)
+add_subdirectory(clock)
 
 
 # add sources
@@ -43,6 +45,9 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE basic_defines.h)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 target_link_libraries(${PROJECT_NAME} PUBLIC
         Microsoft.GSL::GSL
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE
+        sfml-system
 )
 
 if (MSVC)
