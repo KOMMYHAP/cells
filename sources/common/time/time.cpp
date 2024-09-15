@@ -14,11 +14,6 @@ Time Time::FromSeconds(float seconds)
     return Time { NarrowCast<uint64_t>(roundedMicroseconds) };
 }
 
-Time::Time(uint64_t us)
-    : _microseconds(us)
-{
-}
-
 Time Time::FromMilliseconds(uint64_t ms)
 {
     ASSERT(ms <= std::numeric_limits<uint64_t>::max() / 1000, "overflow");
@@ -43,6 +38,16 @@ uint64_t Time::AsMilliseconds() const
 uint64_t Time::AsMicroseconds() const
 {
     return _microseconds;
+}
+
+bool Time::IsZero() const
+{
+    return _microseconds == 0;
+}
+
+Time::Time(uint64_t us)
+    : _microseconds(us)
+{
 }
 
 bool operator==(Time left, Time right)
@@ -126,13 +131,13 @@ Time& operator/=(Time& left, float right)
 
 float operator/(Time left, Time right)
 {
-    ASSERT(right != Time::Zero);
+    ASSERT(!right.IsZero());
     return left.AsSeconds() / right.AsSeconds();
 }
 
 Time operator%(Time left, Time right)
 {
-    ASSERT(right != Time::Zero);
+    ASSERT(!right.IsZero());
     return Time::FromMicroseconds(left.AsMicroseconds() % right.AsMicroseconds());
 }
 

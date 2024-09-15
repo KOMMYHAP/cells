@@ -1,8 +1,9 @@
+#pragma once
+#include "sample_counter.h"
 
 namespace common {
 
 template <class Sample, uint16_t SamplesLimit>
-    requires std::is_arithmetic_v<Sample>
 void SampleCounter<Sample, SamplesLimit>::Reset()
 {
     _currentSample = 0;
@@ -11,7 +12,6 @@ void SampleCounter<Sample, SamplesLimit>::Reset()
 }
 
 template <class Sample, uint16_t SamplesLimit>
-    requires std::is_arithmetic_v<Sample>
 void SampleCounter<Sample, SamplesLimit>::AddSample(Sample sample)
 {
     _samples[_currentSample] = sample;
@@ -23,7 +23,6 @@ void SampleCounter<Sample, SamplesLimit>::AddSample(Sample sample)
 }
 
 template <class Sample, uint16_t SamplesLimit>
-    requires std::is_arithmetic_v<Sample>
 Sample SampleCounter<Sample, SamplesLimit>::CalcMedian() const
 {
     if (IsEmpty()) {
@@ -33,15 +32,12 @@ Sample SampleCounter<Sample, SamplesLimit>::CalcMedian() const
     auto samples = _samples;
     std::sort(samples.begin(), samples.begin() + _availableSamplesCount);
 
-    if (_availableSamplesCount % 2 == 0) {
-        return static_cast<Sample>(static_cast<float>(samples[_availableSamplesCount / 2 - 1] + samples[_availableSamplesCount / 2]) / 2.0f);
-    }
-
-    return samples[_availableSamplesCount / 2];
+    // Take less value if samples count is even
+    const uint16_t indexOffset = (_availableSamplesCount % 2 != 0) ? 0 : 1;
+    return samples[_availableSamplesCount / 2 - indexOffset];
 }
 
 template <class Sample, uint16_t SamplesLimit>
-    requires std::is_arithmetic_v<Sample>
 Sample SampleCounter<Sample, SamplesLimit>::CalcAverage() const
 {
     if (IsEmpty()) {

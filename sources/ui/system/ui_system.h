@@ -15,7 +15,7 @@ public:
 
 private:
     void ProcessInput();
-    void Update(sf::Time elapsedTime);
+    void Update(Common::Time elapsedTime);
     void Render();
 
     bool _shouldStopMainLoop { false };

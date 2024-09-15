@@ -10,15 +10,15 @@ void TestMenuWidget::OnMenuItemJustOpened()
     std::cout << "OnMenuItemJustOpened\n";
 }
 
-BaseMenuWidget::MenuWidgetAction TestMenuWidget::ProcessMenuItem(sf::Time elapsedTime)
+BaseMenuWidget::MenuWidgetAction TestMenuWidget::ProcessMenuItem(Common::Time elapsedTime)
 {
     _elapsedTimeSinceFlush += elapsedTime;
-    static const sf::Time FlushPeriod { sf::seconds(1) };
+    static const Common::Time FlushPeriod { Common::Time::FromSeconds(1) };
     if (_elapsedTimeSinceFlush > FlushPeriod) {
         std::cout << "ProcessMenuItem\n";
         Flush();
     }
-    ImGui::Text("Elapsed time since last flush: %4d [ms]", _elapsedTimeSinceFlush.asMilliseconds());
+    ImGui::Text("Elapsed time since last flush: %4d [ms]", _elapsedTimeSinceFlush.AsMilliseconds());
     return MenuWidgetAction::KeepOpen;
 }
 

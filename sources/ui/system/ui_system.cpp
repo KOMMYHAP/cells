@@ -86,7 +86,7 @@ void UiSystem::ProcessInput()
     _shouldStopMainLoop = shouldStopMainLoop;
 }
 
-void UiSystem::Update(sf::Time elapsedTime)
+void UiSystem::Update(Common::Time elapsedTime)
 {
     ImGui_ImplSDLRenderer2_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -112,7 +112,7 @@ void UiSystem::ApplicationRunMainLoop()
 {
     sf::Clock frameClock;
     while (!_shouldStopMainLoop) {
-        const sf::Time elapsedTime = frameClock.restart();
+        const Common::Time elapsedTime = frameClock.restart();
         ProcessInput();
         Update(elapsedTime);
         Render();

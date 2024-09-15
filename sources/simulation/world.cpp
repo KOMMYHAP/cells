@@ -1,6 +1,7 @@
 #include "world.h"
 
 #include "cell_factories/random_cell_factory.h"
+#include "clock/clock.h"
 
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
@@ -28,7 +29,7 @@ World::World(const SimulationConfig& config)
     , _randomCellFactory(_simulationVm, _randomEngine)
     , _statistics(_cellsLocator)
 {
-    const sf::Time targetSimulationTime = sf::milliseconds(30);
+    const Common::Time targetSimulationTime = Common::Time::FromMilliseconds(30);
 
     RegisterSystem<SpawnSystem>(_ecsWorld, _cellsLocator);
     RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
@@ -58,7 +59,7 @@ World::World(const SimulationConfig& config)
     _tickCalculator.Setup(targetSimulationTime);
 }
 
-void World::Update(const sf::Time elapsedTime)
+void World::Update(const Common::Time elapsedTime)
 {
     Warmup();
 
@@ -75,19 +76,19 @@ void World::Warmup()
     }
 }
 
-sf::Time World::GetTickTime() const
+Common::Time World::GetTickTime() const
 {
-    return sf::seconds(_tickSampler.CalcMedian());
+    return _tickSampler.CalcMedian();
 }
 
 void World::Tick()
 {
-    const sf::Clock clock;
+    const Common::Clock clock;
     for (const auto& system : _simulationSystems) {
         system->DoSystemUpdate();
     }
-    const float seconds = clock.getElapsedTime().asSeconds();
-    _tickSampler.AddSample(seconds);
+    const Common::Time tickTime = clock.GetElapsedTime();
+    _tickSampler.AddSample(tickTime);
 }
 
 template <class T, class... Args>

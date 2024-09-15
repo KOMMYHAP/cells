@@ -3,5 +3,5 @@
 
 class ImPlotDemoMenuWidget final : public BaseMenuWidget {
 public:
-    MenuWidgetAction ProcessMenuItem(sf::Time elapsedTime) override;
+    MenuWidgetAction ProcessMenuItem(Common::Time elapsedTime) override;
 };

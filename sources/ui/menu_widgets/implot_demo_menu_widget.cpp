@@ -1,6 +1,6 @@
 #include "implot_demo_menu_widget.h"
 
-BaseMenuWidget::MenuWidgetAction ImPlotDemoMenuWidget::ProcessMenuItem(sf::Time elapsedTime)
+BaseMenuWidget::MenuWidgetAction ImPlotDemoMenuWidget::ProcessMenuItem(Common::Time elapsedTime)
 {
     bool opened = true;
     ImPlot::ShowDemoWindow(&opened);

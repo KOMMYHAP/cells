@@ -26,7 +26,7 @@
 //     uint16_t columnsCount { 0 };
 //
 //     // simulation
-//     sf::Time targetSimulationTime;
+//     Common::Time targetSimulationTime;
 //
 //     // virtual machine
 //     uint8_t systemInstructionPerStep { 0 };

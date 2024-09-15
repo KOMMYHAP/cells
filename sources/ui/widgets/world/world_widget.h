@@ -9,7 +9,7 @@ public:
     WorldWidget(SDL_Renderer& renderer, World& world, WorldRasterizationSystem& worldRasterizationSystem, SDL_Rect textureRect);
     ~WorldWidget() override;
 
-    void UpdateWidget(sf::Time elapsedTime) override;
+    void UpdateWidget(Common::Time elapsedTime) override;
     void RenderWidget() override;
 
 private:

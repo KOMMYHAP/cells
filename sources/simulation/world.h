@@ -18,7 +18,7 @@ class World {
 public:
     explicit World(const SimulationConfig& config);
 
-    void Update(sf::Time elapsedTime);
+    void Update(Common::Time elapsedTime);
 
     const EcsWorld& GetEcsWorld() const { return _ecsWorld; }
     EcsWorld& ModifyEcsWorld() { return _ecsWorld; }
@@ -27,7 +27,7 @@ public:
 
 private:
     void Warmup();
-    sf::Time GetTickTime() const;
+    Common::Time GetTickTime() const;
     void Tick();
 
     template <class T, class... Args>
@@ -39,7 +39,7 @@ private:
     T& RegisterSystem(Args&&... args);
 
     EcsWorld _ecsWorld;
-    common::SampleCounter<float, 20> _tickSampler;
+    common::SampleCounter<Common::Time, 20> _tickSampler;
     SimulationTickCalculator _tickCalculator;
     CellLocator _cellsLocator;
     Spawner _spawner;

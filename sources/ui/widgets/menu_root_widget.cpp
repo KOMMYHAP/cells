@@ -1,6 +1,6 @@
 ﻿#include "menu_root_widget.h"
 
-void MenuRootWidget::UpdateWidget(sf::Time elapsedTime)
+void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 {
     if (ImGui::BeginMainMenuBar()) {
         if (const WidgetsGroup* rootGroup = FindWidgetGroup(_rootWidgetId)) {
@@ -92,7 +92,7 @@ void MenuRootWidget::ProcessWidgetState(MenuWidgetId id)
     widgetState.justClosed = wasOpen && !widgetState.opened;
 }
 
-void MenuRootWidget::UpdateOpenedWidgets(sf::Time elapsedTime)
+void MenuRootWidget::UpdateOpenedWidgets(Common::Time elapsedTime)
 {
     auto it = std::ranges::remove_if(_openedWidgets, [this, elapsedTime](const MenuWidgetId id) {
         const bool shouldClose = ProcessOpenedWidgetState(id, elapsedTime);
@@ -101,7 +101,7 @@ void MenuRootWidget::UpdateOpenedWidgets(sf::Time elapsedTime)
     _openedWidgets.erase(it.begin(), it.end());
 }
 
-bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, const sf::Time elapsedTime)
+bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, const Common::Time elapsedTime)
 {
     WidgetData& widgetData = ModifyWidgetData(id);
     BaseMenuWidget& widget = *widgetData.widget;

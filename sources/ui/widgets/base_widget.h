@@ -1,7 +1,8 @@
 ﻿#pragma once
+#include "time/time.h"
 
 class BaseWidget {
 public:
     virtual ~BaseWidget() = default;
-    virtual void UpdateWidget(sf::Time elapsedTime) = 0;
+    virtual void UpdateWidget(Common::Time elapsedTime) = 0;
 };

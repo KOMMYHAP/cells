@@ -10,7 +10,7 @@ public:
         requires std::is_constructible_v<WidgetType, Args...>
     WidgetType& AddWidget(Args&&... args);
 
-    void UpdateWidget(sf::Time elapsedTime) override;
+    void UpdateWidget(Common::Time elapsedTime) override;
     void RenderWidget() override;
 
 private:

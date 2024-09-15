@@ -13,7 +13,7 @@ public:
         requires std::is_base_of_v<BaseMenuWidget, T> && std::is_constructible_v<T, Args...>
     MenuWidgetId AddWidget(MenuWidgetId parent, std::string name, Args&&... args);
 
-    void UpdateWidget(sf::Time elapsedTime) override;
+    void UpdateWidget(Common::Time elapsedTime) override;
 
 private:
     static constexpr auto RootWidgetId = static_cast<MenuWidgetId>(std::numeric_limits<std::underlying_type_t<MenuWidgetId>>::max());
@@ -43,8 +43,8 @@ private:
     void UpdateWidgetsGroup(MenuWidgetId id);
     void ProcessWidgetState(MenuWidgetId id);
 
-    void UpdateOpenedWidgets(sf::Time elapsedTime);
-    bool ProcessOpenedWidgetState(MenuWidgetId id, sf::Time elapsedTime);
+    void UpdateOpenedWidgets(Common::Time elapsedTime);
+    bool ProcessOpenedWidgetState(MenuWidgetId id, Common::Time elapsedTime);
 
     std::vector<WidgetData> _widgets;
     std::map<MenuWidgetId, WidgetsGroup> _indexedGroups;

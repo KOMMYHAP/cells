@@ -1,12 +1,13 @@
 #pragma once
+#include "time/time.h"
 
 class SimulationTickCalculator {
 public:
-    void Setup(sf::Time targetSimulationTime);
+    void Setup(Common::Time targetSimulationTime);
 
-    uint32_t CalculateElapsedTicks(sf::Time tickTime, sf::Time elapsedTime);
+    uint32_t CalculateElapsedTicks(Common::Time tickTime, Common::Time elapsedTime);
 
 private:
-    sf::Time _limitSimulationTime;
-    sf::Time _availableTimeToSpent;
+    Common::Time _limitSimulationTime;
+    Common::Time _availableTimeToSpent;
 };

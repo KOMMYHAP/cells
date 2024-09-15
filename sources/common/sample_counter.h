@@ -3,7 +3,6 @@
 namespace common {
 
 template <class Sample, uint16_t SamplesLimit>
-    requires std::is_arithmetic_v<Sample>
 class SampleCounter {
 public:
     void AddSample(Sample sample);

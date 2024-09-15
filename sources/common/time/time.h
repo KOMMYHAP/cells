@@ -4,6 +4,8 @@ namespace Common {
 
 class Time {
 public:
+    Time() = default;
+
     static Time FromSeconds(float seconds);
     static Time FromMilliseconds(uint64_t ms);
     static Time FromMicroseconds(uint64_t us);
@@ -11,8 +13,7 @@ public:
     float AsSeconds() const;
     uint64_t AsMilliseconds() const;
     uint64_t AsMicroseconds() const;
-
-    static const inline Time Zero { 0 };
+    bool IsZero() const;
 
 private:
     explicit Time(uint64_t us);

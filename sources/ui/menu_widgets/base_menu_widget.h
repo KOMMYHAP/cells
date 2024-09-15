@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "time/time.h"
 
 class BaseMenuWidget {
 public:
@@ -11,7 +12,7 @@ public:
         KeepOpen,
         ShouldClose,
     };
-    virtual MenuWidgetAction ProcessMenuItem(sf::Time elapsedTime) { return MenuWidgetAction::ShouldClose; }
+    virtual MenuWidgetAction ProcessMenuItem(Common::Time elapsedTime) { return MenuWidgetAction::ShouldClose; }
 
     virtual void OnMenuItemJustClosed() { }
 };

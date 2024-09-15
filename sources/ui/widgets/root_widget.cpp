@@ -7,7 +7,7 @@ RootWidget::~RootWidget()
     }
 }
 
-void RootWidget::UpdateWidget(sf::Time elapsedTime)
+void RootWidget::UpdateWidget(Common::Time elapsedTime)
 {
     for (const auto& widget : _widgets) {
         widget->UpdateWidget(elapsedTime);

@@ -5,11 +5,11 @@ class TestMenuWidget final : public BaseMenuWidget {
 public:
     void OnMenuItemOpenedFirstTime() override;
     void OnMenuItemJustOpened() override;
-    MenuWidgetAction ProcessMenuItem(sf::Time elapsedTime) override;
+    MenuWidgetAction ProcessMenuItem(Common::Time elapsedTime) override;
     void OnMenuItemJustClosed() override;
 
 private:
     void Flush();
     
-    sf::Time _elapsedTimeSinceFlush;
+    Common::Time _elapsedTimeSinceFlush;
 };

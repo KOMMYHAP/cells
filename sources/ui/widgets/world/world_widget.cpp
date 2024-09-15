@@ -41,7 +41,7 @@ void WorldWidget::RenderWidget()
     }
 }
 
-void WorldWidget::UpdateWidget(sf::Time elapsedTime)
+void WorldWidget::UpdateWidget(Common::Time elapsedTime)
 {
     void* pixels { nullptr };
     int pitch { 0 };
