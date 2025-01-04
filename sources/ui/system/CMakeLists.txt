@@ -5,4 +5,4 @@
         ui_system.cpp
         ui_system.h
 )
-target_precompile_headers(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui_pch.h)
+target_precompile_headers(${PROJECT_NAME} PRIVATE ui_pch.h)
