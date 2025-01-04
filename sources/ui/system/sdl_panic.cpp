@@ -2,7 +2,7 @@
 
 [[noreturn]] void PanicOnSdlError(const std::string_view functionName)
 {
-    std::cerr << std::format("{} failed: \"{}\"", functionName, SDL_GetError()) << std::endl;
+    std::println("{} failed: \"{}\"", functionName, SDL_GetError());
     ASSERT_FAIL("SDL Error");
     std::abort();
 }
