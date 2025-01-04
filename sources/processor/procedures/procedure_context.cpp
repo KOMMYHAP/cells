@@ -37,6 +37,6 @@ bool ProcedureContext::IsPending() const
 
 void ProcedureContext::SetState(State state)
 {
-    ASSERT(state != State::Initial);
+    ASSERT(state != State::Initial, "Invalid argument");
     _state = state;
 }

@@ -29,7 +29,7 @@ bool RandomCellFactory::Make(CellBrain& childBrainOut)
         }
 
         memory.Write(instruction);
-        ASSERT(description.argumentsCount <= 2);
+        ASSERT(description.argumentsCount <= 2, "Invalid argument");
         if (description.argumentsCount == 2) {
             const auto [operand1, operand2] = GenerateTwoOperand(instruction);
             memory.Write(operand1, operand2);
@@ -77,7 +77,7 @@ std::tuple<std::byte, std::byte> RandomCellFactory::GenerateTwoOperand(Processor
     case ProcessorInstruction::SubtractRegistryValue:
         return { GenerateRegistryIndex(), GenerateValue() };
     default:
-        ASSERT_FAIL("Unknown instruction!", hint);
+        ASSERT_FAIL("Unknown instruction!");
         return {};
     }
 }
@@ -114,7 +114,7 @@ std::byte RandomCellFactory::GenerateOneOperand(ProcessorInstruction hint)
     case ProcessorInstruction::Call:
         return GenerateProcedureId();
     default:
-        ASSERT_FAIL("Unknown instruction!", hint);
+        ASSERT_FAIL("Unknown instruction!");
         return {};
     }
 }

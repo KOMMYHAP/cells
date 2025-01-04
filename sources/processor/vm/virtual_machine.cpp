@@ -25,7 +25,7 @@ ProcedureId VirtualMachine::RegisterProcedure(ProcedureBase* procedure, uint8_t 
 void VirtualMachine::Run(ProcessorMemory memory, ProcessorUserData userData /*= {}*/)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
-    ASSERT(controlBlockRead);
+    ASSERT(controlBlockRead, "Invalid control block");
 
     ProcessorContext::Params params {
         &_procedureTable,
@@ -47,7 +47,7 @@ void VirtualMachine::Run(ProcessorMemory memory, ProcessorUserData userData /*= 
 void VirtualMachine::CompleteDeferredExecution(ProcessorMemory memory, const ProcedureContext& procedureContext)
 {
     const auto [controlBlockRead, controlBlock] = memory.TryAccess<ProcessorControlBlock>();
-    ASSERT(controlBlockRead);
+    ASSERT(controlBlockRead, "Invalid control block");
 
     ProcessorContext::Params params {
         &_procedureTable,

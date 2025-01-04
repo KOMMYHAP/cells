@@ -32,7 +32,7 @@ ProcessorInstructionDescription GetProcessorInstructionDescription(ProcessorInst
         description.argumentsCount = 0;
         break;
     default:
-        ASSERT_FAIL("Unknown instruction!", instruction);
+        ASSERT_FAIL("Unknown instruction!");
     }
 
     return description;

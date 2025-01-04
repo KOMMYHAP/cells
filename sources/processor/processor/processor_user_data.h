@@ -19,7 +19,7 @@ public:
     template <ProcessorUserDataType T>
     T Get() const
     {
-        ASSERT(_valid);
+        ASSERT(_valid, "Invalid flow");
         T value;
         memcpy(&value, _data.data(), sizeof(T));
         return value;

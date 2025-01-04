@@ -19,7 +19,7 @@ bool MemoryBase<Unit>::HasBytes() const
 template <class Unit>
 void MemoryBase<Unit>::Move(uint8_t offset)
 {
-    ASSERT(HasBytes(offset));
+    ASSERT(HasBytes(offset), "Not enough memory");
     _memory = _memory.subspan(offset);
 }
 
@@ -53,7 +53,7 @@ template <class Unit>
 template <MemoryType T>
 T MemoryBase<Unit>::Peek()
 {
-    ASSERT(HasBytes<T>());
+    ASSERT(HasBytes<T>(), "Not enough memory");
     T value;
     memcpy(&value, _memory.data(), sizeof(T));
     return value;
@@ -91,7 +91,7 @@ inline ProcessorConstMemory::ProcessorConstMemory(std::span<const std::byte> mem
 template <MemoryType T>
 T& ProcessorMemory::Access()
 {
-    ASSERT(HasBytes<T>());
+    ASSERT(HasBytes<T>(), "Not enough memory");
     T* value = reinterpret_cast<T*>(_memory.data());
     Move<T>();
     return *value;

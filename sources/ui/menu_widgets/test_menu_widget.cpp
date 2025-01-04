@@ -15,16 +15,14 @@ BaseMenuWidget::MenuWidgetAction TestMenuWidget::ProcessMenuItem(Common::Time el
     _elapsedTimeSinceFlush += elapsedTime;
     static const Common::Time FlushPeriod { Common::Time::FromSeconds(1) };
     if (_elapsedTimeSinceFlush > FlushPeriod) {
-        std::cout << "ProcessMenuItem\n";
         Flush();
     }
-    ImGui::Text("Elapsed time since last flush: %4d [ms]", _elapsedTimeSinceFlush.AsMilliseconds());
+    ImGui::Text("Elapsed time since last flush: %4d [ms]", static_cast<int>(_elapsedTimeSinceFlush.AsMilliseconds()));
     return MenuWidgetAction::KeepOpen;
 }
 
 void TestMenuWidget::OnMenuItemJustClosed()
 {
-    std::cout << "OnMenuItemJustClosed\n";
     // Force flush on close, because there will not be any processing for this widget.
     Flush();
 }

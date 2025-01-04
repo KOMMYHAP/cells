@@ -165,7 +165,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction()
 
     /// instructions without operand:
     case ProcessorInstruction::Nope:
-        ASSERT(GetProcessorInstructionDescription(instruction).argumentsCount == 0);
+        ASSERT(GetProcessorInstructionDescription(instruction).argumentsCount == 0, "Invalid argument");
         if (!context.MoveCommandPointer(1)) {
             return {};
         }
@@ -181,7 +181,7 @@ std::optional<ProcessorInstruction> Processor::ProcessInstruction()
 bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext)
 {
     ProcessorContext& context = *_processorContext;
-    ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2);
+    ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 2, "Invalid argument");
 
     /// Data extraction
     const uint8_t destinationIdx = instructionContext.operand1;
@@ -271,7 +271,7 @@ bool Processor::ProcessTwoOperands(TwoOperandsContext instructionContext)
 bool Processor::ProcessOneOperand(OneOperandContext instructionContext)
 {
     ProcessorContext& context = *_processorContext;
-    ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1);
+    ASSERT(GetProcessorInstructionDescription(instructionContext.instruction).argumentsCount == 1, "Invalid argument");
 
     /// Data extraction
     uint8_t sourceData { instructionContext.operand1 };
@@ -357,7 +357,7 @@ bool Processor::ProcessOneOperand(OneOperandContext instructionContext)
     }
     default:
         // Seems like a new instruction was added to ProcessInstruction, but wasn't processed here.
-        ASSERT_FAIL("Unknown instruction", instructionContext.instruction);
+        ASSERT_FAIL("Unknown instruction");
     }
 
     return context.MoveCommandPointer(1 /* instruction */ + 1 /* operand */);
@@ -380,7 +380,7 @@ void Processor::UpdateFlags(FlagsContext flagsContext)
         result = flagsContext.operand1 + flagsContext.operand2;
         break;
     default:
-        ASSERT_FAIL("Unknown instruction", flagsContext.instruction);
+        ASSERT_FAIL("Unknown instruction");
     }
 
     context.SetFlag(ProcessorFlags::Zero, result == 0);

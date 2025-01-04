@@ -121,7 +121,7 @@ Time& operator*=(Time& left, float right)
 
 Time operator/(Time left, float right)
 {
-    ASSERT(right != 0.0f);
+    ASSERT(right != 0.0f, "Invalid argument");
     return Time::FromSeconds(left.AsSeconds() / right);
 }
 
@@ -132,13 +132,13 @@ Time& operator/=(Time& left, float right)
 
 float operator/(Time left, Time right)
 {
-    ASSERT(!right.IsZero());
+    ASSERT(!right.IsZero(), "Invalid argument");
     return left.AsSeconds() / right.AsSeconds();
 }
 
 Time operator%(Time left, Time right)
 {
-    ASSERT(!right.IsZero());
+    ASSERT(!right.IsZero(), "Invalid argument");
     return Time::FromMicroseconds(left.AsMicroseconds() % right.AsMicroseconds());
 }
 

@@ -1,5 +1,6 @@
 ﻿#include "menu_root_widget.h"
 
+
 void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 {
     if (ImGui::BeginMainMenuBar()) {
@@ -26,14 +27,14 @@ MenuWidgetId MenuRootWidget::AddWidget(MenuWidgetId parent, WidgetData widgetDat
 MenuRootWidget::WidgetData& MenuRootWidget::ModifyWidgetData(MenuWidgetId id)
 {
     const size_t index = static_cast<size_t>(id);
-    ASSERT(index < _widgets.size());
+    ASSERT(index < _widgets.size(), "Invalid index!");
     return _widgets[index];
 }
 
 const MenuRootWidget::WidgetData& MenuRootWidget::GetWidgetData(MenuWidgetId id) const
 {
     const size_t index = static_cast<size_t>(id);
-    ASSERT(index < _widgets.size());
+    ASSERT(index < _widgets.size(), "Invalid index!");
     return _widgets[index];
 }
 

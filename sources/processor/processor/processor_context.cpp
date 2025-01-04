@@ -133,7 +133,7 @@ std::optional<ProcedureContext> ProcessorContext::MakeProcedureContext(Procedure
 ProcedureBase& ProcessorContext::GetProcedure(ProcedureId id)
 {
     const ProcedureTableEntry* info = _params.procedureTable->FindProcedure(id);
-    ASSERT(info != nullptr);
+    ASSERT(info != nullptr, "Procedure not found");
     return *info->procedure;
 }
 

@@ -14,7 +14,7 @@ template <std::ranges::constant_range Range>
     requires std::ranges::sized_range<Range>
 auto Accessor::Select(Range range)
 {
-    ASSERT(!std::ranges::empty(range));
+    ASSERT(!std::ranges::empty(range), "Invalid range");
     const size_t index = GetValue(0, std::ranges::size(range) - 1);
     return range[index];
 }

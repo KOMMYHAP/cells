@@ -29,7 +29,7 @@ void SimulationVirtualMachine::CompletePendingProcedure(EcsEntity id, CellBrain&
 ProcedureId SimulationVirtualMachine::GetProcedureId(ProcedureType type) const
 {
     const auto index = static_cast<uint8_t>(type);
-    ASSERT(index < _procedureTypeMapping.size());
+    ASSERT(index < _procedureTypeMapping.size(), "Invalid type of procedure");
     const ProcedureId id = _procedureTypeMapping[index];
     ASSERT(id != ProcedureId::Invalid, "Procedure was not registered!");
     return id;
@@ -39,7 +39,7 @@ auto SimulationVirtualMachine::FindProcedureInfo(ProcedureType type) const -> co
 {
     const ProcedureId procedureId = GetProcedureId(type);
     const auto id = static_cast<uint8_t>(procedureId);
-    ASSERT(id < _procedureDataList.size());
+    ASSERT(id < _procedureDataList.size(), "Invalid type of procedure");
 
     auto& info = _procedureDataList[id];
     if (info.procedure == nullptr) {
@@ -53,12 +53,12 @@ auto SimulationVirtualMachine::FindProcedureInfo(ProcedureType type) const -> co
 void SimulationVirtualMachine::RegisterProcedure(ProcedureType type, ProcedureBase* procedure, uint8_t inputCount, uint8_t outputCount, std::string name)
 {
     const auto procedureId = _virtualMachine.RegisterProcedure(procedure, inputCount, outputCount);
-    ASSERT(procedureId != ProcedureId::Invalid);
+    ASSERT(procedureId != ProcedureId::Invalid, "Failed to register procedure");
 
     {
         // Register procedure info
         const auto index = static_cast<uint16_t>(procedureId);
-        ASSERT(_procedureDataList[index].procedure == nullptr, "Another procedure registered by the same index!", procedureId);
+        ASSERT(_procedureDataList[index].procedure == nullptr, "Another procedure registered by the same index!");
 
         SimulationProcedureInfo info { std::move(name), inputCount, outputCount, type };
         _procedureDataList[index] = ProcedureData { std::move(info), {}, std::move(procedure) };
@@ -67,7 +67,7 @@ void SimulationVirtualMachine::RegisterProcedure(ProcedureType type, ProcedureBa
     {
         // Register procedure type
         const auto index = static_cast<uint8_t>(type);
-        ASSERT(_procedureTypeMapping[index] == ProcedureId::Invalid, "Another procedure id bound with the same type!", procedureId);
+        ASSERT(_procedureTypeMapping[index] == ProcedureId::Invalid, "Another procedure id bound with the same type!");
         _procedureTypeMapping[index] = procedureId;
     }
 }
