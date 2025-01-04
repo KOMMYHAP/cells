@@ -1,9 +1,9 @@
 project(cells-ui)
 add_library(${PROJECT_NAME} STATIC
-    ui_registrable_system.cpp
-    ui_registrable_system.h
-    ui_application_interface.h
-    ui_config.h
+        ui_registrable_system.cpp
+        ui_registrable_system.h
+        ui_application_interface.h
+        ui_config.h
 )
 
 add_subdirectory(system)
@@ -11,8 +11,8 @@ add_subdirectory(menu_widgets)
 add_subdirectory(widgets)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-    cells-simulation
-    sfml-system
+        cells-simulation
+        sfml-system
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
