@@ -9,11 +9,6 @@ Engine MakeEngine(std::string_view seed);
 class Accessor {
 public:
     explicit Accessor(Engine& engine);
-    Accessor(const Accessor&) = default;
-    Accessor(Accessor&&) = default;
-    Accessor& operator=(const Accessor&) = default;
-    Accessor& operator=(Accessor&&) = default;
-    ~Accessor() = default;
 
     // Returns value from range [0.0f; 1.0f]
     float GetNextValue();
