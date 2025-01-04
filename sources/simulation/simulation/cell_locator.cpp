@@ -77,7 +77,8 @@ bool CellLocator::IsNeighbourFor(CellPosition lhs, CellPosition rhs) const
     return distanceSqr == 1;
 }
 
-uint32_t CellLocator::ToGridIndex(CellPosition position) const {
+uint32_t CellLocator::ToGridIndex(CellPosition position) const
+{
     ASSERT(position.x < _width, "Invalid X position");
     ASSERT(position.y < _height, "Invalid Y position");
     const uint32_t index = position.y * _width + position.x;
