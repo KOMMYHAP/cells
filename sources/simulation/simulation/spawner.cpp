@@ -4,7 +4,7 @@
 
 Spawner::Spawner(EcsWorld& world, const CellLocator& locator)
     : _world(&world)
-, _locator(&locator)
+    , _locator(&locator)
 {
 }
 
