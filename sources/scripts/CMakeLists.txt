@@ -1,29 +1,19 @@
 project(cells-scripts)
 add_library(${PROJECT_NAME} STATIC)
 
-# add sources
 target_sources(${PROJECT_NAME} PRIVATE
-        simulation_script.cpp
-        setup_script.cpp
-        setup_script_errors.cpp
-        scripts_system.cpp
-)
-
-
-# add headers
-target_sources(${PROJECT_NAME} PUBLIC
-        simulation_script.h
-        setup_script.h
+        lua_registrable_system.cpp
+        lua_system.cpp
+        lua_system.h
         scripts_pch.h
-        setup_script_errors.h
-        scripts_system.h
 )
 
-add_subdirectory(native)
+target_sources(${PROJECT_NAME} PUBLIC
+        lua_registrable_system.h
+)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        cells-simulation
-        cells-ui
+        cells-common
         sol2::sol2
         lua
 )
