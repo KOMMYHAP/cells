@@ -22,7 +22,7 @@ void KeepPopulationSystem::DoSystemUpdate()
     const uint32_t width = _config.locator->GetWidth();
 
     for (size_t i = 0; i < spawnPlaceToCreate; ++i) {
-        const uint32_t cellsIndex = random.GetValue(0, NarrowCast<uint32_t>(_config.stats->GetCellsCapacity()));
+        const uint32_t cellsIndex = random.GetValue(0, NarrowCast<uint32_t>(_config.stats->GetCellsCapacity() - 1));
         const auto x = NarrowCast<int16_t>(cellsIndex % width);
         const auto y = NarrowCast<int16_t>(cellsIndex / width);
         spawnPlacesBuffer[i] = CellPosition { x, y };

@@ -23,7 +23,7 @@
 
 World::World(const SimulationConfig& config)
     : _cellsLocator(config.cellsCountX, config.cellsCountY)
-    , _spawner(_ecsWorld)
+    , _spawner(_ecsWorld, _cellsLocator)
     , _simulationVm(_ecsWorld)
     , _randomEngine(Random::MakeEngine("white"))
     , _randomCellFactory(_simulationVm, _randomEngine)
