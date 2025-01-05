@@ -17,7 +17,6 @@ add_subdirectory(widgets)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-simulation
-        sfml-system
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

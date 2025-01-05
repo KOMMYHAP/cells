@@ -46,9 +46,6 @@ target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 target_link_libraries(${PROJECT_NAME} PUBLIC
         Microsoft.GSL::GSL
 )
-target_link_libraries(${PROJECT_NAME} PRIVATE
-        sfml-system
-)
 
 if (MSVC)
     # target_compile_options(${PROJECT_NAME} PUBLIC /WX /W4 /permissive-)

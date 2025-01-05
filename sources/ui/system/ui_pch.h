@@ -2,8 +2,6 @@
 
 #include "SDL.h"
 
-#include "SFML/System.hpp"
-
 #include "imgui.h"
 #include "implot.h"
 
