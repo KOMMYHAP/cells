@@ -23,7 +23,11 @@ std::pair<std::underlying_type_t<MenuWidgetId>, LuaMenuWidget*> LuaMenu::Registe
     if (luaParentWidget.is<uint32_t>()) {
         parentWidgetId = static_cast<MenuWidgetId>(luaParentWidget.as<uint32_t>());
     } else if (luaParentWidget != sol::lua_nil) {
-        _logger->Error("Invalid id of menu widget");
+        _logger->Error("Invalid id of menu widget!");
+        return std::make_pair(std::to_underlying(MenuWidgetId::Invalid), nullptr);
+    }
+    if (!_menuRootWidget->HasWidget(parentWidgetId)) {
+        _logger->Error("Unknown parent widget!");
         return std::make_pair(std::to_underlying(MenuWidgetId::Invalid), nullptr);
     }
     auto&& [id, widget] = _menuRootWidget->AddWidget<LuaMenuWidget>(parentWidgetId, std::string(name), *_logger);

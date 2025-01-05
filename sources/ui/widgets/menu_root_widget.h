@@ -13,6 +13,8 @@ public:
         requires std::is_base_of_v<BaseMenuWidget, T> && std::is_constructible_v<T, Args...>
     std::pair<MenuWidgetId, T*> AddWidget(MenuWidgetId parent, std::string name, Args&&... args);
 
+    bool HasWidget(MenuWidgetId id) const;
+
     void UpdateWidget(Common::Time elapsedTime) override;
 
 private:

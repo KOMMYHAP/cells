@@ -1,5 +1,13 @@
 ﻿#include "menu_root_widget.h"
 
+bool MenuRootWidget::HasWidget(MenuWidgetId id) const
+{
+    if (id == MenuWidgetId::Root) {
+        return true;
+    }
+    return std::to_underlying(id) < _widgets.size();
+}
+
 void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 {
     if (ImGui::BeginMainMenuBar()) {
@@ -18,6 +26,10 @@ MenuWidgetId MenuRootWidget::AddWidget(MenuWidgetId parent, WidgetData widgetDat
 {
     if (_widgets.size() >= LimitNumberOfWidgets) {
         ASSERT_FAIL("Limit of widgets reached!");
+        return MenuWidgetId::Invalid;
+    }
+    if (!HasWidget(parent)) {
+        ASSERT_FAIL("Invalid parent id!");
         return MenuWidgetId::Invalid;
     }
     const auto childId = static_cast<MenuWidgetId>(_widgets.size());
