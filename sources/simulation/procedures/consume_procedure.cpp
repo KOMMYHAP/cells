@@ -13,7 +13,7 @@ ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& vm, CellLocat
 {
 }
 
-void ConsumeProcedure::Execute(ProcedureContext& context)
+void ConsumeProcedure::Execute(ProcedureContext& /*context*/)
 {
     ASSERT_FAIL("Not implemented!");
     // const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();

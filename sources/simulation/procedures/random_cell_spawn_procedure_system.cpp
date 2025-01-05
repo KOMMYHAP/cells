@@ -14,7 +14,7 @@ RandomCellSpawnProcedureSystem::RandomCellSpawnProcedureSystem(EcsWorld& world, 
     , _factory(&factory)
 {
 }
-RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, CellPosition position, CellEnergyDecrease& energyChange)
+RandomCellSpawnProcedureSystem::ExecutionStatus RandomCellSpawnProcedureSystem::ExecuteProcedure(EcsEntity /*id*/, ProcedureContext& context, CellBrain& /*brain*/, CellPosition position, CellEnergyDecrease& energyChange)
 {
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {

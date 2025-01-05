@@ -4,8 +4,10 @@
 
 template <class T, class U>
     requires std::is_arithmetic_v<std::decay_t<T>> && std::is_arithmetic_v<std::decay_t<U>>
-constexpr T NarrowCast(U&& u) noexcept
+constexpr T NarrowCast(U u) noexcept
 {
-    ASSERT(u <= std::numeric_limits<T>::max(), "Numeric limit is reached!");
-    return static_cast<T>(std::forward<U>(u));
+    const auto uCurrent = static_cast<std::common_type_t<T, U>>(u);
+    const auto uMax = static_cast<std::common_type_t<T, U>>(std::numeric_limits<T>::max());
+    ASSERT(uCurrent <= uMax, "Numeric limit is reached!");
+    return static_cast<T>(u);
 }

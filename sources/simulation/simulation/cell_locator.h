@@ -6,7 +6,7 @@
 
 class CellLocator {
 public:
-    CellLocator(uint32_t width, uint32_t height);
+    CellLocator(int32_t width, int32_t height);
 
     void Set(CellPosition position, EcsEntity id);
     void Replace(CellPosition oldPosition, CellPosition newPosition);
@@ -14,8 +14,8 @@ public:
 
     EcsEntity Find(CellPosition position) const;
 
-    uint32_t GetWidth() const { return _width; }
-    uint32_t GetHeight() const { return _height; }
+    int32_t GetWidth() const { return _width; }
+    int32_t GetHeight() const { return _height; }
 
     bool IsNeighbourFor(CellPosition lhs, CellPosition rhs) const;
 
@@ -23,9 +23,9 @@ public:
     CellPosition TryApplyDirection(CellPosition position, Direction direction) const;
 
 private:
-    uint32_t ToGridIndex(CellPosition position) const;
+    int32_t ToGridIndex(CellPosition position) const;
 
-    uint32_t _width { 0 };
-    uint32_t _height { 0 };
+    int32_t _width { 0 };
+    int32_t _height { 0 };
     std::vector<EcsEntity> _grid;
 };

@@ -34,7 +34,7 @@ BaseMenuWidget::MenuWidgetAction LuaMenuWidget::ProcessMenuItem(Common::Time ela
     if (_onUpdate == sol::nil) {
         return MenuWidgetAction::KeepOpen;
     }
-    const sol::function_result result = _onUpdate();
+    const sol::function_result result = _onUpdate(elapsedTime.AsMilliseconds());
     if (!result.valid()) {
         const sol::error err = result;
         _logger->Error("Failed to call {}: {}!", KeyOnUpdate, err.what());

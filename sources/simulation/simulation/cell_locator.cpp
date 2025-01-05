@@ -1,9 +1,9 @@
 #include "cell_locator.h"
 
-CellLocator::CellLocator(uint32_t width, uint32_t height)
+CellLocator::CellLocator(int32_t width, int32_t height)
     : _width(width)
     , _height(height)
-    , _grid(NarrowCast<size_t>(width * height), InvalidEcsEntity)
+    , _grid(static_cast<size_t>(width * height), InvalidEcsEntity)
 {
 }
 
@@ -77,12 +77,12 @@ bool CellLocator::IsNeighbourFor(CellPosition lhs, CellPosition rhs) const
     return distanceSqr == 1;
 }
 
-uint32_t CellLocator::ToGridIndex(CellPosition position) const
+int32_t CellLocator::ToGridIndex(CellPosition position) const
 {
     ASSERT(position.x < _width, "Invalid X position");
     ASSERT(position.y < _height, "Invalid Y position");
-    const uint32_t index = position.y * _width + position.x;
-    ASSERT(index < _grid.size(), "Invalid cell position!");
+    const int32_t index = position.y * _width + position.x;
+    ASSERT(index < NarrowCast<int32_t>(_grid.size()), "Invalid cell position!");
     return index;
 }
 

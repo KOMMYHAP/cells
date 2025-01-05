@@ -48,7 +48,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 )
 
 if (MSVC)
-    # target_compile_options(${PROJECT_NAME} PUBLIC /WX /W4 /permissive-)
+     target_compile_options(${PROJECT_NAME} PUBLIC /WX /W4 /permissive-)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-    # target_compile_options(${PROJECT_NAME} PUBLIC -Werror -Wall -Wextra -Wpedantic)
+     target_compile_options(${PROJECT_NAME} PUBLIC -Werror -Wall -Wextra -Wpedantic)
 endif ()

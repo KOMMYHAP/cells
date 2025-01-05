@@ -8,27 +8,27 @@ SimulationCellDebugger::SimulationCellDebugger(EcsWorld& world)
 {
 }
 
-bool SimulationCellDebugger::ShouldAttachDebugger(const ProcessorContext& context) const
+bool SimulationCellDebugger::ShouldAttachDebugger(const ProcessorContext& /*context*/) const
 {
     return false;
 }
 
-void SimulationCellDebugger::AttachDebugger(ProcessorContext& context)
+void SimulationCellDebugger::AttachDebugger(ProcessorContext& /*context*/)
 {
 }
 
-void SimulationCellDebugger::DetachDebugger(ProcessorContext& context)
+void SimulationCellDebugger::DetachDebugger(ProcessorContext& /*context*/)
 {
 }
 
-void SimulationCellDebugger::ProcedureWillStarted(ProcessorContext& processorContext, ProcedureContext& procedureContext)
+void SimulationCellDebugger::ProcedureWillStarted(ProcessorContext& /*processorContext*/, ProcedureContext& /*procedureContext*/)
 {
 }
 
-void SimulationCellDebugger::ProcedureWasDeferred(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+void SimulationCellDebugger::ProcedureWasDeferred(ProcessorContext& /*processorContext*/, const ProcedureContext& /*procedureContext*/)
 {
 }
 
-void SimulationCellDebugger::ProcedureWasCompleted(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+void SimulationCellDebugger::ProcedureWasCompleted(ProcessorContext& /*processorContext*/, const ProcedureContext& /*procedureContext*/)
 {
 }

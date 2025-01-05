@@ -20,7 +20,7 @@ void SimulationVirtualMachine::Run(const EcsEntity id, CellBrain& brain)
     _virtualMachine.Run(memory, ProcessorUserData { simulationContext });
 }
 
-void SimulationVirtualMachine::CompletePendingProcedure(EcsEntity id, CellBrain& brain, const ProcedureContext& context)
+void SimulationVirtualMachine::CompletePendingProcedure(EcsEntity /*id*/, CellBrain& brain, const ProcedureContext& context)
 {
     const ProcessorMemory memory { brain.data };
     _virtualMachine.CompleteDeferredExecution(memory, context);

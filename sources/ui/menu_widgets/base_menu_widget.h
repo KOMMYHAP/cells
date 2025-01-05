@@ -12,7 +12,7 @@ public:
         KeepOpen,
         ShouldClose,
     };
-    virtual MenuWidgetAction ProcessMenuItem(Common::Time elapsedTime) { return MenuWidgetAction::ShouldClose; }
+    virtual MenuWidgetAction ProcessMenuItem(Common::Time /*elapsedTime*/) { return MenuWidgetAction::ShouldClose; }
 
     virtual void OnMenuItemJustClosed() { }
 };

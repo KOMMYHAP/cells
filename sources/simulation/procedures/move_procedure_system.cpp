@@ -7,7 +7,7 @@ MoveProcedureSystem::MoveProcedureSystem(EcsWorld& world, SimulationVirtualMachi
 {
 }
 
-MoveProcedureSystem::ExecutionStatus MoveProcedureSystem::ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, CellPosition& position)
+MoveProcedureSystem::ExecutionStatus MoveProcedureSystem::ExecuteProcedure(EcsEntity /*id*/, ProcedureContext& context, CellBrain& /*brain*/, CellPosition& position)
 {
     const auto [readArgs, rawDirection] = context.TryPopArgs<uint8_t>();
     if (!readArgs) {
