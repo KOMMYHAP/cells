@@ -1,5 +1,6 @@
 #include "lua_system.h"
 
+#include "bind/lua_imgui_bindings.h"
 #include "bind/lua_menu.h"
 #include "bind/lua_menu_widget.h"
 
@@ -15,7 +16,9 @@ LuaSystem::LuaSystem(MenuRootWidget& menuRootWidget)
     _luaState.new_usertype<LuaMenu>("menu", "register", &LuaMenu::Register);
     _luaState["ui_menu"] = LuaMenu(_logger, *_menuRootWidget);
 
-        static constexpr auto script = R"(
+    sol_ImGui::Init(_luaState);
+
+    static constexpr auto script = R"(
 id, w = ui_menu:register(nil, "test")
 assert(w ~= nil)
 w.onFirstTimeOpen = function() print("onFirstTimeOpen") end
