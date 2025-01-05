@@ -16,8 +16,6 @@ public:
     void UpdateWidget(Common::Time elapsedTime) override;
 
 private:
-    static constexpr auto RootWidgetId = static_cast<MenuWidgetId>(std::numeric_limits<std::underlying_type_t<MenuWidgetId>>::max());
-
     struct WidgetState {
         bool opened { false };
         bool justOpenedFirstTime { false };

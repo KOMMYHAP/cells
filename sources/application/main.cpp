@@ -6,6 +6,7 @@
 #include "simulation_registrable_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
+#include "lua_registrable_system.h"
 
 namespace {
 
@@ -66,6 +67,7 @@ int main(int /*argc*/, char** /*argv*/)
     common::Registrar registrar;
     registrar.Register<ConfigurationRegistrableSystem>();
     registrar.Register<SimulationRegistrableSystem>();
+    registrar.Register<LuaRegistrableSystem>();
     const UiRegistrableSystem& uiSystem = registrar.Register<UiRegistrableSystem>();
 
     if (const std::error_code error = registrar.RunInit()) {

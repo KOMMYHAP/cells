@@ -4,7 +4,7 @@
 void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 {
     if (ImGui::BeginMainMenuBar()) {
-        if (const WidgetsGroup* rootGroup = FindWidgetGroup(_rootWidgetId)) {
+        if (const WidgetsGroup* rootGroup = FindWidgetGroup(MenuWidgetId::Root)) {
             for (const MenuWidgetId id : rootGroup->items) {
                 UpdateWidgetsGroup(id);
             }
@@ -18,7 +18,7 @@ void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 MenuWidgetId MenuRootWidget::AddWidget(MenuWidgetId parent, WidgetData widgetData)
 {
     const auto childId = static_cast<MenuWidgetId>(_widgets.size());
-    ASSERT(childId != RootWidgetId, "Limit of widgets reached!");
+    ASSERT(childId != MenuWidgetId::Root, "Limit of widgets reached!");
     _widgets.emplace_back(std::move(widgetData));
     _indexedGroups[parent].items.emplace_back(childId);
     return childId;
