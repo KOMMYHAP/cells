@@ -1,5 +1,6 @@
 #pragma once
 #include "lua_logger.h"
+#include "sol/forward.hpp"
 
 class MenuRootWidget;
 

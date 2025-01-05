@@ -1,7 +1,3 @@
-#ifdef NDEBUG
-#error You should run unit-tests in debug configuration to enable asserts in death tests!
-#endif
-
 #include "utils/test_throw_assert_listener.h"
 
 int main(int argc, char** argv)

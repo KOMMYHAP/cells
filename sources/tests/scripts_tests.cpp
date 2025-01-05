@@ -1,14 +1,17 @@
+#include "sol/sol.hpp"
+
 #include "application_storage.h"
 #include "lua_registrable_system.h"
 #include "registrar/registrar.h"
 #include "simulation_config.h"
 #include "simulation_registrable_system.h"
 #include "system/lua_system.h"
+#include "system/ui_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
 
 namespace {
-class ScriptsFixture : public ::testing::Test {
+class ScriptsFixture : public testing::Test {
 protected:
     void SetUp() override;
     void TearDown() override;
@@ -20,6 +23,7 @@ private:
 
     common::Registrar registrar;
     LuaSystem* luaSystem { nullptr };
+    UiSystem* uiSystem { nullptr };
 };
 
 class TestConfigurationRegistrableSystem final : public common::RegistrableSystem {
@@ -32,16 +36,16 @@ void ScriptsFixture::SetUp()
 {
     registrar.Register<TestConfigurationRegistrableSystem>();
     registrar.Register<SimulationRegistrableSystem>();
-    const UiRegistrableSystem& uiSystem = registrar.Register<UiRegistrableSystem>();
+    UiRegistrableSystem& uiRegistrableSystem = registrar.Register<UiRegistrableSystem>();
     LuaRegistrableSystem& luaRegistrableSystem = registrar.Register<LuaRegistrableSystem>();
 
     if (const std::error_code error = registrar.RunInit()) {
-        ASSERT_EQ(error, std::error_code {}) << std::format("Failed to initialize systems: {}", error.message()) << '\n';
+        GTEST_FAIL() << std::format("Failed to initialize systems: {}", error.message()) << '\n';
         return;
     }
 
     luaSystem = &luaRegistrableSystem.ModifyLuaSystem();
-    uiSystem.GetUiApplicationInterface()->ApplicationRunMainLoop();
+    uiSystem = &uiRegistrableSystem.ModifyUiSystem();
 }
 
 void ScriptsFixture::TearDown()
@@ -51,10 +55,12 @@ void ScriptsFixture::TearDown()
 
 void ScriptsFixture::Run(std::string_view filename)
 {
-    const std::filesystem::path path = std::filesystem::path { "../../sources/tests/lua" } / filename;
+    const std::filesystem::path relativePathToLuaTestsDirectory { "../../../../sources/tests/lua" };
+    const std::filesystem::path path = std::filesystem::current_path() / relativePathToLuaTestsDirectory / filename;
     const std::optional<std::string> mbData = LoadScript(path);
     ASSERT_TRUE(mbData) << std::format("Cannot load script {}", filename);
     luaSystem->RunScript(*mbData);
+    uiSystem->Update(Common::Time::FromMilliseconds(15));
 }
 
 std::optional<std::string> ScriptsFixture::LoadScript(const std::filesystem::path& path)
@@ -64,10 +70,11 @@ std::optional<std::string> ScriptsFixture::LoadScript(const std::filesystem::pat
         return {};
     }
     ifs.seekg(0, std::ios::end);
-    const std::streampos size = ifs.tellg();
-    ifs.seekg(0, std::ios::cur);
-    std::string data { size + std::streampos { 1 } };
+    const std::ifstream::pos_type size = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+    auto data = std::string(size + std::ifstream::off_type { 1 }, '\0');
     ifs.read(data.data(), data.length());
+    std::erase_if(data, [](char c) { return c == '\0'; });
     return data;
 }
 
@@ -86,8 +93,8 @@ std::error_code TestConfigurationRegistrableSystem::InitializeSystem(Application
     uiConfig.worldWidgetSizeY = 50;
     uiConfig.cellPixelsSize = 10;
 
-    storage.Store<LuaLogger>([this] {
-        ASSERT_TRUE(false, "Script exection error! See details in log");
+    storage.Store<LuaLogger>([] {
+        GTEST_FAIL() << "Script execution error! See details in log";
     });
     return {};
 }

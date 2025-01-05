@@ -8,17 +8,15 @@ class UiSystem;
 class UiRegistrableSystem final : public common::RegistrableSystem {
 public:
     UiRegistrableSystem();
-    UiRegistrableSystem(const UiRegistrableSystem& other) = delete;
-    UiRegistrableSystem(UiRegistrableSystem&& other) noexcept = delete;
-    UiRegistrableSystem& operator=(const UiRegistrableSystem& other) = delete;
-    UiRegistrableSystem& operator=(UiRegistrableSystem&& other) noexcept = delete;
     ~UiRegistrableSystem() override;
 
     std::error_code InitializeSystem(ApplicationStorage& storage) override;
     void TerminateSystem() override;
 
     UiApplicationInterface* GetUiApplicationInterface() const;
+    const UiSystem& GetUiSystem() const { return *_uiSystem; }
+    UiSystem& ModifyUiSystem() { return *_uiSystem; }
 
 private:
-    UiSystem* _uiSystem{nullptr};
+    UiSystem* _uiSystem { nullptr };
 };

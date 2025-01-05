@@ -18,4 +18,4 @@ local menu_widget = {}
 ---@param parent_id number?
 ---@param name string
 ---@return number widget_id, menu_widget? widget
-function ui_menu.register(parent_id, name, flags)  end
+function ui_menu:register(parent_id, name, flags)  end

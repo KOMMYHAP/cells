@@ -17,13 +17,13 @@ public:
 
     void ApplicationRunMainLoop() override;
 
-    MenuRootWidget& GetMenuRootWidget() { return *_menuRootWidget; }
-
-private:
     void ProcessInput();
     void Update(Common::Time elapsedTime);
     void Render();
 
+    MenuRootWidget& GetMenuRootWidget() { return *_menuRootWidget; }
+
+private:
     bool _shouldStopMainLoop { false };
     SDL_Window* _window { nullptr };
     SDL_Renderer* _renderer { nullptr };
