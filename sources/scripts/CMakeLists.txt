@@ -13,9 +13,7 @@ add_subdirectory(system)
 add_subdirectory(bind)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        sol2::sol2
-        lua
-        ImGuiLib
+        cells-lua-imgui-bindings
         cells-common
         cells-simulation
         cells-ui
