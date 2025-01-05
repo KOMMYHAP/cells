@@ -107,7 +107,7 @@ void UiSystem::Render()
     SDL_RenderClear(_renderer);
 
     _rootWidget->RenderWidget();
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), _renderer);
     SDL_RenderPresent(_renderer);
 }
 
