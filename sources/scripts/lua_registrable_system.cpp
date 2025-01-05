@@ -1,5 +1,6 @@
 #include "lua_registrable_system.h"
 
+#include "system/lua_logger.h"
 #include "system/lua_system.h"
 #include "system/ui_system.h"
 
@@ -10,11 +11,26 @@ std::error_code LuaRegistrableSystem::InitializeSystem(ApplicationStorage& stora
 {
     UiSystem& uiSystem = storage.Modify<UiSystem>();
     MenuRootWidget& menuRootWidget = uiSystem.GetMenuRootWidget();
-    _luaSystem = std::make_unique<LuaSystem>(menuRootWidget);
+
+    MakeDefaultLuaLogger();
+    LuaLogger* logger { _defaultLogger.get() };
+    if (storage.Has<LuaLogger>()) {
+        logger = &storage.Modify<LuaLogger>();
+    }
+
+    _luaSystem = std::make_unique<LuaSystem>(menuRootWidget, *logger);
     return {};
 }
 
 void LuaRegistrableSystem::TerminateSystem()
 {
     _luaSystem.reset();
+}
+
+void LuaRegistrableSystem::MakeDefaultLuaLogger()
+{
+    _defaultLogger = std::make_unique<LuaLogger>([] {
+        std::fflush(stdout);
+        ASSERT_FAIL("Lua error occurred!");
+    });
 }

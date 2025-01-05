@@ -1,7 +1,6 @@
 #include "lua_logger.h"
 
-void LuaLogger::BreakIfNeeded()
+LuaLogger::LuaLogger(std::function<void()> onErrorCallback)
+    : _onError(std::move(onErrorCallback))
 {
-    std::fflush(stdout);
-    ASSERT_FAIL("Lua error occurred!");
 }
