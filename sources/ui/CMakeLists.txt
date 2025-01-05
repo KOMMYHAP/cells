@@ -1,6 +1,11 @@
 project(cells-ui)
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME} STATIC)
+
+target_sources(${PROJECT_NAME} PRIVATE
         ui_registrable_system.cpp
+)
+
+target_sources(${PROJECT_NAME} PUBLIC
         ui_registrable_system.h
         ui_application_interface.h
         ui_config.h

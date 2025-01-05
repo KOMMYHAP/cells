@@ -81,6 +81,7 @@
 #include <vector>
 #include <xutility>
 #include <print>
+#include <filesystem>
 
 // GSL
 #include <gsl/pointers> // owner, not_null
