@@ -67,8 +67,8 @@ int main(int /*argc*/, char** /*argv*/)
     common::Registrar registrar;
     registrar.Register<ConfigurationRegistrableSystem>();
     registrar.Register<SimulationRegistrableSystem>();
-    registrar.Register<LuaRegistrableSystem>();
     const UiRegistrableSystem& uiSystem = registrar.Register<UiRegistrableSystem>();
+    registrar.Register<LuaRegistrableSystem>();
 
     if (const std::error_code error = registrar.RunInit()) {
         std::cerr << std::format("Failed to initialize systems: {}", error.message()) << '\n';

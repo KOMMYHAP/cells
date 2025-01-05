@@ -1,6 +1,7 @@
 #include "world_widget.h"
 
 #include "system/sdl_panic.h"
+#include "world_rasterization_data.h"
 
 WorldWidget::WorldWidget(SDL_Renderer& renderer, World& world, WorldRasterizationSystem& worldRasterizationSystem, SDL_Rect textureRect)
     : _world(&world)

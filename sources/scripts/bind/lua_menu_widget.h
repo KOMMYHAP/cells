@@ -13,6 +13,7 @@ public:
     void OnMenuItemJustClosed() override;
 
     void OverrideFunction(sol::string_view key, sol::function function, sol::this_state state);
+    void ClearFunctions();
 
 private:
     static constexpr auto KeyOnFirstTimeOpen = "onFirstTimeOpen"sv;

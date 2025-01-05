@@ -9,26 +9,35 @@ LuaMenuWidget::LuaMenuWidget(LuaLogger& logger)
 
 void LuaMenuWidget::OnMenuItemOpenedFirstTime()
 {
+    if (_onFirstTimeOpen == sol::nil) {
+        return;
+    }
     if (const sol::function_result result = _onFirstTimeOpen(); !result.valid()) {
         const sol::error err = result;
-        _logger->Error("Failed to call {}!", KeyOnFirstTimeOpen);
+        _logger->Error("Failed to call {}: {}!", KeyOnFirstTimeOpen, err.what());
     }
 }
 
 void LuaMenuWidget::OnMenuItemJustOpened()
 {
+    if (_onJustOpened == sol::nil) {
+        return;
+    }
     if (const sol::function_result result = _onJustOpened(); !result.valid()) {
         const sol::error err = result;
-        _logger->Error("Failed to call {}!", KeyOnJustOpen);
+        _logger->Error("Failed to call {}: {}!", KeyOnJustOpen, err.what());
     }
 }
 
 BaseMenuWidget::MenuWidgetAction LuaMenuWidget::ProcessMenuItem(Common::Time elapsedTime)
 {
+    if (_onUpdate == sol::nil) {
+        return MenuWidgetAction::KeepOpen;
+    }
     const sol::function_result result = _onUpdate();
     if (!result.valid()) {
         const sol::error err = result;
-        _logger->Error("Failed to call {}!", KeyOnUpdate);
+        _logger->Error("Failed to call {}: {}!", KeyOnUpdate, err.what());
         return MenuWidgetAction::KeepOpen;
     }
 
@@ -43,9 +52,12 @@ BaseMenuWidget::MenuWidgetAction LuaMenuWidget::ProcessMenuItem(Common::Time ela
 
 void LuaMenuWidget::OnMenuItemJustClosed()
 {
+    if (_onClosed == sol::nil) {
+        return;
+    }
     if (const sol::function_result result = _onClosed(); !result.valid()) {
         const sol::error err = result;
-        _logger->Error("Failed to call {}!", KeyOnClosed);
+        _logger->Error("Failed to call {}: {}!", KeyOnClosed, err.what());
     }
 }
 
@@ -68,4 +80,12 @@ void LuaMenuWidget::OverrideFunction(sol::string_view key, sol::function functio
     }
 
     *targetFunction = std::move(function);
+}
+
+void LuaMenuWidget::ClearFunctions()
+{
+    _onFirstTimeOpen = sol::nil;
+    _onJustOpened = sol::nil;
+    _onUpdate = sol::nil;
+    _onClosed = sol::nil;
 }

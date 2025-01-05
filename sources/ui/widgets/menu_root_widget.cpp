@@ -1,6 +1,5 @@
 ﻿#include "menu_root_widget.h"
 
-
 void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 {
     if (ImGui::BeginMainMenuBar()) {
@@ -17,8 +16,11 @@ void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 
 MenuWidgetId MenuRootWidget::AddWidget(MenuWidgetId parent, WidgetData widgetData)
 {
+    if (_widgets.size() >= LimitNumberOfWidgets) {
+        ASSERT_FAIL("Limit of widgets reached!");
+        return MenuWidgetId::Invalid;
+    }
     const auto childId = static_cast<MenuWidgetId>(_widgets.size());
-    ASSERT(childId != MenuWidgetId::Root, "Limit of widgets reached!");
     _widgets.emplace_back(std::move(widgetData));
     _indexedGroups[parent].items.emplace_back(childId);
     return childId;

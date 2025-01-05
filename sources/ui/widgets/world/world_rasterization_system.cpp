@@ -1,4 +1,5 @@
 ﻿#include "world_rasterization_system.h"
+#include "world_rasterization_data.h"
 
 WorldRasterizationSystem::WorldRasterizationSystem(EcsWorld& ecsWorld, uint16_t cellSize)
     : SimulationEcsSystem(ecsWorld)

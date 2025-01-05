@@ -1,28 +1,32 @@
 #include "lua_system.h"
 
+#include "bind/lua_menu.h"
 #include "bind/lua_menu_widget.h"
-#include "menu_widgets/menu_widget_id.h"
-#include "widgets/menu_root_widget.h"
 
 LuaSystem::LuaSystem(MenuRootWidget& menuRootWidget)
     : _menuRootWidget(&menuRootWidget)
 {
+    _luaState.open_libraries(sol::lib::base);
+
     _luaState.new_usertype<LuaMenuWidget>("menu_widget",
         sol::meta_function::new_index,
         &LuaMenuWidget::OverrideFunction);
 
-    _luaState["ui_menu"].set_function("register", [this](sol::object luaParentWidget, std::string_view name) {
-        auto parentWidgetId { MenuWidgetId::Root };
-        if (luaParentWidget.is<uint32_t>) {
-            parentWidgetId = static_cast<MenuWidgetId>(luaParentWidget.as<uint32_t>());
-        } else if (luaParentWidget != sol::lua_nil) {
-            _logger.Error("Invalid id of menu widget");
-            return std::to_underlying(MenuWidgetId::Invalid);
-        }
-        const MenuWidgetId id = _menuRootWidget->AddWidget<LuaMenuWidget>(parentWidgetId, std::string(name), _logger);
-        if (id == MenuWidgetId::Invalid) {
-            _logger.Error("Failed to register new menu widget!");
-        }
-        return std::to_underlying(id);
-    });
+    _luaState.new_usertype<LuaMenu>("menu", "register", &LuaMenu::Register);
+    _luaState["ui_menu"] = LuaMenu(_logger, *_menuRootWidget);
+
+    //     static constexpr auto script = R"(
+    // id, w = ui_menu:register(nil, "test")
+    // w.onFirstTimeOpen = function() print("onFirstTimeOpen") end
+    // w.onJustOpen = function() print("onJustOpen") end
+    // w.onUpdate = function() print("onUpdate") return true end
+    // w.onClosed = function() print("onClosed") end
+    // print(id)
+    // print(w)
+    // )"sv;
+    //     const auto r = _luaState.script(script, sol::script_pass_on_error);
+    //     if (!r.valid()) {
+    //         const sol::error error = r;
+    //         _logger.Error("Failed to run script: {}", error.what());
+    //     }
 }

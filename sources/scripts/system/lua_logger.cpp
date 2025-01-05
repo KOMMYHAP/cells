@@ -2,5 +2,6 @@
 
 void LuaLogger::BreakIfNeeded()
 {
-    ASSERT("Lua error occurred!");
+    std::fflush(stdout);
+    ASSERT_FAIL("Lua error occurred!");
 }

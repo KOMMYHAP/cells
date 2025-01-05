@@ -20,5 +20,5 @@ public:
     UiApplicationInterface* GetUiApplicationInterface() const;
 
 private:
-    std::unique_ptr<UiSystem> _uiSystem;
+    UiSystem* _uiSystem{nullptr};
 };

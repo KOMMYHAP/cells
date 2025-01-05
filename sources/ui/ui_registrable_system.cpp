@@ -10,16 +10,16 @@ std::error_code UiRegistrableSystem::InitializeSystem(ApplicationStorage& storag
 {
     const auto& config = storage.Get<UiConfig>();
     World& world = storage.Modify<World>();
-    _uiSystem = std::make_unique<UiSystem>(world, config);
+    _uiSystem = &storage.Store<UiSystem>(world, config);
     return {};
 }
 
 void UiRegistrableSystem::TerminateSystem()
 {
-    _uiSystem.reset();
+    _uiSystem = nullptr;
 }
 
 UiApplicationInterface* UiRegistrableSystem::GetUiApplicationInterface() const
 {
-    return _uiSystem.get();
+    return _uiSystem;
 }

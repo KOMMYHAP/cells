@@ -7,15 +7,16 @@ class MenuRootWidget final : public BaseWidget {
 public:
     template <class T, class... Args>
         requires std::is_base_of_v<BaseMenuWidget, T> && std::is_constructible_v<T, Args...>
-    MenuWidgetId AddWidget(std::string name, Args&&... args);
+    std::pair<MenuWidgetId, T*> AddWidget(std::string name, Args&&... args);
 
     template <class T, class... Args>
         requires std::is_base_of_v<BaseMenuWidget, T> && std::is_constructible_v<T, Args...>
-    MenuWidgetId AddWidget(MenuWidgetId parent, std::string name, Args&&... args);
+    std::pair<MenuWidgetId, T*> AddWidget(MenuWidgetId parent, std::string name, Args&&... args);
 
     void UpdateWidget(Common::Time elapsedTime) override;
 
 private:
+    static constexpr size_t LimitNumberOfWidgets = 1'000;
     struct WidgetState {
         bool opened { false };
         bool justOpenedFirstTime { false };
@@ -46,7 +47,6 @@ private:
 
     std::vector<WidgetData> _widgets;
     std::map<MenuWidgetId, WidgetsGroup> _indexedGroups;
-    MenuWidgetId _rootWidgetId { RootWidgetId };
     std::vector<MenuWidgetId> _openedWidgets;
 };
 

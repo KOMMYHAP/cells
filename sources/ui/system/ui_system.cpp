@@ -56,7 +56,7 @@ UiSystem::UiSystem(World& world, const UiConfig& uiConfig)
     MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
     _menuRootWidget = &menuRootWidget;
 
-    const MenuWidgetId gameMenu = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
+    auto&& [gameMenu, _] = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
     menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
     menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
     menuRootWidget.AddWidget<ImPlotDemoMenuWidget>("ImPlot Demo");

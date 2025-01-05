@@ -7,6 +7,9 @@
 #include "world.h"
 
 class MenuRootWidget;
+struct SDL_Window;
+struct SDL_Renderer;
+
 class UiSystem final : public UiApplicationInterface {
 public:
     explicit UiSystem(World& world, const UiConfig& uiConfig);

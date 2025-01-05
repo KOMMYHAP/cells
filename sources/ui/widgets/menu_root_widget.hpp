@@ -3,17 +3,22 @@
 
 template <class T, class... Args>
     requires std::is_base_of_v<BaseMenuWidget, T> && std::is_constructible_v<T, Args...>
-MenuWidgetId MenuRootWidget::AddWidget(std::string name, Args&&... args)
+std::pair<MenuWidgetId, T*> MenuRootWidget::AddWidget(std::string name, Args&&... args)
 {
-    return AddWidget<T>(RootWidgetId, std::move(name), std::forward<Args>(args)...);
+    return AddWidget<T>(MenuWidgetId::Root, std::move(name), std::forward<Args>(args)...);
 }
 
 template <class T, class... Args>
     requires std::is_base_of_v<BaseMenuWidget, T> && std::is_constructible_v<T, Args...>
-MenuWidgetId MenuRootWidget::AddWidget(MenuWidgetId parent, std::string name, Args&&... args)
+std::pair<MenuWidgetId, T*> MenuRootWidget::AddWidget(MenuWidgetId parent, std::string name, Args&&... args)
 {
     WidgetData data;
     data.widget = std::make_unique<T>(std::forward<Args>(args)...);
     data.name = std::move(name);
-    return AddWidget(parent, std::move(data));
+    T* rawWidget = static_cast<T*>(data.widget.get());
+    const MenuWidgetId id = AddWidget(parent, std::move(data));
+    if (id == MenuWidgetId::Invalid) {
+        rawWidget = nullptr;
+    }
+    return std::make_pair(id, rawWidget);
 }
