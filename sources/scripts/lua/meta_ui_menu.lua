@@ -12,6 +12,7 @@ ui_menu = {
 ---@field onJustOpen fun()
 ---@field onUpdate fun(dt: integer): boolean Returns true if stil opened, otherwise returns false
 ---@field onClosed fun()
+---@field name string
 local menu_widget = {}
 
 

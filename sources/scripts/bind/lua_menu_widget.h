@@ -15,6 +15,9 @@ public:
     void OverrideFunction(sol::string_view key, sol::function function, sol::this_state state);
     void ClearFunctions();
 
+    void SetName(std::string_view name) { _name = name; }
+    std::string_view GetName() const { return _name; }
+
 private:
     static constexpr auto KeyOnFirstTimeOpen = "onFirstTimeOpen"sv;
     static constexpr auto KeyOnJustOpen = "onJustOpen"sv;
@@ -26,4 +29,5 @@ private:
     sol::function _onUpdate;
     sol::function _onClosed;
     gsl::not_null<LuaLogger*> _logger;
+    std::string_view _name;
 };

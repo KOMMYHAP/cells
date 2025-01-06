@@ -8,10 +8,11 @@ LuaSystem::LuaSystem(MenuRootWidget& menuRootWidget, LuaLogger& logger)
     : _logger(&logger)
     , _menuRootWidget(&menuRootWidget)
 {
-    _luaState.open_libraries(sol::lib::base);
+    _luaState.open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table);
     _luaState.new_usertype<LuaMenuWidget>("menu_widget",
         sol::meta_function::new_index,
-        &LuaMenuWidget::OverrideFunction);
+        &LuaMenuWidget::OverrideFunction,
+        "name", sol::readonly_property(&LuaMenuWidget::GetName));
     _luaState.new_usertype<LuaMenu>("menu",
         "register", &LuaMenu::Register,
         "root_widget", sol::var(std::to_underlying(MenuWidgetId::Root)),

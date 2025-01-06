@@ -34,6 +34,7 @@ std::pair<std::underlying_type_t<MenuWidgetId>, LuaMenuWidget*> LuaMenu::Registe
     if (id == MenuWidgetId::Invalid) {
         _logger->Error("Failed to register new menu widget!");
     }
+    widget->SetName(name);
     _widgets.emplace_back(widget);
     return std::make_pair(std::to_underlying(id), widget);
 }
