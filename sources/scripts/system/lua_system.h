@@ -10,14 +10,19 @@ public:
 
     void RegisterWidgets(MenuRootWidget& menuRootWidget);
 
-    void AddPath(const std::filesystem::path& path);
-    sol::load_result* LoadScript(const std::filesystem::path& scriptPath);
-    sol::load_result* FindScript(const std::string& scriptName);
+    void SetPath(const std::filesystem::path& path);
+    sol::load_result* LoadScript(std::string_view scriptName);
+    sol::load_result* FindScript(std::string_view scriptName);
 
-    sol::function_result RunScript(std::string_view script);
+    template <class... Args>
+    sol::function_result RunScript(std::string_view scriptName, Args&&... args);
+    sol::function_result RunScriptFromCode(std::string_view script);
 
 private:
     sol::state _luaState;
     gsl::not_null<LuaLogger*> _logger;
-    std::map<std::string, sol::load_result> _scripts;
+    std::map<std::string, sol::load_result, std::less<>> _scripts;
+    std::filesystem::path _scriptsLoaderPath;
 };
+
+#include "lua_system.hpp"

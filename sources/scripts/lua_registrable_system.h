@@ -6,6 +6,11 @@ class LuaLogger;
 class LuaSystem;
 class LuaRegistrableSystem final : public common::RegistrableSystem {
 public:
+    struct Config {
+        std::filesystem::path luaDirectory;
+        std::optional<std::string_view> startupScript;
+    };
+
     LuaRegistrableSystem();
     ~LuaRegistrableSystem() override;
 
@@ -18,6 +23,6 @@ public:
 private:
     void MakeDefaultLuaLogger();
 
-    std::unique_ptr<LuaSystem> _luaSystem;
+    LuaSystem* _luaSystem{nullptr};
     std::unique_ptr<LuaLogger> _defaultLogger;
 };

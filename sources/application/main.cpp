@@ -3,10 +3,10 @@
 
 #include "registrar/registrar.h"
 
+#include "lua_registrable_system.h"
 #include "simulation_registrable_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
-#include "lua_registrable_system.h"
 
 namespace {
 
@@ -57,6 +57,11 @@ std::error_code ConfigurationRegistrableSystem::InitializeSystem(ApplicationStor
     uiConfig.worldWidgetSizeX = WorldWidgetSizeX;
     uiConfig.worldWidgetSizeY = WorldWidgetSizeY;
     uiConfig.cellPixelsSize = CellPixelsSize;
+
+    auto& luaConfig = storage.Store<LuaRegistrableSystem::Config>();
+    static constexpr auto RelativePathToLuaDirectory = "../../../../sources/scripts/lua/"sv;
+    luaConfig.luaDirectory = std::filesystem::current_path() / RelativePathToLuaDirectory;
+    luaConfig.startupScript = "loader.lua"sv;
 
     return {};
 }

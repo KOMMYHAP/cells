@@ -17,32 +17,25 @@ std::error_code LuaRegistrableSystem::InitializeSystem(ApplicationStorage& stora
     if (storage.Has<LuaLogger>()) {
         logger = &storage.Modify<LuaLogger>();
     }
-
-    _luaSystem = std::make_unique<LuaSystem>(*logger);
+    _luaSystem = &storage.Store<LuaSystem>(*logger);
     _luaSystem->RegisterWidgets(menuRootWidget);
 
-    static constexpr auto RelativePathToLuaDirectory = "../../../../sources/scripts/lua/"sv;
-    const std::filesystem::path scriptsDirectory = std::filesystem::current_path() / RelativePathToLuaDirectory;
-    _luaSystem->AddPath(scriptsDirectory);
+    const Config& config = storage.Get<Config>();
+    _luaSystem->SetPath(config.luaDirectory);
 
-    sol::load_result* loader = _luaSystem->LoadScript(scriptsDirectory / "loader.lua"sv);
-    if (!loader) {
-        return std::make_error_code(std::errc::invalid_argument);
-    }
-    if (!loader->valid()) {
-        return std::make_error_code(std::errc::invalid_argument);
-    }
-    const sol::function_result r = loader->call();
-    if (!r.valid()) {
-        logger->Error("Failed to execute script: {}!", sol::error { r }.what());
-        return std::make_error_code(std::errc::invalid_argument);
+    if (config.startupScript) {
+        const std::string_view scriptName = *config.startupScript;
+        _luaSystem->LoadScript(scriptName);
+        if (const sol::function_result r = _luaSystem->RunScript(scriptName); !r.valid()) {
+            return std::make_error_code(std::errc::invalid_argument);
+        }
     }
     return {};
 }
 
 void LuaRegistrableSystem::TerminateSystem()
 {
-    _luaSystem.reset();
+    _luaSystem = nullptr;
 }
 
 void LuaRegistrableSystem::MakeDefaultLuaLogger()

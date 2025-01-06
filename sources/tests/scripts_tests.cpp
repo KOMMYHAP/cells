@@ -18,15 +18,11 @@ protected:
     void SetUp() override;
     void TearDown() override;
 
-    sol::function_result Run(std::string_view filename);
-    UiSystem& ModifyUiSystem();
-
-private:
-    std::optional<std::string> LoadScript(const std::filesystem::path& path);
-
-    common::Registrar registrar;
     LuaSystem* luaSystem { nullptr };
     UiSystem* uiSystem { nullptr };
+
+private:
+    common::Registrar registrar;
 };
 
 class TestConfigurationRegistrableSystem final : public common::RegistrableSystem {
@@ -44,7 +40,6 @@ void ScriptsFixture::SetUp()
 
     if (const std::error_code error = registrar.RunInit()) {
         GTEST_FAIL() << std::format("Failed to initialize systems: {}", error.message()) << '\n';
-        return;
     }
 
     luaSystem = &luaRegistrableSystem.ModifyLuaSystem();
@@ -54,38 +49,6 @@ void ScriptsFixture::SetUp()
 void ScriptsFixture::TearDown()
 {
     registrar.RunTerm();
-}
-
-sol::function_result ScriptsFixture::Run(std::string_view filename)
-{
-    const std::filesystem::path relativePathToLuaTestsDirectory { "../../../../sources/tests/lua" };
-    const std::filesystem::path path = std::filesystem::current_path() / relativePathToLuaTestsDirectory / filename;
-    const std::optional<std::string> mbData = LoadScript(path);
-    if (!mbData) {
-        return {};
-    }
-    sol::function_result result = luaSystem->RunScript(*mbData);
-    return result;
-}
-
-UiSystem& ScriptsFixture::ModifyUiSystem()
-{
-    return *uiSystem;
-}
-
-std::optional<std::string> ScriptsFixture::LoadScript(const std::filesystem::path& path)
-{
-    std::ifstream ifs { path };
-    if (!ifs.is_open()) {
-        return {};
-    }
-    ifs.seekg(0, std::ios::end);
-    const std::ifstream::pos_type size = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-    auto data = std::string(size + std::ifstream::off_type { 1 }, '\0');
-    ifs.read(data.data(), data.length());
-    std::erase_if(data, [](char c) { return c == '\0'; });
-    return data;
 }
 
 std::error_code TestConfigurationRegistrableSystem::InitializeSystem(ApplicationStorage& storage)
@@ -103,6 +66,10 @@ std::error_code TestConfigurationRegistrableSystem::InitializeSystem(Application
     uiConfig.worldWidgetSizeY = 50;
     uiConfig.cellPixelsSize = 10;
 
+    auto& luaConfig = storage.Store<LuaRegistrableSystem::Config>();
+    static constexpr auto RelativePathToLuaDirectory = "../../../../sources/tests/lua/"sv;
+    luaConfig.luaDirectory = std::filesystem::current_path() / RelativePathToLuaDirectory;
+
     storage.Store<LuaLogger>([] {
         GTEST_FAIL() << "Script execution error! See details in log";
     });
@@ -117,15 +84,16 @@ void TestConfigurationRegistrableSystem::TerminateSystem()
 
 TEST_F(ScriptsFixture, Widget)
 {
-    sol::function_result testWidget = Run("test_widget.lua");
+    static constexpr auto ScriptName = "test_widget.lua"sv;
+    luaSystem->LoadScript(ScriptName);
+    sol::function_result testWidget = luaSystem->RunScript(ScriptName);
     ASSERT_TRUE(testWidget.valid());
     const LuaMenuWidget* widget = testWidget;
     ASSERT_NE(widget->GetId(), MenuWidgetId::Invalid);
     ASSERT_EQ(widget->GetName(), "my_test_widget");
-    UiSystem& uiSystem = ModifyUiSystem();
-    MenuRootWidget& menuRootWidget = uiSystem.ModifyMenuRootWidget();
+    MenuRootWidget& menuRootWidget = uiSystem->ModifyMenuRootWidget();
     ASSERT_TRUE(menuRootWidget.HasWidget(widget->GetId()));
     menuRootWidget.OpenWidget(widget->GetId());
-    uiSystem.Update(Common::Time::FromMilliseconds(15));
+    uiSystem->Update(Common::Time::FromMilliseconds(15));
     menuRootWidget.CloseWidget(widget->GetId());
 }

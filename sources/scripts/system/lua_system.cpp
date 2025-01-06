@@ -54,24 +54,25 @@ void LuaSystem::RegisterWidgets(MenuRootWidget& menuRootWidget)
     ImGui.set_function("ShowDemo", &ShowImGuiDemoWindow);
 }
 
-void LuaSystem::AddPath(const std::filesystem::path& path)
+void LuaSystem::SetPath(const std::filesystem::path& path)
 {
-    const std::string currentPath = _luaState["package"]["path"];
-    const std::string newPath = path.lexically_normal().string();
-    std::string updatedPath = std::format("{}?;{}?.lua;{}", newPath, newPath, currentPath);
-    std::println("Lua path updated: {}", updatedPath);
+    ASSERT(_scriptsLoaderPath.empty(), "Lua path was already set!");
+    const std::string oldPath = _luaState["package"]["path"];
+    _scriptsLoaderPath = path.lexically_normal();
+    const std::string newPath = _scriptsLoaderPath.string();
+    std::string updatedPath = std::format("{}?;{}?.lua;{}", newPath, newPath, oldPath);
     _luaState["package"]["path"] = std::move(updatedPath);
 }
 
-sol::load_result* LuaSystem::LoadScript(const std::filesystem::path& scriptPath)
+sol::load_result* LuaSystem::LoadScript(std::string_view scriptName)
 {
-    std::string scriptPathKey = scriptPath.filename().string();
+    const std::filesystem::path scriptPath = _scriptsLoaderPath / scriptName;
     sol::load_result result = _luaState.load_file(scriptPath.string());
-    auto [it, _] = _scripts.insert_or_assign(std::move(scriptPathKey), std::move(result));
+    auto [it, _] = _scripts.insert_or_assign(std::string{scriptName}, std::move(result));
     return &it->second;
 }
 
-sol::load_result* LuaSystem::FindScript(const std::string& scriptName)
+sol::load_result* LuaSystem::FindScript(std::string_view scriptName)
 {
     const auto it = _scripts.find(scriptName);
     if (it == _scripts.end()) {
@@ -80,7 +81,7 @@ sol::load_result* LuaSystem::FindScript(const std::string& scriptName)
     return &it->second;
 }
 
-sol::function_result LuaSystem::RunScript(std::string_view script)
+sol::function_result LuaSystem::RunScriptFromCode(std::string_view script)
 {
     sol::function_result result = _luaState.script(script, sol::script_pass_on_error);
     if (!result.valid()) {
