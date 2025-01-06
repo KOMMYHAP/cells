@@ -10,7 +10,7 @@ LuaRegistrableSystem::~LuaRegistrableSystem() = default;
 std::error_code LuaRegistrableSystem::InitializeSystem(ApplicationStorage& storage)
 {
     UiSystem& uiSystem = storage.Modify<UiSystem>();
-    MenuRootWidget& menuRootWidget = uiSystem.GetMenuRootWidget();
+    MenuRootWidget& menuRootWidget = uiSystem.ModifyMenuRootWidget();
 
     MakeDefaultLuaLogger();
     LuaLogger* logger { _defaultLogger.get() };

@@ -1,6 +1,7 @@
 #include "sol/sol.hpp"
 
 #include "application_storage.h"
+#include "bind/lua_menu_widget.h"
 #include "lua_registrable_system.h"
 #include "registrar/registrar.h"
 #include "simulation_config.h"
@@ -9,6 +10,7 @@
 #include "system/ui_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
+#include "widgets/menu_root_widget.h"
 
 namespace {
 class ScriptsFixture : public testing::Test {
@@ -16,7 +18,8 @@ protected:
     void SetUp() override;
     void TearDown() override;
 
-    void Run(std::string_view filename);
+    sol::function_result Run(std::string_view filename);
+    UiSystem& ModifyUiSystem();
 
 private:
     std::optional<std::string> LoadScript(const std::filesystem::path& path);
@@ -53,14 +56,21 @@ void ScriptsFixture::TearDown()
     registrar.RunTerm();
 }
 
-void ScriptsFixture::Run(std::string_view filename)
+sol::function_result ScriptsFixture::Run(std::string_view filename)
 {
     const std::filesystem::path relativePathToLuaTestsDirectory { "../../../../sources/tests/lua" };
     const std::filesystem::path path = std::filesystem::current_path() / relativePathToLuaTestsDirectory / filename;
     const std::optional<std::string> mbData = LoadScript(path);
-    ASSERT_TRUE(mbData) << std::format("Cannot load script {}", filename);
-    luaSystem->RunScript(*mbData);
-    uiSystem->Update(Common::Time::FromMilliseconds(15));
+    if (!mbData) {
+        return {};
+    }
+    sol::function_result result = luaSystem->RunScript(*mbData);
+    return result;
+}
+
+UiSystem& ScriptsFixture::ModifyUiSystem()
+{
+    return *uiSystem;
 }
 
 std::optional<std::string> ScriptsFixture::LoadScript(const std::filesystem::path& path)
@@ -85,8 +95,8 @@ std::error_code TestConfigurationRegistrableSystem::InitializeSystem(Application
     simulationConfig.cellsCountY = 1;
 
     auto& uiConfig = storage.Store<UiConfig>();
-    uiConfig.windowSizeX = 100;
-    uiConfig.windowSizeY = 100;
+    uiConfig.windowSizeX = 800;
+    uiConfig.windowSizeY = 600;
     uiConfig.worldWidgetOffsetX = 10;
     uiConfig.worldWidgetOffsetY = 10;
     uiConfig.worldWidgetSizeX = 50;
@@ -107,5 +117,15 @@ void TestConfigurationRegistrableSystem::TerminateSystem()
 
 TEST_F(ScriptsFixture, Widget)
 {
-    Run("test_widget.lua");
+    sol::function_result testWidget = Run("test_widget.lua");
+    ASSERT_TRUE(testWidget.valid());
+    const LuaMenuWidget* widget = testWidget;
+    ASSERT_NE(widget->GetId(), MenuWidgetId::Invalid);
+    ASSERT_EQ(widget->GetName(), "my_test_widget");
+    UiSystem& uiSystem = ModifyUiSystem();
+    MenuRootWidget& menuRootWidget = uiSystem.ModifyMenuRootWidget();
+    ASSERT_TRUE(menuRootWidget.HasWidget(widget->GetId()));
+    menuRootWidget.OpenWidget(widget->GetId());
+    uiSystem.Update(Common::Time::FromMilliseconds(15));
+    menuRootWidget.CloseWidget(widget->GetId());
 }

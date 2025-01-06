@@ -21,7 +21,7 @@ public:
     void Update(Common::Time elapsedTime);
     void Render();
 
-    MenuRootWidget& GetMenuRootWidget() { return *_menuRootWidget; }
+    MenuRootWidget& ModifyMenuRootWidget() { return *_menuRootWidget; }
 
 private:
     bool _shouldStopMainLoop { false };
