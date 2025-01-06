@@ -18,7 +18,8 @@ std::error_code LuaRegistrableSystem::InitializeSystem(ApplicationStorage& stora
         logger = &storage.Modify<LuaLogger>();
     }
 
-    _luaSystem = std::make_unique<LuaSystem>(menuRootWidget, *logger);
+    _luaSystem = std::make_unique<LuaSystem>(*logger);
+    _luaSystem->RegisterWidgets(menuRootWidget);
     return {};
 }
 

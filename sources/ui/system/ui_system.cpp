@@ -6,10 +6,6 @@
 #include "sdl_panic.h"
 #include "world.h"
 
-#include "menu_widgets/fps_widget.h"
-#include "menu_widgets/group_menu_widget.h"
-#include "menu_widgets/imgui_demo_menu_widget.h"
-#include "menu_widgets/implot_demo_menu_widget.h"
 #include "widgets/menu_root_widget.h"
 #include "widgets/world/world_rasterization_system.h"
 #include "widgets/world/world_widget.h"
@@ -56,10 +52,10 @@ UiSystem::UiSystem(World& world, const UiConfig& uiConfig)
     MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
     _menuRootWidget = &menuRootWidget;
 
-    auto&& [gameMenu, _] = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
-    menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
-    menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
-    menuRootWidget.AddWidget<ImPlotDemoMenuWidget>("ImPlot Demo");
+    // auto&& [gameMenu, _] = menuRootWidget.AddWidget<GroupMenuWidget>("Game");
+    // menuRootWidget.AddWidget<FpsWidget>(gameMenu, "FPS");
+    // menuRootWidget.AddWidget<ImGuiDemoMenuWidget>("ImGui Demo");
+    // menuRootWidget.AddWidget<ImPlotDemoMenuWidget>("ImPlot Demo");
 }
 
 UiSystem::~UiSystem()
