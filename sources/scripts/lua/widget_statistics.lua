@@ -32,6 +32,9 @@ statistics.widget.onUpdate = function (dt)
     local average_fps = 1000.0 / average_ms
 
     ImGui.Text(string.format("FPS: %.3f (%.3f ms)", average_fps, average_ms))
+    local gc_memory_usage = lua_native:get_memory_used() // 1024
+    local gc_is_on = lua_native:is_gc_on() and "on" or "off"
+    ImGui.Text(string.format("Lua Memory: %d KiB (gc is %s)", gc_memory_usage, gc_is_on))
 
     return true
 end

@@ -25,6 +25,13 @@ LuaSystem::LuaSystem(LuaLogger& logger)
     : _logger(&logger)
 {
     _luaState.open_libraries(sol::lib::base, sol::lib::package, sol::lib::string, sol::lib::math, sol::lib::table);
+    sol::table engine = _luaState.create_named_table("lua_native");
+    engine.set_function("get_memory_used", [this] {
+        return _luaState.memory_used();
+    });
+    engine.set_function("is_gc_on", [this] {
+        return _luaState.is_gc_on();
+    });
 }
 
 void LuaSystem::RegisterWidgets(MenuRootWidget& menuRootWidget)
@@ -68,7 +75,7 @@ sol::load_result* LuaSystem::LoadScript(std::string_view scriptName)
 {
     const std::filesystem::path scriptPath = _scriptsLoaderPath / scriptName;
     sol::load_result result = _luaState.load_file(scriptPath.string());
-    auto [it, _] = _scripts.insert_or_assign(std::string{scriptName}, std::move(result));
+    auto [it, _] = _scripts.insert_or_assign(std::string { scriptName }, std::move(result));
     return &it->second;
 }
 
