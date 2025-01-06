@@ -1,6 +1,6 @@
-assert(ui_menu ~= nil)
-assert(ui_menu.register ~= nil)
-local w = ui_menu:register(ui_menu.root_widget, "my_test_widget")
+assert(ui_native ~= nil)
+assert(ui_native.register ~= nil)
+local w = ui_native:register(ui_native.root_widget, "my_test_widget")
 if not w then
     error("failed to create widget")
     return nil
