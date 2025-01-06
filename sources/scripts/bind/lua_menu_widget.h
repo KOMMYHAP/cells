@@ -1,5 +1,6 @@
 #pragma once
 #include "menu_widgets/base_menu_widget.h"
+#include "menu_widgets/menu_widget_id.h"
 
 class LuaLogger;
 
@@ -18,6 +19,9 @@ public:
     void SetName(std::string_view name) { _name = name; }
     std::string_view GetName() const { return _name; }
 
+    void SetId(MenuWidgetId id) { _id = id; }
+    MenuWidgetId GetId() const { return _id; }
+
 private:
     static constexpr auto KeyOnFirstTimeOpen = "onFirstTimeOpen"sv;
     static constexpr auto KeyOnJustOpen = "onJustOpen"sv;
@@ -30,4 +34,5 @@ private:
     sol::function _onClosed;
     gsl::not_null<LuaLogger*> _logger;
     std::string_view _name;
+    MenuWidgetId _id { MenuWidgetId::Invalid };
 };

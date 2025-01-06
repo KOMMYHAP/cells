@@ -17,24 +17,29 @@ LuaMenu::~LuaMenu()
     }
 }
 
-std::pair<std::underlying_type_t<MenuWidgetId>, LuaMenuWidget*> LuaMenu::Register(sol::stack_object luaParentWidget, std::string_view name)
+LuaMenuWidget* LuaMenu::Register(MenuWidgetId parentId, std::string_view name)
 {
-    auto parentWidgetId { MenuWidgetId::Root };
-    if (luaParentWidget.is<uint32_t>()) {
-        parentWidgetId = static_cast<MenuWidgetId>(luaParentWidget.as<uint32_t>());
-    } else if (luaParentWidget != sol::lua_nil) {
-        _logger->Error("Invalid id of menu widget!");
-        return std::make_pair(std::to_underlying(MenuWidgetId::Invalid), nullptr);
-    }
-    if (!_menuRootWidget->HasWidget(parentWidgetId)) {
+    if (!_menuRootWidget->HasWidget(parentId)) {
         _logger->Error("Unknown parent widget!");
-        return std::make_pair(std::to_underlying(MenuWidgetId::Invalid), nullptr);
+        return nullptr;
     }
-    auto&& [id, widget] = _menuRootWidget->AddWidget<LuaMenuWidget>(parentWidgetId, std::string(name), *_logger);
+    auto&& [id, widget] = _menuRootWidget->AddWidget<LuaMenuWidget>(parentId, std::string(name), *_logger);
     if (id == MenuWidgetId::Invalid) {
         _logger->Error("Failed to register new menu widget!");
+        return nullptr;
     }
     widget->SetName(name);
+    widget->SetId(id);
     _widgets.emplace_back(widget);
-    return std::make_pair(std::to_underlying(id), widget);
+    return widget;
+}
+
+void LuaMenu::OpenWidget(const LuaMenuWidget* widget)
+{
+    _menuRootWidget->OpenWidget(widget->GetId());
+}
+
+void LuaMenu::CloseWidget(const LuaMenuWidget* widget)
+{
+    _menuRootWidget->CloseWidget(widget->GetId());
 }

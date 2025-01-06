@@ -12,9 +12,13 @@ LuaSystem::LuaSystem(MenuRootWidget& menuRootWidget, LuaLogger& logger)
     _luaState.new_usertype<LuaMenuWidget>("menu_widget",
         sol::meta_function::new_index,
         &LuaMenuWidget::OverrideFunction,
-        "name", sol::readonly_property(&LuaMenuWidget::GetName));
+        "name", sol::readonly_property(&LuaMenuWidget::GetName),
+        "id", sol::readonly_property(&LuaMenuWidget::GetId));
+    _luaState.new_usertype<MenuWidgetId>("widget_id");
     _luaState.new_usertype<LuaMenu>("menu",
         "register", &LuaMenu::Register,
+        "open", &LuaMenu::OpenWidget,
+        "close", &LuaMenu::CloseWidget,
         "root_widget", sol::var(std::to_underlying(MenuWidgetId::Root)),
         "invalid_widget", sol::var(std::to_underlying(MenuWidgetId::Invalid)));
     _luaState["ui_menu"] = LuaMenu(*_logger, *_menuRootWidget);

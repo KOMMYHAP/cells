@@ -8,6 +8,24 @@ bool MenuRootWidget::HasWidget(MenuWidgetId id) const
     return std::to_underlying(id) < _widgets.size();
 }
 
+void MenuRootWidget::OpenWidget(MenuWidgetId id)
+{
+    if (!HasWidget(id)) {
+        ASSERT_FAIL("Invalid widget id!");
+        return;
+    }
+    ChangeWidgetState(id, true, GetWidgetData(id).state.opened);
+}
+
+void MenuRootWidget::CloseWidget(MenuWidgetId id)
+{
+    if (!HasWidget(id)) {
+        ASSERT_FAIL("Invalid widget id!");
+        return;
+    }
+    ChangeWidgetState(id, false, GetWidgetData(id).state.opened);
+}
+
 void MenuRootWidget::UpdateWidget(Common::Time elapsedTime)
 {
     if (ImGui::BeginMainMenuBar()) {
@@ -85,15 +103,26 @@ void MenuRootWidget::UpdateWidgetsGroup(MenuWidgetId id)
 
 void MenuRootWidget::ProcessWidgetState(MenuWidgetId id)
 {
-    WidgetData& widgetData = ModifyWidgetData(id);
-    WidgetState& widgetState = widgetData.state;
+    const WidgetData& widgetData = GetWidgetData(id);
+    const WidgetState& widgetState = widgetData.state;
 
     const bool wasOpen = widgetState.opened;
-    if (!ImGui::MenuItem(widgetData.name.c_str(), nullptr, &widgetState.opened)) {
+    bool opened = widgetState.opened;
+    const bool openedByImgui = ImGui::MenuItem(widgetData.name.c_str(), nullptr, &opened);
+    if (!openedByImgui) {
         return;
     }
 
-    if (widgetState.opened) {
+    ChangeWidgetState(id, opened, wasOpen);
+}
+
+void MenuRootWidget::ChangeWidgetState(MenuWidgetId id, bool openedNow, bool wasOpen)
+{
+    WidgetData& widgetData = ModifyWidgetData(id);
+    WidgetState& widgetState = widgetData.state;
+
+    if (openedNow) {
+        widgetState.opened = true;
         if (!widgetState.wasOpenedAtLeastOnce) {
             widgetState.wasOpenedAtLeastOnce = true;
             widgetState.justOpenedFirstTime = true;
@@ -102,9 +131,10 @@ void MenuRootWidget::ProcessWidgetState(MenuWidgetId id)
         if (widgetState.justOpened) {
             _openedWidgets.emplace_back(id);
         }
+    } else {
+        widgetState.opened = false;
+        widgetState.justClosed = wasOpen && !widgetState.opened;
     }
-
-    widgetState.justClosed = wasOpen && !widgetState.opened;
 }
 
 void MenuRootWidget::UpdateOpenedWidgets(Common::Time elapsedTime)

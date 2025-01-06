@@ -15,6 +15,9 @@ public:
 
     bool HasWidget(MenuWidgetId id) const;
 
+    void OpenWidget(MenuWidgetId id);
+    void CloseWidget(MenuWidgetId id);
+
     void UpdateWidget(Common::Time elapsedTime) override;
 
 private:
@@ -43,6 +46,7 @@ private:
 
     void UpdateWidgetsGroup(MenuWidgetId id);
     void ProcessWidgetState(MenuWidgetId id);
+    void ChangeWidgetState(MenuWidgetId id, bool openedNow, bool wasOpen);
 
     void UpdateOpenedWidgets(Common::Time elapsedTime);
     bool ProcessOpenedWidgetState(MenuWidgetId id, Common::Time elapsedTime);

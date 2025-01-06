@@ -9,7 +9,9 @@ public:
     LuaMenu(LuaLogger& logger, MenuRootWidget& menuRootWidget);
     ~LuaMenu();
 
-    std::pair<std::underlying_type_t<MenuWidgetId>, LuaMenuWidget*> Register(sol::stack_object luaParentWidget, std::string_view name);
+    LuaMenuWidget* Register(MenuWidgetId parentId, std::string_view name);
+    void OpenWidget(const LuaMenuWidget* widget);
+    void CloseWidget(const LuaMenuWidget* widget);
 
 private:
     gsl::not_null<LuaLogger*> _logger;
