@@ -129,7 +129,7 @@ private:
 TEST_F(ProcedureFixture, RegisterProcedure)
 {
     auto procedure = std::make_unique<TestProcedure>();
-    procedure->func = [](ProcedureContext& context) {};
+    procedure->func = [](ProcedureContext& /*context*/) {};
 
     std::set<ProcedureId> oldIds;
     for (uint8_t i { 0 }; i < ProcedureTableLimit; ++i) {
@@ -156,7 +156,7 @@ TEST_F(ProcedureFixture, CheckProcedureIsCalled)
 {
     int counter { 0 };
     auto procedure = std::make_unique<TestProcedure>();
-    procedure->func = [&](ProcedureContext& context) {
+    procedure->func = [&](ProcedureContext& /*context*/) {
         counter += 1;
     };
 
@@ -251,7 +251,7 @@ TEST_F(ProcedureFixture, Procedure_In0_Out1)
 TEST_F(ProcedureFixture, Procedure_InLimit)
 {
     auto procedure = std::make_unique<TestProcedure>();
-    procedure->func = [](ProcedureContext& context) {};
+    procedure->func = [](ProcedureContext& /*context*/) {};
     if constexpr (ProcedureInputArgsCountLimit > 0) {
         const ProcedureId id = vm->RegisterProcedure(procedure.get(), ProcedureInputArgsCountLimit - 1, 0);
         ASSERT_NE(id, ProcedureId::Invalid);
@@ -269,7 +269,7 @@ TEST_F(ProcedureFixture, Procedure_InLimit)
 TEST_F(ProcedureFixture, Procedure_OutLimit)
 {
     auto procedure = std::make_unique<TestProcedure>();
-    procedure->func = [](ProcedureContext& context) {};
+    procedure->func = [](ProcedureContext& /*context*/) {};
     if constexpr (ProcedureOutputArgsCountLimit > 0) {
         const ProcedureId id = vm->RegisterProcedure(procedure.get(), 0, ProcedureOutputArgsCountLimit - 1);
         ASSERT_NE(id, ProcedureId::Invalid);

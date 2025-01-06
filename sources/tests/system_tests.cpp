@@ -17,7 +17,7 @@ public:
     EcsWorld& AccessEcsWorld() { return *_world; }
     SimulationVirtualMachine& AccessVirtualMachine() { return *_vm; }
 
-    ExecutionStatus ExecuteProcedure(EcsEntity id, ProcedureContext& context, CellBrain& brain, TestComponent& component)
+    ExecutionStatus ExecuteProcedure(EcsEntity /*id*/, ProcedureContext& /*context*/, CellBrain& /*brain*/, TestComponent& /*component*/)
     {
         return ExecutionStatus::Success;
     }

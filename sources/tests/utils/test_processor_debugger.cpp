@@ -2,7 +2,7 @@
 
 #include "processor/processor_context.h"
 
-bool TestProcessorDebugger::ShouldAttachDebugger(const ProcessorContext& context) const
+bool TestProcessorDebugger::ShouldAttachDebugger(const ProcessorContext& /*context*/) const
 {
     return true;
 }
@@ -28,17 +28,17 @@ void TestProcessorDebugger::DetachDebugger(ProcessorContext& context)
     }
 }
 
-void TestProcessorDebugger::ProcedureWillStarted(ProcessorContext& processorContext, ProcedureContext& procedureContext)
+void TestProcessorDebugger::ProcedureWillStarted(ProcessorContext& /*processorContext*/, ProcedureContext& procedureContext)
 {
     _procedureState = procedureContext.GetState();
 }
 
-void TestProcessorDebugger::ProcedureWasDeferred(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+void TestProcessorDebugger::ProcedureWasDeferred(ProcessorContext& /*processorContext*/, const ProcedureContext& procedureContext)
 {
     _procedureState = procedureContext.GetState();
 }
 
-void TestProcessorDebugger::ProcedureWasCompleted(ProcessorContext& processorContext, const ProcedureContext& procedureContext)
+void TestProcessorDebugger::ProcedureWasCompleted(ProcessorContext& /*processorContext*/, const ProcedureContext& procedureContext)
 {
     _procedureState = procedureContext.GetState();
 }

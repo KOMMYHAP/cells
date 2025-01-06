@@ -16,7 +16,7 @@ public:
     std::function<void()> onTerm;
 };
 
-std::error_code RegistrarTestSystem::InitializeSystem(common::StackStorage& storage)
+std::error_code RegistrarTestSystem::InitializeSystem(common::StackStorage& /*storage*/)
 {
     if (simulateError) {
         return std::make_error_code(std::errc::argument_out_of_domain);
