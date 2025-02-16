@@ -1,4 +1,4 @@
-require "widget_library"
+require "ui.widget_library"
 
 local engine_group = ui:require_group_widget(nil, "Engine")
 

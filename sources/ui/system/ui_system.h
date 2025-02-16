@@ -25,7 +25,7 @@ public:
     MenuRootWidget& ModifyMenuRootWidget() { return *_menuRootWidget; }
     RootWidget& ModifyRootWidget() { return *_rootWidget; }
 
-    std::unique_ptr<WorldWidget> MakeWorldWidget(WorldRasterizationSystem& rasterizationSystem, int x, int y, int w, int h);
+    std::unique_ptr<WorldWidget> MakeWorldWidget(World & world,WorldRasterizationSystem& rasterizationSystem, int x, int y, int w, int h);
 
 private:
     bool _shouldStopMainLoop { false };

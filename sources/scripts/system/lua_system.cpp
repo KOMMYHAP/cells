@@ -63,12 +63,17 @@ void LuaSystem::RegisterWidgets(MenuRootWidget& menuRootWidget)
 
 void LuaSystem::SetPath(const std::filesystem::path& path)
 {
+    if (path.empty()) {
+        return;
+    }
     ASSERT(_scriptsLoaderPath.empty(), "Lua path was already set!");
     const std::string oldPath = _luaState["package"]["path"];
     _scriptsLoaderPath = path.lexically_normal();
     const std::string newPath = _scriptsLoaderPath.string();
     std::string updatedPath = std::format("{}?;{}?.lua;{}", newPath, newPath, oldPath);
     _luaState["package"]["path"] = std::move(updatedPath);
+
+    std::println("Add home directory for lua scripts: {}", newPath);
 }
 
 sol::load_result* LuaSystem::LoadScript(std::string_view scriptName)

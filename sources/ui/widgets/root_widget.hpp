@@ -13,8 +13,8 @@ template <class WidgetType>
     requires(!std::same_as<WidgetType, BaseWidget>)
 WidgetType& RootWidget::AddWidget(std::unique_ptr<WidgetType> widget)
 {
-    _widgets.emplace_back(std::move(widget));
     WidgetType& widgetRef = *widget;
+    _widgets.emplace_back(std::move(widget));
     if constexpr (std::is_base_of_v<CustomRenderWidget, WidgetType>) {
         _customRenderWidgets.emplace_back(&widgetRef);
     }

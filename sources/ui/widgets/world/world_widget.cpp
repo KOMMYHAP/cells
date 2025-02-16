@@ -3,9 +3,10 @@
 #include "system/sdl_panic.h"
 #include "world_rasterization_data.h"
 
-WorldWidget::WorldWidget(SDL_Renderer& renderer, WorldRasterizationSystem& worldRasterizationSystem, Rect textureRect)
+WorldWidget::WorldWidget(World& world, SDL_Renderer& renderer, WorldRasterizationSystem& worldRasterizationSystem, Rect textureRect)
     : _renderer(&renderer)
     , _textureRect(textureRect)
+    , _world(&world)
     , _rasterizationSystem(&worldRasterizationSystem)
 {
     _texture = SDL_CreateTexture(

@@ -96,10 +96,10 @@ void UiSystem::Render()
     SDL_RenderPresent(_renderer);
 }
 
-std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(WorldRasterizationSystem& rasterizationSystem, int x, int y, int w, int h)
+std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(World& world, WorldRasterizationSystem& rasterizationSystem, int x, int y, int w, int h)
 {
     const WorldWidget::Rect worldRect { x, y, w, h };
-    return std::make_unique<WorldWidget>(*_renderer, rasterizationSystem, worldRect);
+    return std::make_unique<WorldWidget>(world, *_renderer, rasterizationSystem, worldRect);
 }
 
 void UiSystem::ApplicationRunMainLoop()

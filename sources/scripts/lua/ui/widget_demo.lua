@@ -1,4 +1,4 @@
-require "widget_library"
+require "ui.widget_library"
 
 local demo_group = ui:require_group_widget(nil, "Demo")
 local imgui_demo = ui:require_widget(demo_group, "ImGui")
