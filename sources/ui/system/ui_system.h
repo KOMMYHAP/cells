@@ -6,13 +6,14 @@
 #include "widgets/world/world_rasterization_system.h"
 #include "world.h"
 
+class WorldWidget;
 class MenuRootWidget;
 struct SDL_Window;
 struct SDL_Renderer;
 
 class UiSystem final : public UiApplicationInterface {
 public:
-    explicit UiSystem(World& world, const UiConfig& uiConfig);
+    explicit UiSystem(const UiConfig& uiConfig);
     ~UiSystem() override;
 
     void ApplicationRunMainLoop() override;
@@ -22,6 +23,9 @@ public:
     void Render();
 
     MenuRootWidget& ModifyMenuRootWidget() { return *_menuRootWidget; }
+    RootWidget& ModifyRootWidget() { return *_rootWidget; }
+
+    std::unique_ptr<WorldWidget> MakeWorldWidget(WorldRasterizationSystem& rasterizationSystem, int x, int y, int w, int h);
 
 private:
     bool _shouldStopMainLoop { false };

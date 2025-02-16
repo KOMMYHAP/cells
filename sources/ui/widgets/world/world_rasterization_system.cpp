@@ -3,7 +3,7 @@
 
 WorldRasterizationSystem::WorldRasterizationSystem(EcsWorld& ecsWorld, uint16_t cellSize)
     : SimulationEcsSystem(ecsWorld)
-    , _cellSizeInPixels(cellSize)
+    , _cellSizeInPixels(NarrowCast<int16_t>(cellSize))
 {
 }
 
@@ -40,15 +40,17 @@ void WorldRasterizationSystem::ResetDestination()
 
 void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellType type, const CellPosition position)
 {
-    ASSERT(_rasterizationData != nullptr, "Rasterization data is null!");
+    if (_rasterizationData == nullptr) {
+        return;
+    }
 
     // todo: ask EnTT to sort CellPosition to increase data locality?
 
-    const size_t bpp = _rasterizationData->pixelFormat->BytesPerPixel;
+    const int32_t bpp = _rasterizationData->pixelFormat->BytesPerPixel;
     const uint32_t color = GetColor(type);
 
-    auto FillPixelsRow = [&](const int32_t pixelX, const int32_t pixelY, const uint32_t pixelsCount) {
-        const size_t pixelDataOffset = static_cast<size_t>(pixelY) * _rasterizationData->pitch + pixelX * bpp;
+    auto FillPixelsRow = [&](const int32_t pixelX, const int32_t pixelY, const int32_t pixelsCount) {
+        const int64_t pixelDataOffset = pixelY * _rasterizationData->pitch + pixelX * bpp;
         ASSERT(pixelDataOffset < _rasterizationData->pixelDataBytesCount, "Pixel data offset is out of bounds!");
         ASSERT(pixelDataOffset + bpp * pixelsCount <= _rasterizationData->pixelDataBytesCount, "Pixel data offset is out of bounds!");
 

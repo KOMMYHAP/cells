@@ -7,8 +7,7 @@ SimulationRegistrableSystem::~SimulationRegistrableSystem() = default;
 
 std::error_code SimulationRegistrableSystem::InitializeSystem(ApplicationStorage& storage)
 {
-    const SimulationConfig& config = storage.Get<SimulationConfig>();
-    storage.Store<World>(config);
+    storage.Store<World>();
     return {};
 }
 

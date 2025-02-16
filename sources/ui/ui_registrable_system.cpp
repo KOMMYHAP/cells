@@ -9,8 +9,7 @@ UiRegistrableSystem::~UiRegistrableSystem() = default;
 std::error_code UiRegistrableSystem::InitializeSystem(ApplicationStorage& storage)
 {
     const auto& config = storage.Get<UiConfig>();
-    World& world = storage.Modify<World>();
-    _uiSystem = &storage.Store<UiSystem>(world, config);
+    _uiSystem = &storage.Store<UiSystem>(config);
     return {};
 }
 

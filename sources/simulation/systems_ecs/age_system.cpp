@@ -32,8 +32,8 @@ void AgeSystem::DoProcessComponents(EcsEntity id, CellAge& age)
 
 }
 
-std::unique_ptr<SimulationSystem> RegisterAgeSystem(const SimulationStorage& storage)
+std::unique_ptr<SimulationSystem> MakeAgeSystem(const SimulationStorage& storage)
 {
-    EcsWorld& world = storage.Modify<EcsWorld>;
+    EcsWorld& world = storage.Modify<EcsWorld>();
     return std::make_unique<AgeSystem>(world);
 }

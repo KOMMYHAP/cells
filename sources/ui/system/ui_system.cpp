@@ -10,7 +10,7 @@
 #include "widgets/world/world_rasterization_system.h"
 #include "widgets/world/world_widget.h"
 
-UiSystem::UiSystem(World& world, const UiConfig& uiConfig)
+UiSystem::UiSystem(const UiConfig& uiConfig)
 {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER)) {
         PanicOnSdlError("SDL_Init"sv);
@@ -43,13 +43,7 @@ UiSystem::UiSystem(World& world, const UiConfig& uiConfig)
     }
 
     _rootWidget = std::make_unique<RootWidget>();
-
-    EcsWorld& ecsWorld = world.ModifyEcsWorld();
-    _renderSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld, uiConfig.cellPixelsSize);
-    const SDL_Rect worldRect { uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY };
-    _rootWidget->AddWidget<WorldWidget>(*_renderer, world, *_renderSystem, worldRect);
-
-    MenuRootWidget& menuRootWidget = _rootWidget->AddWidget<MenuRootWidget>();
+    MenuRootWidget& menuRootWidget = _rootWidget->EmplaceWidget<MenuRootWidget>();
     _menuRootWidget = &menuRootWidget;
 }
 
@@ -100,6 +94,12 @@ void UiSystem::Render()
     _rootWidget->RenderWidget();
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), _renderer);
     SDL_RenderPresent(_renderer);
+}
+
+std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(WorldRasterizationSystem& rasterizationSystem, int x, int y, int w, int h)
+{
+    const WorldWidget::Rect worldRect { x, y, w, h };
+    return std::make_unique<WorldWidget>(*_renderer, rasterizationSystem, worldRect);
 }
 
 void UiSystem::ApplicationRunMainLoop()

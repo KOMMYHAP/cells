@@ -3,9 +3,8 @@
 #include "system/sdl_panic.h"
 #include "world_rasterization_data.h"
 
-WorldWidget::WorldWidget(SDL_Renderer& renderer, World& world, WorldRasterizationSystem& worldRasterizationSystem, SDL_Rect textureRect)
-    : _world(&world)
-    , _renderer(&renderer)
+WorldWidget::WorldWidget(SDL_Renderer& renderer, WorldRasterizationSystem& worldRasterizationSystem, Rect textureRect)
+    : _renderer(&renderer)
     , _textureRect(textureRect)
     , _rasterizationSystem(&worldRasterizationSystem)
 {
@@ -13,8 +12,8 @@ WorldWidget::WorldWidget(SDL_Renderer& renderer, World& world, WorldRasterizatio
         _renderer,
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
-        NarrowCast<int>(textureRect.w),
-        NarrowCast<int>(textureRect.h));
+        textureRect.width,
+        textureRect.height);
     if (!_texture) {
         PanicOnSdlError("SDL_CreateTexture"sv);
     }
@@ -37,12 +36,13 @@ WorldWidget::~WorldWidget()
 
 void WorldWidget::RenderWidget()
 {
-    if (SDL_RenderCopy(_renderer, _texture, nullptr, &_textureRect)) {
+    const SDL_Rect rect { _textureRect.x, _textureRect.y, _textureRect.width, _textureRect.height };
+    if (SDL_RenderCopy(_renderer, _texture, nullptr, &rect)) {
         PanicOnSdlError("SDL_RenderCopy"sv);
     }
 }
 
-void WorldWidget::UpdateWidget(Common::Time elapsedTime)
+void WorldWidget::UpdateWidget(Common::Time /*elapsedTime*/)
 {
     void* pixels { nullptr };
     int pitch { 0 };
@@ -51,13 +51,12 @@ void WorldWidget::UpdateWidget(Common::Time elapsedTime)
     }
     const WorldRasterizationData data {
         static_cast<std::byte*>(pixels),
-        NarrowCast<size_t>(pitch) * _textureRect.h,
-        NarrowCast<uint32_t>(pitch),
+        static_cast<int64_t>(pitch) * _textureRect.height,
+        pitch,
         _texturePixelFormat
     };
     _rasterizationSystem->SetDestination(data);
 
-    _world->Update(elapsedTime);
     _rasterizationSystem->DoSystemUpdate();
 
     _rasterizationSystem->ResetDestination();

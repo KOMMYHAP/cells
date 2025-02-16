@@ -9,7 +9,7 @@ std::error_code Registrar::RunInit()
     ASSERT(_state == State::Registration, "Registration phase was already completed!");
     _state = State::Initialized;
 
-    for (auto& system : _systems) {
+    for (const auto& system : _systems) {
         if (const std::error_code error = system->InitializeSystem(_storage)) {
             _state = State::FailedToInitialize;
             return error;

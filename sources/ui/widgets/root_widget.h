@@ -8,7 +8,11 @@ public:
 
     template <class WidgetType, class... Args>
         requires std::is_constructible_v<WidgetType, Args...>
-    WidgetType& AddWidget(Args&&... args);
+    WidgetType& EmplaceWidget(Args&&... args);
+
+    template <class WidgetType>
+        requires(!std::same_as<WidgetType, BaseWidget>)
+    WidgetType& AddWidget(std::unique_ptr<WidgetType> widget);
 
     void UpdateWidget(Common::Time elapsedTime) override;
     void RenderWidget() override;
