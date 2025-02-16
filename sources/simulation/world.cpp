@@ -98,7 +98,7 @@ T& World::RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint8_
     auto procedure = std::make_unique<T>(std::forward<Args>(args)...);
     T* weakProcedure = procedure.get();
     _simulationVm.RegisterProcedure(type, weakProcedure, inputCount, outputCount, std::move(name));
-    _simulationSystems.emplace_back(std::move(procedure));
+    _simulationSystems.push_back(std::move(procedure));
     return *weakProcedure;
 }
 

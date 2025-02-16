@@ -1,11 +1,6 @@
 #pragma once
 
-#include "components/cell_age.h"
-#include "simulation/simulation_ecs_system.h"
+#include "simulation/simulation_system.h"
+#include "simulation/simulation_storage.h"
 
-class AgeSystem final : public SimulationEcsSystem<AgeSystem, CellAge> {
-public:
-    explicit AgeSystem(EcsWorld& ecsWorld);
-
-    void DoProcessComponents(EcsEntity id, CellAge& age);
-};
+std::unique_ptr<SimulationSystem> RegisterAgeSystem(const SimulationStorage & storage);

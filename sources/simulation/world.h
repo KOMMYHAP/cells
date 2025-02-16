@@ -14,6 +14,8 @@
 #include "simulation_config.h"
 #include "tick_calculator.h"
 
+#include <simulation/simulation_storage.h>
+
 class World {
 public:
     explicit World(const SimulationConfig& config);
@@ -37,6 +39,8 @@ private:
     template <class T, class... Args>
         requires std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
     T& RegisterSystem(Args&&... args);
+
+    SimulationStorage _simulationStorage;
 
     EcsWorld _ecsWorld;
     common::SampleCounter<Common::Time, 20> _tickSampler;

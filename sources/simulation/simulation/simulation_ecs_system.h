@@ -16,7 +16,7 @@ public:
     void DoSystemUpdate() final
     {
         _ecsWorld->view<Components...>(ExcludeGraveyardedCells).each([this]<typename... T0>(const EcsEntity& id, T0&&... components) noexcept {
-            static_cast<Derived&>(*this).DoProcessComponents(id, std::forward<T0>(components)...);
+            Self().DoProcessComponents(id, std::forward<T0>(components)...);
         });
     }
 
@@ -24,5 +24,7 @@ public:
     EcsWorld& AccessEcsWorld() { return *_ecsWorld; }
 
 private:
+    Derived& Self() { return static_cast<Derived&>(*this); }
+
     gsl::not_null<EcsWorld*> _ecsWorld;
 };
