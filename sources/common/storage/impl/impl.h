@@ -12,7 +12,7 @@ template <class T>
 class StorageItemHolder final : public StorageItemHolderBase {
 public:
     template <class... Args>
-    StorageItemHolder(Args&&... args)
+    explicit StorageItemHolder(Args&&... args)
         : value(std::forward<Args>(args)...)
     {
     }
