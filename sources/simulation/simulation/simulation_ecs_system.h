@@ -35,7 +35,7 @@ private:
         if constexpr (SimulationEcsSystemHasExcludedComponents<Derived>) {
             using Derived::ExcludedComponents;
         } else {
-            return entt::exclude_t {};
+            return ExcludeGraveyardedCells;
         }
     }
 
