@@ -42,7 +42,7 @@ void WorldWidget::RenderWidget()
     }
 }
 
-void WorldWidget::UpdateWidget(Common::Time /*elapsedTime*/)
+void WorldWidget::UpdateWidget(Common::Time elapsedTime)
 {
     void* pixels { nullptr };
     int pitch { 0 };
@@ -57,7 +57,11 @@ void WorldWidget::UpdateWidget(Common::Time /*elapsedTime*/)
     };
     _rasterizationSystem->SetDestination(data);
 
-    _rasterizationSystem->DoSystemUpdate();
+    // TODO: extract render system, split render processing from logic processing:
+    // 1. prepare render: add components with texture's part for each cell
+    // 2. render: update texture
+    // 3. post render: upload texture to driver
+    _world->Update(elapsedTime);
 
     _rasterizationSystem->ResetDestination();
     SDL_UnlockTexture(_texture);
