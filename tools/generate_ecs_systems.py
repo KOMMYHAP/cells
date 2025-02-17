@@ -1,4 +1,5 @@
 import os
+import re
 from os import makedirs
 from pathlib import Path
 
@@ -26,6 +27,49 @@ class EcsComponent:
         return ''.join(map(lambda word: word.capitalize(), self._name.split('_')))
 
 
+class LuaComponentRegex:
+    def __init__(self):
+        self.class_name = re.compile(r'(---@class (?P<CLASS_NAME>[a-z_]+))')
+        self.field_name = re.compile(r'(---@field (?P<FIELD_NAME>[a-z0-9_]+)\s+(?P<FIELD_TYPE>[a-z0-9_]+))')
+
+
+def parse_component(component_regex: LuaComponentRegex, content: str) -> EcsComponent | None:
+    class_name_list = component_regex.class_name.findall(content)
+    if len(class_name_list) != 1:
+        print(f'Exactly one class name allowed for component: pattern "{component_regex.class_name}"')
+        return None
+    class_name = class_name_list[0][1]
+
+    fields_list = component_regex.field_name.findall(content)
+    if len(fields_list) == 0:
+        print(f'At least one field must exist: pattern "{component_regex.field_name}"')
+        return None
+
+    component = EcsComponent(class_name)
+    for field_entry in fields_list:
+        field_name = field_entry[1]
+        field_type = field_entry[2]
+        component.add_field(field_type, field_name)
+    return component
+
+
+def gather_components_list():
+    components = []
+    component_regex = LuaComponentRegex()
+    input_directory = Path('../sources/simulation/components')
+    if input_directory.exists():
+        for file in os.listdir(input_directory):
+            if not file.endswith('.lua'):
+                continue
+            file_path = input_directory / file
+            with file_path.open(mode="r", encoding="utf-8") as component_data:
+                component = parse_component(component_regex, component_data.read())
+                if not component:
+                    break
+                components.append(component)
+    return components
+
+
 def main():
     output_directory = Path('../sources/simulation/components/generated')
     if output_directory.exists():
@@ -38,10 +82,7 @@ def main():
         output_directory.rmdir()
     makedirs(output_directory)
 
-    components = []
-    component = EcsComponent('cell_age')
-    component.add_field('uint16_t', 'value')
-    components.append(component)
+    components = gather_components_list()
 
     environment = Environment(loader=FileSystemLoader("templates/"), trim_blocks=True, lstrip_blocks=True)
     template = environment.get_template("ecs_component.jinja")
