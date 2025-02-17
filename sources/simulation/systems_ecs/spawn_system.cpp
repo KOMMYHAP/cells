@@ -2,7 +2,7 @@
 
 #include "components/generated/auto_cell_age.h"
 #include "components/generated/auto_cell_energy.h"
-#include "components/generated/auto_cell_energy_change.h"
+#include "components/generated/auto_cell_energy_decrease.h"
 #include "components/generated/auto_cell_type.h"
 #include "components/generated/auto_cell_unit_tag.h"
 

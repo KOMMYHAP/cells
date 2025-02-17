@@ -5,6 +5,6 @@ constants:
     type: int32_t
     value: 255
 fields:
-  - name: 'value'
-    type: 'uint16_t'
+  - name: 'data'
+    type: 'std::byte'
     array_size_constant: 'limit'
