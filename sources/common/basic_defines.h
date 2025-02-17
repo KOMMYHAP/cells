@@ -29,6 +29,7 @@
 #include <atomic>
 #include <bitset>
 #include <chrono>
+#include <compare>
 #include <complex>
 #include <condition_variable>
 #include <deque>
