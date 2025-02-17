@@ -1,5 +1,7 @@
 #include "cell_locator.h"
 
+#include "cell_position_utils.h"
+
 CellLocator::CellLocator(int32_t width, int32_t height)
     : _width(width)
     , _height(height)
@@ -38,7 +40,7 @@ EcsEntity CellLocator::Find(CellPosition position) const
 
 CellPosition CellLocator::TryApplyDirection(CellPosition position, Direction direction) const
 {
-    switch (direction) {
+    switch (direction.type) {
     case Direction::Left:
         if (position.x >= 1) {
             position.x -= 1;
@@ -63,8 +65,9 @@ CellPosition CellLocator::TryApplyDirection(CellPosition position, Direction dir
             return position;
         }
         break;
+    default:
+        return InvalidCellPosition;
     }
-
     return InvalidCellPosition;
 }
 
