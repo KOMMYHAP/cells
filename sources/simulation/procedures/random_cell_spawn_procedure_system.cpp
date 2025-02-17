@@ -1,9 +1,9 @@
 #include "random_cell_spawn_procedure_system.h"
 
-#include "components/generated/auto_cell_energy_change.h"
+#include "components/generated/auto_cell_energy_decrease.h"
 #include "components/generated/auto_direction.h"
+#include "direction_utils.h"
 #include "procedures/procedure_context.h"
-
 #include "simulation/cell_locator.h"
 
 RandomCellSpawnProcedureSystem::RandomCellSpawnProcedureSystem(EcsWorld& world, SimulationVirtualMachine& vm, const CellLocator& locator, Spawner& spawner, RandomCellFactory& factory)

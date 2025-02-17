@@ -1,6 +1,8 @@
 #include "look_procedure_system.h"
 
+#include "cell_position_utils.h"
 #include "components/generated/auto_cell_type.h"
+#include "direction_utils.h"
 #include "procedures/procedure_context.h"
 #include "simulation/cell_locator.h"
 
