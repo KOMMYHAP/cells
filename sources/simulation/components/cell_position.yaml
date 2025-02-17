@@ -9,3 +9,4 @@ fields:
     type: 'int16_t'
   - name: 'y'
     type: 'int16_t'
+spaceship_operator: true
