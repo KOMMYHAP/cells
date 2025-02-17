@@ -1,6 +1,6 @@
 #include "spawn_places_statistics_system.h"
 
-#include "components/spawn_place_tag.h"
+#include "components/generated/spawn_place_tag.h"
 
 SpawnPlacesStatisticsSystem::SpawnPlacesStatisticsSystem(EcsWorld& world, SimulationStatisticsProvider& stats)
     : _world(&world)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cell_factories/random_cell_factory.h"
-#include "components/cell_energy_change.h"
+#include "components/generated/cell_energy_change.h"
 #include "simulation/cell_locator.h"
 #include "simulation/simulation_ecs_procedure.h"
 #include "simulation/spawner.h"

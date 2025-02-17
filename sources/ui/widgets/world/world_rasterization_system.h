@@ -2,8 +2,8 @@
 
 #include "simulation/simulation_ecs_system.h"
 
-#include "components/cell_position.h"
-#include "components/cell_type.h"
+#include "components/generated/cell_position.h"
+#include "components/generated/cell_type.h"
 
 struct WorldRasterizationData;
 

@@ -3,7 +3,7 @@
 #include "simulation/simulation_ecs_system.h"
 #include "simulation/simulation_virtual_machine.h"
 
-#include "components/cell_brain.h"
+#include "components/generated/cell_brain.h"
 
 class BrainSimulationSystem final : public SimulationEcsSystem<BrainSimulationSystem, CellBrain> {
 public:

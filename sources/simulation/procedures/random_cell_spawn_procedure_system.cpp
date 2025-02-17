@@ -1,7 +1,7 @@
 #include "random_cell_spawn_procedure_system.h"
 
-#include "components/cell_energy_change.h"
-#include "components/direction.h"
+#include "components/generated/cell_energy_change.h"
+#include "components/generated/direction.h"
 #include "procedures/procedure_context.h"
 
 #include "simulation/cell_locator.h"

@@ -1,7 +1,7 @@
 ﻿#include "energy_decrease_system.h"
 
-#include "components/death_from_empty_energy_tag.h"
-#include "components/graveyard_tag.h"
+#include "components/generated/death_from_empty_energy_tag.h"
+#include "components/generated/graveyard_tag.h"
 
 EnergyDecreaseSystem::EnergyDecreaseSystem(EcsWorld& ecsWorld)
     : SimulationEcsSystem(ecsWorld)
