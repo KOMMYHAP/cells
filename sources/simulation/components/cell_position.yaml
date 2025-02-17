@@ -1,0 +1,11 @@
+class:
+  name: 'cell_position'
+constants:
+  - name: 'invalid'
+    type: int16_t
+    value: 32767
+fields:
+  - name: 'x'
+    type: 'int16_t'
+  - name: 'y'
+    type: 'int16_t'

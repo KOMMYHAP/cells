@@ -1,0 +1,9 @@
+class:
+  name: 'cell_health'
+constants:
+  - name: 'zero'
+    type: uint16_t
+    value: 0
+fields:
+  - name: 'value'
+    type: 'uint16_t'

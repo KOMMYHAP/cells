@@ -135,21 +135,59 @@ def gather_components_list():
 
 def main():
     output_directory = Path('../sources/simulation/components/generated')
-    if output_directory.exists():
-        for file in os.listdir(output_directory):
-            file_path = os.path.join(output_directory, file)
-            valid_filename = file.startswith('auto_') or file == 'CMakeLists.txt'
-            if not os.path.isfile(file_path) or not valid_filename:
-                raise RuntimeError(f'Directory with auto-generated ecs components contains something wrong: {file}')
-            os.unlink(file_path)
-        output_directory.rmdir()
-    makedirs(output_directory)
-
-    components = gather_components_list()
+    create_sandbox(output_directory)
 
     environment = Environment(loader=FileSystemLoader("templates/"), trim_blocks=True, lstrip_blocks=True)
-    template = environment.get_template("ecs_component.jinja")
+    components = generate_components(environment, output_directory)
+    pch_filename = generate_pch(environment, output_directory)
+    compile_check_filename = generate_compile_check_file(components, environment, output_directory)
+    generate_cmake(pch_filename, compile_check_filename, components, environment, output_directory)
 
+
+def generate_pch(environment, output_directory):
+    pch_template = environment.get_template("ecs_component_pch.jinja")
+    pch_filename = 'pch.h'
+    pch_path = Path(output_directory) / pch_filename
+    with pch_path.open(mode="w", encoding="utf-8") as pch_data:
+        pch_data.write(pch_template.render())
+        print(f'... wrote {pch_filename}')
+    return pch_filename
+
+
+def generate_compile_check_file(components: list, environment: Environment, output_directory: Path):
+    compile_check_template = environment.get_template("ecs_component_compile_check_file.jinja")
+    compile_check_filename = 'auto_components.cpp'
+    compile_check_path = Path(output_directory) / compile_check_filename
+    with compile_check_path.open(mode="w", encoding="utf-8") as compile_check_file_data:
+        component_filename_list = []
+        for component in components:
+            component_filename_list.append(component.get_cpp_filename())
+        content = compile_check_template.render(components=component_filename_list)
+        compile_check_file_data.write(content)
+        print(f'... wrote {compile_check_filename}')
+    return compile_check_filename
+
+
+def generate_cmake(pch_filename: str, compile_check_filename: str, components: list, environment: Environment,
+                   output_directory: Path):
+    cmake_template = environment.get_template("ecs_component_list_cmake.jinja")
+    cmake_filename = Path(output_directory) / 'CMakeLists.txt'
+    with cmake_filename.open(mode="w", encoding="utf-8") as cmake_data:
+        component_filename_list = []
+        for component in components:
+            component_filename_list.append(component.get_cpp_filename())
+        content = cmake_template.render(
+            components=component_filename_list,
+            precompile_header=pch_filename,
+            compile_check_file=compile_check_filename
+        )
+        cmake_data.write(content)
+        print('... wrote CMakeLists.txt')
+
+
+def generate_components(environment, output_directory):
+    template = environment.get_template("ecs_component.jinja")
+    components = gather_components_list()
     for component in components:
         content = template.render(
             name=component.get_cpp_structure_name(),
@@ -161,16 +199,19 @@ def main():
         with filename.open(mode="w", encoding="utf-8") as component_data:
             component_data.write(content)
             print(f"... wrote {component.get_cpp_structure_name()} to {component.get_cpp_filename()}")
+    return components
 
-    cmake_template = environment.get_template("ecs_component_list_cmake.jinja")
-    cmake_filename = Path(output_directory) / 'CMakeLists.txt'
-    with cmake_filename.open(mode="w", encoding="utf-8") as cmake_data:
-        component_filename_list = []
-        for component in components:
-            component_filename_list.append(component.get_cpp_filename())
-        content = cmake_template.render(components=component_filename_list)
-        cmake_data.write(content)
-        print('... wrote CMakeLists.txt')
+
+def create_sandbox(output_directory):
+    if output_directory.exists():
+        for file in os.listdir(output_directory):
+            file_path = os.path.join(output_directory, file)
+            valid_filename = file.startswith('auto_') or file in ('CMakeLists.txt', 'pch.h')
+            if not os.path.isfile(file_path) or not valid_filename:
+                raise RuntimeError(f'Directory with auto-generated ecs components contains something wrong: {file}')
+            os.unlink(file_path)
+        output_directory.rmdir()
+    makedirs(output_directory)
 
 
 if __name__ == '__main__':

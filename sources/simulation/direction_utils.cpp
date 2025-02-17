@@ -1,4 +1,4 @@
-﻿#include "direction.h"
+﻿#include "direction_utils.h"
 
 bool TryParseDirection(uint8_t data, Direction& direction)
 {

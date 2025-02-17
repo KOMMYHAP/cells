@@ -1,0 +1,5 @@
+class:
+  name: 'cell_energy_change'
+fields:
+  - name: 'value'
+    type: 'uint8_t'

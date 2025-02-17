@@ -7,7 +7,6 @@ struct {{name}}
 {
 {% for constant in constants %}
     static constexpr {{ constant.type }} {{ constant.name }} {{ '{' }}{{ constant.value }}{{ '}' }};
-
 {% endfor %}
 {% for field in fields %}
     {{ field.type }} {{ field.name }};

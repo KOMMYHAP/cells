@@ -3,7 +3,7 @@ add_library(${PROJECT_NAME} STATIC)
 
 
 # add sub sources
-add_subdirectory(components)
+add_subdirectory(components/generated)
 add_subdirectory(procedures)
 add_subdirectory(genetic)
 add_subdirectory(cell_factories)
@@ -18,6 +18,9 @@ target_sources(${PROJECT_NAME} PRIVATE
         tick_calculator.h
         tick_calculator.cpp
         world.cpp
+        cell_position_utils.h
+        direction_utils.h
+        direction_utils.cpp
 )
 
 
@@ -33,6 +36,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-common
         cells-processor
+        cells-generated-components
         EnTT::EnTT
 )
 

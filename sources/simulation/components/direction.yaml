@@ -1,0 +1,18 @@
+class:
+  name: 'direction'
+constants:
+  - name: 'left'
+    type: uint8_t
+    value: 0
+  - name: 'right'
+    type: uint8_t
+    value: 1
+  - name: 'up'
+    type: uint8_t
+    value: 2
+  - name: 'down'
+    type: uint8_t
+    value: 3
+fields:
+  - name: 'type'
+    type: 'uint8_t'

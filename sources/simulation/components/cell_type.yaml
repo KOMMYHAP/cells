@@ -1,0 +1,18 @@
+class:
+  name: 'cell_type'
+constants:
+  - name: 'unit'
+    type: uint8_t
+    value: 0
+  - name: 'food'
+    type: uint8_t
+    value: 1
+  - name: 'wall'
+    type: uint8_t
+    value: 2
+  - name: 'dummy'
+    type: uint8_t
+    value: 3
+fields:
+  - name: 'type'
+    type: 'uint8_t'

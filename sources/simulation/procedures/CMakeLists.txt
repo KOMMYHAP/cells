@@ -9,4 +9,5 @@ target_sources(${PROJECT_NAME} PRIVATE
         consume_procedure.h
         random_cell_spawn_procedure_system.h
         look_procedure_system.h
+        deferred_procedure_execution.h
 )
