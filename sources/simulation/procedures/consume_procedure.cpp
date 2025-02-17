@@ -5,11 +5,11 @@
 #include "simulation/simulation_procedure_context.h"
 #include "simulation/simulation_virtual_machine.h"
 
-ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& vm, CellLocator& positionSystem, HealthSystem& healthSystem, TypeSystem& typeSystem)
-    : _vm(vm)
-    , _positionSystem(positionSystem)
-    , _healthSystem(healthSystem)
-    , _typeSystem(typeSystem)
+ConsumeProcedure::ConsumeProcedure(const SimulationVirtualMachine& /*vm*/, CellLocator& /*positionSystem*/, HealthSystem& /*healthSystem*/, TypeSystem& /*typeSystem*/)
+// : _vm(vm)
+// , _positionSystem(positionSystem)
+// , _healthSystem(healthSystem)
+// , _typeSystem(typeSystem)
 {
 }
 

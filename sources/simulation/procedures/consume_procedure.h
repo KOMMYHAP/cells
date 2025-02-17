@@ -14,8 +14,8 @@ public:
     void Execute(ProcedureContext& context) override;
 
 private:
-    const SimulationVirtualMachine& _vm;
-    CellLocator& _positionSystem;
-    HealthSystem& _healthSystem;
-    TypeSystem& _typeSystem;
+    // const SimulationVirtualMachine& _vm;
+    // CellLocator& _positionSystem;
+    // HealthSystem& _healthSystem;
+    // TypeSystem& _typeSystem;
 };
