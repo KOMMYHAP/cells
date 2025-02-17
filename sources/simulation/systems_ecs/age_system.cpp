@@ -1,6 +1,6 @@
 #include "age_system.h"
 
-#include "components/cell_age.h"
+#include "components/generated/auto_cell_age.h"
 #include "components/death_from_age_tag.h"
 #include "components/graveyard_tag.h"
 #include "simulation/simulation_ecs_system.h"

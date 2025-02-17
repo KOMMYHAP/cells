@@ -1,6 +1,6 @@
 ﻿#include "spawn_system.h"
 
-#include "components/cell_age.h"
+#include "components/generated/auto_cell_age.h"
 #include "components/cell_energy.h"
 #include "components/cell_energy_change.h"
 #include "components/cell_type.h"
