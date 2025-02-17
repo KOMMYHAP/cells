@@ -1,4 +1,5 @@
 #include "keep_population_system.h"
+#include "cell_position_utils.h"
 
 KeepPopulationSystem::KeepPopulationSystem(Config config)
     : _config(std::move(config))
