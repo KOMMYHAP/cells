@@ -1,10 +1,4 @@
 ﻿#pragma once
-
-enum class Direction : uint8_t {
-    Left,
-    Right,
-    Up,
-    Down,
-};
+#include "components/generated/auto_direction.h"
 
 bool TryParseDirection(uint8_t data, Direction& direction);

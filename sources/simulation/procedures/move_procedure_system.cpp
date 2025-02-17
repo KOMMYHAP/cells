@@ -1,4 +1,6 @@
 #include "move_procedure_system.h"
+#include "cell_position_utils.h"
+#include "direction_utils.h"
 
 MoveProcedureSystem::MoveProcedureSystem(EcsWorld& world, SimulationVirtualMachine& vm, CellLocator& locator)
     : _world(&world)
