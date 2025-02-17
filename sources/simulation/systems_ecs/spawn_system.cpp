@@ -1,10 +1,10 @@
 ﻿#include "spawn_system.h"
 
 #include "components/generated/auto_cell_age.h"
-#include "components/generated/cell_energy.h"
-#include "components/generated/cell_energy_change.h"
-#include "components/generated/cell_type.h"
-#include "components/generated/cell_unit_tag.h"
+#include "components/generated/auto_cell_energy.h"
+#include "components/generated/auto_cell_energy_change.h"
+#include "components/generated/auto_cell_type.h"
+#include "components/generated/auto_cell_unit_tag.h"
 
 SpawnSystem::SpawnSystem(EcsWorld& world, CellLocator& locator)
     : SimulationEcsSystem(world)

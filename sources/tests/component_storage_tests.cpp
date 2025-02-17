@@ -1,4 +1,4 @@
-// #include "components/generated/component_storage.h"
+// #include "components/generated/auto_component_storage.h"
 //
 // TEST(ComponentStorageTest, SimpleTestData)
 // {

@@ -1,6 +1,6 @@
 ﻿#include "spawner.h"
 
-#include "components/generated/spawn_place_tag.h"
+#include "components/generated/auto_spawn_place_tag.h"
 
 Spawner::Spawner(EcsWorld& world, const CellLocator& locator)
     : _world(&world)

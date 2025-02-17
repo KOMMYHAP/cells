@@ -1,8 +1,8 @@
 #pragma once
 
 #include "simulation/simulation_ecs_config.h"
-#include "components/generated/cell_position.h"
-#include "components/generated/direction.h"
+#include "components/generated/auto_cell_position.h"
+#include "components/generated/auto_direction.h"
 
 class CellLocator {
 public:

@@ -1,6 +1,6 @@
 ﻿#include "death_from_empty_energy_statistics_system.h"
 
-#include "components/generated/death_from_empty_energy_tag.h"
+#include "components/generated/auto_death_from_empty_energy_tag.h"
 
 DeathFromEmptyEnergySystem::DeathFromEmptyEnergySystem(EcsWorld& world, SimulationStatisticsProvider& stats)
     : _world(&world)

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "../procedures/deferred_procedure_execution.h"
-#include "components/generated/cell_brain.h"
+#include "components/generated/auto_cell_brain.h"
 #include "procedures/procedure.h"
 #include "simulation/simulation_ecs_system.h"
 #include "simulation/simulation_procedure_context.h"

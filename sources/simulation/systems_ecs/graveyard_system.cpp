@@ -1,7 +1,7 @@
 #include "graveyard_system.h"
 
-#include "components/generated/cell_position.h"
-#include "components/generated/graveyard_tag.h"
+#include "components/generated/auto_cell_position.h"
+#include "components/generated/auto_graveyard_tag.h"
 
 GraveyardSystem::GraveyardSystem(EcsWorld& world, CellLocator& locator)
     : _world(&world)

@@ -139,19 +139,8 @@ def main():
 
     environment = Environment(loader=FileSystemLoader("templates/"), trim_blocks=True, lstrip_blocks=True)
     components = generate_components(environment, output_directory)
-    pch_filename = generate_pch(environment, output_directory)
     compile_check_filename = generate_compile_check_file(components, environment, output_directory)
-    generate_cmake(pch_filename, compile_check_filename, components, environment, output_directory)
-
-
-def generate_pch(environment, output_directory):
-    pch_template = environment.get_template("ecs_component_pch.jinja")
-    pch_filename = 'pch.h'
-    pch_path = Path(output_directory) / pch_filename
-    with pch_path.open(mode="w", encoding="utf-8") as pch_data:
-        pch_data.write(pch_template.render())
-        print(f'... wrote {pch_filename}')
-    return pch_filename
+    generate_cmake(compile_check_filename, components, environment, output_directory)
 
 
 def generate_compile_check_file(components: list, environment: Environment, output_directory: Path):
@@ -168,7 +157,7 @@ def generate_compile_check_file(components: list, environment: Environment, outp
     return compile_check_filename
 
 
-def generate_cmake(pch_filename: str, compile_check_filename: str, components: list, environment: Environment,
+def generate_cmake(compile_check_filename: str, components: list, environment: Environment,
                    output_directory: Path):
     cmake_template = environment.get_template("ecs_component_list_cmake.jinja")
     cmake_filename = Path(output_directory) / 'CMakeLists.txt'
@@ -178,7 +167,6 @@ def generate_cmake(pch_filename: str, compile_check_filename: str, components: l
             component_filename_list.append(component.get_cpp_filename())
         content = cmake_template.render(
             components=component_filename_list,
-            precompile_header=pch_filename,
             compile_check_file=compile_check_filename
         )
         cmake_data.write(content)
@@ -206,7 +194,7 @@ def create_sandbox(output_directory):
     if output_directory.exists():
         for file in os.listdir(output_directory):
             file_path = os.path.join(output_directory, file)
-            valid_filename = file.startswith('auto_') or file in ('CMakeLists.txt', 'pch.h')
+            valid_filename = file.startswith('auto_') or file == 'CMakeLists.txt'
             if not os.path.isfile(file_path) or not valid_filename:
                 raise RuntimeError(f'Directory with auto-generated ecs components contains something wrong: {file}')
             os.unlink(file_path)

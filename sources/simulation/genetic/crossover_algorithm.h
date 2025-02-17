@@ -1,6 +1,6 @@
 #pragma once
 
-#include "components/generated/cell_brain.h"
+#include "components/generated/auto_cell_brain.h"
 
 class CrossoverAlgorithm {
 public:

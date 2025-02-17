@@ -1,8 +1,8 @@
 #include "age_system.h"
 
 #include "components/generated/auto_cell_age.h"
-#include "components/generated/death_from_age_tag.h"
-#include "components/generated/graveyard_tag.h"
+#include "components/generated/auto_death_from_age_tag.h"
+#include "components/generated/auto_graveyard_tag.h"
 #include "simulation/simulation_ecs_system.h"
 
 namespace {

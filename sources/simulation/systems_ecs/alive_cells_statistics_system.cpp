@@ -1,6 +1,6 @@
 ﻿#include "alive_cells_statistics_system.h"
 
-#include "components/generated/cell_unit_tag.h"
+#include "components/generated/auto_cell_unit_tag.h"
 
 AliveCellsStatisticsSystem::AliveCellsStatisticsSystem(EcsWorld& ecsWorld, SimulationStatisticsProvider& stats)
     : _world(&ecsWorld)

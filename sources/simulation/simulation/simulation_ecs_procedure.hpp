@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "components/generated/graveyard_tag.h"
+#include "components/generated/auto_graveyard_tag.h"
 #include "simulation/simulation_virtual_machine.h"
 #include "simulation_ecs_procedure.h"
 #include "systems_ecs/graveyarded_cell_exclude.h"
