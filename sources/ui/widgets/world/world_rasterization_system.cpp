@@ -10,7 +10,7 @@ WorldRasterizationSystem::WorldRasterizationSystem(EcsWorld& ecsWorld, uint16_t 
 uint32_t WorldRasterizationSystem::GetColor(const CellType type) const
 {
     const auto* pixelFormat = _rasterizationData->pixelFormat;
-    switch (type) {
+    switch (type.type) {
     case CellType::Unit:
         return SDL_MapRGB(pixelFormat, 255, 0, 0);
     case CellType::Food:
@@ -19,15 +19,16 @@ uint32_t WorldRasterizationSystem::GetColor(const CellType type) const
         return SDL_MapRGB(pixelFormat, 255, 255, 255);
     case CellType::Dummy:
         return SDL_MapRGB(pixelFormat, 0, 0, 0);
+    default:
+        return SDL_MapRGB(pixelFormat, 255, 00, 255);
     }
-    return SDL_MapRGB(pixelFormat, 255, 00, 255);
 }
 
 void WorldRasterizationSystem::SetDestination(const WorldRasterizationData& rasterizationData)
 {
     _rasterizationData = &rasterizationData;
 
-    const uint32_t color = GetColor(CellType::Dummy);
+    const uint32_t color = GetColor(CellType { CellType::Dummy });
     ASSERT(_rasterizationData->pixelDataBytesCount % 4 == 0,
         "Optimized version of fucntion to clear render texture requires size of texture in bytes to be multiple of 4!");
     SDL_memset4(rasterizationData.rawPixelData, color, _rasterizationData->pixelDataBytesCount / 4);
