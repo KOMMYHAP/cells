@@ -1,0 +1,5 @@
+target_sources(${PROJECT_NAME} PRIVATE
+{% for file_name in components %}
+    {{file_name}}
+{% endfor %}
+)

@@ -3,7 +3,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_position.h
         cell_type.h
         cell_unit_tag.h
-        cell_age.h
         cell_health.h
         cell_position.cpp
         direction.h
@@ -16,3 +15,5 @@ target_sources(${PROJECT_NAME} PRIVATE
         death_from_age_tag.h
         death_from_empty_energy_tag.h
 )
+
+add_subdirectory(generated)
