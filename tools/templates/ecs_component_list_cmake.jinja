@@ -7,3 +7,5 @@ add_library(cells-generated-components STATIC
 {% endfor %}
     {{ compile_check_file }}
 )
+
+target_compile_features(cells-generated-components PRIVATE cxx_std_17)
