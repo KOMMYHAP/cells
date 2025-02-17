@@ -92,6 +92,12 @@ class YamlComponent:
             for constant_entry in data['constants']:
                 self.constants.append(YamlComponentConstant(constant_entry))
 
+        self.spaceship_required = False
+        if 'spaceship_operator' in data:
+            self.spaceship_required = data['spaceship_operator']
+            if not isinstance(self.spaceship_required, bool):
+                raise RuntimeError('Field "spaceship_operator" must have "bool" type')
+
     def get_cpp_structure_name(self):
         return _snake_case_to_camel_case(self.class_name.name)
 
@@ -180,7 +186,8 @@ def generate_components(environment, output_directory):
         content = template.render(
             name=component.get_cpp_structure_name(),
             fields=component.get_jinja_fields(),
-            constants=component.get_jinja_constants()
+            constants=component.get_jinja_constants(),
+            spaceship_required=component.spaceship_required
         )
 
         filename = Path(output_directory) / component.get_cpp_filename()
