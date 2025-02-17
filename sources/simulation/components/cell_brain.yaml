@@ -1,0 +1,10 @@
+class:
+  name: 'cell_brain'
+constants:
+  - name: 'limit'
+    type: int32_t
+    value: 255
+fields:
+  - name: 'value'
+    type: 'uint16_t'
+    array_size_constant: 'limit'

@@ -1,0 +1,5 @@
+class:
+  name: 'cell_age'
+fields:
+  - name: 'value'
+    type: 'uint16_t'
