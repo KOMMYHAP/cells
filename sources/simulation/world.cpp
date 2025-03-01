@@ -13,8 +13,6 @@
 #include "systems_ecs/brain_simulation_system.h"
 #include "systems_ecs/death_from_age_statistics_system.h"
 #include "systems_ecs/death_from_empty_energy_statistics_system.h"
-#include "systems_ecs/energy_decrease_system.h"
-#include "systems_ecs/energy_leak_system.h"
 #include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/keep_population_system.h"
 #include "systems_ecs/spawn_places_statistics_system.h"

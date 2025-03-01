@@ -3,10 +3,6 @@
 #include "components/generated/auto_death_from_empty_energy_tag.h"
 #include "components/generated/auto_graveyard_tag.h"
 
-EnergyDecreaseSystem::EnergyDecreaseSystem(EcsWorld& ecsWorld)
-    : SimulationEcsSystem(ecsWorld)
-{
-}
 
 void EnergyDecreaseSystem::DoProcessComponents(const EcsEntity id, CellEnergy& energy, CellEnergyDecrease& change)
 {

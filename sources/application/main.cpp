@@ -13,9 +13,9 @@
 #include "systems_ecs/brain_simulation_system.h"
 #include "systems_ecs/death_from_age_statistics_system.h"
 #include "systems_ecs/death_from_empty_energy_statistics_system.h"
-#include "systems_ecs/energy_decrease_system.h"
-#include "systems_ecs/energy_leak_system.h"
 #include "systems_ecs/generated/auto_make_age_system.h"
+#include "systems_ecs/generated/auto_make_energy_decrease_system.h"
+#include "systems_ecs/generated/auto_make_energy_leak_system.h"
 #include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/keep_population_system.h"
 #include "systems_ecs/spawn_places_statistics_system.h"
@@ -129,8 +129,8 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     TEMP_RegisterSystem<SpawnSystem>(world, ecsWorld, cellLocator);
     TEMP_RegisterSystem<BrainSimulationSystem>(world, ecsWorld, vm);
     TEMP_RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(world, ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", ecsWorld, vm, cellLocator, spawner, randomCellFactory);
-    TEMP_RegisterSystem<EnergyLeakSystem>(world, ecsWorld);
-    TEMP_RegisterSystem<EnergyDecreaseSystem>(world, ecsWorld);
+    RegisterEcsSystem(&MakeEnergyLeakSystem);
+    RegisterEcsSystem(&MakeEnergyDecreaseSystem);
     RegisterEcsSystem(&MakeAgeSystem);
     TEMP_RegisterProcedureSystem<LookProcedureSystem>(world, ProcedureType::Look, 1, 1, "Look", ecsWorld, vm, cellLocator);
     TEMP_RegisterProcedureSystem<MoveProcedureSystem>(world, ProcedureType::Move, 1, 0, "Move", ecsWorld, vm, cellLocator);
