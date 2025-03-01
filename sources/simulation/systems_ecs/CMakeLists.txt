@@ -1,9 +1,8 @@
 target_sources(${PROJECT_NAME} PRIVATE
+        age_system.cpp
         brain_simulation_system.h
         brain_simulation_system.cpp
-        energy_leak_system.h
         energy_leak_system.cpp
-        energy_decrease_system.h
         energy_decrease_system.cpp
         graveyard_system.cpp
         graveyard_system.h
@@ -19,8 +18,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         death_from_age_statistics_system.cpp
         death_from_empty_energy_statistics_system.h
         death_from_empty_energy_statistics_system.cpp
-
-        age_system.cpp
 )
 
 add_subdirectory(generated)

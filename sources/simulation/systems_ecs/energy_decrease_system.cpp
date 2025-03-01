@@ -1,4 +1,4 @@
-﻿#include "energy_decrease_system.h"
+﻿#include "generated/auto_energy_decrease_system.h"
 
 #include "components/generated/auto_death_from_empty_energy_tag.h"
 #include "components/generated/auto_graveyard_tag.h"

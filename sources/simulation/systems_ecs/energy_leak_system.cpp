@@ -1,9 +1,4 @@
-﻿#include "energy_leak_system.h"
-
-EnergyLeakSystem::EnergyLeakSystem(EcsWorld& ecsWorld)
-    : SimulationEcsSystem(ecsWorld)
-{
-}
+﻿#include "generated/auto_energy_leak_system.h"
 
 void EnergyLeakSystem::DoProcessComponents(const EcsEntity /*id*/, CellEnergyDecrease& change)
 {

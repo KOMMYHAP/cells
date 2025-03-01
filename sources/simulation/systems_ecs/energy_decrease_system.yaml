@@ -1,0 +1,4 @@
+name: 'energy_decrease_system'
+components:
+  - name: 'cell_energy'
+  - name: 'cell_energy_decrease'
