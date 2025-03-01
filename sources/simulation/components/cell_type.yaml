@@ -1,5 +1,4 @@
-class:
-  name: 'cell_type'
+name: 'cell_type'
 constants:
   - name: 'unit'
     type: uint8_t

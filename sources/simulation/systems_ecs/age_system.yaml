@@ -1,0 +1,4 @@
+name: 'age_system'
+components:
+  - name: 'cell_age'
+    readonly: false

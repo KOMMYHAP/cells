@@ -7,8 +7,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         energy_decrease_system.cpp
         graveyard_system.cpp
         graveyard_system.h
-        age_system.cpp
-        age_system.h
         alive_cells_statistics_system.h
         alive_cells_statistics_system.cpp
         spawn_system.cpp
@@ -21,4 +19,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         death_from_age_statistics_system.cpp
         death_from_empty_energy_statistics_system.h
         death_from_empty_energy_statistics_system.cpp
+
+        age_system.cpp
 )
+
+add_subdirectory(generated)

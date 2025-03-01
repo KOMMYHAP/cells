@@ -1,5 +1,4 @@
-class:
-  name: 'cell_position'
+name: 'cell_position'
 constants:
   - name: 'invalid'
     type: int16_t

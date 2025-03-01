@@ -1,0 +1,15 @@
+#include "{{ system.file_name }}"
+
+#include "simulation/simulation_ecs_system.h"
+#include "simulation/simulation_storage.h"
+
+{{ system.class_name }}::{{ system.class_name }}(EcsWorld& ecsWorld)
+    : SimulationEcsSystem(ecsWorld)
+{
+}
+
+std::unique_ptr<SimulationSystem> Make{{ system.class_name }}(const SimulationStorage& storage)
+{
+    EcsWorld& world = storage.Modify<EcsWorld>();
+    return std::make_unique<{{ system.class_name }}>(world);
+}

@@ -1,5 +1,4 @@
-class:
-  name: 'direction'
+name: 'direction'
 constants:
   - name: 'left'
     type: uint8_t

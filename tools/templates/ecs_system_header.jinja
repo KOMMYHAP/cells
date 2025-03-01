@@ -1,0 +1,22 @@
+#pragma once
+
+{% for component in components %}
+#include "components/generated/{{component.file_name}}"
+{% endfor %}
+#include "simulation/simulation_ecs_system.h"
+
+class {{ system.class_name }} final : public SimulationEcsSystem<{{ system.class_name }},
+{% for component in components %}
+    {{component.class_name}}
+{% endfor %}
+    >
+{
+public:
+    explicit {{ system.class_name }}(EcsWorld& ecsWorld);
+
+    void DoProcessComponents(EcsEntity id,
+{% for component in components %}
+        {{component.argument_type_and_name}}
+{% endfor %}
+    );
+};

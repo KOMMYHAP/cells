@@ -1,5 +1,4 @@
-class:
-  name: 'cell_brain'
+name: 'cell_brain'
 constants:
   - name: 'limit'
     type: int32_t
