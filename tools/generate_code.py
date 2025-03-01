@@ -9,7 +9,7 @@ from generate_ecs_systems import generate_systems
 
 
 def main():
-    environment = Environment(loader=FileSystemLoader("templates/"), trim_blocks=True, lstrip_blocks=True)
+    environment = Environment(loader=FileSystemLoader("templates/"))
 
     output_directory = Path('../sources/simulation/components/generated')
     create_sandbox(output_directory)
