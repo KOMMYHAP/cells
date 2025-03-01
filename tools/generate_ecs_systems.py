@@ -145,25 +145,10 @@ def main():
 
     environment = Environment(loader=FileSystemLoader("templates/"), trim_blocks=True, lstrip_blocks=True)
     components = generate_components(environment, output_directory)
-    compile_check_filename = generate_compile_check_file(components, environment, output_directory)
-    generate_cmake(compile_check_filename, components, environment, output_directory)
+    generate_cmake(components, environment, output_directory)
 
 
-def generate_compile_check_file(components: list, environment: Environment, output_directory: Path):
-    compile_check_template = environment.get_template("ecs_component_compile_check_file.jinja")
-    compile_check_filename = 'auto_components.cpp'
-    compile_check_path = Path(output_directory) / compile_check_filename
-    with compile_check_path.open(mode="w", encoding="utf-8") as compile_check_file_data:
-        component_filename_list = []
-        for component in components:
-            component_filename_list.append(component.get_cpp_filename())
-        content = compile_check_template.render(components=component_filename_list)
-        compile_check_file_data.write(content)
-        print(f'... wrote {compile_check_filename}')
-    return compile_check_filename
-
-
-def generate_cmake(compile_check_filename: str, components: list, environment: Environment,
+def generate_cmake(components: list, environment: Environment,
                    output_directory: Path):
     cmake_template = environment.get_template("ecs_component_list_cmake.jinja")
     cmake_filename = Path(output_directory) / 'CMakeLists.txt'
@@ -173,7 +158,6 @@ def generate_cmake(compile_check_filename: str, components: list, environment: E
             component_filename_list.append(component.get_cpp_filename())
         content = cmake_template.render(
             components=component_filename_list,
-            compile_check_file=compile_check_filename
         )
         cmake_data.write(content)
         print('... wrote CMakeLists.txt')
