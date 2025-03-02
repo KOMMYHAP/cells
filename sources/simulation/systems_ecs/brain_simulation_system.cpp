@@ -1,12 +1,7 @@
-﻿#include "brain_simulation_system.h"
-
-BrainSimulationSystem::BrainSimulationSystem(EcsWorld& ecsWorld, SimulationVirtualMachine& vm)
-    : SimulationEcsSystem(ecsWorld)
-    , _vm(&vm)
-{
-}
+﻿#include "generated/auto_brain_simulation_system.h"
+#include "simulation/simulation_virtual_machine.h"
 
 void BrainSimulationSystem::DoProcessComponents(const EcsEntity id, CellBrain& brain)
 {
-    _vm->Run(id, brain);
+    _simulationVirtualMachine->Run(id, brain);
 }

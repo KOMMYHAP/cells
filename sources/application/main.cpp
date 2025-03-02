@@ -10,7 +10,7 @@
 #include "simulation_registrable_system.h"
 #include "system/ui_system.h"
 #include "systems_ecs/alive_cells_statistics_system.h"
-#include "systems_ecs/brain_simulation_system.h"
+#include "systems_ecs/generated/auto_make_brain_simulation_system.h"
 #include "systems_ecs/death_from_age_statistics_system.h"
 #include "systems_ecs/death_from_empty_energy_statistics_system.h"
 #include "systems_ecs/generated/auto_make_age_system.h"
@@ -127,7 +127,7 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     };
 
     TEMP_RegisterSystem<SpawnSystem>(world, ecsWorld, cellLocator);
-    TEMP_RegisterSystem<BrainSimulationSystem>(world, ecsWorld, vm);
+    RegisterEcsSystem(&MakeBrainSimulationSystem);
     TEMP_RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(world, ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", ecsWorld, vm, cellLocator, spawner, randomCellFactory);
     RegisterEcsSystem(&MakeEnergyLeakSystem);
     RegisterEcsSystem(&MakeEnergyDecreaseSystem);

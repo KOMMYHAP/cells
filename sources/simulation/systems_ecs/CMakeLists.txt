@@ -1,6 +1,5 @@
 target_sources(${PROJECT_NAME} PRIVATE
         age_system.cpp
-        brain_simulation_system.h
         brain_simulation_system.cpp
         energy_leak_system.cpp
         energy_decrease_system.cpp

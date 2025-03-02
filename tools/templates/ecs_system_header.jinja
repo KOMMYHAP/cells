@@ -1,9 +1,13 @@
 #pragma once
-
-{%- for component in components %}
-#include "components/generated/{{component.file_name}}"
-{%- endfor %}
 #include "simulation/simulation_ecs_system.h"
+
+{% for component in components -%}
+#include "components/generated/{{component.file_name}}"
+{% endfor %}
+
+{% for resource in resources -%}
+class {{resource.type_name}};
+{% endfor %}
 
 class {{ system.class_name }} final : public SimulationEcsSystem<{{ system.class_name }},
 {%- for component in components %}
@@ -11,11 +15,26 @@ class {{ system.class_name }} final : public SimulationEcsSystem<{{ system.class
 {%- endfor -%}
     > {
 public:
+{%- if resources|length >= 1 %}
+    {{ system.class_name }}(EcsWorld& ecsWorld,
+{%- for resource in resources %}
+        {{resource.argument_type}} {{resource.argument_name}}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+    );
+{% else %}
     explicit {{ system.class_name }}(EcsWorld& ecsWorld);
+{% endif %}
 
     void DoProcessComponents(EcsEntity id,
 {%- for component in components %}
         {{component.argument_type_and_name}}{% if not loop.last %},{% endif %}
 {%- endfor -%}
     );
+
+{% if resources|length >= 1 %}
+private:
+{%- for resource in resources %}
+    {{resource.field_type}} _{{resource.argument_name}};
+{%- endfor -%}
+{% endif %}
 };

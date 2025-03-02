@@ -3,13 +3,40 @@
 #include "simulation/simulation_ecs_system.h"
 #include "simulation/simulation_storage.h"
 
-{{ system.class_name }}::{{ system.class_name }}(EcsWorld& ecsWorld)
+{% for resource in resources -%}
+#include "{{resource.include_path}}"
+{%- endfor %}
+
+
+{{ system.class_name }}::{{ system.class_name }}(EcsWorld& ecsWorld
+{%- if resources|length >= 1 -%}
+,
+{%- for resource in resources %}
+        {{resource.argument_type}} {{resource.argument_name}}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+{% else %}
+{% endif -%}
+)
     : SimulationEcsSystem(ecsWorld)
+{%- for resource in resources %}
+    , _{{resource.argument_name}}(&{{resource.argument_name}})
+{%- endfor %}
 {
 }
 
 std::unique_ptr<SimulationSystem> Make{{ system.class_name }}(const SimulationStorage& storage)
 {
     EcsWorld& world = storage.Modify<EcsWorld>();
-    return std::make_unique<{{ system.class_name }}>(world);
+{%- for resource in resources %}
+    {{resource.argument_type}} {{resource.argument_name}} = storage.Modify<{{resource.type_name}}>();
+{%- endfor %}
+
+    return std::make_unique<{{ system.class_name }}>(world
+{%- if resources|length >= 1 -%}
+,
+{%- for resource in resources %}
+        {{resource.argument_name}}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+{% endif %}
+    );
 }

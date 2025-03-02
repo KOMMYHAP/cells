@@ -10,7 +10,6 @@
 #include "simulation/simulation_statistics_provider.h"
 
 #include "systems_ecs/alive_cells_statistics_system.h"
-#include "systems_ecs/brain_simulation_system.h"
 #include "systems_ecs/death_from_age_statistics_system.h"
 #include "systems_ecs/death_from_empty_energy_statistics_system.h"
 #include "systems_ecs/graveyard_system.h"

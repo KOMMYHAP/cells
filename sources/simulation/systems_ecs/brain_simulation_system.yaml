@@ -1,0 +1,6 @@
+﻿name: 'brain_simulation_system'
+components:
+    - name: 'cell_brain'
+resources:
+    - name: 'simulation_virtual_machine'
+      include_path: 'simulation/simulation_virtual_machine.h'
