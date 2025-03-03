@@ -1,0 +1,16 @@
+﻿name: 'spawn_system'
+components:
+  - name: 'spawn_place_tag'
+    readonly: true
+    is_tag: true
+  - name: 'cell_position'
+    readonly: true
+  - name: 'graveyard_tag'
+    excluded: true
+resources:
+  - name: 'cell_locator'
+    include_path: 'simulation/cell_locator.h'
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

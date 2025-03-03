@@ -3,7 +3,6 @@
 #include "components/generated/auto_cell_age.h"
 #include "components/generated/auto_death_from_age_tag.h"
 #include "components/generated/auto_graveyard_tag.h"
-#include "simulation/simulation_ecs_system.h"
 
 void AgeSystem::DoProcessComponents(EcsEntity id, CellAge& cellAge)
 {
@@ -11,7 +10,7 @@ void AgeSystem::DoProcessComponents(EcsEntity id, CellAge& cellAge)
 
     constexpr static uint16_t LimitAge = 2'000;
     if (cellAge.value >= LimitAge) {
-        EcsWorld& world = AccessEcsWorld();
+        EcsWorld& world = *_ecsWorld;
         world.emplace<DeathFromAgeTag>(id);
         world.emplace_or_replace<GraveyardTag>(id);
     }

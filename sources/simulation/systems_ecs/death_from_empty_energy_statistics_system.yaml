@@ -1,0 +1,13 @@
+﻿name: 'death_from_empty_energy_statistics_system'
+components:
+  - name: 'death_from_empty_energy_tag'
+    readonly: true
+  - name: 'graveyard_tag'
+    excluded: true
+resources:
+  - name: 'simulation_statistics_provider'
+    include_path: 'simulation/simulation_statistics_provider.h'
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: false

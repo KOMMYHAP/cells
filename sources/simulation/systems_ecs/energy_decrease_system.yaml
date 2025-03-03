@@ -2,3 +2,10 @@ name: 'energy_decrease_system'
 components:
   - name: 'cell_energy'
   - name: 'cell_energy_decrease'
+  - name: 'graveyard_tag'
+    excluded: true
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

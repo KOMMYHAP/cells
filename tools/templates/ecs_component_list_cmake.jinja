@@ -2,8 +2,8 @@
 # PLEASE DO NOT MAKE CHANGES MANUALLY
 
 add_library(cells-generated-components INTERFACE
-{% for file_name in components %}
-    {{file_name}}
+{% for component in components %}
+    {{component.file_name}}
 {% endfor %}
 )
 

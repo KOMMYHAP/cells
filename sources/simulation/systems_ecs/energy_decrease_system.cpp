@@ -1,8 +1,9 @@
 ﻿#include "generated/auto_energy_decrease_system.h"
 
+#include "components/generated/auto_cell_energy.h"
+#include "components/generated/auto_cell_energy_decrease.h"
 #include "components/generated/auto_death_from_empty_energy_tag.h"
 #include "components/generated/auto_graveyard_tag.h"
-
 
 void EnergyDecreaseSystem::DoProcessComponents(const EcsEntity id, CellEnergy& energy, CellEnergyDecrease& change)
 {
@@ -15,7 +16,7 @@ void EnergyDecreaseSystem::DoProcessComponents(const EcsEntity id, CellEnergy& e
     change.value = 0;
 
     if (energy.value == 0) {
-        EcsWorld& world = AccessEcsWorld();
+        EcsWorld& world = *_ecsWorld;
         world.emplace_or_replace<GraveyardTag>(id);
         world.emplace<DeathFromEmptyEnergyTag>(id);
     }

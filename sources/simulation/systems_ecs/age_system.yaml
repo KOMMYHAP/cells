@@ -1,3 +1,10 @@
 name: 'age_system'
 components:
   - name: 'cell_age'
+  - name: 'graveyard_tag'
+    excluded: true
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

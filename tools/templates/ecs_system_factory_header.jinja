@@ -3,4 +3,4 @@
 #include "simulation/simulation_system.h"
 #include "simulation/simulation_storage.h"
 
-std::unique_ptr<SimulationSystem> Make{{ system.class_name }}(const SimulationStorage& storage);
+std::unique_ptr<SimulationSystem> Make{{ system.type_name }}(const SimulationStorage& storage);

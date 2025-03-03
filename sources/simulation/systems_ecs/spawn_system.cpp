@@ -1,21 +1,18 @@
-﻿#include "spawn_system.h"
+﻿#include "generated/auto_spawn_system.h"
 
 #include "components/generated/auto_cell_age.h"
 #include "components/generated/auto_cell_energy.h"
 #include "components/generated/auto_cell_energy_decrease.h"
 #include "components/generated/auto_cell_type.h"
 #include "components/generated/auto_cell_unit_tag.h"
+#include "simulation/cell_locator.h"
 
-SpawnSystem::SpawnSystem(EcsWorld& world, CellLocator& locator)
-    : SimulationEcsSystem(world)
-    , _locator(&locator)
-{
-}
+#include <components/generated/auto_spawn_place_tag.h>
 
-void SpawnSystem::DoProcessComponents(EcsEntity id, CellPosition position)
+void SpawnSystem::DoProcessComponents(EcsEntity id, const CellPosition& cellPosition)
 {
-    EcsWorld& world = AccessEcsWorld();
-    const EcsEntity targetId = _locator->Find(position);
+    EcsWorld& world = *_ecsWorld;
+    const EcsEntity targetId = _cellLocator->Find(cellPosition);
     if (const bool canSpawnAtPosition = targetId == InvalidEcsEntity; !canSpawnAtPosition) {
         world.destroy(id);
         return;
@@ -27,5 +24,5 @@ void SpawnSystem::DoProcessComponents(EcsEntity id, CellPosition position)
     world.emplace<CellEnergy>(id, CellEnergy { StartupEnergy });
     world.emplace<CellEnergyDecrease>(id, CellEnergyDecrease { 0 });
     world.emplace<CellAge>(id, CellAge { 0 });
-    _locator->Set(position, id);
+    _cellLocator->Set(cellPosition, id);
 }

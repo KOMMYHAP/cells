@@ -1,42 +1,60 @@
 #include "{{ system.file_name }}"
 
-#include "simulation/simulation_ecs_system.h"
 #include "simulation/simulation_storage.h"
 
-{% for resource in resources -%}
+{% for resource in system.resources %}
+    {% if resource.forward_declaration_only %}
 #include "{{resource.include_path}}"
-{%- endfor %}
+    {% endif %}
+{% endfor %}
 
+{% for component in system.components %}
+#include "components/generated/{{component.file_name}}"
+{% endfor %}
+{% for component in system.excluded_components %}
+#include "components/generated/{{component.file_name}}"
+{% endfor %}
 
-{{ system.class_name }}::{{ system.class_name }}(EcsWorld& ecsWorld
-{%- if resources|length >= 1 -%}
-,
-{%- for resource in resources %}
+{{ system.type_name }}::{{ system.type_name }}(
+{%- for resource in system.resources %}
         {{resource.argument_type}} {{resource.argument_name}}{% if not loop.last %},{% endif %}
 {%- endfor -%}
-{% else %}
-{% endif -%}
 )
-    : SimulationEcsSystem(ecsWorld)
-{%- for resource in resources %}
-    , _{{resource.argument_name}}(&{{resource.argument_name}})
+    :
+{%- for resource in system.resources %}
+    {% if not loop.first %},{% endif %} _{{resource.argument_name}}(&{{resource.argument_name}})
 {%- endfor %}
 {
 }
 
-std::unique_ptr<SimulationSystem> Make{{ system.class_name }}(const SimulationStorage& storage)
+{% if system.is_ecs %}
+void {{ system.type_name }}::DoSystemUpdate()
 {
-    EcsWorld& world = storage.Modify<EcsWorld>();
-{%- for resource in resources %}
+    static constexpr auto ExcludedComponents = entt::exclude_t<
+{%- for component in system.excluded_components %}
+        {{component.type_name}}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+    >{};
+
+    _ecsWorld->view<
+{%- for component in system.components %}
+    {{component.type_name}}{% if not loop.last %},{% endif %}
+{%- endfor -%}
+    >(ExcludedComponents).each([this]<typename... T0>(const EcsEntity& id, T0&&... components) noexcept {
+        this->DoProcessComponents(id, std::forward<T0>(components)...);
+    });
+}
+{% endif %}
+
+std::unique_ptr<SimulationSystem> Make{{ system.type_name }}(const SimulationStorage& storage)
+{
+{%- for resource in system.resources %}
     {{resource.argument_type}} {{resource.argument_name}} = storage.Modify<{{resource.type_name}}>();
 {%- endfor %}
 
-    return std::make_unique<{{ system.class_name }}>(world
-{%- if resources|length >= 1 -%}
-,
-{%- for resource in resources %}
+    return std::make_unique<{{ system.type_name }}>(
+{%- for resource in system.resources %}
         {{resource.argument_name}}{% if not loop.last %},{% endif %}
 {%- endfor -%}
-{% endif %}
     );
 }

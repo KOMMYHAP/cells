@@ -13,11 +13,11 @@ def main():
 
     output_directory = Path('../sources/simulation/components/generated')
     create_sandbox(output_directory)
-    generate_components(environment, output_directory)
+    components = generate_components(environment, output_directory)
 
     output_directory = Path('../sources/simulation/systems_ecs/generated')
     create_sandbox(output_directory)
-    generate_systems(environment, output_directory)
+    generate_systems(components, environment, output_directory)
 
 
 def create_sandbox(output_directory):

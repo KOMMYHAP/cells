@@ -9,13 +9,9 @@
 
 #include "simulation/simulation_statistics_provider.h"
 
-#include "systems_ecs/alive_cells_statistics_system.h"
-#include "systems_ecs/death_from_age_statistics_system.h"
-#include "systems_ecs/death_from_empty_energy_statistics_system.h"
 #include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/keep_population_system.h"
 #include "systems_ecs/spawn_places_statistics_system.h"
-#include "systems_ecs/spawn_system.h"
 
 World::World()
 {

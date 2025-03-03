@@ -1,5 +1,7 @@
 ﻿#include "generated/auto_energy_leak_system.h"
 
+#include "components/generated/auto_cell_energy_decrease.h"
+
 void EnergyLeakSystem::DoProcessComponents(const EcsEntity /*id*/, CellEnergyDecrease& change)
 {
     static constexpr uint8_t LeakValue = 1;

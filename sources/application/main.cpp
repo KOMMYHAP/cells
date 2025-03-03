@@ -9,17 +9,18 @@
 #include "procedures/random_cell_spawn_procedure_system.h"
 #include "simulation_registrable_system.h"
 #include "system/ui_system.h"
-#include "systems_ecs/alive_cells_statistics_system.h"
-#include "systems_ecs/generated/auto_make_brain_simulation_system.h"
-#include "systems_ecs/death_from_age_statistics_system.h"
-#include "systems_ecs/death_from_empty_energy_statistics_system.h"
+#include "systems_ecs/generated/auto_death_from_age_statistics_system.h"
 #include "systems_ecs/generated/auto_make_age_system.h"
+#include "systems_ecs/generated/auto_make_alive_cells_statistics_system.h"
+#include "systems_ecs/generated/auto_make_brain_simulation_system.h"
+#include "systems_ecs/generated/auto_make_death_from_age_statistics_system.h"
+#include "systems_ecs/generated/auto_make_death_from_empty_energy_statistics_system.h"
 #include "systems_ecs/generated/auto_make_energy_decrease_system.h"
 #include "systems_ecs/generated/auto_make_energy_leak_system.h"
+#include "systems_ecs/generated/auto_make_spawn_system.h"
 #include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/keep_population_system.h"
 #include "systems_ecs/spawn_places_statistics_system.h"
-#include "systems_ecs/spawn_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
 #include "widgets/world/world_rasterization_system.h"
@@ -126,7 +127,7 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
         world.AddSimulationSystem(std::move(system));
     };
 
-    TEMP_RegisterSystem<SpawnSystem>(world, ecsWorld, cellLocator);
+    RegisterEcsSystem(&MakeSpawnSystem);
     RegisterEcsSystem(&MakeBrainSimulationSystem);
     TEMP_RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(world, ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", ecsWorld, vm, cellLocator, spawner, randomCellFactory);
     RegisterEcsSystem(&MakeEnergyLeakSystem);
@@ -134,10 +135,10 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     RegisterEcsSystem(&MakeAgeSystem);
     TEMP_RegisterProcedureSystem<LookProcedureSystem>(world, ProcedureType::Look, 1, 1, "Look", ecsWorld, vm, cellLocator);
     TEMP_RegisterProcedureSystem<MoveProcedureSystem>(world, ProcedureType::Move, 1, 0, "Move", ecsWorld, vm, cellLocator);
-    TEMP_RegisterSystem<AliveCellsStatisticsSystem>(world, ecsWorld, statistics);
+    RegisterEcsSystem(&MakeAliveCellsStatisticsSystem);
     TEMP_RegisterSystem<SpawnPlacesStatisticsSystem>(world, ecsWorld, statistics);
-    TEMP_RegisterSystem<DeathFromAgeStatisticsSystem>(world, ecsWorld, statistics);
-    TEMP_RegisterSystem<DeathFromEmptyEnergySystem>(world, ecsWorld, statistics);
+    RegisterEcsSystem(&MakeDeathFromAgeStatisticsSystem);
+    RegisterEcsSystem(&MakeDeathFromEmptyEnergyStatisticsSystem);
     TEMP_RegisterSystem<GraveyardSystem>(world, ecsWorld, cellLocator);
     {
         KeepPopulationSystem::Config config {
