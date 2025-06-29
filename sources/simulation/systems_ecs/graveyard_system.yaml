@@ -1,0 +1,14 @@
+name: 'graveyard_system'
+components:
+  - name: 'cell_position'
+    readonly: true
+  - name: 'graveyard_tag'
+    readonly: true
+resources:
+  - name: 'cell_locator'
+    include_path: 'simulation/cell_locator.h'
+    forward_declaration_only: true
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

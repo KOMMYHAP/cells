@@ -12,15 +12,15 @@ def main():
     environment = Environment(loader=FileSystemLoader("templates/"))
 
     output_directory = Path('../sources/simulation/components/generated')
-    create_sandbox(output_directory)
+    prepare_output_directory(output_directory)
     components = generate_components(environment, output_directory)
 
     output_directory = Path('../sources/simulation/systems_ecs/generated')
-    create_sandbox(output_directory)
+    prepare_output_directory(output_directory)
     generate_systems(components, environment, output_directory)
 
 
-def create_sandbox(output_directory):
+def prepare_output_directory(output_directory):
     if output_directory.exists():
         for file in os.listdir(output_directory):
             file_path = os.path.join(output_directory, file)

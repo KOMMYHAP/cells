@@ -10,9 +10,7 @@ class {{resource.type_name}};
 {% endfor %}
 
 {% for component in system.components %}
-    {% if not component.is_tag %}
 struct {{component.type_name}};
-    {% endif %}
 {% endfor %}
 
 class {{ system.type_name }} final : public SimulationSystem
@@ -32,16 +30,14 @@ public:
 
 {% if system.is_ecs %}
 private:
-    {%- if system.components|length > system.tag_components_count %}
+    {%- if system.is_tag_only_system %}
+    void DoProcessComponents(EcsEntity id);
+    {% else %}
     void DoProcessComponents(EcsEntity id,
         {%- for component in system.components %}
-            {% if not component.is_tag %}
         {{component.argument_type_and_name}}{% if not loop.last %},{% endif %}
-            {% endif %}
         {%- endfor -%}
     );
-    {% else %}
-    void DoProcessComponents(EcsEntity id);
     {% endif %}
 {% endif %}
 

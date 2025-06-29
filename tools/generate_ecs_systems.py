@@ -135,29 +135,19 @@ class YamlSystem:
         return f'auto_make_{self.system_name}.h'
 
     def components_to_jinja(self):
-        components = []
-        for component in self.components:
-            components.append(component.to_jinja())
-        return components
+        return [c.to_jinja() for c in self.components if not c.is_tag()]
+
+    def tags_to_jinja(self):
+        return [c.to_jinja() for c in self.components if c.is_tag()]
+
+    def components_and_tags_to_jinja(self):
+        return self.components_to_jinja() + self.tags_to_jinja()
 
     def excluded_components_to_jinja(self):
-        components = []
-        for component in self.excluded_components:
-            components.append(component.to_jinja())
-        return components
-
-    def get_tag_components_count(self):
-        count = 0
-        for component in self.components:
-            if component.is_tag():
-                count += 1
-        return count
+        return [c.to_jinja() for c in self.excluded_components]
 
     def resources_to_jinja(self):
-        resources = []
-        for resource in self.resources:
-            resources.append(resource.to_jinja())
-        return resources
+        return [r.to_jinja() for r in self.resources]
 
     def to_jinja(self):
         return {
@@ -165,12 +155,17 @@ class YamlSystem:
             'file_name': self.get_header_filename(),
             'source_file_name': self.get_source_filename(),
             'factory_file_name': self.get_factory_filename(),
-            'tag_components_count': self.get_tag_components_count(),
             'components': self.components_to_jinja(),
+            'tags': self.tags_to_jinja(),
+            'components_and_tags': self.components_and_tags_to_jinja(),
+            'is_tag_only_system': self.is_tag_only_system(),
             'excluded_components': self.excluded_components_to_jinja(),
             'resources': self.resources_to_jinja(),
             'is_ecs': self.is_ecs
         }
+
+    def is_tag_only_system(self):
+        return len(self.components_to_jinja()) == 0
 
 
 def gather_systems_list(components: list[YamlComponent]):

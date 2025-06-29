@@ -1,20 +1,11 @@
-#include "graveyard_system.h"
+#include "systems_ecs/generated/auto_graveyard_system.h"
 
-#include "components/generated/auto_cell_position.h"
-#include "components/generated/auto_graveyard_tag.h"
+#include "simulation/cell_locator.h"
 
-GraveyardSystem::GraveyardSystem(EcsWorld& world, CellLocator& locator)
-    : _world(&world)
-    , _locator(&locator)
+void GraveyardSystem::DoProcessComponents(EcsEntity id, const CellPosition& cellPosition)
 {
-}
+    _cellLocator->Reset(cellPosition);
 
-void GraveyardSystem::DoSystemUpdate()
-{
-    const auto graveyardedCells = _world->view<GraveyardTag, const CellPosition>();
-    graveyardedCells.each([this](const EcsEntity /*id*/, const CellPosition position) {
-        _locator->Reset(position);
-    });
-
-    _world->destroy(graveyardedCells.begin(), graveyardedCells.end());
+    // todo: we can destroy a batch of entities, do we need it for performance?
+    _ecsWorld->destroy(id);
 }
