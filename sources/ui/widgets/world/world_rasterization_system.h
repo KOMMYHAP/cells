@@ -10,13 +10,11 @@ struct SDL_Color;
 
 class WorldRasterizationSystem final : public SimulationEcsSystem<WorldRasterizationSystem, const CellType, const CellPosition> {
 public:
-    WorldRasterizationSystem(EcsWorld& ecsWorld, WorldRasterizationTarget& target, uint16_t cellSize);
+    WorldRasterizationSystem(EcsWorld& ecsWorld, WorldRasterizationTarget& target);
 
     void DoProcessComponents(EcsEntity id, CellType type, CellPosition position);
 
 private:
-    SDL_Color GetColor(CellType type) const;
 
-    int16_t _cellSizeInPixels { 0 };
     gsl::not_null<WorldRasterizationTarget*> _target;
 };

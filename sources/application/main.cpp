@@ -134,8 +134,8 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     RegisterEcsSystem(&MakeGraveyardSystem);
     RegisterEcsSystem(&MakeKeepPopulationSystem);
 
-    std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY);
-    auto worldRasterizationSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld, worldWidget->AccessRasterizationTarget(), uiConfig.cellPixelsSize);
+    std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, uiConfig.cellPixelsSize, uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY);
+    auto worldRasterizationSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld, worldWidget->AccessRasterizationTarget());
     uiSystem.ModifyRootWidget().AddWidget(std::move(worldWidget));
     world.AddSimulationSystem(std::move(worldRasterizationSystem));
 

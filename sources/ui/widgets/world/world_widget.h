@@ -17,7 +17,7 @@ public:
         int height { 0 };
     };
 
-    WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect);
+    WorldWidget(World& world, SDL_Renderer& renderer, int32_t bytesPerCell, Rect textureRect);
     ~WorldWidget() override;
 
     void UpdateWidget(Common::Time elapsedTime) override;

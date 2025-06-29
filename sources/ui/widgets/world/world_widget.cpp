@@ -4,7 +4,7 @@
 #include "world.h"
 #include "world_rasterization_target.h"
 
-WorldWidget::WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect)
+WorldWidget::WorldWidget(World& world, SDL_Renderer& renderer, int32_t bytesPerCell, Rect textureRect)
     : _renderer(&renderer)
     , _textureRect(textureRect)
     , _world(&world)
@@ -19,7 +19,7 @@ WorldWidget::WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect)
         PanicOnSdlError("SDL_CreateTexture"sv);
     }
 
-    _rasterizationTarget = std::make_unique<WorldRasterizationTarget>(*_renderTargetTexture, SDL_Color { 0, 0, 0, 0 });
+    _rasterizationTarget = std::make_unique<WorldRasterizationTarget>(*_renderTargetTexture, SDL_Color { 0, 0, 0, 0 }, bytesPerCell);
 }
 
 WorldWidget::~WorldWidget()

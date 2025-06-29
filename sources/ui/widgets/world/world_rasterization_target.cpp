@@ -1,10 +1,12 @@
 ﻿#include "world_rasterization_target.h"
 
+#include "components/generated/auto_cell_position.h"
 #include "system/sdl_panic.h"
 
-WorldRasterizationTarget::WorldRasterizationTarget(SDL_Texture& texture, SDL_Color clearColor)
+WorldRasterizationTarget::WorldRasterizationTarget(SDL_Texture& texture, SDL_Color clearColor, int32_t cellSizeInPixels)
     : _texture(&texture)
-    , _clearColor(MapColorToBytes(clearColor))
+    , _clearColorBytes(MapColorToBytes(clearColor))
+    , _cellSizeInPixels(cellSizeInPixels)
 {
     uint32_t pixelFormat { 0 };
     if (SDL_QueryTexture(_texture, &pixelFormat, nullptr, nullptr, nullptr)) {
@@ -34,13 +36,22 @@ void WorldRasterizationTarget::Lock()
     }
     _destination = std::span { static_cast<std::byte*>(pixels), static_cast<size_t>(_pitch * height) };
 
-    SDL_memset4(_destination.data(), _clearColor, _destination.size() / 4);
+    SDL_memset4(_destination.data(), _clearColorBytes, _destination.size() / 4);
 }
 
 void WorldRasterizationTarget::Unlock()
 {
     _destination = {};
     SDL_UnlockTexture(_texture);
+}
+
+void WorldRasterizationTarget::Set(CellPosition position, SDL_Color color)
+{
+    const int32_t pixelX = position.x * _cellSizeInPixels;
+    const int32_t pixelY = position.y * _cellSizeInPixels;
+    for (int32_t rowIndex = 0; rowIndex < _cellSizeInPixels; ++rowIndex) {
+        Set(pixelX, pixelY + rowIndex, _cellSizeInPixels, color);
+    }
 }
 
 void WorldRasterizationTarget::Set(int32_t pixelX, int32_t pixelY, int32_t pixelsCount, SDL_Color color)

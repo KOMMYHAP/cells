@@ -95,10 +95,10 @@ void UiSystem::Render()
     SDL_RenderPresent(_renderer);
 }
 
-std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(World& world, int x, int y, int w, int h)
+std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(World& world, int32_t bytesPerCell, int x, int y, int w, int h)
 {
     const WorldWidget::Rect worldRect { x, y, w, h };
-    return std::make_unique<WorldWidget>(world, *_renderer, worldRect);
+    return std::make_unique<WorldWidget>(world, *_renderer, bytesPerCell, worldRect);
 }
 
 void UiSystem::ApplicationRunMainLoop()
