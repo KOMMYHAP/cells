@@ -1,4 +1,5 @@
 target_sources(${PROJECT_NAME} PRIVATE
+        graveyarded_cell_exclude.h
         age_system.cpp
         brain_simulation_system.cpp
         energy_leak_system.cpp

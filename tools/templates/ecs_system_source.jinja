@@ -8,7 +8,7 @@
     {% endif %}
 {% endfor %}
 
-{% for component in system.components %}
+{% for component in system.components_and_tags %}
 #include "components/generated/{{component.file_name}}"
 {% endfor %}
 {% for component in system.excluded_components %}
@@ -37,7 +37,7 @@ void {{ system.type_name }}::DoSystemUpdate()
     >{};
 
     _ecsWorld->view<
-{%- for component in system.components %}
+{%- for component in system.components_and_tags %}
     {{component.type_name}}{% if not loop.last %},{% endif %}
 {%- endfor -%}
     >(ExcludedComponents).each([this]<typename... T0>(const EcsEntity& id, T0&&... components) noexcept {

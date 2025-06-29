@@ -21,9 +21,6 @@
 #include "systems_ecs/generated/auto_make_keep_population_system.h"
 #include "systems_ecs/generated/auto_make_spawn_places_statistics_system.h"
 #include "systems_ecs/generated/auto_make_spawn_system.h"
-#include "systems_ecs/graveyard_system.h"
-#include "systems_ecs/keep_population_system.h"
-#include "systems_ecs/spawn_places_statistics_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
 #include "widgets/world/world_rasterization_system.h"
@@ -98,14 +95,6 @@ void TEMP_RegisterProcedureSystem(World& world, ProcedureType type, uint8_t inpu
     vm.RegisterProcedure(type, weakProcedure, inputCount, outputCount, std::move(name));
 
     world.AddSimulationSystem(std::move(procedure));
-}
-
-template <class T, class... Args>
-    requires std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-void TEMP_RegisterSystem(World& world, Args&&... args)
-{
-    auto system = std::make_unique<T>(std::forward<Args>(args)...);
-    world.AddSimulationSystem(std::move(system));
 }
 
 std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage& applicationStorage)
