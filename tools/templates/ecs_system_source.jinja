@@ -1,6 +1,6 @@
 #include "{{ system.file_name }}"
 
-#include "simulation/simulation_storage.h"
+#include "simulation/common_adapter.h"
 
 {% for resource in system.resources %}
     {% if resource.forward_declaration_only %}

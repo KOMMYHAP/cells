@@ -1,6 +1,6 @@
 #pragma once
 
 #include "simulation/simulation_system.h"
-#include "simulation/simulation_storage.h"
+#include "simulation/common_adapter.h"
 
 std::unique_ptr<SimulationSystem> Make{{ system.type_name }}(const SimulationStorage& storage);
