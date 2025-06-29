@@ -17,6 +17,7 @@
 #include "systems_ecs/generated/auto_make_death_from_empty_energy_statistics_system.h"
 #include "systems_ecs/generated/auto_make_energy_decrease_system.h"
 #include "systems_ecs/generated/auto_make_energy_leak_system.h"
+#include "systems_ecs/generated/auto_make_graveyard_system.h"
 #include "systems_ecs/generated/auto_make_spawn_system.h"
 #include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/keep_population_system.h"
@@ -139,7 +140,7 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     TEMP_RegisterSystem<SpawnPlacesStatisticsSystem>(world, ecsWorld, statistics);
     RegisterEcsSystem(&MakeDeathFromAgeStatisticsSystem);
     RegisterEcsSystem(&MakeDeathFromEmptyEnergyStatisticsSystem);
-    TEMP_RegisterSystem<GraveyardSystem>(world, ecsWorld, cellLocator);
+    RegisterEcsSystem(&MakeGraveyardSystem);
     {
         KeepPopulationSystem::Config config {
             &ecsWorld,
