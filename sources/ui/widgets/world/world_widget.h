@@ -1,9 +1,9 @@
 #pragma once
 
 #include "widgets/custom_render_widget.h"
-#include "world.h"
-#include "world_rasterization_system.h"
 
+class World;
+class WorldRasterizationTarget;
 struct SDL_Texture;
 struct SDL_Renderer;
 struct SDL_PixelFormat;
@@ -17,17 +17,19 @@ public:
         int height { 0 };
     };
 
-    WorldWidget(World& world, SDL_Renderer& renderer, WorldRasterizationSystem& worldRasterizationSystem, Rect textureRect);
+    WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect);
     ~WorldWidget() override;
 
     void UpdateWidget(Common::Time elapsedTime) override;
     void RenderWidget() override;
 
+    WorldRasterizationTarget& AccessRasterizationTarget() { return *_rasterizationTarget; }
+
 private:
     SDL_Renderer* _renderer { nullptr };
-    SDL_Texture* _texture { nullptr };
+    SDL_Texture* _renderTargetTexture { nullptr };
     SDL_PixelFormat* _texturePixelFormat { nullptr };
     Rect _textureRect;
     gsl::not_null<World*> _world;
-    gsl::not_null<WorldRasterizationSystem*> _rasterizationSystem;
+    std::unique_ptr<WorldRasterizationTarget> _rasterizationTarget;
 };

@@ -50,7 +50,6 @@ UiSystem::UiSystem(const UiConfig& uiConfig)
 UiSystem::~UiSystem()
 {
     _rootWidget.reset();
-    _renderSystem.reset();
     ImGui_ImplSDLRenderer2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImPlot::DestroyContext();
@@ -96,10 +95,10 @@ void UiSystem::Render()
     SDL_RenderPresent(_renderer);
 }
 
-std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(World& world, WorldRasterizationSystem& rasterizationSystem, int x, int y, int w, int h)
+std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(World& world, int x, int y, int w, int h)
 {
     const WorldWidget::Rect worldRect { x, y, w, h };
-    return std::make_unique<WorldWidget>(world, *_renderer, rasterizationSystem, worldRect);
+    return std::make_unique<WorldWidget>(world, *_renderer, worldRect);
 }
 
 void UiSystem::ApplicationRunMainLoop()

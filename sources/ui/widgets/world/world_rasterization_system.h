@@ -5,20 +5,18 @@
 #include "components/generated/auto_cell_position.h"
 #include "components/generated/auto_cell_type.h"
 
-struct WorldRasterizationData;
+class WorldRasterizationTarget;
+struct SDL_Color;
 
 class WorldRasterizationSystem final : public SimulationEcsSystem<WorldRasterizationSystem, const CellType, const CellPosition> {
 public:
-    explicit WorldRasterizationSystem(EcsWorld& ecsWorld, uint16_t cellSize);
-
-    void SetDestination(const WorldRasterizationData& rasterizationData);
-    void ResetDestination();
+    WorldRasterizationSystem(EcsWorld& ecsWorld, WorldRasterizationTarget& target, uint16_t cellSize);
 
     void DoProcessComponents(EcsEntity id, CellType type, CellPosition position);
 
 private:
-    uint32_t GetColor(CellType type) const;
+    SDL_Color GetColor(CellType type) const;
 
-    const WorldRasterizationData* _rasterizationData { nullptr };
     int16_t _cellSizeInPixels { 0 };
+    gsl::not_null<WorldRasterizationTarget*> _target;
 };
