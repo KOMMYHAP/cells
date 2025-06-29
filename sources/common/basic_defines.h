@@ -83,6 +83,7 @@
 #include <xutility>
 #include <print>
 #include <filesystem>
+#include <ranges>
 
 // GSL
 #include <gsl/pointers> // owner, not_null
