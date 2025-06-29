@@ -12,7 +12,8 @@ local statistics = {
     samples = {}
 }
 
-for i=1, 30 do
+TOTAL_SAMPLES_COUNT = 50
+for i=1, TOTAL_SAMPLES_COUNT do
     statistics.samples[i] = 0
 end
 statistics.sample_position = 1
@@ -24,14 +25,14 @@ statistics.widget.onUpdate = function (dt)
         statistics.sample_position = 1
     end
 
-    local average_ms = 0.0
+    local total_ms = 0.0
     for i=1, #statistics.samples do
-        average_ms = average_ms + statistics.samples[i]
+        total_ms = total_ms + statistics.samples[i]
     end
-    average_ms = average_ms / #statistics.samples
+    average_ms = total_ms / TOTAL_SAMPLES_COUNT
     local average_fps = 1000.0 / average_ms
 
-    ImGui.Text(string.format("FPS: %.3f (%.3f ms)", average_fps, average_ms))
+    ImGui.Text(string.format("FPS: %.2f (%.2f ms)", average_fps, average_ms))
     local gc_memory_usage = lua_native:get_memory_used() // 1024
     local gc_is_on = lua_native:is_gc_on() and "on" or "off"
     ImGui.Text(string.format("Lua Memory: %d KiB (gc is %s)", gc_memory_usage, gc_is_on))
