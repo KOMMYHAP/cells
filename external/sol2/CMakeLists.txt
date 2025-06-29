@@ -3,7 +3,7 @@ message(STATUS "Fetching sol2...")
 FetchContent_Declare(
         sol2_content
         GIT_REPOSITORY https://github.com/ThePhD/sol2
-        GIT_TAG dca62a0f02bb45f3de296de3ce00b1275eb34c25 # 3.3.1
+        GIT_TAG 9190880c593dfb018ccf5cc9729ab87739709862 # 3.5.0
         GIT_SHALLOW ON
 )
 
