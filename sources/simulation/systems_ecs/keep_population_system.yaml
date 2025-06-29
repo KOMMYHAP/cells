@@ -1,0 +1,21 @@
+﻿name: 'keep_population_system'
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'cell_locator'
+    forward_declaration_only: true
+    include_path: 'simulation/cell_locator.h'
+  - name: 'spawner'
+    forward_declaration_only: true
+    include_path: 'simulation/spawner.h'
+  - name: 'random_cell_factory'
+    forward_declaration_only: true
+    include_path: 'cell_factories/random_cell_factory.h'
+  - name: 'simulation_statistics_provider'
+    forward_declaration_only: true
+    include_path: 'simulation/simulation_statistics_provider.h'
+  - name: 'random_engine'
+    forward_declaration_only: false
+    include_path: 'simulation/common_adapter.h'
+is_ecs: false

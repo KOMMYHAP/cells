@@ -18,6 +18,8 @@
 #include "systems_ecs/generated/auto_make_energy_decrease_system.h"
 #include "systems_ecs/generated/auto_make_energy_leak_system.h"
 #include "systems_ecs/generated/auto_make_graveyard_system.h"
+#include "systems_ecs/generated/auto_make_keep_population_system.h"
+#include "systems_ecs/generated/auto_make_spawn_places_statistics_system.h"
 #include "systems_ecs/generated/auto_make_spawn_system.h"
 #include "systems_ecs/graveyard_system.h"
 #include "systems_ecs/keep_population_system.h"
@@ -120,7 +122,7 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     SimulationVirtualMachine& vm = simulationStorage.Store<SimulationVirtualMachine>(ecsWorld);
     Random::Engine& random = simulationStorage.Store<Random::Engine>(Random::MakeEngine("42"sv));
     RandomCellFactory& randomCellFactory = simulationStorage.Store<RandomCellFactory>(vm, random);
-    SimulationStatisticsProvider& statistics = simulationStorage.Store<SimulationStatisticsProvider>(cellLocator);
+    simulationStorage.Store<SimulationStatisticsProvider>(cellLocator);
 
     using EcsSystemFactory = std::unique_ptr<SimulationSystem> (*)(const SimulationStorage&);
     auto RegisterEcsSystem = [&simulationStorage, &world](const EcsSystemFactory& factory) {
@@ -137,21 +139,11 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     TEMP_RegisterProcedureSystem<LookProcedureSystem>(world, ProcedureType::Look, 1, 1, "Look", ecsWorld, vm, cellLocator);
     TEMP_RegisterProcedureSystem<MoveProcedureSystem>(world, ProcedureType::Move, 1, 0, "Move", ecsWorld, vm, cellLocator);
     RegisterEcsSystem(&MakeAliveCellsStatisticsSystem);
-    TEMP_RegisterSystem<SpawnPlacesStatisticsSystem>(world, ecsWorld, statistics);
+    RegisterEcsSystem(&MakeSpawnPlacesStatisticsSystem);
     RegisterEcsSystem(&MakeDeathFromAgeStatisticsSystem);
     RegisterEcsSystem(&MakeDeathFromEmptyEnergyStatisticsSystem);
     RegisterEcsSystem(&MakeGraveyardSystem);
-    {
-        KeepPopulationSystem::Config config {
-            &ecsWorld,
-            &cellLocator,
-            &spawner,
-            &randomCellFactory,
-            &statistics,
-            &random
-        };
-        TEMP_RegisterSystem<KeepPopulationSystem>(world, config);
-    }
+    RegisterEcsSystem(&MakeKeepPopulationSystem);
 
     auto worldRasterizationSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld, uiConfig.cellPixelsSize);
     std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, *worldRasterizationSystem, uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY);

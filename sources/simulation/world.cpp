@@ -1,17 +1,6 @@
 #include "world.h"
 
-#include "cell_factories/random_cell_factory.h"
 #include "clock/clock.h"
-
-#include "procedures/look_procedure_system.h"
-#include "procedures/move_procedure_system.h"
-#include "procedures/random_cell_spawn_procedure_system.h"
-
-#include "simulation/simulation_statistics_provider.h"
-
-#include "systems_ecs/graveyard_system.h"
-#include "systems_ecs/keep_population_system.h"
-#include "systems_ecs/spawn_places_statistics_system.h"
 
 World::World()
 {

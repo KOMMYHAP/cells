@@ -14,7 +14,7 @@
 #include "simulation_config.h"
 #include "tick_calculator.h"
 
-#include "simulation/simulation_storage.h"
+#include "simulation/common_adapter.h"
 
 class World {
 public:

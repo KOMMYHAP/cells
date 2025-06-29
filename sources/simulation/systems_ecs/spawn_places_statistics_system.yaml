@@ -1,0 +1,9 @@
+﻿name: 'spawn_places_statistics_system'
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'simulation_statistics_provider'
+    forward_declaration_only: true
+    include_path: 'simulation/simulation_statistics_provider.h'
+is_ecs: false
