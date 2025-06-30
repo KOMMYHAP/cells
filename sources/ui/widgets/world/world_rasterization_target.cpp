@@ -42,7 +42,7 @@ void WorldRasterizationTarget::Lock()
 void WorldRasterizationTarget::Unlock()
 {
     _destination = {};
-    SDL_UnlockTexture(_texture);
+    SDL_UnlockTexture(_texture.get());
 }
 
 void WorldRasterizationTarget::Set(CellPosition position, SDL_Color color)

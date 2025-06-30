@@ -24,7 +24,7 @@ public:
     MenuRootWidget& ModifyMenuRootWidget() { return *_menuRootWidget; }
     RootWidget& ModifyRootWidget() { return *_rootWidget; }
 
-    std::unique_ptr<WorldWidget> MakeWorldWidget(World& world, int32_t bytesPerCell, int x, int y, int w, int h);
+    std::unique_ptr<WorldWidget> MakeWorldWidget(World& world, int x, int y, int w, int h);
 
 private:
     bool _shouldStopMainLoop { false };

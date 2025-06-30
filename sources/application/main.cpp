@@ -1,3 +1,4 @@
+#include "SDL_pixels.h"
 #include "basic_defines.h"
 #include "simulation_config.h"
 
@@ -21,9 +22,12 @@
 #include "systems_ecs/generated/auto_make_keep_population_system.h"
 #include "systems_ecs/generated/auto_make_spawn_places_statistics_system.h"
 #include "systems_ecs/generated/auto_make_spawn_system.h"
+#include "systems_ecs/generated/auto_make_world_rasterization_system.h"
+#include "systems_ecs/generated/auto_make_world_rasterization_lock_system.h"
+#include "systems_ecs/generated/auto_make_world_rasterization_unlock_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
-#include "widgets/world/world_rasterization_system.h"
+#include "widgets/world/world_rasterization_target.h"
 #include "widgets/world/world_widget.h"
 #include "world.h"
 
@@ -106,6 +110,10 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     SimulationStorage& simulationStorage = world.ModifySimulation();
     EcsWorld& ecsWorld = simulationStorage.Modify<EcsWorld>();
 
+    std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY);
+    simulationStorage.Store<WorldRasterizationTarget>(worldWidget->AccessRasterizationTexture(), SDL_Color { 0, 0, 0, 0 }, uiConfig.cellPixelsSize);
+    uiSystem.ModifyRootWidget().AddWidget(std::move(worldWidget));
+
     CellLocator& cellLocator = simulationStorage.Store<CellLocator>(simulationConfig.cellsCountX, simulationConfig.cellsCountY);
     Spawner& spawner = simulationStorage.Store<Spawner>(ecsWorld, cellLocator);
     SimulationVirtualMachine& vm = simulationStorage.Store<SimulationVirtualMachine>(ecsWorld);
@@ -133,11 +141,9 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     RegisterEcsSystem(&MakeDeathFromEmptyEnergyStatisticsSystem);
     RegisterEcsSystem(&MakeGraveyardSystem);
     RegisterEcsSystem(&MakeKeepPopulationSystem);
-
-    std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, uiConfig.cellPixelsSize, uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY);
-    auto worldRasterizationSystem = std::make_unique<WorldRasterizationSystem>(ecsWorld, worldWidget->AccessRasterizationTarget());
-    uiSystem.ModifyRootWidget().AddWidget(std::move(worldWidget));
-    world.AddSimulationSystem(std::move(worldRasterizationSystem));
+    RegisterEcsSystem(&MakeWorldRasterizationLockSystem);
+    RegisterEcsSystem(&MakeWorldRasterizationSystem);
+    RegisterEcsSystem(&MakeWorldRasterizationUnlockSystem);
 
     return {};
 }

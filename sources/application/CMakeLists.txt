@@ -12,6 +12,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-ui
         cells-scripts
+        SDL2::SDL2
 )
 
 target_copy_required_dll(${PROJECT_NAME})

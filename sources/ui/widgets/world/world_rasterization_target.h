@@ -2,6 +2,7 @@
 
 struct CellPosition;
 struct SDL_Color;
+struct SDL_Texture;
 
 class WorldRasterizationTarget {
 public:

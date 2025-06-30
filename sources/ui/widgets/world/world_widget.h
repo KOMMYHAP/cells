@@ -17,13 +17,13 @@ public:
         int height { 0 };
     };
 
-    WorldWidget(World& world, SDL_Renderer& renderer, int32_t bytesPerCell, Rect textureRect);
+    WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect);
     ~WorldWidget() override;
 
     void UpdateWidget(Common::Time elapsedTime) override;
     void RenderWidget() override;
 
-    WorldRasterizationTarget& AccessRasterizationTarget() { return *_rasterizationTarget; }
+    SDL_Texture& AccessRasterizationTexture() { return *_renderTargetTexture; }
 
 private:
     SDL_Renderer* _renderer { nullptr };
@@ -31,5 +31,4 @@ private:
     SDL_PixelFormat* _texturePixelFormat { nullptr };
     Rect _textureRect;
     gsl::not_null<World*> _world;
-    std::unique_ptr<WorldRasterizationTarget> _rasterizationTarget;
 };

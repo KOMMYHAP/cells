@@ -1,6 +1,7 @@
 ﻿#include "generated/auto_world_rasterization_system.h"
 
 #include "components/generated/auto_cell_type.h"
+#include "components/generated/auto_cell_position.h"
 #include "widgets/world/world_rasterization_target.h"
 
 void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellType& type, const CellPosition& position)

@@ -1,13 +1,10 @@
 #include "ui_system.h"
 
-#include "storage/stack_storage.h"
-
 #include "clock/clock.h"
 #include "sdl_panic.h"
 #include "world.h"
 
 #include "widgets/menu_root_widget.h"
-#include "widgets/world/world_rasterization_system.h"
 #include "widgets/world/world_widget.h"
 
 UiSystem::UiSystem(const UiConfig& uiConfig)
@@ -95,10 +92,10 @@ void UiSystem::Render()
     SDL_RenderPresent(_renderer);
 }
 
-std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(World& world, int32_t bytesPerCell, int x, int y, int w, int h)
+std::unique_ptr<WorldWidget> UiSystem::MakeWorldWidget(World& world, int x, int y, int w, int h)
 {
     const WorldWidget::Rect worldRect { x, y, w, h };
-    return std::make_unique<WorldWidget>(world, *_renderer, bytesPerCell, worldRect);
+    return std::make_unique<WorldWidget>(world, *_renderer, worldRect);
 }
 
 void UiSystem::ApplicationRunMainLoop()
