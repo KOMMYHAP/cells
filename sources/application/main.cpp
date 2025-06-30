@@ -115,7 +115,7 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
         static_cast<float>(uiConfig.worldWidgetSizeY),
     };
     std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, worldWidgetRect);
-    simulationStorage.Store<WorldRasterizationTarget>(worldWidget->AccessRasterizationTexture(), SDL_Color { 0, 0, 0, 0 }, uiConfig.cellPixelsSize);
+    simulationStorage.Store<WorldRasterizationTarget>(worldWidget->AccessRasterizationTexture(), SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE }, uiConfig.cellPixelsSize);
     uiSystem.ModifyRootWidget().AddWidget(std::move(worldWidget));
 
     CellLocator& cellLocator = simulationStorage.Store<CellLocator>(simulationConfig.cellsCountX, simulationConfig.cellsCountY);
