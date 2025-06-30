@@ -1,14 +1,9 @@
-﻿#include "world_rasterization_system.h"
-#include "world_rasterization_target.h"
+﻿#include "generated/auto_world_rasterization_system.h"
 
-WorldRasterizationSystem::WorldRasterizationSystem(EcsWorld& ecsWorld, WorldRasterizationTarget& target)
-    : SimulationEcsSystem(ecsWorld)
-    , _target(&target)
-{
-}
+#include "components/generated/auto_cell_type.h"
+#include "widgets/world/world_rasterization_target.h"
 
-
-void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellType type, const CellPosition position)
+void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellType& type, const CellPosition& position)
 {
     // todo: ask EnTT to sort CellPosition to increase data locality?
 
@@ -30,5 +25,6 @@ void WorldRasterizationSystem::DoProcessComponents(EcsEntity /*id*/, const CellT
         color = SDL_Color { 255, 00, 255, 0 };
         break;
     }
-    _target->Set(position, color);
+
+    _worldRasterizationTarget->Set(position, color);
 }

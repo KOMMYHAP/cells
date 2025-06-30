@@ -14,6 +14,7 @@ target_sources(${PROJECT_NAME} PUBLIC
 add_subdirectory(system)
 add_subdirectory(menu_widgets)
 add_subdirectory(widgets)
+add_subdirectory(systems_ecs)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-simulation
