@@ -1,23 +1,17 @@
 #pragma once
 
+#include "SDL3/SDL_rect.h"
+
 #include "widgets/custom_render_widget.h"
 
 class World;
 class WorldRasterizationTarget;
 struct SDL_Texture;
 struct SDL_Renderer;
-struct SDL_PixelFormat;
 
 class WorldWidget final : public CustomRenderWidget {
 public:
-    struct Rect {
-        int x { 0 };
-        int y { 0 };
-        int width { 0 };
-        int height { 0 };
-    };
-
-    WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect);
+    WorldWidget(World& world, SDL_Renderer& renderer, SDL_FRect textureRect);
     ~WorldWidget() override;
 
     void UpdateWidget(Common::Time elapsedTime) override;
@@ -28,7 +22,6 @@ public:
 private:
     SDL_Renderer* _renderer { nullptr };
     SDL_Texture* _renderTargetTexture { nullptr };
-    SDL_PixelFormat* _texturePixelFormat { nullptr };
-    Rect _textureRect;
+    SDL_FRect _textureRect;
     gsl::not_null<World*> _world;
 };

@@ -8,20 +8,10 @@ WorldRasterizationTarget::WorldRasterizationTarget(SDL_Texture& texture, SDL_Col
     , _clearColorBytes(MapColorToBytes(clearColor))
     , _cellSizeInPixels(cellSizeInPixels)
 {
-    uint32_t pixelFormat { 0 };
-    if (SDL_QueryTexture(_texture, &pixelFormat, nullptr, nullptr, nullptr)) {
-        PanicOnSdlError("SDL_QueryTexture"sv);
-    }
-    _pixelFormat = SDL_AllocFormat(pixelFormat);
-    if (!_pixelFormat) {
-        PanicOnSdlError("SDL_AllocFormat"sv);
-    }
-    _bytesPerPixel = _pixelFormat->BytesPerPixel;
 }
 
 WorldRasterizationTarget::~WorldRasterizationTarget()
 {
-    SDL_FreeFormat(_pixelFormat);
 }
 
 void WorldRasterizationTarget::Lock()
@@ -30,10 +20,15 @@ void WorldRasterizationTarget::Lock()
     if (SDL_LockTexture(_texture, nullptr, &pixels, &_pitch)) {
         PanicOnSdlError("SDL_LockTexture");
     }
-    int32_t height { 0 };
-    if (SDL_QueryTexture(_texture.get(), nullptr, nullptr, nullptr, &height) != 0) {
-        PanicOnSdlError("SDL_QueryTexture");
+    const SDL_PropertiesID propertiesId = SDL_GetTextureProperties(_texture.get());
+    const SDL_PixelFormat pixelFormat = static_cast<SDL_PixelFormat>(SDL_GetNumberProperty(propertiesId, SDL_PROP_TEXTURE_FORMAT_NUMBER, static_cast<int64_t>(SDL_PixelFormat::SDL_PIXELFORMAT_UNKNOWN)));
+    _pixelFormatDetails = SDL_GetPixelFormatDetails(pixelFormat);
+    if (!_pixelFormatDetails) {
+        PanicOnSdlError("SDL_GetPixelFormatDetails"sv);
     }
+    _bytesPerPixel = _pixelFormatDetails->bytes_per_pixel;
+    const int64_t height = SDL_GetNumberProperty(propertiesId, SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0);
+    ASSERT(height > 0, "SDL_GetNumberProperty(SDL_PROP_TEXTURE_HEIGHT_NUMBER) failed!");
     _destination = std::span { static_cast<std::byte*>(pixels), static_cast<size_t>(_pitch * height) };
 
     SDL_memset4(_destination.data(), _clearColorBytes, _destination.size() / 4);
@@ -42,6 +37,8 @@ void WorldRasterizationTarget::Lock()
 void WorldRasterizationTarget::Unlock()
 {
     _destination = {};
+    _bytesPerPixel = 0;
+    _pixelFormatDetails = nullptr;
     SDL_UnlockTexture(_texture.get());
 }
 
@@ -78,5 +75,5 @@ bool WorldRasterizationTarget::DebugIsLocked() const
 
 uint32_t WorldRasterizationTarget::MapColorToBytes(SDL_Color color) const
 {
-    return SDL_MapRGBA(_pixelFormat, color.r, color.g, color.b, color.a);
+    return SDL_MapRGBA(_pixelFormatDetails, nullptr, color.r, color.g, color.b, color.a);
 }

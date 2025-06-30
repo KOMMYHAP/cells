@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SDL3/SDL_rect.h"
+
 #include "ui_application_interface.h"
 #include "ui_config.h"
 #include "widgets/root_widget.h"
@@ -24,7 +26,7 @@ public:
     MenuRootWidget& ModifyMenuRootWidget() { return *_menuRootWidget; }
     RootWidget& ModifyRootWidget() { return *_rootWidget; }
 
-    std::unique_ptr<WorldWidget> MakeWorldWidget(World& world, int x, int y, int w, int h);
+    std::unique_ptr<WorldWidget> MakeWorldWidget(World& world, const SDL_FRect& worldRect);
 
 private:
     bool _shouldStopMainLoop { false };

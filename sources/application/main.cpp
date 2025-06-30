@@ -1,10 +1,8 @@
-#include "SDL_pixels.h"
 #include "basic_defines.h"
 #include "simulation_config.h"
 
 #include "registrar/registrar.h"
 
-#include "lua_registrable_system.h"
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
 #include "procedures/random_cell_spawn_procedure_system.h"
@@ -79,10 +77,10 @@ std::error_code ConfigurationRegistrableSystem::InitializeSystem(ApplicationStor
     uiConfig.cellPixelsSize = CellPixelsSize;
     storage.Store<const UiConfig>(uiConfig);
 
-    auto& luaConfig = storage.Store<LuaRegistrableSystem::Config>();
-    static constexpr auto RelativePathToLuaDirectory = "../../../../sources/scripts/lua/"sv;
-    luaConfig.luaDirectory = std::filesystem::current_path() / RelativePathToLuaDirectory;
-    luaConfig.startupScript = "loader.lua"sv;
+    // auto& luaConfig = storage.Store<LuaRegistrableSystem::Config>();
+    // static constexpr auto RelativePathToLuaDirectory = "../../../../sources/scripts/lua/"sv;
+    // luaConfig.luaDirectory = std::filesystem::current_path() / RelativePathToLuaDirectory;
+    // luaConfig.startupScript = "loader.lua"sv;
 
     return {};
 }
@@ -110,7 +108,13 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     SimulationStorage& simulationStorage = world.ModifySimulation();
     EcsWorld& ecsWorld = simulationStorage.Modify<EcsWorld>();
 
-    std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, uiConfig.worldWidgetOffsetX, uiConfig.worldWidgetOffsetY, uiConfig.worldWidgetSizeX, uiConfig.worldWidgetSizeY);
+    const SDL_FRect worldWidgetRect {
+        static_cast<float>(uiConfig.worldWidgetOffsetX),
+        static_cast<float>(uiConfig.worldWidgetOffsetY),
+        static_cast<float>(uiConfig.worldWidgetSizeX),
+        static_cast<float>(uiConfig.worldWidgetSizeY),
+    };
+    std::unique_ptr<WorldWidget> worldWidget = uiSystem.MakeWorldWidget(world, worldWidgetRect);
     simulationStorage.Store<WorldRasterizationTarget>(worldWidget->AccessRasterizationTexture(), SDL_Color { 0, 0, 0, 0 }, uiConfig.cellPixelsSize);
     uiSystem.ModifyRootWidget().AddWidget(std::move(worldWidget));
 
@@ -156,7 +160,7 @@ int main(int /*argc*/, char** /*argv*/)
     registrar.Register<ConfigurationRegistrableSystem>();
     registrar.Register<SimulationRegistrableSystem>();
     const UiRegistrableSystem& uiSystem = registrar.Register<UiRegistrableSystem>();
-    registrar.Register<LuaRegistrableSystem>();
+    // registrar.Register<LuaRegistrableSystem>();
     registrar.Register<WorldSetupRegistrableSystem>();
 
     if (const std::error_code error = registrar.RunInit()) {

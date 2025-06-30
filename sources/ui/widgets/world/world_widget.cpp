@@ -4,7 +4,7 @@
 #include "world.h"
 #include "world_rasterization_target.h"
 
-WorldWidget::WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect)
+WorldWidget::WorldWidget(World& world, SDL_Renderer& renderer, SDL_FRect textureRect)
     : _renderer(&renderer)
     , _textureRect(textureRect)
     , _world(&world)
@@ -13,8 +13,8 @@ WorldWidget::WorldWidget(World& world, SDL_Renderer& renderer, Rect textureRect)
         _renderer,
         SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING,
-        textureRect.width,
-        textureRect.height);
+        static_cast<int32_t>(textureRect.w),
+        static_cast<int32_t>(textureRect.h));
     if (!_renderTargetTexture) {
         PanicOnSdlError("SDL_CreateTexture"sv);
     }
@@ -27,8 +27,7 @@ WorldWidget::~WorldWidget()
 
 void WorldWidget::RenderWidget()
 {
-    const SDL_Rect rect { _textureRect.x, _textureRect.y, _textureRect.width, _textureRect.height };
-    if (SDL_RenderCopy(_renderer, _renderTargetTexture, nullptr, &rect)) {
+    if (SDL_RenderTexture(_renderer, _renderTargetTexture, nullptr, &_textureRect)) {
         PanicOnSdlError("SDL_RenderCopy"sv);
     }
 }

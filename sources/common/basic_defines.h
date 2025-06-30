@@ -93,3 +93,5 @@
 #undef Ensures
 
 using std::literals::string_view_literals::operator""sv;
+
+#include "utils/windows_api.h"
