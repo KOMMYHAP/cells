@@ -27,7 +27,7 @@ WorldWidget::~WorldWidget()
 
 void WorldWidget::RenderWidget()
 {
-    if (SDL_RenderTexture(_renderer, _renderTargetTexture, nullptr, &_textureRect)) {
+    if (!SDL_RenderTexture(_renderer, _renderTargetTexture, nullptr, &_textureRect)) {
         PanicOnSdlError("SDL_RenderCopy"sv);
     }
 }

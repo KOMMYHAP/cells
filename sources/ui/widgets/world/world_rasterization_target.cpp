@@ -17,7 +17,7 @@ WorldRasterizationTarget::~WorldRasterizationTarget()
 void WorldRasterizationTarget::Lock()
 {
     void* pixels { nullptr };
-    if (SDL_LockTexture(_texture, nullptr, &pixels, &_pitch)) {
+    if (!SDL_LockTexture(_texture, nullptr, &pixels, &_pitch)) {
         PanicOnSdlError("SDL_LockTexture");
     }
     const SDL_PropertiesID propertiesId = SDL_GetTextureProperties(_texture.get());
