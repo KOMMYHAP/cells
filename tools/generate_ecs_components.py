@@ -4,6 +4,7 @@ from pathlib import Path
 import yaml
 from jinja2 import Environment
 
+from utils import get_autogen_directory
 from yaml_ecs_component import YamlComponent
 
 
@@ -34,7 +35,8 @@ def _generate_cmake(components: list, environment: Environment,
         print('... wrote CMakeLists.txt')
 
 
-def generate_components(environment, output_directory) -> list[YamlComponent]:
+def generate_components(environment, root_directory: Path) -> list[YamlComponent]:
+    output_directory = root_directory / get_autogen_directory()
     template = environment.get_template("ecs_component.jinja")
     components = _gather_components_list()
     for component in components:

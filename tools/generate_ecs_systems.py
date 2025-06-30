@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from utils import snake_case_to_camel_case
+from utils import snake_case_to_camel_case, get_autogen_directory
 from yaml_ecs_component import YamlComponent
 
 
@@ -168,8 +168,7 @@ class YamlSystem:
         return len(self.components_to_jinja()) == 0
 
 
-def gather_systems_list(components: list[YamlComponent]):
-    input_directory = Path('../sources/simulation/systems_ecs')
+def gather_systems_list(components: list[YamlComponent], input_directory: Path):
     if not input_directory.exists():
         return []
 
@@ -241,8 +240,9 @@ def _generate_cmake(systems: list, environment, output_directory: Path):
         print('... wrote CMakeLists.txt for ecs systems')
 
 
-def generate_systems(components: list[YamlComponent], environment, output_directory):
-    systems = gather_systems_list(components)
+def generate_systems(components: list[YamlComponent], environment, root_directory: Path):
+    output_directory = root_directory / get_autogen_directory()
+    systems = gather_systems_list(components, root_directory)
     _generate_systems_sources(environment, systems, output_directory)
     _generate_systems_headers(environment, systems, output_directory)
     _generate_systems_factories(environment, systems, output_directory)

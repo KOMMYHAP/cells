@@ -6,21 +6,32 @@ from jinja2 import Environment, FileSystemLoader
 
 from generate_ecs_components import generate_components
 from generate_ecs_systems import generate_systems
+from utils import get_autogen_directory
 
 
 def main():
     environment = Environment(loader=FileSystemLoader("templates/"))
 
-    output_directory = Path('../sources/simulation/components/generated')
-    prepare_output_directory(output_directory)
-    components = generate_components(environment, output_directory)
+    component_roots = [
+        Path('../sources/simulation/components')
+    ]
+    system_roots = [
+        Path('../sources/simulation/systems_ecs'),
+        Path('../sources/ui/systems_ecs')
+    ]
 
-    output_directory = Path('../sources/simulation/systems_ecs/generated')
-    prepare_output_directory(output_directory)
-    generate_systems(components, environment, output_directory)
+    components = []
+    for root in component_roots:
+        prepare_output_directory(root)
+        components = components + generate_components(environment, root)
+
+    for root in system_roots:
+        prepare_output_directory(root)
+        generate_systems(components, environment, root)
 
 
-def prepare_output_directory(output_directory):
+def prepare_output_directory(root_directory: Path):
+    output_directory = root_directory / get_autogen_directory()
     if output_directory.exists():
         for file in os.listdir(output_directory):
             file_path = os.path.join(output_directory, file)
