@@ -1,7 +1,7 @@
 ﻿#pragma once
+#include "menu_widgets/base/base_menu_widget.h"
+#include "menu_widgets/base/menu_widget_id.h"
 #include "base_widget.h"
-#include "menu_widgets/base_menu_widget.h"
-#include "menu_widgets/menu_widget_id.h"
 
 class MenuRootWidget final : public BaseWidget {
 public:

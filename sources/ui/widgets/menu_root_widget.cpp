@@ -161,7 +161,13 @@ bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, const Commo
         widget.OnMenuItemJustOpened();
     }
     if (widgetState.opened) {
-        const BaseMenuWidget::MenuWidgetAction action = widget.ProcessMenuItem(elapsedTime);
+        bool isOpened{true};
+        ImGui::Begin(widgetData.name.c_str(), &isOpened);
+        BaseMenuWidget::MenuWidgetAction action = BaseMenuWidget::MenuWidgetAction::ShouldClose;
+        if (isOpened) {
+            action = widget.ProcessMenuItem(elapsedTime);
+        }
+        ImGui::End();
         widgetState.justClosed = action == BaseMenuWidget::MenuWidgetAction::ShouldClose;
     }
     if (widgetState.justClosed) {
