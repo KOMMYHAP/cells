@@ -1,7 +1,7 @@
 ﻿#pragma once
+#include "base_widget.h"
 #include "menu_widgets/base/base_menu_widget.h"
 #include "menu_widgets/base/menu_widget_id.h"
-#include "base_widget.h"
 
 class MenuRootWidget final : public BaseWidget {
 public:
@@ -31,11 +31,18 @@ private:
     };
     struct WidgetData {
         WidgetState state;
+        MenuWidgetId parent { MenuWidgetId::Invalid };
         std::unique_ptr<BaseMenuWidget> widget;
         std::string name;
     };
     struct WidgetsGroup {
         std::vector<MenuWidgetId> items;
+    };
+
+    // Builder with reusable storage
+    struct WidgetNameBuilder {
+        std::vector<const WidgetData*> widgets;
+        std::string name;
     };
 
     MenuWidgetId AddWidget(MenuWidgetId parent, WidgetData widgetData);
@@ -51,9 +58,13 @@ private:
     void UpdateOpenedWidgets(Common::Time elapsedTime);
     bool ProcessOpenedWidgetState(MenuWidgetId id, Common::Time elapsedTime);
 
+    // Must return null terminated string
+    std::string_view MakeFullWidgetName(const WidgetData& data);
+
     std::vector<WidgetData> _widgets;
     std::map<MenuWidgetId, WidgetsGroup> _indexedGroups;
     std::vector<MenuWidgetId> _openedWidgets;
+    WidgetNameBuilder _fullNameBuilder;
 };
 
 #include "menu_root_widget.hpp"

@@ -13,6 +13,7 @@ template <class T, class... Args>
 std::pair<MenuWidgetId, T*> MenuRootWidget::AddWidget(MenuWidgetId parent, std::string name, Args&&... args)
 {
     WidgetData data;
+    data.parent = parent;
     data.widget = std::make_unique<T>(std::forward<Args>(args)...);
     data.name = std::move(name);
     T* rawWidget = static_cast<T*>(data.widget.get());

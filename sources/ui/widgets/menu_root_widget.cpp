@@ -161,8 +161,9 @@ bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, const Commo
         widget.OnMenuItemJustOpened();
     }
     if (widgetState.opened) {
-        bool isOpened{true};
-        ImGui::Begin(widgetData.name.c_str(), &isOpened);
+        bool isOpened { true };
+        const std::string_view widgetName = MakeFullWidgetName(widgetData);
+        ImGui::Begin(widgetName.data(), &isOpened);
         BaseMenuWidget::MenuWidgetAction action = BaseMenuWidget::MenuWidgetAction::ShouldClose;
         if (isOpened) {
             action = widget.ProcessMenuItem(elapsedTime);
@@ -177,4 +178,28 @@ bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, const Commo
         return true;
     }
     return false;
+}
+
+std::string_view MenuRootWidget::MakeFullWidgetName(const WidgetData& data)
+{
+    _fullNameBuilder.widgets.clear();
+    _fullNameBuilder.name.clear();
+
+    MenuWidgetId id = data.parent;
+    _fullNameBuilder.widgets.push_back(&data);
+    while (id != MenuWidgetId::Root) {
+        const WidgetData& parent = GetWidgetData(id);
+        _fullNameBuilder.widgets.push_back(&parent);
+        id = parent.parent;
+    }
+
+    bool needSeparator = false;
+    for (const WidgetData* widget : _fullNameBuilder.widgets | std::views::reverse) {
+        if (needSeparator) {
+            _fullNameBuilder.name += '.';
+        }
+        needSeparator = true;
+        _fullNameBuilder.name += widget->name;
+    }
+    return _fullNameBuilder.name;
 }
