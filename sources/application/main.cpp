@@ -3,10 +3,14 @@
 
 #include "registrar/registrar.h"
 
+#include "menu_widgets/base/group_menu_widget.h"
+#include "menu_widgets/engine_summary_widget.h"
+#include "menu_widgets/simulation_summary_widget.h"
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
 #include "procedures/random_cell_spawn_procedure_system.h"
 #include "simulation_registrable_system.h"
+#include "simulation/simulation_statistics_provider.h"
 #include "system/ui_system.h"
 #include "systems_ecs/generated/auto_death_from_age_statistics_system.h"
 #include "systems_ecs/generated/auto_make_age_system.h"
@@ -20,14 +24,16 @@
 #include "systems_ecs/generated/auto_make_keep_population_system.h"
 #include "systems_ecs/generated/auto_make_spawn_places_statistics_system.h"
 #include "systems_ecs/generated/auto_make_spawn_system.h"
-#include "systems_ecs/generated/auto_make_world_rasterization_system.h"
 #include "systems_ecs/generated/auto_make_world_rasterization_lock_system.h"
+#include "systems_ecs/generated/auto_make_world_rasterization_system.h"
 #include "systems_ecs/generated/auto_make_world_rasterization_unlock_system.h"
 #include "ui_config.h"
 #include "ui_registrable_system.h"
+#include "widgets/menu_root_widget.h"
 #include "widgets/world/world_rasterization_target.h"
 #include "widgets/world/world_widget.h"
 #include "world.h"
+#include "world_statistics.h"
 
 namespace {
 
@@ -123,7 +129,7 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     SimulationVirtualMachine& vm = simulationStorage.Store<SimulationVirtualMachine>(ecsWorld);
     Random::Engine& random = simulationStorage.Store<Random::Engine>(Random::MakeEngine("42"sv));
     RandomCellFactory& randomCellFactory = simulationStorage.Store<RandomCellFactory>(vm, random);
-    simulationStorage.Store<SimulationStatisticsProvider>(cellLocator);
+    SimulationStatisticsProvider& simulationStats = simulationStorage.Store<SimulationStatisticsProvider>(cellLocator);
 
     using EcsSystemFactory = std::unique_ptr<SimulationSystem> (*)(const SimulationStorage&);
     auto RegisterEcsSystem = [&simulationStorage, &world](const EcsSystemFactory& factory) {
@@ -148,6 +154,15 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     RegisterEcsSystem(&MakeWorldRasterizationLockSystem);
     RegisterEcsSystem(&MakeWorldRasterizationSystem);
     RegisterEcsSystem(&MakeWorldRasterizationUnlockSystem);
+
+    {
+        MenuRootWidget& menuRoot = uiSystem.ModifyMenuRootWidget();
+        auto [engineRootId, _1] = menuRoot.AddWidget<GroupMenuWidget>("Engine");
+        menuRoot.AddWidget<EngineSummaryWidget>(engineRootId, "Summary", uiSystem.GetAppStatistics());
+
+        auto [simulationRootId, _2] = menuRoot.AddWidget<GroupMenuWidget>("Simulation");
+        menuRoot.AddWidget<SimulationSummaryWidget>(simulationRootId, "Summary", applicationStorage.Get<WorldStatistics>(), simulationStats);
+    }
 
     return {};
 }

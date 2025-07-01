@@ -1,55 +1,16 @@
 #include "world.h"
 
 #include "clock/clock.h"
+#include "world_statistics.h"
 
-World::World()
+World::World(WorldStatistics& stats)
+    : _worldStatistics(&stats)
 {
     _simulationStorage.Store<EcsWorld>();
 
     const Common::Time targetSimulationTime = Common::Time::FromMilliseconds(30);
     _tickCalculator.Setup(targetSimulationTime);
 }
-
-// World::World(const SimulationConfig& config)
-//     : _cellsLocator(config.cellsCountX, config.cellsCountY)
-//     , _spawner(_ecsWorld, _cellsLocator)
-//     , _simulationVm(_ecsWorld)
-//     , _randomEngine(Random::MakeEngine("white"))
-//     , _randomCellFactory(_simulationVm, _randomEngine)
-//     , _statistics(_cellsLocator)
-// {
-//     const Common::Time targetSimulationTime = Common::Time::FromMilliseconds(30);
-//
-//     RegisterSystem<SpawnSystem>(_ecsWorld, _cellsLocator);
-//     RegisterSystem<BrainSimulationSystem>(_ecsWorld, _simulationVm);
-//     RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", _ecsWorld, _simulationVm, _cellsLocator, _spawner, _randomCellFactory);
-//     RegisterSystem<EnergyLeakSystem>(_ecsWorld);
-//     RegisterSystem<EnergyDecreaseSystem>(_ecsWorld);
-//     {
-//         std::unique_ptr<SimulationSystem> system = RegisterAgeSystem(_simulationStorage);
-//         _simulationSystems.push_back(std::move(system));
-//     }
-//     RegisterProcedureSystem<LookProcedureSystem>(ProcedureType::Look, 1, 1, "Look", _ecsWorld, _simulationVm, _cellsLocator);
-//     RegisterProcedureSystem<MoveProcedureSystem>(ProcedureType::Move, 1, 0, "Move", _ecsWorld, _simulationVm, _cellsLocator);
-//     RegisterSystem<AliveCellsStatisticsSystem>(_ecsWorld, _statistics);
-//     RegisterSystem<SpawnPlacesStatisticsSystem>(_ecsWorld, _statistics);
-//     RegisterSystem<DeathFromAgeStatisticsSystem>(_ecsWorld, _statistics);
-//     RegisterSystem<DeathFromEmptyEnergySystem>(_ecsWorld, _statistics);
-//     RegisterSystem<GraveyardSystem>(_ecsWorld, _cellsLocator);
-//     {
-//         KeepPopulationSystem::Config config {
-//             &_ecsWorld,
-//             &_cellsLocator,
-//             &_spawner,
-//             &_randomCellFactory,
-//             &_statistics,
-//             &_randomEngine
-//         };
-//         RegisterSystem<KeepPopulationSystem>(config);
-//     }
-//
-//     _tickCalculator.Setup(targetSimulationTime);
-// }
 
 void World::AddSimulationSystem(std::unique_ptr<SimulationSystem> system)
 {
@@ -58,51 +19,27 @@ void World::AddSimulationSystem(std::unique_ptr<SimulationSystem> system)
 
 void World::Update(const Common::Time elapsedTime)
 {
-    Warmup();
-
-    const uint32_t ticks = _tickCalculator.CalculateElapsedTicks(GetTickTime(), elapsedTime);
-    for (uint32_t i { 0 }; i < ticks; ++i) {
+    const Common::Clock frameClock;
+    int32_t ticks = 1;
+    if (_worldStatistics->GetElapsedTicksCount() > 0) {
+        ticks = _tickCalculator.CalculateElapsedTicks(GetTickTime(), elapsedTime);
+    }
+    for (int32_t i { 0 }; i < ticks; ++i) {
         Tick();
     }
-}
-
-void World::Warmup()
-{
-    while (!_tickSampler.IsFull()) {
-        Tick();
-    }
+    _worldStatistics->AddFrame(frameClock.GetElapsedTime());
 }
 
 Common::Time World::GetTickTime() const
 {
-    return _tickSampler.CalcMedian();
+    return _worldStatistics->GetTickTime();
 }
 
 void World::Tick()
 {
-    const Common::Clock clock;
+    const Common::Clock tickClock;
     for (const auto& system : _simulationSystems) {
         system->DoSystemUpdate();
     }
-    const Common::Time tickTime = clock.GetElapsedTime();
-    _tickSampler.AddSample(tickTime);
+    _worldStatistics->AddTick(tickClock.GetElapsedTime());
 }
-
-// template <class T, class... Args>
-//     requires std::is_base_of_v<ProcedureBase, T> && std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-// T& World::RegisterProcedureSystem(ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
-// {
-//     auto procedure = std::make_unique<T>(std::forward<Args>(args)...);
-//     T* weakProcedure = procedure.get();
-//     _simulationVm.RegisterProcedure(type, weakProcedure, inputCount, outputCount, std::move(name));
-//     _simulationSystems.push_back(std::move(procedure));
-//     return *weakProcedure;
-// }
-//
-// template <class T, class... Args>
-//     requires std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-// T& World::RegisterSystem(Args&&... args)
-// {
-//     auto& procedure = _simulationSystems.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
-//     return static_cast<T&>(*procedure);
-// }

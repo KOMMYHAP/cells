@@ -1,6 +1,6 @@
 #pragma once
 
-namespace common {
+namespace Common {
 
 template <class Sample, uint16_t SamplesLimit>
 class SampleCounter {

@@ -1,7 +1,7 @@
 #pragma once
 #include "sample_counter.h"
 
-namespace common {
+namespace Common {
 
 template <class Sample, uint16_t SamplesLimit>
 void SampleCounter<Sample, SamplesLimit>::Reset()

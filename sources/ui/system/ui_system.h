@@ -7,6 +7,7 @@
 #include "widgets/root_widget.h"
 #include "world.h"
 
+class AppStatistics;
 class WorldWidget;
 class MenuRootWidget;
 struct SDL_Window;
@@ -27,11 +28,13 @@ public:
     RootWidget& ModifyRootWidget() { return *_rootWidget; }
 
     std::unique_ptr<WorldWidget> MakeWorldWidget(World& world, const SDL_FRect& worldRect);
+    const AppStatistics& GetAppStatistics() const { return *_appStats; }
 
 private:
     bool _shouldStopMainLoop { false };
     SDL_Window* _window { nullptr };
     SDL_Renderer* _renderer { nullptr };
     std::unique_ptr<RootWidget> _rootWidget;
+    std::unique_ptr<AppStatistics> _appStats;
     MenuRootWidget* _menuRootWidget;
 };

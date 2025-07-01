@@ -21,6 +21,7 @@ target_sources(${PROJECT_NAME} PRIVATE
         cell_position_utils.h
         direction_utils.h
         direction_utils.cpp
+        world_statistics.cpp
 )
 
 
@@ -29,6 +30,7 @@ target_sources(${PROJECT_NAME} PUBLIC
         simulation_config.h
         simulation_registrable_system.h
         world.h
+        world_statistics.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -7,7 +7,10 @@
 #include "widgets/menu_root_widget.h"
 #include "widgets/world/world_widget.h"
 
+#include "app_statistics.h"
+
 UiSystem::UiSystem(const UiConfig& uiConfig)
+    :_appStats(std::make_unique<AppStatistics>())
 {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         PanicOnSdlError("SDL_Init"sv);
@@ -105,5 +108,6 @@ void UiSystem::ApplicationRunMainLoop()
         ProcessInput();
         Update(elapsedTime);
         Render();
+        _appStats->AddFrame(elapsedTime);
     }
 }
