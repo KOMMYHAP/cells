@@ -28,7 +28,7 @@ CellBrain CrossoverAlgorithm::Combine(const CellBrain& parentLeft, const CellBra
         0,
         {}
     };
-    const bool writeSuccess = memory.TryWrite(controlBlock);
+    [[maybe_unused]] const bool writeSuccess = memory.TryWrite(controlBlock);
     ASSERT(writeSuccess, "Failed to write control block");
 
     auto blobOut = memory.MakeSpan(0);

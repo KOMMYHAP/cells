@@ -17,16 +17,18 @@ void World::AddSimulationSystem(std::unique_ptr<SimulationSystem> system)
     _simulationSystems.push_back(std::move(system));
 }
 
-void World::Update(const Common::Time elapsedTime)
+void World::Update(const Common::Time /*elapsedTime*/)
 {
     const Common::Clock frameClock;
-    int32_t ticks = 1;
-    if (_worldStatistics->GetElapsedTicksCount() > 0) {
-        ticks = _tickCalculator.CalculateElapsedTicks(GetTickTime(), elapsedTime);
-    }
-    for (int32_t i { 0 }; i < ticks; ++i) {
-        Tick();
-    }
+    // int32_t ticks = 1;
+    // if (_worldStatistics->GetElapsedTicksCount() > 0) {
+    //     ticks = _tickCalculator.CalculateElapsedTicks(GetTickTime(), elapsedTime);
+    // }
+    // for (int32_t i { 0 }; i < ticks; ++i) {
+    // Tick();
+    // }
+
+    Tick();
     _worldStatistics->AddFrame(frameClock.GetElapsedTime());
 }
 

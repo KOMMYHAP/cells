@@ -7,8 +7,10 @@ namespace Common {
 Time Time::FromSeconds(float seconds)
 {
     const float us = seconds * 1000.0f * 1000.0f;
+#if defined(COMMON_ASSERTS_ENABLED)
     const int classification = std::fpclassify(us);
     ASSERT(classification == FP_ZERO || classification == FP_NORMAL, "overflow");
+#endif
     const int64_t roundedMicroseconds = std::llround(us);
     return Time { roundedMicroseconds };
 }

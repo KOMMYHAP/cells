@@ -11,7 +11,9 @@ public:
 
     template <ProcessorUserDataType T>
     explicit ProcessorUserData(const T value)
+#if defined(COMMON_ASSERTS_ENABLED)
         : _valid(true)
+#endif
     {
         memcpy(_data.data(), &value, sizeof(T));
     }
@@ -27,5 +29,8 @@ public:
 
 private:
     std::array<std::byte, ProcessorUserDataSize> _data;
+
+#if defined(COMMON_ASSERTS_ENABLED)
     bool _valid { false };
+#endif
 };
