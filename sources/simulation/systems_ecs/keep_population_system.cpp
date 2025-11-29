@@ -8,8 +8,8 @@
 
 void KeepPopulationSystem::DoSystemUpdate()
 {
-    static constexpr int64_t TargetCellsCount = { 1'000'000 };
-    static constexpr int64_t SpawnPlacesBatchLimit = { 10'000 };
+    static constexpr int64_t TargetCellsCount = { 10'000 };
+    static constexpr int64_t SpawnPlacesBatchLimit = { 100 };
 
     const int64_t expectedCellsCount = _simulationStatisticsProvider->GetCellsCount() + _simulationStatisticsProvider->GetSpawnPlacesCount();
     if (expectedCellsCount >= TargetCellsCount) {
