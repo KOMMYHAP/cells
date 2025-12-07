@@ -3,27 +3,29 @@
 #include "simulation/common_adapter.h"
 
 {% for resource in system.resources %}
-    {% if resource.forward_declaration_only %}
-#include "{{resource.include_path}}"
-    {% endif %}
+{% if resource.forward_declaration_only %}
+#include "{{ resource.include_path }}"
+{% endif %}
 {% endfor %}
 
 {% for component in system.components_and_tags %}
-#include "components/generated/{{component.file_name}}"
+#include "components/generated/{{ component.file_name }}"
 {% endfor %}
 {% for component in system.excluded_components %}
-#include "components/generated/{{component.file_name}}"
+#include "components/generated/{{ component.file_name }}"
 {% endfor %}
 
 {{ system.type_name }}::{{ system.type_name }}(
-{%- for resource in system.resources %}
-        {{resource.argument_type}} {{resource.argument_name}}{% if not loop.last %},{% endif %}
-{%- endfor -%}
+{% for resource in system.resources %}
+    {{ resource.argument_type }} {{ resource.argument_name }}{% if not loop.last %},
+{% endif %}
+{% endfor %}
 )
-    :
-{%- for resource in system.resources %}
-    {% if not loop.first %},{% endif %} _{{resource.argument_name}}(&{{resource.argument_name}})
-{%- endfor %}
+{% if system.resources|length > 0 %}
+    : {% for resource in system.resources %}_{{ resource.argument_name }}(&{{ resource.argument_name }}){% if not loop.last %}
+    , {% endif %}
+    {% endfor %}
+{% endif %}
 {
 }
 
@@ -31,15 +33,17 @@
 void {{ system.type_name }}::DoSystemUpdate()
 {
     static constexpr auto ExcludedComponents = entt::exclude_t<
-{%- for component in system.excluded_components %}
-        {{component.type_name}}{% if not loop.last %},{% endif %}
-{%- endfor -%}
+{% for component in system.excluded_components %}
+        {{ component.type_name }}{% if not loop.last %},
+{% endif %}
+{% endfor %}
     >{};
 
     _ecsWorld->view<
-{%- for component in system.components_and_tags %}
-    {{component.type_name}}{% if not loop.last %},{% endif %}
-{%- endfor -%}
+{% for component in system.components_and_tags %}
+        {{ component.type_name }}{% if not loop.last %},
+{% endif %}
+{% endfor %}
     >(ExcludedComponents).each([this]<typename... T0>(const EcsEntity& id, T0&&... components) noexcept {
         this->DoProcessComponents(id, std::forward<T0>(components)...);
     });
@@ -48,13 +52,14 @@ void {{ system.type_name }}::DoSystemUpdate()
 
 std::unique_ptr<SimulationSystem> Make{{ system.type_name }}(const SimulationStorage& storage)
 {
-{%- for resource in system.resources %}
-    {{resource.argument_type}} {{resource.argument_name}} = storage.Modify<{{resource.type_name}}>();
-{%- endfor %}
+{% for resource in system.resources %}
+    {{ resource.argument_type }} {{ resource.argument_name }} = storage.Modify<{{ resource.type_name }}>();
+{% endfor %}
 
     return std::make_unique<{{ system.type_name }}>(
-{%- for resource in system.resources %}
-        {{resource.argument_name}}{% if not loop.last %},{% endif %}
-{%- endfor -%}
+{% for resource in system.resources %}
+        {{ resource.argument_name }}{% if not loop.last %},
+{% endif %}
+{% endfor -%}
     );
 }

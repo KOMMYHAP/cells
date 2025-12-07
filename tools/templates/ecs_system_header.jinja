@@ -1,16 +1,17 @@
 #pragma once
 #include "simulation/simulation_system.h"
+#include "simulation/common_adapter.h"
 
 {% for resource in system.resources %}
-    {% if resource.forward_declaration_only %}
-class {{resource.type_name}};
-    {% else %}
-#include "{{resource.include_path}}"
-    {% endif %}
+{% if resource.forward_declaration_only %}
+class {{ resource.type_name }};
+{% else %}
+#include "{{ resource.include_path }}"
+{% endif %}
 {% endfor %}
 
 {% for component in system.components %}
-struct {{component.type_name}};
+struct {{ component.type_name }};
 {% endfor %}
 
 class {{ system.type_name }} final : public SimulationSystem
@@ -19,32 +20,36 @@ public:
 {% if system.resources|length > 0 %}
     explicit {{ system.type_name }}(
 {% else %}
-    {{ system.type_name }}(
+        {{ system.type_name }}(
 {% endif %}
-{%- for resource in system.resources %}
-        {{resource.argument_type}} {{resource.argument_name}}{% if not loop.last %},{% endif %}
-{%- endfor -%}
+{% for resource in system.resources %}
+        {{ resource.argument_type }} {{ resource.argument_name }}{% if not loop.last %},
+{% endif %}
+{% endfor -%}
     );
 
     void DoSystemUpdate() override;
 
 {% if system.is_ecs %}
 private:
-    {%- if system.is_tag_only_system %}
+{% if system.is_tag_only_system %}
     void DoProcessComponents(EcsEntity id);
-    {% else %}
-    void DoProcessComponents(EcsEntity id,
-        {%- for component in system.components %}
-        {{component.argument_type_and_name}}{% if not loop.last %},{% endif %}
-        {%- endfor -%}
+{% else %}
+    void DoProcessComponents(
+        EcsEntity id{% if system.components|length > 0 %},
+        {% endif %}
+{% for component in system.components %}
+        {{ component.argument_type_and_name }}{% if not loop.last %},
+{% endif %}
+{% endfor %}
+{% endif -%}
     );
-    {% endif %}
 {% endif %}
 
 {% if system.resources|length >= 1 %}
 private:
-    {%- for resource in system.resources %}
-    {{resource.field_type}} _{{resource.argument_name}};
-    {%- endfor -%}
+{% for resource in system.resources %}
+    {{ resource.field_type }} _{{ resource.argument_name }};
+{% endfor %}
 {% endif %}
 };

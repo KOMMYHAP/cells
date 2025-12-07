@@ -10,7 +10,11 @@ from utils import get_autogen_directory
 
 
 def main():
-    environment = Environment(loader=FileSystemLoader("templates/"))
+    environment = Environment(
+        loader=FileSystemLoader("templates/"),
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
 
     component_roots = [
         Path('../sources/simulation/components')
