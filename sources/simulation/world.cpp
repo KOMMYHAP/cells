@@ -12,9 +12,10 @@ World::World(WorldStatistics& stats)
     _tickCalculator.Setup(targetSimulationTime);
 }
 
-void World::AddSimulationSystem(std::unique_ptr<SimulationSystem> system)
+void World::AddSimulationSystem(Phase phase, std::unique_ptr<SimulationSystem> system)
 {
-    _simulationSystems.push_back(std::move(system));
+    Systems& systems = _simulationSystems[phase];
+    systems.push_back(std::move(system));
 }
 
 void World::Update(const Common::Time /*elapsedTime*/)
@@ -32,6 +33,11 @@ void World::Update(const Common::Time /*elapsedTime*/)
     _worldStatistics->AddFrame(frameClock.GetElapsedTime());
 }
 
+void World::SetPhase(Phase phase)
+{
+    _activePhase = phase;
+}
+
 Common::Time World::GetTickTime() const
 {
     return _worldStatistics->GetTickTime();
@@ -40,7 +46,7 @@ Common::Time World::GetTickTime() const
 void World::Tick()
 {
     const Common::Clock tickClock;
-    for (const auto& system : _simulationSystems) {
+    for (const auto& system : _simulationSystems[_activePhase]) {
         system->DoSystemUpdate();
     }
     _worldStatistics->AddTick(tickClock.GetElapsedTime());

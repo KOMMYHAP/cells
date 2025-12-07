@@ -11,7 +11,7 @@ void EnergyDecreaseSystem::DoProcessComponents(const EcsEntity id, CellEnergy& e
         return;
     }
 
-    const int endEnergy = NarrowCast<int>(energy.value) - NarrowCast<int>(change.value);
+    const int endEnergy = static_cast<int>(energy.value) - static_cast<int>(change.value);
     energy.value = NarrowCast<uint8_t>(std::max(0, endEnergy));
     change.value = 0;
 

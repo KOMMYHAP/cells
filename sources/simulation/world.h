@@ -14,16 +14,27 @@ public:
     World(WorldStatistics& stats);
 
     SimulationStorage& ModifySimulation() { return _simulationStorage; }
-    void AddSimulationSystem(std::unique_ptr<SimulationSystem> system);
+
+    enum class Phase {
+        Stopped,
+        Running,
+        Paused
+    };
+    void AddSimulationSystem(Phase phase, std::unique_ptr<SimulationSystem> system);
 
     void Update(Common::Time elapsedTime);
 
+    void SetPhase(Phase phase);
+    Phase GetPhase() const { return _activePhase; }
+
 private:
+    using Systems = std::vector<std::unique_ptr<SimulationSystem>>;
     Common::Time GetTickTime() const;
     void Tick();
 
     gsl::not_null<WorldStatistics*> _worldStatistics;
     SimulationTickCalculator _tickCalculator;
     SimulationStorage _simulationStorage;
-    std::vector<std::unique_ptr<SimulationSystem>> _simulationSystems;
+    Phase _activePhase{Phase::Stopped};
+    std::map<Phase, Systems> _simulationSystems;
 };
