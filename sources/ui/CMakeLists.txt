@@ -20,7 +20,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         cells-simulation
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
+target_link_libraries(${PROJECT_NAME} PUBLIC
         SDL3::SDL3
         ImGuiLib
 )

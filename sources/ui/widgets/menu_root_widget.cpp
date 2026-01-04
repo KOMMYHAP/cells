@@ -164,6 +164,7 @@ bool MenuRootWidget::ProcessOpenedWidgetState(const MenuWidgetId id, const Commo
         bool isOpened { true };
         const std::string_view widgetName = MakeFullWidgetName(widgetData);
         ImGui::Begin(widgetName.data(), &isOpened);
+
         BaseMenuWidget::MenuWidgetAction action = BaseMenuWidget::MenuWidgetAction::ShouldClose;
         if (isOpened) {
             action = widget.ProcessMenuItem(elapsedTime);
