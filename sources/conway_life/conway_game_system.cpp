@@ -34,7 +34,9 @@ void ConwayGameSystem::DoSystemUpdate()
     }
     _rasterizationTarget->Unlock();
 
-    std::this_thread::sleep_for(_sleepTime);
+    if (_sleepTime != std::chrono::milliseconds {}) {
+        std::this_thread::sleep_for(_sleepTime);
+    }
 }
 
 ConwayGame* ConwayGameSystem::ModifyGame()

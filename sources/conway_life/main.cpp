@@ -17,8 +17,8 @@ int main()
         FieldPosition { 0, 1 },
     };
 
-    static constexpr uint16_t CellsCountX = 290;
-    static constexpr uint16_t CellsCountY = 182;
+    static constexpr uint16_t CellsCountX = 256;
+    static constexpr uint16_t CellsCountY = 128;
     static constexpr uint16_t CellPixelsSize = 4;
 
     static constexpr uint16_t WindowSizeLimitX = 1200;

@@ -22,4 +22,5 @@ private:
     std::vector<bool> _cells;
     int32_t _sizeX { 0 };
     int32_t _sizeY { 0 };
+    int32_t _blocksInRow {0};
 };

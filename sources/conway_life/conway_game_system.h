@@ -26,5 +26,5 @@ private:
     WorldRasterizationTarget* _rasterizationTarget { nullptr };
     ConwayGameSummary _summary;
     bool _inProgress { true };
-    std::chrono::milliseconds _sleepTime{15};
+    std::chrono::milliseconds _sleepTime{0};
 };
