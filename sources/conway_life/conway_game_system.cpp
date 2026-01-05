@@ -25,8 +25,8 @@ void ConwayGameSystem::DoSystemUpdate()
     const Field& field = _game->GetCurrentGeneration();
 
     _rasterizationTarget->Lock();
-    for (int32_t x = 0; x < field.GetSizeX(); ++x) {
-        for (int32_t y = 0; y < field.GetSizeY(); ++y) {
+    for (int32_t y = 0; y < field.GetSizeY(); ++y) {
+        for (int32_t x = 0; x < field.GetSizeX(); ++x) {
             const FieldPosition position { x, y };
             const SDL_Color color = field.Has(position) ? SDL_Color { 255, 0, 0, 255 } : SDL_Color { 0, 0, 0, 255 };
             _rasterizationTarget->Set(CellPosition { static_cast<int16_t>(x), static_cast<int16_t>(y) }, color);
