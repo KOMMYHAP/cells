@@ -34,11 +34,6 @@ BaseMenuWidget::MenuWidgetAction ConwayDebugWidget::ProcessMenuItem(Common::Time
 
 void ConwayDebugWidget::ProcessFieldEditor()
 {
-    ImGui::Text("IsItemHovered %d", ImGui::IsItemHovered());
-    ImGui::Text("IsWindowHovered %d", ImGui::IsWindowHovered());
-    ImGui::Text("IsMouseDragging Left %d", ImGui::IsMouseDragging(ImGuiMouseButton_Left));
-    ImGui::Text("IsMouseDragging Right %d", ImGui::IsMouseDragging(ImGuiMouseButton_Right));
-
     const bool leftButtonDragging = ImGui::IsMouseDragging(ImGuiMouseButton_Left);
     const bool rightButtonDragging = ImGui::IsMouseDragging(ImGuiMouseButton_Right);
     if (!leftButtonDragging && !rightButtonDragging) {
