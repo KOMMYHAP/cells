@@ -34,9 +34,11 @@ BaseMenuWidget::MenuWidgetAction ConwayDebugWidget::ProcessMenuItem(Common::Time
 
 void ConwayDebugWidget::ProcessFieldEditor()
 {
+    const bool mouseOverWindow = ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow);
     const bool leftButtonDragging = ImGui::IsMouseDragging(ImGuiMouseButton_Left);
     const bool rightButtonDragging = ImGui::IsMouseDragging(ImGuiMouseButton_Right);
-    if (!leftButtonDragging && !rightButtonDragging) {
+    const bool shouldStopEditing = mouseOverWindow || (!leftButtonDragging && !rightButtonDragging);
+    if (shouldStopEditing) {
         UpdateEditorState(EditorState::None);
         return;
     }
