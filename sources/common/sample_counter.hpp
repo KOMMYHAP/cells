@@ -45,7 +45,7 @@ Sample SampleCounter<Sample, SamplesLimit>::CalcAverage() const
     }
 
     const Sample total = std::accumulate(_samples.begin(), _samples.begin() + _availableSamplesCount, Sample {});
-    return static_cast<Sample>(static_cast<float>(total) / _availableSamplesCount);
+    return total / static_cast<double>(_availableSamplesCount);
 }
 
 }
