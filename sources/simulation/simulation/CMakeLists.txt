@@ -17,4 +17,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         simulation_ecs_procedure.hpp
         simulation_statistics_provider.h
         simulation_statistics_provider.cpp
+        simulation_player.cpp
+        simulation_player.h
 )
