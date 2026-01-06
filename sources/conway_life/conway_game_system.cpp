@@ -3,8 +3,9 @@
 #include "components/generated/auto_cell_position.h"
 #include "widgets/world/world_rasterization_target.h"
 
-ConwayGameSystem::ConwayGameSystem(ConwayGame& game, WorldRasterizationTarget& rasterizationTarget)
-    : _game(&game)
+ConwayGameSystem::ConwayGameSystem(ConwayGame& game, WorldRasterizationTarget& rasterizationTarget, SimulationPlayer& simulationPlayer)
+    : _simulationPlayer(&simulationPlayer)
+    , _game(&game)
     , _rasterizationTarget(&rasterizationTarget)
 {
 }
@@ -13,6 +14,7 @@ void ConwayGameSystem::Restart()
 {
     _inProgress = true;
     _game->Restart();
+    _simulationPlayer->Resume();
 }
 
 void ConwayGameSystem::DoSystemUpdate()
@@ -36,6 +38,10 @@ void ConwayGameSystem::DoSystemUpdate()
 
     if (_sleepTime != std::chrono::milliseconds {}) {
         std::this_thread::sleep_for(_sleepTime);
+    }
+
+    if (!_inProgress) {
+        _simulationPlayer->Pause(); //< pause player when game finished
     }
 }
 

@@ -18,18 +18,16 @@ void World::AddSimulationSystem(Phase phase, std::unique_ptr<SimulationSystem> s
     systems.push_back(std::move(system));
 }
 
-void World::Update(const Common::Time /*elapsedTime*/)
+void World::Update(const Common::Time elapsedTime)
 {
     const Common::Clock frameClock;
-    // int32_t ticks = 1;
-    // if (_worldStatistics->GetElapsedTicksCount() > 0) {
-    //     ticks = _tickCalculator.CalculateElapsedTicks(GetTickTime(), elapsedTime);
-    // }
-    // for (int32_t i { 0 }; i < ticks; ++i) {
-    // Tick();
-    // }
-
-    Tick();
+    if (_player.GetCurrentMode() == SimulationPlayer::Mode::FixedSpeed) {
+        _player.UpdateElapsedTime(elapsedTime);
+    }
+    while (_player.ShouldPlayFrame()) {
+        _player.PlayFrame();
+        Tick();
+    }
     _worldStatistics->AddFrame(frameClock.GetElapsedTime());
 }
 

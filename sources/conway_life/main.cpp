@@ -2,7 +2,9 @@
 #include "conway_game.h"
 #include "conway_game_system.h"
 #include "field_position.h"
+#include "menu_widgets/base/group_menu_widget.h"
 #include "menu_widgets/engine_summary_widget.h"
+#include "menu_widgets/simulation_player_widget.h"
 #include "system/ui_system.h"
 #include "widgets/menu_root_widget.h"
 #include "widgets/world/world_rasterization_target.h"
@@ -70,9 +72,11 @@ int main()
     auto rasterizationTarget = std::make_unique<WorldRasterizationTarget>(worldWidget->AccessRasterizationTexture(), SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE }, uiConfig.cellPixelsSize);
     uiSystem->ModifyRootWidget().AddWidget(std::move(worldWidget));
 
-    auto gameSystem = std::make_unique<ConwayGameSystem>(game, *rasterizationTarget);
+    auto gameSystem = std::make_unique<ConwayGameSystem>(game, *rasterizationTarget, world->ModifySimulationPlayer());
     uiSystem->ModifyMenuRootWidget().AddWidget<EngineSummaryWidget>("Engine", uiSystem->GetAppStatistics());
-    uiSystem->ModifyMenuRootWidget().AddWidget<ConwayDebugWidget>("Conway", uiConfig, *gameSystem);
+    auto [simulationGroup, _] = uiSystem->ModifyMenuRootWidget().AddWidget<GroupMenuWidget>("Simulation");
+    uiSystem->ModifyMenuRootWidget().AddWidget<SimulationPlayerWidget>(simulationGroup, "Player Control", world->ModifySimulationPlayer());
+    uiSystem->ModifyMenuRootWidget().AddWidget<ConwayDebugWidget>(simulationGroup, "Conway", uiConfig, *gameSystem);
     const ConwayGameSummary* summary = &gameSystem->GetGameSummary();
     world->AddSimulationSystem(World::Phase::Running, std::move(gameSystem));
 
