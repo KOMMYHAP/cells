@@ -6,7 +6,12 @@ void AppStatistics::AddFrame(Common::Time elapsedTime)
     _frameSamples.AddSample(elapsedTime);
 }
 
-Common::Time AppStatistics::GetFrameTime() const
+Common::Time AppStatistics::GetMedianFrameTime() const
 {
     return _frameSamples.CalcMedian();
+}
+
+Common::Time AppStatistics::GetAverageFrameTime() const
+{
+    return _frameSamples.CalcAverage();
 }

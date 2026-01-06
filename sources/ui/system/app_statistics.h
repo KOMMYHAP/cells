@@ -5,8 +5,10 @@
 class AppStatistics {
 public:
     void AddFrame(Common::Time elapsedTime);
+
     int64_t GetElapsedFramesCount() const { return _elapsedFramesCount; }
-    Common::Time GetFrameTime() const;
+    Common::Time GetMedianFrameTime() const;
+    Common::Time GetAverageFrameTime() const;
 
 private:
     static constexpr int32_t TOTAL_SAMPLES_COUNT { 30 };
