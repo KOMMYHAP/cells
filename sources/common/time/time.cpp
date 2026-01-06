@@ -4,9 +4,9 @@
 
 namespace Common {
 
-Time Time::FromSeconds(float seconds)
+Time Time::FromSeconds(double seconds)
 {
-    const float us = seconds * 1000.0f * 1000.0f;
+    const double us = seconds * 1000.0 * 1000.0;
 #if defined(COMMON_ASSERTS_ENABLED)
     const int classification = std::fpclassify(us);
     ASSERT(classification == FP_ZERO || classification == FP_NORMAL, "overflow");
@@ -26,9 +26,9 @@ Time Time::FromMicroseconds(int64_t us)
     return Time { us };
 }
 
-float Time::AsSeconds() const
+double Time::AsSeconds() const
 {
-    return static_cast<float>(_microseconds) / 1000.0f / 1000.0f;
+    return static_cast<double>(_microseconds) / 1000.0 / 1000.0;
 }
 
 int64_t Time::AsMilliseconds() const
@@ -106,33 +106,33 @@ Time& operator-=(Time& left, Time right)
     return left = left - right;
 }
 
-Time operator*(Time left, float right)
+Time operator*(Time left, double right)
 {
     return Time::FromSeconds(left.AsSeconds() * right);
 }
 
-Time operator*(float left, Time right)
+Time operator*(double left, Time right)
 {
     return right * left;
 }
 
-Time& operator*=(Time& left, float right)
+Time& operator*=(Time& left, double right)
 {
     return left = left * right;
 }
 
-Time operator/(Time left, float right)
+Time operator/(Time left, double right)
 {
     ASSERT(right != 0.0f, "Invalid argument");
     return Time::FromSeconds(left.AsSeconds() / right);
 }
 
-Time& operator/=(Time& left, float right)
+Time& operator/=(Time& left, double right)
 {
     return left = left / right;
 }
 
-float operator/(Time left, Time right)
+double operator/(Time left, Time right)
 {
     ASSERT(!right.IsZero(), "Invalid argument");
     return left.AsSeconds() / right.AsSeconds();
