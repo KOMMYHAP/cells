@@ -36,10 +36,6 @@ void ConwayGameSystem::DoSystemUpdate()
     }
     _rasterizationTarget->Unlock();
 
-    if (_sleepTime != std::chrono::milliseconds {}) {
-        std::this_thread::sleep_for(_sleepTime);
-    }
-
     if (!_inProgress) {
         _simulationPlayer->Pause(); //< pause player when game finished
     }
