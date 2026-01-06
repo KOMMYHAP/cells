@@ -16,9 +16,9 @@ uint32_t SimulationTickCalculator::CalculateElapsedTicks(const Common::Time tick
         return 0;
     }
 
-    const float availableTicks = _availableTimeToSpent / tickTime;
+    const float availableTicks = static_cast<float>(_availableTimeToSpent / tickTime);
     constexpr float minimumTicks = 1.0f;
-    const float maximumTicks = std::max(minimumTicks, _limitSimulationTime / tickTime);
+    const float maximumTicks = std::max(minimumTicks, static_cast<float>(_limitSimulationTime / tickTime));
     const float ticksToProcess = std::clamp(availableTicks, minimumTicks, maximumTicks);
     const uint32_t roundedTicksToProcess = static_cast<uint32_t>(ticksToProcess);
 
