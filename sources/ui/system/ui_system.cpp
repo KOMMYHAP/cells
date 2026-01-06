@@ -109,5 +109,12 @@ void UiSystem::ApplicationRunMainLoop()
         Update(elapsedTime);
         Render();
         _appStats->AddFrame(elapsedTime);
+
+        static const Common::Time TargetLoopTime{Common::Time::FromMilliseconds(15)};
+        const Common::Time frameTime = _appStats->GetAverageFrameTime();
+        if (frameTime < TargetLoopTime) {
+            const Common::Time timeToSleep = TargetLoopTime - frameTime;
+            std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleep.AsMilliseconds()));
+        }
     }
 }
