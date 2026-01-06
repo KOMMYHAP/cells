@@ -20,12 +20,13 @@ public: //< ManualMode
 
 public: //< FixedSpeedMode
     void Resume();
-    void SetFixedSpeedMode(double generationsPerSecond);
-    void UpdateElapsedTime(Common::Time elapsedTime);
+    void SetFixedSpeedMode(double stepsPerSeconds);
+    void UpdateElapsedTime(Common::Time elapsedTime, Common::Time timePerStep);
 
 private:
     Mode mode { Mode::ManualStep };
     bool stepRequested { false };
     Common::Time timeToSpend;
-    Common::Time timePerGeneration;
+    Common::Time requiredTimePerStep;
+    Common::Time elapsedTimePerStep;
 };

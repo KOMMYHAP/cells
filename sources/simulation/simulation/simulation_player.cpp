@@ -12,7 +12,7 @@ bool SimulationPlayer::ShouldPlayFrame() const
         return stepRequested;
     }
     if (mode == Mode::FixedSpeed) {
-        return timeToSpend >= timePerGeneration;
+        return timeToSpend >= requiredTimePerStep;
     }
 
     ASSERT(mode == Mode::ManualStep, "Unknown mode!");
@@ -27,7 +27,7 @@ void SimulationPlayer::PlayFrame()
         stepRequested = false;
     }
     if (mode == Mode::FixedSpeed) {
-        timeToSpend -= timePerGeneration;
+        timeToSpend -= requiredTimePerStep;
     }
 }
 
@@ -47,20 +47,23 @@ void SimulationPlayer::Resume()
 {
     mode = Mode::FixedSpeed;
     timeToSpend = {};
+    stepRequested = true;
 }
 
-void SimulationPlayer::SetFixedSpeedMode(double generationsPerSecond)
+void SimulationPlayer::SetFixedSpeedMode(double stepsPerSeconds)
 {
     ASSERT(generationsPerSecond > 0.0, "Positive amount of generations allowed only!");
     mode = Mode::FixedSpeed;
     timeToSpend = {};
-    timePerGeneration = Common::Time::FromSeconds(1.0 / generationsPerSecond);
+    requiredTimePerStep = Common::Time::FromSeconds(1.0 / stepsPerSeconds);
 }
 
-void SimulationPlayer::UpdateElapsedTime(Common::Time elapsedTime)
+void SimulationPlayer::UpdateElapsedTime(Common::Time elapsedTime, Common::Time timePerStep)
 {
     ASSERT(mode == Mode::FixedSpeed, "Mode 'FixedSpeed' required!");
     timeToSpend += elapsedTime;
+    elapsedTimePerStep = timePerStep;
+    requiredTimePerStep = std::max(elapsedTimePerStep, requiredTimePerStep);
 
     if (timeToSpend > Common::Time::FromSeconds(1.0)) {
         timeToSpend = Common::Time::FromSeconds(1.0);

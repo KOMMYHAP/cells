@@ -22,7 +22,7 @@ void World::Update(const Common::Time elapsedTime)
 {
     const Common::Clock frameClock;
     if (_player.GetCurrentMode() == SimulationPlayer::Mode::FixedSpeed) {
-        _player.UpdateElapsedTime(elapsedTime);
+        _player.UpdateElapsedTime(elapsedTime, _worldStatistics->GetTickTime());
     }
     while (_player.ShouldPlayFrame()) {
         _player.PlayFrame();
