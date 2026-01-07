@@ -16,22 +16,43 @@ def main():
         lstrip_blocks=True,
     )
 
-    component_roots = [
-        Path('../sources/simulation/components')
+    component_entries = [
+        {
+            'root': Path('../sources/simulation/components'),
+            'name': 'simulation_components'
+        },
+        {
+            'root': Path('../sources/conway_life/components'),
+            'name': 'conway_life_components'
+        }
     ]
-    system_roots = [
-        Path('../sources/simulation/systems_ecs'),
-        Path('../sources/ui/systems_ecs')
+    system_entries = [
+        {
+            'root': Path('../sources/simulation/systems_ecs'),
+            'name': 'simulation_systems'
+        },
+        {
+            'root': Path('../sources/ui/systems_ecs'),
+            'name': 'ui_systems'
+        },
+        {
+            'root': Path('../sources/conway_life/systems'),
+            'name': 'conway_life_systems'
+        }
     ]
 
-    components = []
-    for root in component_roots:
+    existing_components = []
+    for entry in component_entries:
+        root = entry['root']
+        name = entry['name']
         prepare_output_directory(root)
-        components = components + generate_components(environment, root)
+        existing_components = existing_components + generate_components(environment, root, name)
 
-    for root in system_roots:
+    for entry in system_entries:
+        root = entry['root']
+        name = entry['name']
         prepare_output_directory(root)
-        generate_systems(components, environment, root)
+        generate_systems(existing_components, environment, root, name)
 
 
 def prepare_output_directory(root_directory: Path):

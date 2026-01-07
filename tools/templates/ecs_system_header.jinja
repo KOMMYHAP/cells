@@ -42,8 +42,8 @@ private:
         {{ component.argument_type_and_name }}{% if not loop.last %},
 {% endif %}
 {% endfor %}
-{% endif -%}
     );
+{% endif -%}
 {% endif %}
 
 {% if system.resources|length >= 1 %}

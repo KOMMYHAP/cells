@@ -226,7 +226,7 @@ def _generate_systems_factories(environment, systems: list[YamlSystem], output_d
             print(f"... wrote {system.get_factory_filename()}")
 
 
-def _generate_cmake(systems: list, environment, output_directory: Path):
+def _generate_cmake(name: str, systems: list, environment, output_directory: Path):
     cmake_template = environment.get_template("ecs_systems_cmake.jinja")
     cmake_filename = Path(output_directory) / 'CMakeLists.txt'
     with cmake_filename.open(mode="w", encoding="utf-8") as cmake_data:
@@ -234,16 +234,17 @@ def _generate_cmake(systems: list, environment, output_directory: Path):
         for system in systems:
             systems_yaml_data.append(system.to_jinja())
         content = cmake_template.render(
+            name=name,
             systems=systems_yaml_data
         )
         cmake_data.write(content)
         print('... wrote CMakeLists.txt for ecs systems')
 
 
-def generate_systems(components: list[YamlComponent], environment, root_directory: Path):
+def generate_systems(components: list[YamlComponent], environment, root_directory: Path, name: str):
     output_directory = root_directory / get_autogen_directory()
     systems = gather_systems_list(components, root_directory)
     _generate_systems_sources(environment, systems, output_directory)
     _generate_systems_headers(environment, systems, output_directory)
     _generate_systems_factories(environment, systems, output_directory)
-    _generate_cmake(systems, environment, output_directory)
+    _generate_cmake(name, systems, environment, output_directory)
