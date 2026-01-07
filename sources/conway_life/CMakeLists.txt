@@ -10,14 +10,14 @@ target_sources(${PROJECT_NAME} PRIVATE
         conway_game.h
         field.cpp
         field.h
-        field_position.h
         field_utilities.cpp
         field_utilities.h
         conway_debug_widget.h
         conway_debug_widget.cpp
-        conway_game_system.cpp
-        conway_game_system.h
 )
+
+add_subdirectory(components/generated)
+add_subdirectory(systems)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

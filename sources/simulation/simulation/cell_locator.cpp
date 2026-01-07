@@ -34,6 +34,15 @@ void CellLocator::Reset(const CellPosition position)
 
 EcsEntity CellLocator::Find(CellPosition position) const
 {
+    const bool insideByX = position.x >= 0 && position.x < _width;
+    if (!insideByX) [[unlikely]] {
+        return InvalidEcsEntity;
+    }
+    const bool insideByY = position.y >= 0 && position.y < _height;
+    if (!insideByY) [[unlikely]] {
+        return InvalidEcsEntity;
+    }
+
     const uint32_t index = ToGridIndex(position);
     return _grid[index];
 }
@@ -82,8 +91,8 @@ bool CellLocator::IsNeighbourFor(CellPosition lhs, CellPosition rhs) const
 
 int32_t CellLocator::ToGridIndex(CellPosition position) const
 {
-    ASSERT(position.x < _width, "Invalid X position");
-    ASSERT(position.y < _height, "Invalid Y position");
+    ASSERT(position.x >= 0 && position.x < _width, "Invalid X position");
+    ASSERT(position.y >= 0 && position.y < _height, "Invalid Y position");
     const int32_t index = position.y * _width + position.x;
     ASSERT(index < NarrowCast<int32_t>(_grid.size()), "Invalid cell position!");
     return index;

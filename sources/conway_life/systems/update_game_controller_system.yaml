@@ -1,0 +1,12 @@
+﻿name: 'update_game_controller_system'
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'conway_game_controller'
+    forward_declaration_only: true
+    include_path: 'conway_game.h'
+  - name: 'cell_locator'
+    forward_declaration_only: true
+    include_path: 'simulation/cell_locator.h'
+is_ecs: false

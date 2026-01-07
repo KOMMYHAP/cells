@@ -1,0 +1,31 @@
+name: 'neighbours'
+constants:
+  - name: 'n_0_0'
+    type: int32_t
+    value: 0
+  - name: 'n_1_0'
+    type: int32_t
+    value: 1
+  - name: 'n_2_0'
+    type: int32_t
+    value: 2
+  - name: 'n_0_1'
+    type: int32_t
+    value: 3
+  - name: 'n_2_1'
+    type: int32_t
+    value: 4
+  - name: 'n_0_2'
+    type: int32_t
+    value: 5
+  - name: 'n_1_2'
+    type: int32_t
+    value: 6
+  - name: 'n_2_2'
+    type: int32_t
+    value: 7
+fields:
+  - name: 'entities'
+    type: 'EcsEntity'
+    array_size: 8
+

@@ -9,29 +9,24 @@ enum class ConwayGenerationState : uint8_t {
 };
 
 struct ConwayGameSummary {
-    ConwayGenerationState state { ConwayGenerationState::Good };
+    ConwayGenerationState state { ConwayGenerationState::NoCellsLeft };
     int32_t aliveCells { 0 };
     std::optional<int32_t> similarGenerationNumber;
+    const Field* currentGeneration { nullptr };
+    int32_t generationNumber { 1 };
 };
 
-class ConwayGame {
+class ConwayGameController {
 public:
-    ConwayGame(Field&& field);
-
     void Restart();
-    ConwayGameSummary DoNextGeneration();
-
-    int32_t GetCurrentGenerationNumber() const { return _currentGenerationNumber; }
-    const Field& GetCurrentGeneration() const { return _currentField; }
-    Field& ModifyCurrentGeneration() { return _currentField; }
+    void SetCurrentGeneration(Field&& field, int32_t aliveCells);
+    ConwayGameSummary GetSummary() const { return _currentGenerationSummary; }
 
 private:
     struct FieldDescription {
         int32_t generationNumber { 0 };
     };
 
-    int32_t _currentGenerationNumber { 1 };
-    Field _currentField;
-    Field _nextField;
+    ConwayGameSummary _currentGenerationSummary;
     std::unordered_map<Field, FieldDescription, FieldHasher, FieldComparator> _previousGenerations;
 };

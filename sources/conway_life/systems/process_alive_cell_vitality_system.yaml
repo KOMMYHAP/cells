@@ -1,0 +1,12 @@
+﻿name: 'process_alive_cell_vitality_system'
+components:
+  - name: 'has_life_tag'
+    readonly: true
+    is_tag: true
+  - name: 'neighbours_count'
+    readonly: true
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

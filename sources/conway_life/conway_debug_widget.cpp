@@ -1,12 +1,18 @@
 #include "conway_debug_widget.h"
 
+#include "components/generated/auto_has_life_tag.h"
+#include "components/generated/auto_will_born_tag.h"
+#include "components/generated/auto_will_die_tag.h"
 #include "conway_game.h"
-#include "conway_game_system.h"
 #include "imgui.h"
+#include "simulation/cell_locator.h"
+#include "ui_config.h"
 
-ConwayDebugWidget::ConwayDebugWidget(const UiConfig& uiConfig, ConwayGameSystem& game)
-    : _game(&game)
-    , _uiConfig(uiConfig)
+ConwayDebugWidget::ConwayDebugWidget(SimulationStorage& storage)
+    : _game(&storage.Modify<ConwayGameController>())
+    , _uiConfig(&storage.Get<UiConfig>())
+    , _ecsWorld(&storage.Modify<EcsWorld>())
+    , _cellLocator(&storage.Get<CellLocator>())
 {
 }
 
@@ -49,17 +55,23 @@ void ConwayDebugWidget::ProcessFieldEditor()
         UpdateEditorState(EditorState::Erasing);
     }
 
-    if (!_game->ModifyGame()) {
-        return;
-    }
-
     const ImVec2 position = ImGui::GetMousePos();
     auto fieldPosition = ConvertMouseToFieldPosition(position.x, position.y);
     if (!fieldPosition) {
         return;
     }
-    Field& field = _game->ModifyGame()->ModifyCurrentGeneration();
-    field.Set(*fieldPosition, _editorState == EditorState::Drawing);
+
+    const EcsEntity cell = _cellLocator->Find(*fieldPosition);
+    if (cell == InvalidEcsEntity) {
+        return;
+    }
+
+    const bool hasLife = _ecsWorld->all_of<HasLifeTag>(cell);
+    if (_editorState == EditorState::Drawing && !hasLife) {
+        _ecsWorld->emplace_or_replace<WillBornTag>(cell);
+    } else if (_editorState == EditorState::Erasing && hasLife) {
+        _ecsWorld->emplace_or_replace<WillDieTag>(cell);
+    }
 }
 
 void ConwayDebugWidget::UpdateEditorState(EditorState newState)
@@ -71,23 +83,23 @@ void ConwayDebugWidget::UpdateEditorState(EditorState newState)
     _editorState = newState;
 }
 
-std::optional<FieldPosition> ConwayDebugWidget::ConvertMouseToFieldPosition(float x, float y)
+std::optional<CellPosition> ConwayDebugWidget::ConvertMouseToFieldPosition(float x, float y)
 {
-    if (x < _uiConfig.worldWidgetOffsetX || y < _uiConfig.worldWidgetOffsetY) {
+    if (x < _uiConfig->worldWidgetOffsetX || y < _uiConfig->worldWidgetOffsetY) {
         return {};
     }
-    if (x >= _uiConfig.worldWidgetOffsetX + _uiConfig.worldWidgetSizeX || y >= _uiConfig.worldWidgetOffsetY + +_uiConfig.worldWidgetSizeY) {
+    if (x >= _uiConfig->worldWidgetOffsetX + _uiConfig->worldWidgetSizeX || y >= _uiConfig->worldWidgetOffsetY + +_uiConfig->worldWidgetSizeY) {
         return {};
     }
 
-    const int32_t fieldX = static_cast<int32_t>((x - _uiConfig.worldWidgetOffsetX) / _uiConfig.cellPixelsSize);
-    const int32_t fieldY = static_cast<int32_t>((y - _uiConfig.worldWidgetOffsetY) / _uiConfig.cellPixelsSize);
-    return FieldPosition { fieldX, fieldY };
+    const int16_t fieldX = static_cast<int16_t>((x - _uiConfig->worldWidgetOffsetX) / _uiConfig->cellPixelsSize);
+    const int16_t fieldY = static_cast<int16_t>((y - _uiConfig->worldWidgetOffsetY) / _uiConfig->cellPixelsSize);
+    return CellPosition { fieldX, fieldY };
 }
 
 void ConwayDebugWidget::ProcessGameSummary()
 {
-    const ConwayGameSummary& gameSummary = _game->GetGameSummary();
+    const ConwayGameSummary& gameSummary = _game->GetSummary();
     const std::string_view stateStr = [](ConwayGenerationState state) -> std::string_view {
         switch (state) {
         case ConwayGenerationState::Good:
@@ -102,7 +114,7 @@ void ConwayDebugWidget::ProcessGameSummary()
     }(gameSummary.state);
 
     ImGui::Text("State: %.*s", static_cast<int32_t>(stateStr.length()), stateStr.data());
-    ImGui::Text("Generation: %d", _game->GetGame()->GetCurrentGenerationNumber());
+    ImGui::Text("Generation: %d", gameSummary.generationNumber);
     ImGui::Text("Cells: %d", gameSummary.aliveCells);
     if (gameSummary.similarGenerationNumber) {
         ImGui::Text("Similar generation: %d", *gameSummary.similarGenerationNumber);

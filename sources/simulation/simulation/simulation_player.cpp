@@ -50,12 +50,12 @@ void SimulationPlayer::Resume()
     stepRequested = true;
 }
 
-void SimulationPlayer::SetFixedSpeedMode(double stepsPerSeconds)
+void SimulationPlayer::SetFixedSpeedMode(double stepsPerSecond)
 {
-    ASSERT(generationsPerSecond > 0.0, "Positive amount of generations allowed only!");
+    ASSERT(stepsPerSecond > 0.0, "Positive amount of generations allowed only!");
     mode = Mode::FixedSpeed;
     timeToSpend = {};
-    requiredTimePerStep = Common::Time::FromSeconds(1.0 / stepsPerSeconds);
+    requiredTimePerStep = Common::Time::FromSeconds(1.0 / stepsPerSecond);
 }
 
 void SimulationPlayer::UpdateElapsedTime(Common::Time elapsedTime, Common::Time timePerStep)

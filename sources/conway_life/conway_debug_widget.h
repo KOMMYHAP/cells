@@ -1,15 +1,17 @@
 #pragma once
-#include "field_position.h"
+#include "components/generated/auto_cell_position.h"
 #include "menu_widgets/base/base_menu_widget.h"
-#include "ui_config.h"
+#include "simulation/common_adapter.h"
+#include "simulation/simulation_ecs_config.h"
 
-class ConwayGameSystem;
-class ConwayGame;
+class CellLocator;
+struct UiConfig;
+class ConwayGameController;
 struct ConwayGameSummary;
 
 class ConwayDebugWidget final : public BaseMenuWidget {
 public:
-    ConwayDebugWidget(const UiConfig& uiConfig, ConwayGameSystem& game);
+    ConwayDebugWidget(SimulationStorage& storage);
 
     MenuWidgetAction ProcessMenuItem(Common::Time) override;
 
@@ -22,12 +24,14 @@ private:
 
     void ProcessFieldEditor();
     void UpdateEditorState(EditorState newState);
-    std::optional<FieldPosition> ConvertMouseToFieldPosition(float x, float y);
+    std::optional<CellPosition> ConvertMouseToFieldPosition(float x, float y);
 
     void ProcessGameSummary();
 
-    ConwayGameSystem* _game { nullptr };
-    UiConfig _uiConfig;
+    ConwayGameController* _game { nullptr };
+    const UiConfig* _uiConfig{nullptr};
     EditorState _editorState {EditorState::None};
+    EcsWorld* _ecsWorld{nullptr};
+    const CellLocator* _cellLocator{nullptr};
 
 };

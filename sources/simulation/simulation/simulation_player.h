@@ -20,7 +20,7 @@ public: //< ManualMode
 
 public: //< FixedSpeedMode
     void Resume();
-    void SetFixedSpeedMode(double stepsPerSeconds);
+    void SetFixedSpeedMode(double stepsPerSecond);
     void UpdateElapsedTime(Common::Time elapsedTime, Common::Time timePerStep);
 
 private:

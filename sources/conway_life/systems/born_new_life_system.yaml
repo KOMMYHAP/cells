@@ -1,0 +1,14 @@
+﻿name: 'born_new_life_system'
+components:
+  - name: 'has_life_tag'
+    excluded: true
+    readonly: true
+    is_tag: true
+  - name: 'will_born_tag'
+    readonly: true
+    is_tag: true
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

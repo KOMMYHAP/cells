@@ -1,0 +1,14 @@
+﻿name: 'collect_neighbours_count_system'
+components:
+  - name: 'should_collect_neighbour'
+    readonly: true
+    is_tag: true
+  - name: 'neighbours'
+    readonly: true
+  - name: 'neighbours_count'
+    readonly: false
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

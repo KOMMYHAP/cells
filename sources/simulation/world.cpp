@@ -12,10 +12,9 @@ World::World(WorldStatistics& stats)
     _tickCalculator.Setup(targetSimulationTime);
 }
 
-void World::AddSimulationSystem(Phase phase, std::unique_ptr<SimulationSystem> system)
+void World::AddSimulationSystem(Common::Condition condition, std::unique_ptr<SimulationSystem> system)
 {
-    Systems& systems = _simulationSystems[phase];
-    systems.push_back(std::move(system));
+    _systems.emplace_back(condition, std::move(system));
 }
 
 void World::Update(const Common::Time elapsedTime)
@@ -24,28 +23,19 @@ void World::Update(const Common::Time elapsedTime)
     if (_player.GetCurrentMode() == SimulationPlayer::Mode::FixedSpeed) {
         _player.UpdateElapsedTime(elapsedTime, _worldStatistics->GetTickTime());
     }
-    while (_player.ShouldPlayFrame()) {
+    _conditions.UpdateConditions();
+    if (_player.ShouldPlayFrame()) {
         _player.PlayFrame();
-        Tick();
     }
+    SimulateStep();
     _worldStatistics->AddFrame(frameClock.GetElapsedTime());
 }
 
-void World::SetPhase(Phase phase)
+void World::SimulateStep()
 {
-    _activePhase = phase;
-}
-
-Common::Time World::GetTickTime() const
-{
-    return _worldStatistics->GetTickTime();
-}
-
-void World::Tick()
-{
-    const Common::Clock tickClock;
-    for (const auto& system : _simulationSystems[_activePhase]) {
-        system->DoSystemUpdate();
+    for (const auto& data : _systems) {
+        if (_conditions.Check(data.condition)) {
+            data.system->DoSystemUpdate();
+        }
     }
-    _worldStatistics->AddTick(tickClock.GetElapsedTime());
 }
