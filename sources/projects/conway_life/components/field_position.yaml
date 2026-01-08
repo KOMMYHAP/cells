@@ -1,6 +1,0 @@
-name: 'field_position'
-fields:
-  - name: 'x'
-    type: 'int32_t'
-  - name: 'y'
-    type: 'int32_t'
