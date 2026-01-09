@@ -1,13 +1,9 @@
-﻿name: 'draw_alive_cell_system'
+﻿name: 'draw_cell_particle_system'
 components:
   - name: 'cell_position'
     readonly: true
-  - name: 'has_life_tag'
-    readonly: true
-    is_tag: true
   - name: 'cell_particle'
-    excluded: true
-    is_tag: true
+    readonly: true
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false
@@ -17,6 +13,5 @@ resources:
     include_path: 'widgets/world/world_rasterization_target.h'
   - name: 'game_config'
     forward_declaration_only: true
-    readonly: true
     include_path: 'game_config.h'
 is_ecs: true

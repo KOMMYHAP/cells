@@ -1,0 +1,6 @@
+name: 'cell_particle'
+fields:
+  - name: lifetime
+    type: int32_t
+  - name: color
+    type: uint32_t

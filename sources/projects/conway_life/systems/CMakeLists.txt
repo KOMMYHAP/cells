@@ -10,4 +10,11 @@ target_sources(${PROJECT_NAME}
         remove_died_cell_system.cpp
         invalidate_neighbours_system.cpp
         update_game_controller_system.cpp
+        draw_cell_particle_system.cpp
+        create_birth_emitter_system.cpp
+        create_death_emitter_system.cpp
+        emit_new_particle_system.cpp
+        update_emitter_system.cpp
+        update_particle_system.cpp
+        draw_empty_cell_system.cpp
 )

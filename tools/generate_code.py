@@ -22,7 +22,7 @@ def main():
             'name': 'simulation_components'
         },
         {
-            'root': Path('../sources/conway_life/components'),
+            'root': Path('../sources/projects/conway_life/components'),
             'name': 'conway_life_components'
         }
     ]
@@ -36,7 +36,7 @@ def main():
             'name': 'ui_systems'
         },
         {
-            'root': Path('../sources/conway_life/systems'),
+            'root': Path('../sources/projects/conway_life/systems'),
             'name': 'conway_life_systems'
         }
     ]

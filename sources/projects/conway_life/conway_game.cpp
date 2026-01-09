@@ -1,7 +1,5 @@
 #include "conway_game.h"
 
-#include "components/generated/auto_field_position.h"
-
 void ConwayGameController::Restart()
 {
     _previousGenerations.clear();

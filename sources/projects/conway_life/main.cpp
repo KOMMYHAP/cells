@@ -1,5 +1,6 @@
 #include "conway_debug_widget.h"
 #include "conway_game.h"
+#include "game_config.h"
 #include "menu_widgets/base/group_menu_widget.h"
 #include "menu_widgets/engine_summary_widget.h"
 #include "menu_widgets/simulation_player_widget.h"
@@ -18,12 +19,19 @@
 
 #include "systems/generated/auto_make_born_new_life_system.h"
 #include "systems/generated/auto_make_collect_neighbours_count_system.h"
+#include "systems/generated/auto_make_create_birth_emitter_system.h"
+#include "systems/generated/auto_make_create_death_emitter_system.h"
 #include "systems/generated/auto_make_draw_alive_cell_system.h"
+#include "systems/generated/auto_make_draw_cell_particle_system.h"
+#include "systems/generated/auto_make_draw_empty_cell_system.h"
+#include "systems/generated/auto_make_emit_new_particle_system.h"
 #include "systems/generated/auto_make_invalidate_neighbours_system.h"
 #include "systems/generated/auto_make_process_alive_cell_vitality_system.h"
 #include "systems/generated/auto_make_process_empty_cell_vitality_system.h"
 #include "systems/generated/auto_make_remove_died_cell_system.h"
+#include "systems/generated/auto_make_update_emitter_system.h"
 #include "systems/generated/auto_make_update_game_controller_system.h"
+#include "systems/generated/auto_make_update_particle_system.h"
 
 int main()
 {
@@ -76,6 +84,7 @@ int main()
     auto world = std::make_unique<World>(*worldStatistics);
     SimulationStorage& simulationStorage = world->ModifySimulation();
     simulationStorage.Store<UiConfig>(uiConfig);
+    simulationStorage.Store<GameConfig>();
     auto worldWidget = uiSystem->MakeWorldWidget(*world, worldWidgetRect);
 
     simulationStorage.Store<WorldRasterizationTarget>(worldWidget->AccessRasterizationTexture(), SDL_Color { 0, 0, 0, SDL_ALPHA_OPAQUE }, uiConfig.cellPixelsSize);
@@ -142,12 +151,19 @@ int main()
     world->AddSimulationSystem(conditionGameInProcess, MakeCollectNeighboursCountSystem(simulationStorage));
     world->AddSimulationSystem(conditionGameInProcess, MakeProcessAliveCellVitalitySystem(simulationStorage));
     world->AddSimulationSystem(conditionGameInProcess, MakeProcessEmptyCellVitalitySystem(simulationStorage));
+    world->AddSimulationSystem(conditionGameInProcess, MakeCreateBirthEmitterSystem(simulationStorage));
+    world->AddSimulationSystem(conditionGameInProcess, MakeCreateDeathEmitterSystem(simulationStorage));
     world->AddSimulationSystem(conditionAlways, MakeRemoveDiedCellSystem(simulationStorage));
     world->AddSimulationSystem(conditionAlways, MakeBornNewLifeSystem(simulationStorage));
+    world->AddSimulationSystem(conditionGameInProcess, MakeEmitNewParticleSystem(simulationStorage));
+    world->AddSimulationSystem(conditionAlways, MakeUpdateEmitterSystem(simulationStorage));
+    world->AddSimulationSystem(conditionAlways, MakeUpdateParticleSystem(simulationStorage));
     world->AddSimulationSystem(conditionGameInProcess, MakeUpdateGameControllerSystem(simulationStorage));
 
     world->AddSimulationSystem(conditionAlways, MakeWorldRasterizationLockSystem(simulationStorage));
     world->AddSimulationSystem(conditionAlways, MakeDrawAliveCellSystem(simulationStorage));
+    world->AddSimulationSystem(conditionAlways, MakeDrawCellParticleSystem(simulationStorage));
+    world->AddSimulationSystem(conditionAlways, MakeDrawEmptyCellSystem(simulationStorage));
     world->AddSimulationSystem(conditionAlways, MakeWorldRasterizationUnlockSystem(simulationStorage));
 
     simulationPlayer.SetFixedSpeedMode(10.0);

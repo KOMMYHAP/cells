@@ -1,13 +1,7 @@
-﻿name: 'draw_alive_cell_system'
+﻿name: 'create_death_emitter_system'
 components:
-  - name: 'cell_position'
+  - name: 'will_die_tag'
     readonly: true
-  - name: 'has_life_tag'
-    readonly: true
-    is_tag: true
-  - name: 'cell_particle'
-    excluded: true
-    is_tag: true
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false

@@ -1,0 +1,10 @@
+name: 'cell_emitter'
+fields:
+  - name: emitter_lifetime
+    type: int32_t
+  - name: particle_lifetime
+    type: int32_t
+  - name: color_from
+    type: uint32_t
+  - name: color_to
+    type: uint32_t
