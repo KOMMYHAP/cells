@@ -7,9 +7,6 @@ World::World(WorldStatistics& stats)
     : _worldStatistics(&stats)
 {
     _simulationStorage.Store<EcsWorld>();
-
-    const Common::Time targetSimulationTime = Common::Time::FromMilliseconds(30);
-    _tickCalculator.Setup(targetSimulationTime);
 }
 
 void World::AddSimulationSystem(Common::Condition condition, std::unique_ptr<SimulationSystem> system)

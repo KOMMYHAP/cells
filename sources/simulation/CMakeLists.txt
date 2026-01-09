@@ -15,8 +15,6 @@ add_subdirectory(simulation)
 target_sources(${PROJECT_NAME} PRIVATE
         simulation_pch.h
         simulation_registrable_system.cpp
-        tick_calculator.h
-        tick_calculator.cpp
         world.cpp
         cell_position_utils.h
         direction_utils.h
