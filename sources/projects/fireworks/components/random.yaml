@@ -1,0 +1,4 @@
+name: 'random'
+fields:
+  - name: value
+    type: uint32_t

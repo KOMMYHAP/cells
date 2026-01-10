@@ -1,0 +1,8 @@
+name: 'particle_lifetime'
+fields:
+  - name: initial_lifetime
+    type: int32_t
+  - name: lifetime
+    type: int32_t
+  - name: key
+    type: float

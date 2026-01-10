@@ -6,6 +6,8 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE
         main.cpp
         pch.h
+        game_config.cpp
+        game_config.h
 )
 
 add_subdirectory(components/generated)

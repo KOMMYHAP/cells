@@ -1,0 +1,8 @@
+name: 'particle_color'
+fields:
+  - name: color_from
+    type: uint32_t
+  - name: color_to
+    type: uint32_t
+  - name: color
+    type: uint32_t

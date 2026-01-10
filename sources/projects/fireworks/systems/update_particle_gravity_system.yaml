@@ -1,0 +1,9 @@
+﻿name: 'update_particle_gravity_system'
+components:
+  - name: 'particle_velocity'
+    readonly: false
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: true

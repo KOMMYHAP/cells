@@ -1,0 +1,15 @@
+﻿name: 'update_particle_color_system'
+components:
+  - name: 'particle_lifetime'
+    readonly: true
+  - name: 'particle_color'
+    readonly: false
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'game_config'
+    forward_declaration_only: true
+    readonly: true
+    include_path: 'game_config.h'
+is_ecs: true

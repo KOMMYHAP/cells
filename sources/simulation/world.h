@@ -37,7 +37,6 @@ private:
 
     gsl::not_null<WorldStatistics*> _worldStatistics;
     SimulationPlayer _player;
-    SimulationTickCalculator _tickCalculator;
     SimulationStorage _simulationStorage;
     Common::ConditionSystem _conditions;
     std::vector<SystemData> _systems;

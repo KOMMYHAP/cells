@@ -1,2 +1,3 @@
 add_subdirectory(application)
 add_subdirectory(conway_life)
+add_subdirectory(fireworks)

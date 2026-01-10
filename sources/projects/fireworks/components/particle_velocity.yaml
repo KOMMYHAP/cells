@@ -1,0 +1,10 @@
+name: 'particle_velocity'
+fields:
+  - name: x
+    type: float
+  - name: y
+    type: float
+  - name: dx
+    type: float
+  - name: dy
+    type: float

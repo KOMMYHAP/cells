@@ -1,0 +1,18 @@
+﻿name: 'draw_empty_cell_system'
+components:
+  - name: 'cell_position'
+    readonly: true
+  - name: 'empty_tag'
+    is_tag: true
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'world_rasterization_target'
+    forward_declaration_only: true
+    include_path: 'widgets/world/world_rasterization_target.h'
+  - name: 'game_config'
+    forward_declaration_only: true
+    readonly: true
+    include_path: 'game_config.h'
+is_ecs: true
