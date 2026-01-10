@@ -1,4 +1,4 @@
-from utils import snake_case_to_camel_case
+from utils import snake_case_to_camel_case, decapitalize
 
 
 class YamlComponentField:
@@ -35,12 +35,13 @@ class YamlComponentField:
         return self.type
 
     def _get_jinja_name(self):
+        name = decapitalize(snake_case_to_camel_case(self.name))
         if self.array_size:
-            return f'{self.name}[{self.array_size}]'
+            return f'{name}[{self.array_size}]'
         if self.array_size_constant:
             cpp_constant_name = snake_case_to_camel_case(self.array_size_constant)
-            return f'{self.name}[{cpp_constant_name}]'
-        return self.name
+            return f'{name}[{cpp_constant_name}]'
+        return name
 
     def to_jinja(self):
         return {

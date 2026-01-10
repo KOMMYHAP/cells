@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from utils import snake_case_to_camel_case, get_autogen_directory
+from utils import snake_case_to_camel_case, get_autogen_directory, decapitalize
 from yaml_ecs_component import YamlComponent
 
 
@@ -30,7 +30,7 @@ class YamlSystemResource:
 
     def get_cpp_field(self) -> str:
         resource_type = self.get_resource_type_name()
-        name = resource_type[0].lower() + resource_type[1:]
+        name = decapitalize(resource_type)
         if self.readonly:
             resource_type = 'const ' + resource_type
         return f'gsl::not_null<{resource_type}*> _{name}'

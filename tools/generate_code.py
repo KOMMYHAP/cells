@@ -24,6 +24,10 @@ def main():
         {
             'root': Path('../sources/projects/conway_life/components'),
             'name': 'conway_life_components'
+        },
+        {
+            'root': Path('../sources/projects/fireworks/components'),
+            'name': 'fireworks_components'
         }
     ]
     system_entries = [
@@ -38,6 +42,10 @@ def main():
         {
             'root': Path('../sources/projects/conway_life/systems'),
             'name': 'conway_life_systems'
+        },
+        {
+            'root': Path('../sources/projects/fireworks/systems'),
+            'name': 'fireworks_systems'
         }
     ]
 
