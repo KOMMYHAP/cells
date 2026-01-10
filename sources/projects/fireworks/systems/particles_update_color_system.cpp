@@ -1,4 +1,10 @@
-﻿
+﻿#include "sdl_utils.h"
+#include "generated/auto_particles_update_color_system.h"
+
+#include "SDL3/SDL_pixels.h"
+#include "components/generated/auto_particle_color.h"
+#include "components/generated/auto_particle_lifetime.h"
+
 static SDL_Color LerpSdlColor(float t, SDL_Color from, SDL_Color to)
 {
     SDL_Color color;
@@ -9,7 +15,9 @@ static SDL_Color LerpSdlColor(float t, SDL_Color from, SDL_Color to)
     return color;
 }
 
-// const SDL_Color colorFrom = UnpackColor(cellEmitter.color_from);
-// const SDL_Color colorTo = UnpackColor(cellEmitter.color_to);
-// const SDL_Color newColor = LerpSdlColor(t, colorFrom, colorTo);
-// cellParticle.color = PackColor(newColor);
+void UpdateParticleColorSystem::DoProcessComponents(EcsEntity id, const ParticleLifetime& particleLifetime, ParticleColor& particleColor)
+{
+    const float t = particleLifetime.key;
+    SDL_Color color = LerpSdlColor(t, UnpackColor(particleColor.startColor), UnpackColor(particleColor.endColor));
+    particleColor.color = PackColor(color);
+}

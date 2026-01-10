@@ -1,13 +1,17 @@
-﻿name: 'update_particle_lifetime_system'
+﻿name: 'particles_update_position_system'
 components:
-  - name: 'emitter'
+  - name: 'particle_velocity'
     readonly: true
-  - name: 'particle_lifetime'
+  - name: 'particle_position'
     readonly: false
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false
     include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'game_controller'
+    forward_declaration_only: true
+    readonly: true
+    include_path: 'game_controller.h'
   - name: 'game_config'
     forward_declaration_only: true
     readonly: true

@@ -1,8 +1,7 @@
-﻿#include "SDL3/SDL_pixels.h"
+﻿#include "generated/auto_update_particle_lifetime_system.h"
+
 #include "components/generated/auto_emitter.h"
 #include "components/generated/auto_particle_lifetime.h"
-#include "generated/auto_update_particle_lifetime_system.h"
-#include "game_config.h"
 
 void UpdateParticleLifetimeSystem::DoProcessComponents(EcsEntity id, const Emitter& emitter, ParticleLifetime& particleLifetime)
 {
@@ -11,6 +10,6 @@ void UpdateParticleLifetimeSystem::DoProcessComponents(EcsEntity id, const Emitt
         return;
     }
 
-    const float t = static_cast<float>(particleLifetime.initialLifetime - particleLifetime.lifetime) / static_cast<float>(particleLifetime.initialLifetime);
-    cellParticle.lifetime -= 1;
+    particleLifetime.lifetime -= 1;
+    particleLifetime.key = static_cast<float>(particleLifetime.initialLifetime - particleLifetime.lifetime) / static_cast<float>(particleLifetime.initialLifetime);
 }

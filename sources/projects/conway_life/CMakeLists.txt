@@ -15,8 +15,6 @@ target_sources(${PROJECT_NAME} PRIVATE
         conway_debug_widget.h
         conway_debug_widget.cpp
         game_config.h
-        sdl_utils.cpp
-        sdl_utils.h
 )
 
 add_subdirectory(components/generated)

@@ -1,11 +1,14 @@
-﻿name: 'emit_new_particle_system'
+﻿name: 'emitter_init_system'
 components:
-  - name: 'new_particle_tag'
-    is_tag: true
+  - name: 'emitter_init_request'
+    readonly: true
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false
     include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'game_controller'
+    forward_declaration_only: true
+    include_path: 'game_controller.h'
   - name: 'game_config'
     forward_declaration_only: true
     readonly: true

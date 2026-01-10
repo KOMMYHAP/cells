@@ -1,7 +1,9 @@
-﻿name: 'update_emitter_system'
+﻿name: 'particles_init_system'
 components:
-  - name: 'emitter'
-    readonly: false
+  - name: 'random'
+    readonly: true
+  - name: 'particle_init_request'
+    is_tag: true
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false

@@ -14,7 +14,7 @@ public:
     float GetNextValue();
 
     // Returns value from range [start; end]
-    uint32_t GetValue(uint32_t start, uint32_t end);
+    uint32_t GetValue(uint32_t start = 0, uint32_t end = std::numeric_limits<uint32_t>::max());
 
     template <std::ranges::random_access_range Ranges>
         requires std::permutable<std::ranges::iterator_t<Ranges>>

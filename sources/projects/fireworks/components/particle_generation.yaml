@@ -1,0 +1,4 @@
+name: 'particle_generation'
+fields:
+  - name: generation
+    type: int32_t

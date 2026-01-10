@@ -1,8 +1,8 @@
 name: 'particle_color'
 fields:
-  - name: color_from
+  - name: start_color
     type: uint32_t
-  - name: color_to
+  - name: end_color
     type: uint32_t
   - name: color
     type: uint32_t

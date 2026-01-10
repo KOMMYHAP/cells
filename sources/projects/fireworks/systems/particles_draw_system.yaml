@@ -1,15 +1,14 @@
-﻿name: 'update_particle_color_system'
+﻿name: 'particles_draw_system'
 components:
-  - name: 'particle_lifetime'
+  - name: 'cell_position'
     readonly: true
   - name: 'particle_color'
-    readonly: false
+    readonly: true
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false
     include_path: 'simulation/simulation_ecs_config.h'
-  - name: 'game_config'
+  - name: 'world_rasterization_target'
     forward_declaration_only: true
-    readonly: true
-    include_path: 'game_config.h'
+    include_path: 'widgets/world/world_rasterization_target.h'
 is_ecs: true

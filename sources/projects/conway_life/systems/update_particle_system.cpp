@@ -1,8 +1,8 @@
-﻿#include "SDL3/SDL_pixels.h"
+﻿#include "sdl_utils.h"
+#include "SDL3/SDL_pixels.h"
 #include "components/generated/auto_cell_emitter.h"
 #include "components/generated/auto_cell_particle.h"
 #include "generated/auto_update_particle_system.h"
-#include "sdl_utils.h"
 
 static SDL_Color LerpSdlColor(float t, SDL_Color from, SDL_Color to)
 {

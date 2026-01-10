@@ -1,6 +1,6 @@
-﻿name: 'update_particle_velocity_system'
+﻿name: 'particles_update_gravity_system'
 components:
-  - name: 'particle_lifetime'
+  - name: 'particle_position'
     readonly: true
   - name: 'particle_velocity'
     readonly: false
@@ -8,4 +8,8 @@ resources:
   - name: 'ecs_world'
     forward_declaration_only: false
     include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'game_controller'
+    forward_declaration_only: true
+    readonly: true
+    include_path: 'game_controller.h'
 is_ecs: true

@@ -15,8 +15,5 @@ public:
     void SetParticlesCount(int32_t count);
     int32_t GetParticlesCount() const;
 
-    Random::Accessor ModifyRandom() { return Random::Accessor { _randomEngine }; }
-
 private:
-    Random::Engine _randomEngine;
 };
