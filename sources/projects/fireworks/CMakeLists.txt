@@ -6,7 +6,8 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_sources(${PROJECT_NAME} PRIVATE
         main.cpp
         pch.h
-        game_config.cpp
+        game_controller.cpp
+        game_controller.h
         game_config.h
 )
 
