@@ -38,7 +38,7 @@ public:
 
     struct FireworksConfig {
         int32_t emitterFramesToLive { 0 };
-        int32_t emitterFramesToEmit { 0 };
+        float emitterParticlesPerSeconds { 0.0f };
         float minDirectionX { 0.0f };
         float maxDirectionX { 0.0f };
         float minDirectionY { 0.0f };

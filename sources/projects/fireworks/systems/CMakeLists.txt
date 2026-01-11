@@ -9,10 +9,14 @@ target_sources(${PROJECT_NAME}
         particles_update_lifetime_system.cpp
         particles_update_position_system.cpp
         particles_update_stats_system.cpp
+        particles_destroy_out_of_world_system.cpp
+
         emitters_init_system.cpp
         emitters_update_lifetime_system.cpp
         emitters_update_stats_system.cpp
+        emitters_create_new_particles_system.cpp
+        emitters_update_random_system.cpp
+
         empty_cell_draw_system.cpp
         game_controller_update_system.cpp
-        particles_destroy_out_of_world_system.cpp
 )

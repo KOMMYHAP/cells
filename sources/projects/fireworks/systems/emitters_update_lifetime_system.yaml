@@ -1,7 +1,5 @@
 ﻿name: 'emitters_update_lifetime_system'
 components:
-  - name: 'particle_position'
-    readonly: true
   - name: 'emitter'
     readonly: false
 resources:

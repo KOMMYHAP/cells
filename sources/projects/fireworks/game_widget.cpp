@@ -28,8 +28,10 @@ BaseMenuWidget::MenuWidgetAction GameWidget::ProcessMenuItem(Common::Time /*time
     };
     ImGui::DragFloat2("Center", gravityCenterXY);
     _gameController->SetGravityCenter(CellPosition { static_cast<int16_t>(gravityCenterXY[0]), static_cast<int16_t>(gravityCenterXY[1]) });
-    float gravityConstant = _gameController->GetGravityConstant();
-    ImGui::DragFloat("Constant", &gravityConstant);
+    double gravityConstant = _gameController->GetGravityConstant();
+    double gravityMin = std::numeric_limits<double>::min();
+    double gravityMax = std::numeric_limits<double>::max();
+    ImGui::DragScalar("Constant", ImGuiDataType_Double, &gravityConstant, 100000.0f, &gravityMin, &gravityMax, "%f");
     _gameController->SetGravityConstant(gravityConstant);
 
     ProcessFireworksConfig(_gameConfig->ModifyFireworks()[0]);
@@ -47,7 +49,7 @@ void GameWidget::ProcessFireworksConfig(GameConfig::FireworksConfig& config)
         ImGui::Text("Emitter:");
         ImGui::PushID("Emitters");
         ImGui::DragInt("Frames to live", &config.emitterFramesToLive, 1.0f, 1, INT_MAX, "%d", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::DragInt("Frames to emit", &config.emitterFramesToEmit, 1.0f, 1, INT_MAX, "%d", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat("Particles/sec", &config.emitterParticlesPerSeconds, 1.0f, 0.0f, FLT_MAX, "%.1f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::PopID();
     }
     {
@@ -55,7 +57,7 @@ void GameWidget::ProcessFireworksConfig(GameConfig::FireworksConfig& config)
         ImGui::PushID("Particles");
         ImGui::DragFloat2("Direction X (min/max)", directionX, 0.02f, -1.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::DragFloat2("Direction Y (min/max)", directionY, 0.02f, -1.0f, 1.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::DragFloat("Speed (min/max)", speed, 10.0f, 0.0f, 1000.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat2("Speed (min/max)", speed, 10.0f, 0.0f, 1000.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
         ImGui::DragInt("Frames to live", &config.framesToLive, 1.0f, 1, INT_MAX, "%d", ImGuiSliderFlags_AlwaysClamp);
         ImGui::PopID();
     }

@@ -12,6 +12,8 @@
 #include "systems/generated/auto_make_emitters_init_system.h"
 #include "systems/generated/auto_make_emitters_update_lifetime_system.h"
 #include "systems/generated/auto_make_emitters_update_stats_system.h"
+#include "systems/generated/auto_make_emitters_update_random_system.h"
+#include "systems/generated/auto_make_emitters_create_new_particles_system.h"
 #include "systems/generated/auto_make_empty_cell_draw_system.h"
 #include "systems/generated/auto_make_game_controller_update_system.h"
 #include "systems/generated/auto_make_particles_destroy_out_of_world_system.h"
@@ -48,22 +50,23 @@ int main()
     };
 
     GameConfig::FireworksConfig & fireworks = gameConfig.ModifyFireworks().emplace_back();
-    fireworks.emitterFramesToLive = 10000;
-    fireworks.emitterFramesToEmit = 20;
-    fireworks.minDirectionX = -0.5f;
-    fireworks.maxDirectionX = 0.5f;
-    fireworks.minDirectionY = -0.5f;
+    fireworks.emitterFramesToLive = std::numeric_limits<int32_t>::max();
+    fireworks.emitterParticlesPerSeconds = 1000;
+    fireworks.minDirectionX = -0.15f;
+    fireworks.maxDirectionX = 0.15f;
+    fireworks.minDirectionY = 0.5f;
     fireworks.maxDirectionY = 0.5f;
-    fireworks.minSpeed = 10.0f;
-    fireworks.maxSpeed = 100.0f;
-    fireworks.framesToLive = 100;
-    fireworks.colorFrom = SDL_Color{ 0, 0, 0, SDL_ALPHA_OPAQUE };
+    fireworks.minSpeed = 300.0f;
+    fireworks.maxSpeed = 1000.0f;
+    fireworks.framesToLive = 200;
+    fireworks.colorFrom = SDL_Color{ 255, 0, 0, SDL_ALPHA_OPAQUE };
     fireworks.colorTo = SDL_Color{ 255, 255, 0, SDL_ALPHA_OPAQUE };
 
     auto uiSystem = std::make_unique<UiSystem>(gameConfig.ui);
     EcsWorld& ecsWorld = simulationStorage.Modify<EcsWorld>();
     GameController& gameController = simulationStorage.Store<GameController>();
     gameController.SetGravityEnabled(false);
+    gameController.SetGravityConstant(100000000.0f);
 
     uiSystem->ModifyMenuRootWidget().AddWidget<GameWidget>("Game", gameController, gameConfig);
 
@@ -80,16 +83,19 @@ int main()
     const Common::Condition condAlways = conditions.Register("enabled_always", [] { return true; });
     const Common::Condition condGravity = conditions.Register("gravity", [&gameController] { return gameController.IsGravityEnabled(); });
 
-    world->AddSimulationSystem(condAlways, MakeEmittersInitSystem(simulationStorage));
     world->AddSimulationSystem(condAlways, MakeEmittersUpdateLifetimeSystem(simulationStorage));
+    world->AddSimulationSystem(condAlways, MakeEmittersUpdateRandomSystem(simulationStorage));
+    world->AddSimulationSystem(condAlways, MakeEmittersInitSystem(simulationStorage));
+    world->AddSimulationSystem(condAlways, MakeEmittersCreateNewParticlesSystem(simulationStorage));
     world->AddSimulationSystem(condAlways, MakeEmittersUpdateStatsSystem(simulationStorage));
     world->AddSimulationSystem(condAlways, MakeGameControllerUpdateSystem(simulationStorage));
-    world->AddSimulationSystem(condAlways, MakeParticlesInitSystem(simulationStorage));
+
+    world->AddSimulationSystem(condAlways, MakeParticlesUpdateLifetimeSystem(simulationStorage));
     world->AddSimulationSystem(condGravity, MakeParticlesUpdateGravitySystem(simulationStorage));
     world->AddSimulationSystem(condAlways, MakeParticlesUpdatePositionSystem(simulationStorage));
     world->AddSimulationSystem(condAlways, MakeParticlesDestroyOutOfWorldSystem(simulationStorage));
-    world->AddSimulationSystem(condAlways, MakeParticlesUpdateLifetimeSystem(simulationStorage));
     world->AddSimulationSystem(condAlways, MakeParticlesUpdateColorSystem(simulationStorage));
+    world->AddSimulationSystem(condAlways, MakeParticlesInitSystem(simulationStorage));
     world->AddSimulationSystem(condAlways, MakeParticlesUpdateStatsSystem(simulationStorage));
 
     world->AddSimulationSystem(condAlways, MakeWorldRasterizationLockSystem(simulationStorage));

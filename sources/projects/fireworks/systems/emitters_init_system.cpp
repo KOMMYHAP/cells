@@ -6,6 +6,7 @@
 #include "components/generated/auto_emitter_random.h"
 #include "components/generated/auto_particle_position.h"
 #include "game_config.h"
+#include "game_controller.h"
 
 void EmittersInitSystem::DoProcessComponents(EcsEntity id, const EmitterInitRequest& emitterInitRequest)
 {
@@ -19,9 +20,10 @@ void EmittersInitSystem::DoProcessComponents(EcsEntity id, const EmitterInitRequ
     }
 
     _ecsWorld->emplace<Emitter>(id,
-        fireworksConfig->emitterFramesToEmit,
-        0, //< emit new particle as soon as possible
+        fireworksConfig->emitterParticlesPerSeconds,
+        0.0f,
         fireworksConfig->emitterFramesToLive,
         generation);
+    _ecsWorld->emplace<EmitterRandom>(id, _gameController->ModifyRandom().GetValue());
     _ecsWorld->emplace<ParticlePosition>(id, emitterInitRequest.x, emitterInitRequest.y);
 }

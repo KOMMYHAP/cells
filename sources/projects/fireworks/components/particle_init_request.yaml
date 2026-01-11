@@ -1,5 +1,7 @@
 name: 'particle_init_request'
 fields:
+  - name: random_seed
+    type: uint32_t
   - name: generation
     type: int32_t
   - name: x

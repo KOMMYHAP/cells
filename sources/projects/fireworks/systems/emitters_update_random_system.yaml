@@ -1,0 +1,13 @@
+﻿name: 'emitters_update_random_system'
+components:
+  - name: 'emitter_random'
+    readonly: false
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+  - name: 'game_controller'
+    forward_declaration_only: true
+    readonly: false
+    include_path: 'game_controller.h'
+is_ecs: true

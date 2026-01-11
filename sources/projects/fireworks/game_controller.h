@@ -11,8 +11,8 @@ public:
     CellPosition GetGravityCenter() const { return _gravityCenter; }
     void SetGravityCenter(CellPosition gravityCenter) { _gravityCenter = gravityCenter; }
 
-    float GetGravityConstant() const { return _gravityConstant; }
-    void SetGravityConstant(float gravityConstant) { _gravityConstant = gravityConstant; }
+    double GetGravityConstant() const { return _gravityConstant; }
+    void SetGravityConstant(double gravityConstant) { _gravityConstant = gravityConstant; }
 
     bool IsGravityEnabled() const { return _gravityEnabled; }
     void SetGravityEnabled(bool value) { _gravityEnabled = value; }
@@ -29,7 +29,7 @@ private:
     Random::Engine _randomEngine;
     Common::Time _frameTime;
     CellPosition _gravityCenter {};
-    float _gravityConstant { 0.0f };
+    double _gravityConstant { 0.0f };
     bool _gravityEnabled { false };
     int32_t _emittersCount { 0 };
     int32_t _particlesCount { 0 };

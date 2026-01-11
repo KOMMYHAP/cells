@@ -26,9 +26,12 @@ void ParticlesInitSystem::DoProcessComponents(EcsEntity id, const ParticleInitRe
     _ecsWorld->emplace<ParticleGeneration>(id, particleInitRequest.generation);
     _ecsWorld->emplace<ParticleLifetime>(id, fireworksConfig->framesToLive, fireworksConfig->framesToLive, 0.0f);
     _ecsWorld->emplace<ParticlePosition>(id, particleInitRequest.x, particleInitRequest.y);
-    const float speed = 0.5f * (fireworksConfig->maxSpeed - fireworksConfig->minSpeed);
-    const float directionX = 0.5f * (fireworksConfig->maxDirectionX - fireworksConfig->minDirectionX);
-    const float directionY = 0.5f * (fireworksConfig->maxDirectionY - fireworksConfig->minDirectionY);
+
+    const float floatRandomValue = particleInitRequest.randomSeed / static_cast<float>(std::numeric_limits<uint32_t>::max());
+
+    const float speed = fireworksConfig->minSpeed + floatRandomValue * (fireworksConfig->maxSpeed - fireworksConfig->minSpeed);
+    const float directionX = fireworksConfig->minDirectionX + floatRandomValue * (fireworksConfig->maxDirectionX - fireworksConfig->minDirectionX);
+    const float directionY = fireworksConfig->minDirectionY + floatRandomValue * (fireworksConfig->maxDirectionY - fireworksConfig->minDirectionY);
     ParticleVelocity & velocity = _ecsWorld->emplace<ParticleVelocity>(id);
     velocity.valueX = directionX * speed;
     velocity.valueY = directionY * speed;

@@ -4,12 +4,10 @@
 #include "components/generated/auto_particle_position.h"
 #include "components/generated/auto_particle_init_request.h"
 
-void EmittersUpdateLifetimeSystem::DoProcessComponents(EcsEntity /*id*/, const ParticlePosition& particlePosition, Emitter& emitter)
+void EmittersUpdateLifetimeSystem::DoProcessComponents(EcsEntity id, Emitter& emitter)
 {
-    emitter.framesToEmit -= 1;
-    if (emitter.framesToEmit <= 0) {
-        const EcsEntity particle = _ecsWorld->create();
-        _ecsWorld->emplace<ParticleInitRequest>(particle, emitter.generation, particlePosition.x, particlePosition.y);
-        emitter.framesToEmit = emitter.initialFramesToEmit;
+    emitter.framesToLive -= 1;
+    if (emitter.framesToLive <= 0) {
+        _ecsWorld->destroy(id);
     }
 }
