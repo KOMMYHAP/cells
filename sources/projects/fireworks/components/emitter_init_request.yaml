@@ -2,3 +2,7 @@ name: 'emitter_init_request'
 fields:
   - name: generation
     type: int32_t
+  - name: x
+    type: float
+  - name: y
+    type: float

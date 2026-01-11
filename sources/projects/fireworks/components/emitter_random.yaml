@@ -1,4 +1,4 @@
-name: 'random'
+name: 'emitter_random'
 fields:
   - name: value
     type: uint32_t

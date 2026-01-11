@@ -1,9 +1,7 @@
 ﻿name: 'particles_init_system'
 components:
-  - name: 'random'
-    readonly: true
   - name: 'particle_init_request'
-    is_tag: true
+    readonly: true
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false

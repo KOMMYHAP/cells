@@ -1,4 +1,4 @@
-﻿name: 'emitter_init_system'
+﻿name: 'emitters_init_system'
 components:
   - name: 'emitter_init_request'
     readonly: true

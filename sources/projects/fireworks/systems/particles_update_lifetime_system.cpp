@@ -1,9 +1,8 @@
-﻿#include "generated/auto_update_particle_lifetime_system.h"
+﻿#include "generated/auto_particles_update_lifetime_system.h"
 
-#include "components/generated/auto_emitter.h"
 #include "components/generated/auto_particle_lifetime.h"
 
-void UpdateParticleLifetimeSystem::DoProcessComponents(EcsEntity id, const Emitter& emitter, ParticleLifetime& particleLifetime)
+void ParticlesUpdateLifetimeSystem::DoProcessComponents(EcsEntity id, ParticleLifetime& particleLifetime)
 {
     if (particleLifetime.lifetime <= 0) {
         _ecsWorld->destroy(id);

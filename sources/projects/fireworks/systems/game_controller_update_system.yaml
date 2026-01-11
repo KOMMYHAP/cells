@@ -1,0 +1,11 @@
+﻿name: 'game_controller_update_system'
+resources:
+  - name: 'game_controller'
+    forward_declaration_only: true
+    readonly: false
+    include_path: 'game_controller.h'
+  - name: 'world_statistics'
+    forward_declaration_only: true
+    readonly: true
+    include_path: 'world_statistics.h'
+is_ecs: false

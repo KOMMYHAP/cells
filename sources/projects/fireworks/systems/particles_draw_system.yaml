@@ -1,8 +1,10 @@
 ﻿name: 'particles_draw_system'
 components:
-  - name: 'cell_position'
+  - name: 'particle_position'
     readonly: true
   - name: 'particle_color'
+    readonly: true
+  - name: 'borders_inside_camera_tag'
     readonly: true
 resources:
   - name: 'ecs_world'

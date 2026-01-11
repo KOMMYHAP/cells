@@ -1,17 +1,36 @@
-﻿#include "generated/auto_emit_new_particle_system.h"
+﻿#include "generated/auto_particles_init_system.h"
 
-#include "components/generated/auto_emitter.h"
+#include "components/generated/auto_emitter_random.h"
+#include "components/generated/auto_particle_color.h"
+#include "components/generated/auto_particle_generation.h"
 #include "components/generated/auto_particle_init_request.h"
+#include "components/generated/auto_particle_lifetime.h"
+#include "components/generated/auto_particle_position.h"
+#include "components/generated/auto_particle_velocity.h"
 #include "game_config.h"
+#include "sdl_utils.h"
 
-void EmitNewParticleSystem::DoProcessComponents(EcsEntity id, const Emitter& emitter)
+void ParticlesInitSystem::DoProcessComponents(EcsEntity id, const ParticleInitRequest& particleInitRequest)
 {
-    _ecsWorld->remove<NewParticleTag>(id);
-    if (emitter.generation < 0 || emitter.generation >= _gameConfig->fireworks.size()) {
-        ASSERT(false, "invalid emitter's generation!");
+    const GameConfig::FireworksConfig* fireworksConfig = _gameConfig->FindFireworks(particleInitRequest.generation);
+    if (!fireworksConfig) {
+        _ecsWorld->destroy(id);
         return;
     }
-    const GameConfig::FireworksConfig& fireworksConfig = _gameConfig->fireworks[emitter.generation];
 
-
+    _ecsWorld->emplace<ParticleColor>(
+        id,
+        PackColor(fireworksConfig->colorFrom),
+        PackColor(fireworksConfig->colorTo),
+        PackColor(fireworksConfig->colorFrom));
+    _ecsWorld->emplace<ParticleGeneration>(id, particleInitRequest.generation);
+    _ecsWorld->emplace<ParticleLifetime>(id, fireworksConfig->framesToLive, fireworksConfig->framesToLive, 0.0f);
+    _ecsWorld->emplace<ParticlePosition>(id, particleInitRequest.x, particleInitRequest.y);
+    const float speed = 0.5f * (fireworksConfig->maxSpeed - fireworksConfig->minSpeed);
+    const float directionX = 0.5f * (fireworksConfig->maxDirectionX - fireworksConfig->minDirectionX);
+    const float directionY = 0.5f * (fireworksConfig->maxDirectionY - fireworksConfig->minDirectionY);
+    ParticleVelocity & velocity = _ecsWorld->emplace<ParticleVelocity>(id);
+    velocity.valueX = directionX * speed;
+    velocity.valueY = directionY * speed;
+    _ecsWorld->remove<ParticleInitRequest>(id);
 }

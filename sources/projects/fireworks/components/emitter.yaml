@@ -1,8 +1,14 @@
 name: 'emitter'
 fields:
+  - name: initial_frames_to_emit
+    type: int32_t
   - name: frames_to_emit
     type: int32_t
   - name: frames_to_live
     type: int32_t
   - name: generation
     type: int32_t
+  - name: x
+    type: float
+  - name: y
+    type: float

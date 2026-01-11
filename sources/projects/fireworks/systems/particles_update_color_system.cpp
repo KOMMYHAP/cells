@@ -15,7 +15,7 @@ static SDL_Color LerpSdlColor(float t, SDL_Color from, SDL_Color to)
     return color;
 }
 
-void UpdateParticleColorSystem::DoProcessComponents(EcsEntity id, const ParticleLifetime& particleLifetime, ParticleColor& particleColor)
+void ParticlesUpdateColorSystem::DoProcessComponents(EcsEntity /*id*/, const ParticleLifetime& particleLifetime, ParticleColor& particleColor)
 {
     const float t = particleLifetime.key;
     SDL_Color color = LerpSdlColor(t, UnpackColor(particleColor.startColor), UnpackColor(particleColor.endColor));

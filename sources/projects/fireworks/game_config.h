@@ -37,30 +37,23 @@ public:
     SDL_Color emptyCellColor { 0, 0, 0, SDL_ALPHA_OPAQUE };
 
     struct FireworksConfig {
-        int32_t emitterFramesToLive { 10000 };
-        int32_t emitterFramesToEmit { 20 };
-
-        float minDirectionX { -0.5 };
-        float maxDirectionX { +0.5 };
-        float minDirectionY { -0.5 };
-        float maxDirectionY { +0.5 };
-        float minVelocity { 10.0f };
-        float maxVelocity { 1000.0f };
-        int32_t framesToLive { 100 };
+        int32_t emitterFramesToLive { 0 };
+        int32_t emitterFramesToEmit { 0 };
+        float minDirectionX { 0.0f };
+        float maxDirectionX { 0.0f };
+        float minDirectionY { 0.0f };
+        float maxDirectionY { 0.0f };
+        float minSpeed { 0.0f };
+        float maxSpeed { 0.0f };
+        int32_t framesToLive { 0 };
+        SDL_Color colorFrom { 0, 0, 0, SDL_ALPHA_OPAQUE };
+        SDL_Color colorTo { 0, 0, 0, SDL_ALPHA_OPAQUE };
     };
     const FireworksConfig* FindFireworks(int32_t epoch) const;
-    std::vector<FireworksConfig>& MoifyFireworks();
+    std::vector<FireworksConfig>& ModifyFireworks() { return _fireworks; }
 
-    std::vector<SDL_Color> fireworksColors {
-        SDL_Color { 0, 0, 255, SDL_ALPHA_OPAQUE },
-        SDL_Color { 0, 255, 0, SDL_ALPHA_OPAQUE },
-        SDL_Color { 255, 0, 0, SDL_ALPHA_OPAQUE },
-        SDL_Color { 0, 255, 255, SDL_ALPHA_OPAQUE },
-        SDL_Color { 255, 255, 0, SDL_ALPHA_OPAQUE },
-        SDL_Color { 255, 0, 255, SDL_ALPHA_OPAQUE },
-        SDL_Color { 255, 255, 255, SDL_ALPHA_OPAQUE },
-    };
+    std::vector<SDL_Color> fireworksColors;
 
 private:
-    std::vector<FireworksConfig> fireworks;
+    std::vector<FireworksConfig> _fireworks;
 };

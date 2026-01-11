@@ -1,13 +1,11 @@
 ﻿name: 'emitters_update_lifetime_system'
 components:
+  - name: 'particle_position'
+    readonly: true
   - name: 'emitter'
     readonly: false
 resources:
   - name: 'ecs_world'
     forward_declaration_only: false
     include_path: 'simulation/simulation_ecs_config.h'
-  - name: 'game_config'
-    forward_declaration_only: true
-    readonly: true
-    include_path: 'game_config.h'
 is_ecs: true

@@ -1,6 +1,10 @@
 name: 'particle_velocity'
 fields:
-  - name: start_value
+  - name: start_value_x
     type: float
-  - name: value
+  - name: start_value_y
+    type: float
+  - name: value_x
+    type: float
+  - name: value_y
     type: float

@@ -13,4 +13,6 @@ target_sources(${PROJECT_NAME}
         emitters_update_lifetime_system.cpp
         emitters_update_stats_system.cpp
         empty_cell_draw_system.cpp
+        game_controller_update_system.cpp
+        particles_destroy_out_of_world_system.cpp
 )

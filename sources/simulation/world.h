@@ -13,7 +13,7 @@ class WorldStatistics;
 
 class World {
 public:
-    World(WorldStatistics& stats);
+    World();
 
     SimulationStorage& ModifySimulation() { return _simulationStorage; }
 
@@ -35,7 +35,7 @@ private:
 
     void SimulateStep();
 
-    gsl::not_null<WorldStatistics*> _worldStatistics;
+    WorldStatistics* _worldStatistics{nullptr};
     SimulationPlayer _player;
     SimulationStorage _simulationStorage;
     Common::ConditionSystem _conditions;

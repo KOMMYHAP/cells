@@ -3,10 +3,10 @@
 #include "clock/clock.h"
 #include "world_statistics.h"
 
-World::World(WorldStatistics& stats)
-    : _worldStatistics(&stats)
+World::World()
 {
     _simulationStorage.Store<EcsWorld>();
+    _worldStatistics = &_simulationStorage.Store<WorldStatistics>();
 }
 
 void World::AddSimulationSystem(Common::Condition condition, std::unique_ptr<SimulationSystem> system)

@@ -1,0 +1,6 @@
+﻿name: 'particles_destroy_out_of_world_system'
+resources:
+  - name: 'ecs_world'
+    forward_declaration_only: false
+    include_path: 'simulation/simulation_ecs_config.h'
+is_ecs: false

@@ -9,8 +9,11 @@ target_sources(${PROJECT_NAME} PRIVATE
         game_controller.cpp
         game_controller.h
         game_config.h
+        game_config.cpp
         particle_random.cpp
         particle_random.h
+        game_widget.cpp
+        game_widget.h
 )
 
 add_subdirectory(components/generated)

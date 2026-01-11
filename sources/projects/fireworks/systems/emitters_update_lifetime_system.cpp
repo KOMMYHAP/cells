@@ -1,15 +1,15 @@
-﻿#include "generated/auto_update_emitter_system.h"
+﻿#include "generated/auto_emitters_update_lifetime_system.h"
 
 #include "components/generated/auto_emitter.h"
+#include "components/generated/auto_particle_position.h"
 #include "components/generated/auto_particle_init_request.h"
-#include "components/generated/auto_particle_color.h"
-#include "game_config.h"
 
-void UpdateEmitterSystem::DoProcessComponents(EcsEntity id, Emitter& emitter)
+void EmittersUpdateLifetimeSystem::DoProcessComponents(EcsEntity /*id*/, const ParticlePosition& particlePosition, Emitter& emitter)
 {
     emitter.framesToEmit -= 1;
     if (emitter.framesToEmit <= 0) {
-        _ecsWorld->emplace<NewParticleTag>(id);
-        emitter.framesToEmit = _gameConfig->;
+        const EcsEntity particle = _ecsWorld->create();
+        _ecsWorld->emplace<ParticleInitRequest>(particle, emitter.generation, particlePosition.x, particlePosition.y);
+        emitter.framesToEmit = emitter.initialFramesToEmit;
     }
 }
