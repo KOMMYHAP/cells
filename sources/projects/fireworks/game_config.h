@@ -39,10 +39,8 @@ public:
     struct FireworksConfig {
         int32_t emitterFramesToLive { 0 };
         float emitterParticlesPerSeconds { 0.0f };
-        float minDirectionX { 0.0f };
-        float maxDirectionX { 0.0f };
-        float minDirectionY { 0.0f };
-        float maxDirectionY { 0.0f };
+        float minAngle { 0.0f };
+        float maxAngle { 0.0f };
         float minSpeed { 0.0f };
         float maxSpeed { 0.0f };
         int32_t framesToLive { 0 };

@@ -15,7 +15,7 @@ void EmittersInitSystem::DoProcessComponents(EcsEntity id, const EmitterInitRequ
     _ecsWorld->remove<EmitterInitRequest>(id);
 
     if (!fireworksConfig) {
-        ASSERT(false, "Invalid fireworks emitter's epoch!");
+        _ecsWorld->destroy(id);
         return;
     }
 

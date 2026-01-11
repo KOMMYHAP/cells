@@ -3,16 +3,22 @@
 #include "random/random.h"
 #include "time/time.h"
 
+struct GravityUnit {
+    double positionX{0.0f};
+    double positionY{0.0f};
+
+    double constant{0.0};
+    double mass{0.0};
+};
+
 class GameController {
 public:
     Common::Time GetFrameTime() const { return _frameTime; }
     void SetFrameTime(Common::Time time) { _frameTime = time; }
 
-    CellPosition GetGravityCenter() const { return _gravityCenter; }
-    void SetGravityCenter(CellPosition gravityCenter) { _gravityCenter = gravityCenter; }
-
-    double GetGravityConstant() const { return _gravityConstant; }
-    void SetGravityConstant(double gravityConstant) { _gravityConstant = gravityConstant; }
+    GravityUnit GetGravityUnit() const { return _gravityUnit; }
+    GravityUnit& ModifyGravityUnit() { return _gravityUnit; }
+    void SetGravityCenter(const GravityUnit & gravityUnit) { _gravityUnit = gravityUnit; }
 
     bool IsGravityEnabled() const { return _gravityEnabled; }
     void SetGravityEnabled(bool value) { _gravityEnabled = value; }
@@ -28,8 +34,7 @@ public:
 private:
     Random::Engine _randomEngine;
     Common::Time _frameTime;
-    CellPosition _gravityCenter {};
-    double _gravityConstant { 0.0f };
+    GravityUnit _gravityUnit;
     bool _gravityEnabled { false };
     int32_t _emittersCount { 0 };
     int32_t _particlesCount { 0 };

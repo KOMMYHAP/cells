@@ -27,13 +27,16 @@ void ParticlesInitSystem::DoProcessComponents(EcsEntity id, const ParticleInitRe
     _ecsWorld->emplace<ParticleLifetime>(id, fireworksConfig->framesToLive, fireworksConfig->framesToLive, 0.0f);
     _ecsWorld->emplace<ParticlePosition>(id, particleInitRequest.x, particleInitRequest.y);
 
-    const float floatRandomValue = particleInitRequest.randomSeed / static_cast<float>(std::numeric_limits<uint32_t>::max());
+    static constexpr uint32_t PrimeSpeed { 4078736633 };
+    static constexpr uint32_t PrimeAngle { 4078736647 };
+    const float randomSpeedCoef = PrimeSpeed * particleInitRequest.randomSeed / static_cast<float>(std::numeric_limits<uint32_t>::max());
+    const float speed = fireworksConfig->minSpeed + randomSpeedCoef * (fireworksConfig->maxSpeed - fireworksConfig->minSpeed);
 
-    const float speed = fireworksConfig->minSpeed + floatRandomValue * (fireworksConfig->maxSpeed - fireworksConfig->minSpeed);
-    const float directionX = fireworksConfig->minDirectionX + floatRandomValue * (fireworksConfig->maxDirectionX - fireworksConfig->minDirectionX);
-    const float directionY = fireworksConfig->minDirectionY + floatRandomValue * (fireworksConfig->maxDirectionY - fireworksConfig->minDirectionY);
-    ParticleVelocity & velocity = _ecsWorld->emplace<ParticleVelocity>(id);
-    velocity.valueX = directionX * speed;
-    velocity.valueY = directionY * speed;
+    const float randomAngleCoef = PrimeAngle * particleInitRequest.randomSeed / static_cast<float>(std::numeric_limits<uint32_t>::max());
+    const float angle = fireworksConfig->minAngle + randomAngleCoef * (fireworksConfig->maxAngle - fireworksConfig->minAngle);
+
+    ParticleVelocity& velocity = _ecsWorld->emplace<ParticleVelocity>(id);
+    velocity.valueX = std::cos(angle * 3.14f / 180.0f) * speed;
+    velocity.valueY = std::sin(angle * 3.14f / 180.0f) * speed;
     _ecsWorld->remove<ParticleInitRequest>(id);
 }
