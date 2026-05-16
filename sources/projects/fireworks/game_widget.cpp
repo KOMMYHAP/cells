@@ -19,9 +19,17 @@ BaseMenuWidget::MenuWidgetAction GameWidget::ProcessMenuItem(Common::Time /*time
 
     ImGui::Text("%d/%d (emitters/particles)", _gameController->GetEmittersCount(), _gameController->GetParticlesCount());
 
-    ProcessGravity(_gameController->ModifyGravityUnit());
     ProcessEmitters();
     ProcessGenerations();
+    ProcessGravity(_gameController->ModifyGravityUnit());
+
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::GetIO().WantCaptureMouse) {
+        const ImVec2 mousePos = ImGui::GetMousePos();
+        _userClickX = mousePos.x;
+        _userClickY = mousePos.y;
+    }
+
+    ImGui::Text("Last click: %.1f, %.1f", _userClickX, _userClickY);
 
     return MenuWidgetAction::KeepOpen;
 }

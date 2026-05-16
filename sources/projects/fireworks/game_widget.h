@@ -34,6 +34,8 @@ private:
     EcsWorld* _ecsWorld { nullptr };
     GameController* _gameController { nullptr };
     GameConfig* _gameConfig { nullptr };
+    float _userClickX { 0.0f };
+    float _userClickY { 0.0f };
     std::vector<EmitterData> _emitters;
     std::vector<GenerationData> _generations;
 };
