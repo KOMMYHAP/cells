@@ -5,10 +5,10 @@
 
 void UpdateEmitterSystem::DoProcessComponents(EcsEntity id, CellEmitter& cellEmitter)
 {
-    if (cellEmitter.emitter_lifetime <= 0) {
+    if (cellEmitter.emitterLifetime <= 0) {
         _ecsWorld->remove<CellEmitter>(id);
         return;
     }
 
-    cellEmitter.emitter_lifetime -= 1;
+    cellEmitter.emitterLifetime -= 1;
 }

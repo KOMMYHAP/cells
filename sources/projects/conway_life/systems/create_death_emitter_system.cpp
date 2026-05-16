@@ -8,10 +8,10 @@
 void CreateDeathEmitterSystem::DoProcessComponents(EcsEntity id)
 {
     CellEmitter emitter{};
-    emitter.particle_lifetime = _gameConfig->deathEmitterLifetime;
-    emitter.emitter_lifetime = emitter.particle_lifetime;
-    emitter.color_from = PackColor(_gameConfig->aliveCellColor);
-    emitter.color_to = PackColor(_gameConfig->emptyCellColor);
+    emitter.particleLifetime = _gameConfig->deathEmitterLifetime;
+    emitter.emitterLifetime = emitter.particleLifetime;
+    emitter.colorFrom = PackColor(_gameConfig->aliveCellColor);
+    emitter.colorTo = PackColor(_gameConfig->emptyCellColor);
     _ecsWorld->emplace_or_replace<CellEmitter>(id, emitter);
     _ecsWorld->remove<CellParticle>(id);
 }

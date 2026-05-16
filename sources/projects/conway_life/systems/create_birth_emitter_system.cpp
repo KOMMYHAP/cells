@@ -8,10 +8,10 @@
 void CreateBirthEmitterSystem::DoProcessComponents(EcsEntity id)
 {
     CellEmitter emitter{};
-    emitter.particle_lifetime = _gameConfig->birthEmitterLifetime;
-    emitter.emitter_lifetime = emitter.particle_lifetime;
-    emitter.color_from = PackColor(_gameConfig->emptyCellColor);
-    emitter.color_to = PackColor(_gameConfig->aliveCellColor);
+    emitter.particleLifetime = _gameConfig->birthEmitterLifetime;
+    emitter.emitterLifetime = emitter.particleLifetime;
+    emitter.colorFrom = PackColor(_gameConfig->emptyCellColor);
+    emitter.colorTo = PackColor(_gameConfig->aliveCellColor);
     _ecsWorld->emplace_or_replace<CellEmitter>(id, emitter);
     _ecsWorld->remove<CellParticle>(id);
 }

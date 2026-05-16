@@ -21,9 +21,9 @@ void UpdateParticleSystem::DoProcessComponents(EcsEntity id, const CellEmitter& 
         return;
     }
 
-    const float t = static_cast<float>(cellEmitter.particle_lifetime - cellParticle.lifetime) / static_cast<float>(cellEmitter.particle_lifetime);
-    const SDL_Color colorFrom = UnpackColor(cellEmitter.color_from);
-    const SDL_Color colorTo = UnpackColor(cellEmitter.color_to);
+    const float t = static_cast<float>(cellEmitter.particleLifetime - cellParticle.lifetime) / static_cast<float>(cellEmitter.particleLifetime);
+    const SDL_Color colorFrom = UnpackColor(cellEmitter.colorFrom);
+    const SDL_Color colorTo = UnpackColor(cellEmitter.colorTo);
     const SDL_Color newColor = LerpSdlColor(t, colorFrom, colorTo);
     cellParticle.color = PackColor(newColor);
     cellParticle.lifetime -= 1;

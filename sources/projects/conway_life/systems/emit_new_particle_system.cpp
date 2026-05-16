@@ -5,5 +5,5 @@
 
 void EmitNewParticleSystem::DoProcessComponents(EcsEntity id, const CellEmitter& cellEmitter)
 {
-    _ecsWorld->emplace_or_replace<CellParticle>(id, cellEmitter.particle_lifetime, cellEmitter.color_from);
+    _ecsWorld->emplace_or_replace<CellParticle>(id, cellEmitter.particleLifetime, cellEmitter.colorFrom);
 }
