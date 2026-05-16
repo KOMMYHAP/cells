@@ -66,7 +66,7 @@ void GameWidget::ProcessEmitters()
         }
 
         data.emitter = _ecsWorld->create();
-        _ecsWorld->emplace<EmitterInitRequest>(data.emitter, data.generation, data.position[0], data.position[1]);
+        _ecsWorld->emplace<EmitterInitRequest>(data.emitter, data.generation, _userClickX, _userClickY);
         data.shouldRecreate = false;
     }
 
@@ -88,7 +88,6 @@ void GameWidget::ProcessEmitterEntry(EmitterData& emitterData)
         ImGui::LabelText("Id", "%s", "Invalid");
     }
 
-    ImGui::DragFloat2("Position", emitterData.position);
     ImGui::DragInt("Generation", &emitterData.generation, 1.0f, 0, static_cast<int32_t>(_generations.size()), "%d", ImGuiSliderFlags_AlwaysClamp);
     ImGui::Checkbox("Remove", &emitterData.shouldRemove);
     ImGui::SameLine();
