@@ -1,4 +1,4 @@
-import os
+# No changes needed, just reading the file.
 from pathlib import Path
 
 import yaml

@@ -9,7 +9,10 @@ The project uses CMake (minimum version 3.26) and supports [CMake Presets](CMake
 #### Prerequisites
 - **MSVC**: The project is primarily developed with MSVC on Windows.
 - **Python 3**: Required for running code generation tools. A virtual environment `.venv` should be present in the project root.
-- **Jinja2**: Python library for code generation templates.
+- **Python Dependencies**: Listed in `tools/requirements.txt`. To install them into the virtual environment:
+  ```powershell
+  .\.venv\Scripts\pip.exe install -r tools/requirements.txt
+  ```
 
 #### Build Instructions
 1. **Configure the project**:
@@ -25,6 +28,17 @@ The project uses CMake (minimum version 3.26) and supports [CMake Presets](CMake
 
 #### Code Generation
 The project extensively uses code generation for ECS components and systems.
+
+**General Rules:**
+- **Tools**: Everything related to the code generation tool must be located in the `tools/` folder.
+- **Output**: All C++ sources produced by the tool must be placed inside the `sources/` directory.
+
+**File Locations:**
+- **Project-specific ECS components/systems** should be located in the project's directory:
+    - `sources/projects/conway_life/components`
+    - `sources/projects/conway_life/systems`
+- **Non-project-specific ECS components/systems** can be located outside of project directories but still within `sources/`:
+    - Example: `sources/ui/systems_ecs`
 
 **When to run:**
 Run the code generation whenever you:
