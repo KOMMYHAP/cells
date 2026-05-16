@@ -80,8 +80,7 @@ int main()
         static_cast<float>(uiConfig.worldWidgetSizeX),
         static_cast<float>(uiConfig.worldWidgetSizeY),
     };
-    auto worldStatistics = std::make_unique<WorldStatistics>();
-    auto world = std::make_unique<World>(*worldStatistics);
+    auto world = std::make_unique<World>();
     SimulationStorage& simulationStorage = world->ModifySimulation();
     simulationStorage.Store<UiConfig>(uiConfig);
     simulationStorage.Store<GameConfig>();
