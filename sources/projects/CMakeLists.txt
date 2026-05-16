@@ -1,3 +1,4 @@
 add_subdirectory(cells)
 add_subdirectory(conway_life)
 add_subdirectory(fireworks)
+add_subdirectory(creatures)
