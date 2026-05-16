@@ -30,11 +30,13 @@ void GameWidget::ProcessEmitters()
 {
     if (ImGui::TreeNode("Emitters")) {
         for (int32_t i = 0; i < _emitters.size(); ++i) {
+            ImGui::PushID(i);
             EmitterData& emitterData = _emitters[i];
             ProcessEmitterEntry(emitterData);
             if (i + 1 != _emitters.size()) {
                 ImGui::Separator();
             }
+            ImGui::PopID();
         }
         if (ImGui::Button("Create emitter")) {
             _emitters.emplace_back();
@@ -89,11 +91,13 @@ void GameWidget::ProcessGenerations()
 {
     if (ImGui::TreeNode("Generations")) {
         for (int32_t i = 0; i < _generations.size(); ++i) {
+            ImGui::PushID(i);
             GenerationData& generationData = _generations[i];
             ProcessGenerationEntry(generationData);
             if (i + 1 != _generations.size()) {
                 ImGui::Separator();
             }
+            ImGui::PopID();
         }
         if (ImGui::Button("Create generation")) {
             _generations.emplace_back();
