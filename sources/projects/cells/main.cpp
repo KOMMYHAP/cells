@@ -9,8 +9,8 @@
 #include "procedures/look_procedure_system.h"
 #include "procedures/move_procedure_system.h"
 #include "procedures/random_cell_spawn_procedure_system.h"
-#include "simulation_registrable_system.h"
 #include "simulation/simulation_statistics_provider.h"
+#include "simulation_registrable_system.h"
 #include "system/ui_system.h"
 #include "systems_ecs/generated/auto_death_from_age_statistics_system.h"
 #include "systems_ecs/generated/auto_make_age_system.h"
@@ -88,12 +88,12 @@ std::error_code ConfigurationRegistrableSystem::InitializeSystem(ApplicationStor
     // luaConfig.luaDirectory = std::filesystem::current_path() / RelativePathToLuaDirectory;
     // luaConfig.startupScript = "loader.lua"sv;
 
-    return {};
+    return { };
 }
 
 template <class T, class... Args>
     requires std::is_base_of_v<ProcedureBase, T> && std::is_base_of_v<SimulationSystem, T> && std::is_constructible_v<T, Args...>
-void TEMP_RegisterProcedureSystem(World& world, ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
+void TEMP_RegisterProcedureSystem(Common::Condition condition, World& world, ProcedureType type, uint8_t inputCount, uint8_t outputCount, std::string name, Args&&... args)
 {
     SimulationStorage& storage = world.ModifySimulation();
     SimulationVirtualMachine& vm = storage.Modify<SimulationVirtualMachine>();
@@ -102,7 +102,7 @@ void TEMP_RegisterProcedureSystem(World& world, ProcedureType type, uint8_t inpu
     T* weakProcedure = procedure.get();
     vm.RegisterProcedure(type, weakProcedure, inputCount, outputCount, std::move(name));
 
-    world.AddSimulationSystem(World::Phase::Running, std::move(procedure));
+    world.AddSimulationSystem(condition, std::move(procedure));
 }
 
 std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage& applicationStorage)
@@ -131,29 +131,27 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
     RandomCellFactory& randomCellFactory = simulationStorage.Store<RandomCellFactory>(vm, random);
     SimulationStatisticsProvider& simulationStats = simulationStorage.Store<SimulationStatisticsProvider>(cellLocator);
 
-    using EcsSystemFactory = std::unique_ptr<SimulationSystem> (*)(const SimulationStorage&);
-    auto AddSimulation = [&simulationStorage, &world](World::Phase phase, const EcsSystemFactory& factory) {
-        std::unique_ptr<SimulationSystem> system = factory(simulationStorage);
-        world.AddSimulationSystem(phase, std::move(system));
-    };
+    const Common::Condition conditionAlways = world.ModifyConditionSystem().Register("always", []() -> bool {
+        return true;
+    });
 
-    AddSimulation(World::Phase::Running, &MakeSpawnSystem);
-    AddSimulation(World::Phase::Running, &MakeBrainSimulationSystem);
-    TEMP_RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(world, ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", ecsWorld, vm, cellLocator, spawner, randomCellFactory);
-    AddSimulation(World::Phase::Running, &MakeEnergyLeakSystem);
-    AddSimulation(World::Phase::Running, &MakeEnergyDecreaseSystem);
-    AddSimulation(World::Phase::Running, &MakeAgeSystem);
-    TEMP_RegisterProcedureSystem<LookProcedureSystem>(world, ProcedureType::Look, 1, 1, "Look", ecsWorld, vm, cellLocator);
-    TEMP_RegisterProcedureSystem<MoveProcedureSystem>(world, ProcedureType::Move, 1, 0, "Move", ecsWorld, vm, cellLocator);
-    AddSimulation(World::Phase::Running, &MakeAliveCellsStatisticsSystem);
-    AddSimulation(World::Phase::Running, &MakeSpawnPlacesStatisticsSystem);
-    AddSimulation(World::Phase::Running, &MakeDeathFromAgeStatisticsSystem);
-    AddSimulation(World::Phase::Running, &MakeDeathFromEmptyEnergyStatisticsSystem);
-    AddSimulation(World::Phase::Running, &MakeGraveyardSystem);
-    AddSimulation(World::Phase::Stopped, &MakeKeepPopulationSystem);
-    AddSimulation(World::Phase::Running, &MakeWorldRasterizationLockSystem);
-    AddSimulation(World::Phase::Running, &MakeWorldRasterizationSystem);
-    AddSimulation(World::Phase::Running, &MakeWorldRasterizationUnlockSystem);
+    world.AddSimulationSystem(conditionAlways, MakeSpawnSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeBrainSimulationSystem(simulationStorage));
+    TEMP_RegisterProcedureSystem<RandomCellSpawnProcedureSystem>(conditionAlways, world, ProcedureType::SpawnRandomCell, 1, 0, "SpawnRandomCell", ecsWorld, vm, cellLocator, spawner, randomCellFactory);
+    world.AddSimulationSystem(conditionAlways, MakeEnergyLeakSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeEnergyDecreaseSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeAgeSystem(simulationStorage));
+    TEMP_RegisterProcedureSystem<LookProcedureSystem>(conditionAlways, world, ProcedureType::Look, 1, 1, "Look", ecsWorld, vm, cellLocator);
+    TEMP_RegisterProcedureSystem<MoveProcedureSystem>(conditionAlways, world, ProcedureType::Move, 1, 0, "Move", ecsWorld, vm, cellLocator);
+    world.AddSimulationSystem(conditionAlways, MakeAliveCellsStatisticsSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeSpawnPlacesStatisticsSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeDeathFromAgeStatisticsSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeDeathFromEmptyEnergyStatisticsSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeGraveyardSystem(simulationStorage));
+    // world.AddSimulationSystem(World::Phase::Stopped, MakeKeepPopulationSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeWorldRasterizationLockSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeWorldRasterizationSystem(simulationStorage));
+    world.AddSimulationSystem(conditionAlways, MakeWorldRasterizationUnlockSystem(simulationStorage));
 
     {
         MenuRootWidget& menuRoot = uiSystem.ModifyMenuRootWidget();
@@ -161,10 +159,10 @@ std::error_code WorldSetupRegistrableSystem::InitializeSystem(ApplicationStorage
         menuRoot.AddWidget<EngineSummaryWidget>(engineRootId, "Summary", uiSystem.GetAppStatistics());
 
         auto [simulationRootId, _2] = menuRoot.AddWidget<GroupMenuWidget>("Simulation");
-        menuRoot.AddWidget<SimulationSummaryWidget>(simulationRootId, "Summary", world, applicationStorage.Get<WorldStatistics>(), simulationStats);
+        menuRoot.AddWidget<SimulationSummaryWidget>(simulationRootId, "Summary", world, world.ModifySimulation().Get<WorldStatistics>(), simulationStats);
     }
 
-    return {};
+    return { };
 }
 
 }
