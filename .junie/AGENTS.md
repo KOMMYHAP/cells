@@ -8,7 +8,7 @@ The project uses CMake (minimum version 3.26) and supports [CMake Presets](CMake
 
 #### Prerequisites
 - **MSVC**: The project is primarily developed with MSVC on Windows.
-- **Python 3**: Required for running code generation tools.
+- **Python 3**: Required for running code generation tools. A virtual environment `.venv` should be present in the project root.
 - **Jinja2**: Python library for code generation templates.
 
 #### Build Instructions
@@ -24,12 +24,25 @@ The project uses CMake (minimum version 3.26) and supports [CMake Presets](CMake
    ```
 
 #### Code Generation
-The project uses ECS (Entity Component System) with some code-generated components and systems.
-Before build, if you modify `.yaml` files in component directories, run the generation script:
-```powershell
-python tools/generate_code.py
-```
-This script uses Jinja2 templates located in `tools/templates` to generate headers and sources.
+The project extensively uses code generation for ECS components and systems.
+
+**When to run:**
+Run the code generation whenever you:
+- **Add a new ECS component**: Create a `.yaml` file in the appropriate `components/` directory (e.g., `sources/projects/conway_life/components/cell_emitter.yaml`).
+- **Add a new ECS system**: Create a `.yaml` file in the appropriate `systems/` directory (e.g., `sources/projects/conway_life/systems/create_birth_emitter_system.yaml`).
+
+**How to run:**
+1. **IDE**: Use the "Generate code" run configuration in CLion.
+2. **Manual**:
+   - The working directory must be the `tools/` folder.
+   - Run the generation script using the project's virtual environment:
+     ```powershell
+     # From the project root:
+     cd tools
+     ..\.venv\Scripts\python.exe generate_code.py
+     ```
+
+The script uses Jinja2 templates in `tools/templates` to generate C++ code into `generated/` subdirectories.
 
 ---
 
