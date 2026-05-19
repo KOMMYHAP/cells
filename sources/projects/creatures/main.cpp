@@ -250,9 +250,9 @@ struct BrainContext {
     Ref<BrainReactionComponent> output;
 };
 
-struct CreatureMutationFactorComponent {
-    float rootSigma{0.0f};
-};
+// struct CreatureMutationFactorComponent {
+//     float rootSigma{0.0f};
+// };
 
 // struct RandomSourceComponent {
 //     Ref<std::mt19937> generator;
@@ -450,16 +450,16 @@ bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEnt
 void InitCreatureGenome(WorldDescription &worldRules, EcsWorld &world, EcsEntity creature, EcsEntity position) {
     const int32_t initialEnergy = std::uniform_int_distribution{0, worldRules.creatureEnergyMax - 1}(worldRules.randomGenerator);
     const int32_t initialFatigue = std::uniform_int_distribution{0, worldRules.creatureFatigueMax - 1}(worldRules.randomGenerator);
-    const int32_t initialRotation = std::uniform_int_distribution{0, WorldAreaSize - 1}(worldRules.randomGenerator);
+    const int32_t initialRotation = std::uniform_int_distribution{0, WorldDirectionCount - 1}(worldRules.randomGenerator);
 
     world.emplace<CreatureStateEnergyComponent>(creature, static_cast<uint16_t>(initialEnergy));
     world.emplace<CreatureStateFatigueComponent>(creature, static_cast<uint16_t>(initialFatigue));
-    world.emplace<CreatureStateRotationComponent>(creature, static_cast<WorldAreaIndex>(initialRotation));
-    world.emplace<CreatureBrainReactionStateComponent>(creature, 0);
+    world.emplace<CreatureStateRotationComponent>(creature, static_cast<WorldDirection>(initialRotation));
+    world.emplace<CreatureBrainReactionStateComponent>(creature, uint16_t{0});
     world.emplace<CreaturePositionComponent>(creature, position);
 
-    world.emplace<CreatureSensorEnergyComponent>(creature, 0);
-    world.emplace<CreatureSensorRotationComponent>(creature, WorldAreaIndex::Position_1_1);
+    world.emplace<CreatureSensorEnergyComponent>(creature, uint16_t{0});
+    world.emplace<CreatureSensorRotationComponent>(creature, WorldDirection::Down);
     auto &[touches] = world.emplace<CreatureSensorTouchComponent>(creature);
     touches.fill(TouchResult::Nothing);
 
@@ -485,15 +485,11 @@ void InitCreatureGenome(WorldDescription &worldRules, EcsWorld &world, EcsEntity
     for (float &quality: genomeQuality) {
         quality = std::uniform_real_distribution{0.0f, 1.0f}(worldRules.randomGenerator);
     }
-    auto &[genes] = world.emplace<CreatureGenomeComponent>(creature, position);
-    static_assert(genes.size() == genomeQuality.size());
+    auto &[genes] = world.emplace<CreatureGenomeComponent>(creature);
+    ASSERT(genes.size() == genomeQuality.size(), "Sanity check: genome size matches quality size");
     for (const size_t geneIndex: std::views::iota(size_t{0}, genes.size())) {
         const bool isAbility = worldRules.geneRules[geneIndex].type == GeneTypes::Ability;
-        bool enabled = true;
-        if (isAbility) {
-            const float quality = genomeQuality[geneIndex];
-            enabled = static_cast<bool>(std::round(quality));
-        }
+        const bool enabled = isAbility ? static_cast<bool>(std::round(genomeQuality[geneIndex])) : true;
         genes[geneIndex] = enabled;
     }
 }
@@ -515,6 +511,231 @@ bool IsActionAllowedForGenome(const WorldDescription &worldRules, const Creature
     }
 
     return true;
+}
+
+void ProcessWorldUpdate(EcsWorld &world, const WorldDescription &worldRules) {
+    world.view<BrainSensorsComponent, const CreatureSensorEnergyComponent, const CreatureSensorRotationComponent, const CreatureSensorTouchComponent>().each([&](BrainSensorsComponent &sensors, const CreatureSensorEnergyComponent energySensor, const CreatureSensorRotationComponent rotationSensor, const CreatureSensorTouchComponent &touchSensor) {
+        sensors.data[static_cast<uint8_t>(Sensors::CreatureEnergy)] = ConvertToSensorValue(energySensor.value, worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)]);
+        sensors.data[static_cast<uint8_t>(Sensors::CreatureRotation)] = ConvertToSensorValue(rotationSensor.value);
+        sensors.data[static_cast<uint8_t>(Sensors::CreatureFatigue)] = ConvertToSensorValue(energySensor.value, worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)]);
+
+        for (const int32_t touchIndex: std::views::iota(0, WorldAreaSize)) {
+            const TouchResult touch = touchSensor.touches[touchIndex];
+            sensors.data[static_cast<int32_t>(Sensors::TouchArea_0_0) + touchIndex] = ConvertToSensorValue(touch);
+        }
+    });
+
+    world.view<const BrainSensorsComponent, const BrainGenomeComponent, const BrainSpecializationComponent, BrainReactionComponent>().each([&](const BrainSensorsComponent &sensors, const BrainGenomeComponent &genome, const BrainSpecializationComponent &specialization, BrainReactionComponent &output) {
+        const BrainContext context{ConstRef{&sensors}, ConstRef{&genome}, ConstRef{&specialization}, Ref{&output}};
+        EvaluateBrain(context);
+    });
+
+    auto BrainDispatchAction = [&](EcsEntity creature, const Actions action, float value) {
+        switch (action) {
+            case Actions::Idle:
+                world.emplace<CreatureActionIdleTag>(creature);
+                break;
+            case Actions::ReadCreatureEnergy:
+                world.emplace<CreatureActionReadEnergyTag>(creature);
+                break;
+            case Actions::ReadCreatureRotation:
+                world.emplace<CreatureActionReadRotationTag>(creature);
+                break;
+            case Actions::ReadAreaTouch:
+                world.emplace<CreatureActionReadTouchAreaTag>(creature);
+                break;
+            case Actions::Bite:
+                world.emplace<CreatureActionBiteComponent>(creature, value);
+                break;
+            case Actions::Move: {
+                const auto direction = ConvertFromSensorValue<WorldDirection>(value);
+                world.emplace<CreatureActionMoveComponent>(creature, direction);
+            }
+            break;
+            case Actions::Rotate: {
+                const auto direction = ConvertFromSensorValue<WorldDirection>(value);
+                world.emplace<CreatureActionRotateComponent>(creature, direction);
+            }
+            break;
+            case Actions::MakeChild:
+                break;
+            case Actions::InternalCount:
+            default:
+                ASSERT_FAIL("Sanity check: invalid action type");
+                break;
+        }
+    };
+
+    world.view<const BrainReactionComponent, const CreatureGenomeComponent, CreatureBrainReactionStateComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each([&](EcsEntity creature, const BrainReactionComponent &reaction, const CreatureGenomeComponent &genome, CreatureBrainReactionStateComponent &brainState) {
+        int32_t brainTickRequested = 0;
+        for (uint8_t actionIndex = 0; actionIndex < ActionTypeCount; ++actionIndex) {
+            if (!IsActionAllowedForGenome(worldRules, genome, static_cast<Actions>(actionIndex))) {
+                continue;
+            }
+
+            const float actionValue = reaction.actionsValue[actionIndex];
+            BrainDispatchAction(creature, static_cast<Actions>(actionIndex), actionValue);
+            brainTickRequested += worldRules.actionRules[actionIndex].brainTickCost;
+        }
+
+        brainState.brainTicksConsumed = static_cast<uint16_t>(brainTickRequested);
+    });
+
+    world.view<const CreatureBrainReactionStateComponent, CreatureStateFatigueComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each([&](EcsEntity creature, const CreatureBrainReactionStateComponent &brainState, CreatureStateFatigueComponent &fatigue) {
+        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
+        const SensorCalculationResult r = UpdateSensorValue(desc, fatigue.value, brainState.brainTicksConsumed);
+        if (r == SensorCalculationResult::MaxValueReached) {
+            world.emplace<CreatureBrainIsOverloadedTag>(creature);
+        }
+    });
+
+    {
+        auto overloadedBrains = world.view<const CreatureBrainIsOverloadedTag, const CreaturePositionComponent>();
+        world.erase<CreatureBrainIsOverloadedTag>(overloadedBrains.begin(), overloadedBrains.end());
+        // overloadedBrains.each([&](const CreaturePositionComponent position) {
+        //     // cleanup reference from world to creature
+        //     world.erase<WorldCreatureComponent>(position.value);
+        // });
+        // world.destroy(overloadedBrains.begin(), overloadedBrains.end());
+    }
+
+    world.view<CreatureStateFatigueComponent>().each([&](CreatureStateFatigueComponent &fatigue) {
+        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
+        UpdateSensorValue(desc, fatigue.value, -worldRules.brainRestPerTickMin);
+    });
+
+    {
+        const auto view = world.view<const CreatureActionIdleTag>();
+        world.erase<CreatureActionIdleTag>(view.begin(), view.end());
+    }
+
+    world.view<const CreatureActionRotateComponent, CreatureStateRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureActionRotateComponent &rotate, CreatureStateRotationComponent &rotation, CreatureStateEnergyComponent &energy) {
+        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+        const ActionDescription &actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
+        const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -actionDesc.energyCost);
+        if (r == SensorCalculationResult::MinValueReached) {
+            world.emplace<CreatureOutOfEnergyTag>(creature);
+        }
+
+        world.erase<CreatureActionRotateComponent>(creature);
+        rotation.value = rotate.value;
+    });
+
+    world.view<const CreatureActionMoveComponent, CreaturePositionComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureActionMoveComponent &move, CreaturePositionComponent &position, CreatureStateEnergyComponent &energy) {
+        world.erase<CreatureActionMoveComponent>(creature);
+        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Move)) {
+            return;
+        }
+
+        WorldAreaIndex areaIndex = WorldAreaIndex::InternalCount;
+        switch (move.value) {
+            case WorldDirection::Up:
+                areaIndex = WorldAreaIndex::Position_0_1;
+                break;
+            case WorldDirection::Down:
+                areaIndex = WorldAreaIndex::Position_2_1;
+                break;
+            case WorldDirection::Left:
+                areaIndex = WorldAreaIndex::Position_1_0;
+                break;
+            case WorldDirection::Right:
+                areaIndex = WorldAreaIndex::Position_1_2;
+                break;
+            case WorldDirection::InternalCount:
+                break;
+        }
+
+        if (areaIndex == WorldAreaIndex::InternalCount) [[unlikely]] {
+            ASSERT_FAIL("Sanity check: unknown move direction!");
+            return;
+        }
+
+        const auto &[location] = world.get<const WorldAreaLocatorComponent>(position.value);
+        const EcsEntity newPosition = location[static_cast<uint8_t>(areaIndex)];
+        if (newPosition == InvalidEcsEntity) {
+            return;
+        }
+        if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(newPosition)) {
+            return;
+        }
+
+        const EcsEntity oldPosition = position.value;
+        world.erase<WorldCreatureComponent>(oldPosition);
+        world.emplace<WorldCreatureComponent>(newPosition, creature);
+        position.value = newPosition;
+    });
+
+    world.view<const CreatureActionReadTouchAreaTag, const CreaturePositionComponent, CreatureSensorTouchComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreaturePositionComponent &creaturePosition, CreatureSensorTouchComponent &touchSensor, CreatureStateEnergyComponent &energy) {
+        world.erase<CreatureActionReadTouchAreaTag>(creature);
+        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadAreaTouch)) {
+            return;
+        }
+        const auto &[entities] = world.get<const WorldAreaLocatorComponent>(creaturePosition.value);
+        for (uint8_t i = 0; i < WorldAreaSize; ++i) {
+            if (const EcsEntity areaPosition = entities[i]; world.any_of<WorldObstacleTag>(areaPosition)) {
+                touchSensor.touches[i] = TouchResult::Solid;
+            } else if (world.any_of<WorldCreatureComponent>(areaPosition)) {
+                touchSensor.touches[i] = TouchResult::Elastic;
+            } else {
+                touchSensor.touches[i] = TouchResult::Nothing;
+            }
+        }
+    });
+
+    world.view<const CreatureActionReadEnergyTag, CreatureStateEnergyComponent, CreatureSensorEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, CreatureStateEnergyComponent &energy, CreatureSensorEnergyComponent &energySensor) {
+        world.erase<CreatureActionReadEnergyTag>(creature);
+        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureEnergy)) {
+            return;
+        }
+        energySensor.value = energy.value;
+    });
+
+    world.view<const CreatureActionReadRotationTag, const CreatureStateRotationComponent, CreatureSensorRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureStateRotationComponent &rotation, CreatureSensorRotationComponent &rotationSensor, CreatureStateEnergyComponent &energy) {
+        world.erase<CreatureActionReadRotationTag>(creature);
+        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureRotation)) {
+            return;
+        }
+        rotationSensor.value = rotation.value;
+    });
+
+
+    world.view<const CreatureActionBiteComponent, CreatureStateEnergyComponent, const CreatureStateRotationComponent, const CreaturePositionComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureActionBiteComponent bite, CreatureStateEnergyComponent &energy, const CreatureStateRotationComponent rotation, const CreaturePositionComponent position) {
+        world.erase<CreatureActionBiteComponent>(creature);
+        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Bite, bite.amplitude)) {
+            return;
+        }
+
+        const auto &[entities] = world.get<WorldAreaLocatorComponent>(position.value);
+        if (rotation.value == WorldDirection::InternalCount) {
+            return;
+        }
+
+        const EcsEntity targetPosition = entities[static_cast<uint8_t>(rotation.value)];
+        const WorldCreatureComponent *target = world.try_get<const WorldCreatureComponent>(targetPosition);
+        if (!target) {
+            return;
+        }
+
+        CreatureStateEnergyComponent &targetEnergy = world.get<CreatureStateEnergyComponent>(target->creature);
+        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+        const uint16_t oldValue = targetEnergy.value;
+        const SensorCalculationResult r = UpdateSensorValue(desc, targetEnergy.value, -worldRules.consumeEnergyPerBiteMax);
+        const uint16_t newValue = targetEnergy.value;
+        const int32_t consumedEnergy = oldValue - newValue;
+        UpdateSensorValue(desc, energy.value, consumedEnergy);
+        if (r == SensorCalculationResult::MinValueReached) {
+            world.emplace_or_replace<CreatureOutOfEnergyTag>(target->creature);
+        }
+    });
+
+    {
+        auto creaturesToDestroy = world.view<const CreatureOutOfEnergyTag, const CreaturePositionComponent>();
+        creaturesToDestroy.each([&](const CreaturePositionComponent position) {
+            // cleanup reference from world to creature
+            world.erase<WorldCreatureComponent>(position.value);
+        });
+        world.destroy(creaturesToDestroy.begin(), creaturesToDestroy.end());
+    }
 }
 
 int main() {
@@ -551,10 +772,10 @@ int main() {
     static constexpr float SigmoidMeaningfulRangeSize = 10.0f; //< [-5; 5]
     worldRules.neuronValueRangeSize = static_cast<float>(BrainInputCount) / SigmoidMeaningfulRangeSize;
 
-    worldRules.creatureEnergyMax = 1000;
+    worldRules.creatureEnergyMax = 100000;
     worldRules.brainRestPerTickMin = 5;
     worldRules.creatureFatigueMax = 200;
-    worldRules.actionsRequiredGene.fill(true);
+    worldRules.actionsRequiredGene.fill(false);
     worldRules.actionsForbiddenGene.fill(false);
 
     auto MakeGeneAbility = [&](Genes gene, std::string_view name, float mutationSigma) {
@@ -628,7 +849,7 @@ int main() {
 
         auto MakeObstacle = [&](const int x, const int y) {
             const EcsEntity border = cells[y * WorldSize + x];
-            world.emplace<WorldObstacleTag>(border);
+            world.emplace_or_replace<WorldObstacleTag>(border);
         };
 
         for (int i = 0; i < WorldSize; ++i) {
@@ -637,208 +858,24 @@ int main() {
             MakeObstacle(WorldSize - 1, i);
             MakeObstacle(0, i);
         }
-    }
 
-    auto BrainDispatchAction = [&](EcsEntity creature, const Actions action, float value) {
-        switch (action) {
-            case Actions::Idle:
-                world.emplace<CreatureActionIdleTag>(creature);
-                break;
-            case Actions::ReadCreatureEnergy:
-                world.emplace<CreatureActionReadEnergyTag>(creature);
-                break;
-            case Actions::ReadCreatureRotation:
-                world.emplace<CreatureActionReadRotationTag>(creature);
-                break;
-            case Actions::ReadAreaTouch:
-                world.emplace<CreatureActionReadTouchAreaTag>(creature);
-                break;
-            case Actions::Bite:
-                world.emplace<CreatureActionBiteComponent>(creature, value);
-                break;
-            case Actions::Move: {
-                const auto direction = ConvertFromSensorValue<WorldDirection>(value);
-                world.emplace<CreatureActionMoveComponent>(creature, direction);
-            }
-            break;
-            case Actions::Rotate: {
-                const auto direction = ConvertFromSensorValue<WorldDirection>(value);
-                world.emplace<CreatureActionRotateComponent>(creature, direction);
-            }
-            break;
-            case Actions::MakeChild:
-                break;
-            case Actions::InternalCount:
-            default:
-                ASSERT_FAIL("Sanity check: invalid action type");
-                break;
-        }
-    };
-
-    world.view<const BrainReactionComponent, const CreatureGenomeComponent, CreatureBrainReactionStateComponent, entt::exclude_t<CreatureBrainIsOverloadedTag> >().each([&](EcsEntity creature, const BrainReactionComponent &reaction, const CreatureGenomeComponent &genome, CreatureBrainReactionStateComponent &brainState) {
-        int32_t brainTickRequested = 0;
-        for (uint8_t actionIndex = 0; actionIndex < ActionTypeCount; ++actionIndex) {
-            if (!IsActionAllowedForGenome(worldRules, genome, static_cast<Actions>(actionIndex))) {
+        auto cellsToShuffle = cells;
+        std::ranges::shuffle(cellsToShuffle, worldRules.randomGenerator);
+        for (const EcsEntity position: cellsToShuffle | std::views::take((WorldSize * WorldSize) / 10)) {
+            if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(position)) {
                 continue;
             }
-
-            const float actionValue = reaction.actionsValue[actionIndex];
-            BrainDispatchAction(creature, static_cast<Actions>(actionIndex), actionValue);
-            brainTickRequested += worldRules.actionRules[actionIndex].brainTickCost;
+            const EcsEntity creature = world.create();
+            world.emplace<WorldCreatureComponent>(position, creature);
+            InitCreatureGenome(worldRules, world, creature, position);
         }
-
-        brainState.brainTicksConsumed = static_cast<uint16_t>(brainTickRequested);
-    });
-
-    world.view<const CreatureBrainReactionStateComponent, CreatureStateFatigueComponent, entt::exclude_t<CreatureBrainIsOverloadedTag> >().each([&](EcsEntity creature, const CreatureBrainReactionStateComponent &brainState, CreatureStateFatigueComponent &fatigue) {
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
-        const SensorCalculationResult r = UpdateSensorValue(desc, fatigue.value, brainState.brainTicksConsumed);
-        if (r == SensorCalculationResult::MaxValueReached) {
-            world.emplace<CreatureBrainIsOverloadedTag>(creature);
-        }
-    });
-
-    {
-        const auto overloadedBrains = world.view<CreatureBrainIsOverloadedTag>();
-        world.destroy(overloadedBrains.begin(), overloadedBrains.end());
-    }
-
-    world.view<CreatureStateFatigueComponent>().each([&](CreatureStateFatigueComponent &fatigue) {
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
-        UpdateSensorValue(desc, fatigue.value, -worldRules.brainRestPerTickMin);
-    });
-
-    {
-        const auto view = world.view<const CreatureActionIdleTag>();
-        world.remove<CreatureActionIdleTag>(view.begin(), view.end());
-    }
-
-    world.view<const CreatureActionRotateComponent, CreatureStateRotationComponent, CreatureStateEnergyComponent, entt::exclude_t<CreatureOutOfEnergyTag> >().each([&](EcsEntity creature, const CreatureActionRotateComponent &rotate, CreatureStateRotationComponent &rotation, CreatureStateEnergyComponent &energy) {
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-        const ActionDescription &actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
-        const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -actionDesc.energyCost);
-        if (r == SensorCalculationResult::MinValueReached) {
-            world.emplace<CreatureOutOfEnergyTag>(creature);
-        }
-
-        world.remove<CreatureActionRotateComponent>(creature);
-        rotation.value = rotate.value;
-    });
-
-    world.view<const CreatureActionMoveComponent, CreaturePositionComponent, CreatureStateEnergyComponent, entt::exclude_t<CreatureOutOfEnergyTag> >().each([&](EcsEntity creature, const CreatureActionMoveComponent &move, CreaturePositionComponent &position, CreatureStateEnergyComponent &energy) {
-        world.remove<CreatureActionMoveComponent>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Move)) {
-            return;
-        }
-
-        WorldAreaIndex areaIndex = WorldAreaIndex::InternalCount;
-        switch (move.value) {
-            case WorldDirection::Up:
-                areaIndex = WorldAreaIndex::Position_0_1;
-                break;
-            case WorldDirection::Down:
-                areaIndex = WorldAreaIndex::Position_2_1;
-                break;
-            case WorldDirection::Left:
-                areaIndex = WorldAreaIndex::Position_1_0;
-                break;
-            case WorldDirection::Right:
-                areaIndex = WorldAreaIndex::Position_1_2;
-                break;
-            case WorldDirection::InternalCount:
-                break;
-        }
-
-        if (areaIndex == WorldAreaIndex::InternalCount) [[unlikely]] {
-            ASSERT_FAIL("Sanity check: unknown move direction!");
-            return;
-        }
-
-        const auto &[location] = world.get<const WorldAreaLocatorComponent>(position.value);
-        const EcsEntity newPosition = location[static_cast<uint8_t>(areaIndex)];
-        if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(newPosition)) {
-            return;
-        }
-
-        const EcsEntity oldPosition = position.value;
-        world.remove<WorldCreatureComponent>(oldPosition);
-        world.emplace<WorldCreatureComponent>(newPosition, creature);
-        position.value = newPosition;
-    });
-
-    world.view<const CreatureActionReadTouchAreaTag, const CreaturePositionComponent, CreatureSensorTouchComponent, CreatureStateEnergyComponent, entt::exclude_t<CreatureOutOfEnergyTag> >().each([&](EcsEntity creature, const CreaturePositionComponent &creaturePosition, CreatureSensorTouchComponent &touchSensor, CreatureStateEnergyComponent &energy) {
-        world.remove<CreatureActionReadTouchAreaTag>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadAreaTouch)) {
-            return;
-        }
-        const auto &[entities] = world.get<const WorldAreaLocatorComponent>(creaturePosition.value);
-        for (uint8_t i = 0; i < WorldAreaSize; ++i) {
-            if (const EcsEntity areaPosition = entities[i]; world.any_of<WorldObstacleTag>(areaPosition)) {
-                touchSensor.touches[i] = TouchResult::Solid;
-            } else if (world.any_of<WorldCreatureComponent>(areaPosition)) {
-                touchSensor.touches[i] = TouchResult::Elastic;
-            } else {
-                touchSensor.touches[i] = TouchResult::Nothing;
-            }
-        }
-    });
-
-    world.view<const CreatureActionReadEnergyTag, CreatureStateEnergyComponent, CreatureSensorEnergyComponent, entt::exclude_t<CreatureOutOfEnergyTag> >().each([&](EcsEntity creature, CreatureStateEnergyComponent &energy, CreatureSensorEnergyComponent &energySensor) {
-        world.remove<CreatureActionReadEnergyTag>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureEnergy)) {
-            return;
-        }
-        energySensor.value = energy.value;
-    });
-
-    world.view<const CreatureActionReadRotationTag, const CreatureStateRotationComponent, CreatureSensorRotationComponent, CreatureStateEnergyComponent, entt::exclude_t<CreatureOutOfEnergyTag> >().each([&](EcsEntity creature, const CreatureStateRotationComponent &rotation, CreatureSensorRotationComponent &rotationSensor, CreatureStateEnergyComponent &energy) {
-        world.remove<CreatureActionReadRotationTag>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureRotation)) {
-            return;
-        }
-        rotationSensor.value = rotation.value;
-    });
-
-
-    world.view<const CreatureActionBiteComponent, CreatureStateEnergyComponent, const CreatureStateRotationComponent, const CreaturePositionComponent, entt::exclude_t<CreatureOutOfEnergyTag> >().each([&](EcsEntity creature, const CreatureActionBiteComponent bite, CreatureStateEnergyComponent &energy, const CreatureStateRotationComponent rotation, const CreaturePositionComponent position) {
-        world.remove<CreatureActionBiteComponent>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Bite, bite.amplitude)) {
-            return;
-        }
-
-        const auto &[entities] = world.get<WorldAreaLocatorComponent>(position.value);
-        if (rotation.value == WorldDirection::InternalCount) {
-            return;
-        }
-
-        const EcsEntity targetPosition = entities[static_cast<uint8_t>(rotation.value)];
-        const WorldCreatureComponent *target = world.try_get<const WorldCreatureComponent>(targetPosition);
-        if (!target) {
-            return;
-        }
-
-        CreatureStateEnergyComponent &targetEnergy = world.get<CreatureStateEnergyComponent>(target->creature);
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-        const uint16_t oldValue = targetEnergy.value;
-        const SensorCalculationResult r = UpdateSensorValue(desc, targetEnergy.value, -worldRules.consumeEnergyPerBiteMax);
-        const uint16_t newValue = targetEnergy.value;
-        const int32_t consumedEnergy = oldValue - newValue;
-        UpdateSensorValue(desc, energy.value, consumedEnergy);
-        if (r == SensorCalculationResult::MinValueReached) {
-            world.emplace<CreatureOutOfEnergyTag>(target->creature);
-        }
-    });
-
-    {
-        const auto creaturesToDestroy = world.view<const CreatureOutOfEnergyTag>();
-        world.destroy(creaturesToDestroy.begin(), creaturesToDestroy.end());
     }
 
 
     /// Main loop
     bool shouldStopMainLoop = false;
     std::chrono::steady_clock::time_point lastFrameTime = std::chrono::steady_clock::now();
-    static constexpr std::chrono::milliseconds TargetFrameTime{1000 / 60};
+    static constexpr std::chrono::milliseconds TargetFrameTime{300};
     while (!shouldStopMainLoop) {
         const std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
         const auto frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
@@ -852,6 +889,7 @@ int main() {
             shouldStopMainLoop |= stopByQuitEvent || stopByWindowEvent;
         }
 
+        ProcessWorldUpdate(world, worldRules);
 
         SDL_SetRenderDrawColor(renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
