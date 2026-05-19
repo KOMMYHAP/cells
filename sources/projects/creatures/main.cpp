@@ -115,10 +115,7 @@ float ConvertToSensorValue(const T value, const T minValue = T{}, const T maxVal
 
 
 enum class Genes : uint8_t {
-    // GeneCreatureMutationFactorSensorsWeight,
-    // GeneCreatureMutationFactorHiddenBias,
-    // GeneCreatureMutationFactorHiddenWeight,
-    // GeneCreatureMutationFactorActionBias,
+    GeneCreatureMutationSpeedFactor,
 
     GeneCreatureEnergySensor,
     GeneCreatureRotationSensor,
@@ -206,9 +203,11 @@ struct ActionDescription {
 
 static constexpr uint8_t ActionTypeCount = static_cast<uint8_t>(Actions::InternalCount);
 
-struct WorldDescription {
+struct WorldContext {
     std::mt19937 randomGenerator;
+};
 
+struct WorldDescription {
     std::array<ActionDescription, ActionTypeCount> actionRules{};
     std::array<GeneDescription, GenesCount> geneRules{};
     std::array<SensorDescription, SensorsCount> sensorRules{};
@@ -447,10 +446,13 @@ bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEnt
 }
 
 
-void InitCreatureGenome(WorldDescription &worldRules, EcsWorld &world, EcsEntity creature, EcsEntity position) {
-    const int32_t initialEnergy = std::uniform_int_distribution{0, worldRules.creatureEnergyMax - 1}(worldRules.randomGenerator);
-    const int32_t initialFatigue = std::uniform_int_distribution{0, worldRules.creatureFatigueMax - 1}(worldRules.randomGenerator);
-    const int32_t initialRotation = std::uniform_int_distribution{0, WorldDirectionCount - 1}(worldRules.randomGenerator);
+void InitCreatureGenome(EcsWorld &world, EcsEntity creature, EcsEntity position) {
+    const WorldDescription &worldRules = world.ctx().get<const WorldDescription>();
+    WorldContext &context = world.ctx().get<WorldContext>();
+
+    const int32_t initialEnergy = std::uniform_int_distribution{0, worldRules.creatureEnergyMax - 1}(context.randomGenerator);
+    const int32_t initialFatigue = std::uniform_int_distribution{0, worldRules.creatureFatigueMax - 1}(context.randomGenerator);
+    const int32_t initialRotation = std::uniform_int_distribution{0, WorldDirectionCount - 1}(context.randomGenerator);
 
     world.emplace<CreatureStateEnergyComponent>(creature, static_cast<uint16_t>(initialEnergy));
     world.emplace<CreatureStateFatigueComponent>(creature, static_cast<uint16_t>(initialFatigue));
@@ -471,7 +473,7 @@ void InitCreatureGenome(WorldDescription &worldRules, EcsWorld &world, EcsEntity
 
     auto FillBrain = [&]<size_t S>(std::array<float, S> &neurons) {
         for (float &neuron: neurons) {
-            neuron = std::uniform_real_distribution{-worldRules.neuronValueRangeSize, worldRules.neuronValueRangeSize}(worldRules.randomGenerator);
+            neuron = std::uniform_real_distribution{-worldRules.neuronValueRangeSize / 2.0f, worldRules.neuronValueRangeSize / 2.0f}(context.randomGenerator);
         }
     };
     auto &brain = world.emplace<BrainSpecializationComponent>(creature);
@@ -483,7 +485,7 @@ void InitCreatureGenome(WorldDescription &worldRules, EcsWorld &world, EcsEntity
 
     auto &[genomeQuality] = world.emplace<BrainGenomeComponent>(creature);
     for (float &quality: genomeQuality) {
-        quality = std::uniform_real_distribution{0.0f, 1.0f}(worldRules.randomGenerator);
+        quality = std::uniform_real_distribution{0.0f, 1.0f}(context.randomGenerator);
     }
     auto &[genes] = world.emplace<CreatureGenomeComponent>(creature);
     ASSERT(genes.size() == genomeQuality.size(), "Sanity check: genome size matches quality size");
@@ -513,7 +515,44 @@ bool IsActionAllowedForGenome(const WorldDescription &worldRules, const Creature
     return true;
 }
 
-void ProcessWorldUpdate(EcsWorld &world, const WorldDescription &worldRules) {
+void ProcessWorldUpdate(EcsWorld &world) {
+    const WorldDescription &worldRules = world.ctx().get<WorldDescription>();
+
+    world.view<BrainSpecializationComponent, const BrainGenomeComponent>().each([&](BrainSpecializationComponent &specialization, const BrainGenomeComponent &genome) {
+        WorldContext &context = world.ctx().get<WorldContext>();
+
+        static constexpr auto MutationSpeedGeneIndex = static_cast<uint8_t>(Genes::GeneCreatureMutationSpeedFactor);
+        static constexpr float MutationSpeedFactorMin = 0.0001f;
+        static constexpr float MutationSpeedFactorMax = 1.0f;
+        const float mutationSigma = genome.quality[MutationSpeedGeneIndex] * (MutationSpeedFactorMax - MutationSpeedFactorMin) + MutationSpeedFactorMin;
+
+        // {
+        //     const GeneDescription &desc = worldRules.geneRules[MutationSpeedGeneIndex];
+        //     std::normal_distribution distribution{desc.mutationCenter, desc.mutationSigma};
+        //     const float mutation = distribution(context.randomGenerator);
+        //
+        //     const float quality = genome.quality[MutationSpeedGeneIndex] * static_cast<float>((desc.maxValue - desc.minValue)) + desc.minValue;
+        //     const float mutatedQuality = quality * std::exp(mutation);
+        //     const float normalizedQuality = (mutatedQuality - static_cast<float>(desc.minValue)) / static_cast<float>(desc.maxValue - desc.minValue);
+        //     genome.quality[MutationSpeedGeneIndex] = normalizedQuality;
+        //     mutationSigma = mutatedQuality;
+        // }
+
+        auto MutateNeuron = [&context, range=worldRules.neuronValueRangeSize, sigma=mutationSigma]<size_t N>(std::array<float, N> &neurons) {
+            for (float &neuron: neurons) {
+                const float neuronMutation = std::normal_distribution{0.0f, sigma}(context.randomGenerator);
+                neuron += neuronMutation;
+                neuron = std::clamp(neuron, -range / 2.0f, range / 2.0f);
+            }
+        };
+
+        MutateNeuron(specialization.weightSensorToHidden);
+        MutateNeuron(specialization.weightQualityToHidden);
+        MutateNeuron(specialization.weightsHiddenToOutput);
+        MutateNeuron(specialization.biasSensorToHidden);
+        MutateNeuron(specialization.biasHiddenToOutput);
+    });
+
     world.view<BrainSensorsComponent, const CreatureSensorEnergyComponent, const CreatureSensorRotationComponent, const CreatureSensorTouchComponent>().each([&](BrainSensorsComponent &sensors, const CreatureSensorEnergyComponent energySensor, const CreatureSensorRotationComponent rotationSensor, const CreatureSensorTouchComponent &touchSensor) {
         sensors.data[static_cast<uint8_t>(Sensors::CreatureEnergy)] = ConvertToSensorValue(energySensor.value, worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)]);
         sensors.data[static_cast<uint8_t>(Sensors::CreatureRotation)] = ConvertToSensorValue(rotationSensor.value);
@@ -766,8 +805,14 @@ int main() {
     WorldRasterizationTarget rasterizationTarget{*renderTargetTexture, SDL_Color{200, 200, 200, SDL_ALPHA_OPAQUE}, 4};
 
     EcsWorld world{};
+    WorldDescription &worldRules = world.ctx().emplace<WorldDescription>();
+    WorldContext &worldContext = world.ctx().emplace<WorldContext>();
+    {
+        static constexpr std::string_view RandomSeed = "White";
+        std::seed_seq seed{RandomSeed.begin(), RandomSeed.end()};
+        worldContext.randomGenerator.seed(seed);
+    }
 
-    WorldDescription worldRules;
     static constexpr int32_t BrainInputCount = GenesCount + SensorsCount;
     static constexpr float SigmoidMeaningfulRangeSize = 10.0f; //< [-5; 5]
     worldRules.neuronValueRangeSize = static_cast<float>(BrainInputCount) / SigmoidMeaningfulRangeSize;
@@ -799,6 +844,10 @@ int main() {
     MakeGeneAbility(Genes::GeneCanBite, "Can Bite", 0.01f);
     MakeGeneAbility(Genes::GeneCanRotate, "Can Rotate", 0.01f);
     MakeGeneAbility(Genes::GeneCanMakeChild, "Can Make Child", 0.01f);
+
+    worldRules.geneRules[static_cast<uint8_t>(Genes::GeneCreatureMutationSpeedFactor)] = {
+        "Mutation Speed", GeneTypes::Property, 0, 0, std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN()
+    };
 
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)] = {"Creature Energy", 0, worldRules.creatureEnergyMax};
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureRotation)] = {"Creature Rotation", 0, WorldDirectionCount};
@@ -860,14 +909,14 @@ int main() {
         }
 
         auto cellsToShuffle = cells;
-        std::ranges::shuffle(cellsToShuffle, worldRules.randomGenerator);
+        std::ranges::shuffle(cellsToShuffle, worldContext.randomGenerator);
         for (const EcsEntity position: cellsToShuffle | std::views::take((WorldSize * WorldSize) / 10)) {
             if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(position)) {
                 continue;
             }
             const EcsEntity creature = world.create();
             world.emplace<WorldCreatureComponent>(position, creature);
-            InitCreatureGenome(worldRules, world, creature, position);
+            InitCreatureGenome(world, creature, position);
         }
     }
 
@@ -875,7 +924,7 @@ int main() {
     /// Main loop
     bool shouldStopMainLoop = false;
     std::chrono::steady_clock::time_point lastFrameTime = std::chrono::steady_clock::now();
-    static constexpr std::chrono::milliseconds TargetFrameTime{300};
+    static constexpr std::chrono::milliseconds TargetFrameTime{1000 / 60};
     while (!shouldStopMainLoop) {
         const std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
         const auto frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
@@ -889,7 +938,7 @@ int main() {
             shouldStopMainLoop |= stopByQuitEvent || stopByWindowEvent;
         }
 
-        ProcessWorldUpdate(world, worldRules);
+        ProcessWorldUpdate(world);
 
         SDL_SetRenderDrawColor(renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
