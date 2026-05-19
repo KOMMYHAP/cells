@@ -652,7 +652,7 @@ void ProcessWorldUpdate(EcsWorld &world, const WorldDescription &worldRules) {
 
         const auto &[location] = world.get<const WorldAreaLocatorComponent>(position.value);
         const EcsEntity newPosition = location[static_cast<uint8_t>(areaIndex)];
-        if (newPosition == InvalidEcsEntity) {
+        if (!world.valid(newPosition)) {
             return;
         }
         if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(newPosition)) {
