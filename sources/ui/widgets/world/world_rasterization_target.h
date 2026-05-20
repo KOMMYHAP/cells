@@ -14,6 +14,8 @@ public:
     void Unlock();
 
     void Set(CellPosition position, SDL_Color color);
+    void SetFilledCircle(int32_t pixelX, int32_t pixelY, float radius, SDL_Color color);
+    void SetLine(int32_t offsetX, int32_t offsetY, int32_t length, SDL_Color color);
 
 private:
     bool DebugIsLocked() const;

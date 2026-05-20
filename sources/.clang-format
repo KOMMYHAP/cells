@@ -1,4 +1,33 @@
 ﻿---
 BasedOnStyle: WebKit
+Language: Cpp
+Standard: c++26
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+ColumnLimit: 160
+
+BreakBeforeBraces: Attach
+
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceAfterTemplateKeyword: false
+
+SortIncludes: Never
+
+NamespaceIndentation: All
+AccessModifierOffset: -4
 
 ...

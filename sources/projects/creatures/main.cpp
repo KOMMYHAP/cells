@@ -64,9 +64,9 @@ enum class Sensors : uint8_t {
 static constexpr uint8_t SensorsCount = static_cast<uint8_t>(Sensors::InternalCount);
 
 struct SensorDescription {
-    std::string_view name;
-    int32_t minValue{0}; //< included
-    int32_t maxValue{0}; //< excluded
+    [[maybe_unused]] std::string_view name;
+    int32_t minValue{ 0 }; //< included
+    int32_t maxValue{ 0 }; //< excluded
 };
 
 enum class SensorCalculationResult {
@@ -75,7 +75,7 @@ enum class SensorCalculationResult {
     MaxValueReached,
 };
 
-SensorCalculationResult UpdateSensorValue(const SensorDescription &desc, uint16_t &value, int32_t diff) {
+SensorCalculationResult UpdateSensorValue(const SensorDescription& desc, uint16_t& value, int32_t diff) {
     const int32_t newValue = static_cast<int32_t>(value) + diff;
     if (newValue >= desc.maxValue) {
         value = static_cast<uint16_t>(desc.maxValue);
@@ -89,7 +89,7 @@ SensorCalculationResult UpdateSensorValue(const SensorDescription &desc, uint16_
     return SensorCalculationResult::ValueInRange;
 }
 
-uint16_t ConvertFromSensorValue(const float value, const SensorDescription &desc) {
+uint16_t ConvertFromSensorValue(const float value, const SensorDescription& desc) {
     const float rawValue = std::lerp(static_cast<float>(desc.minValue), static_cast<float>(desc.maxValue) - 1.0f, value);
     return static_cast<uint16_t>(std::roundf(rawValue));
 }
@@ -101,7 +101,7 @@ T ConvertFromSensorValue(const float value, const T minValue = T{}, const T maxV
     return static_cast<T>(static_cast<std::underlying_type_t<T>>(std::roundf(rawValue)));
 }
 
-float ConvertToSensorValue(const uint16_t value, const SensorDescription &desc) {
+float ConvertToSensorValue(const uint16_t value, const SensorDescription& desc) {
     const float rawValue = (static_cast<float>(value) - static_cast<float>(desc.minValue)) / static_cast<float>(desc.maxValue - desc.minValue);
     return std::clamp(rawValue, 0.0f, 1.0f);
 }
@@ -109,7 +109,8 @@ float ConvertToSensorValue(const uint16_t value, const SensorDescription &desc) 
 template<class T>
     requires std::is_enum_v<T>
 float ConvertToSensorValue(const T value, const T minValue = T{}, const T maxValue = T::InternalCount) {
-    const float rawValue = (static_cast<float>(value) - static_cast<float>(minValue)) / static_cast<float>(std::to_underlying(maxValue) - std::to_underlying(minValue));
+    const float rawValue = (static_cast<float>(value) - static_cast<float>(minValue)) / static_cast<float>(std::to_underlying(maxValue) -
+        std::to_underlying(minValue));
     return std::clamp(rawValue, 0.0f, 1.0f);
 }
 
@@ -136,8 +137,8 @@ enum class Genes : uint8_t {
     GeneCanRotate,
     GeneCanMakeChild,
 
-    GeneBrainRestSpeed,
-    GeneBitePower,
+    // GeneBrainRestSpeed,
+    // GeneBitePower,
 
     InternalCount
 };
@@ -151,20 +152,20 @@ enum class GeneTypes {
     InternalCount
 };
 
-static constexpr uint8_t GeneTypesCount = static_cast<uint8_t>(GeneTypes::InternalCount);
+[[maybe_unused]] static constexpr uint8_t GeneTypesCount = static_cast<uint8_t>(GeneTypes::InternalCount);
 
 struct GeneDescription {
-    std::string_view name;
-    GeneTypes type{GeneTypes::InternalCount};
-    uint16_t minValue{0};
-    uint16_t maxValue{0};
-    float mutationCenter{0.0f};
-    float mutationSigma{0.0f};
+    [[maybe_unused]] std::string_view name;
+    GeneTypes type{ GeneTypes::InternalCount };
+    [[maybe_unused]] uint16_t minValue{ 0 };
+    [[maybe_unused]] uint16_t maxValue{ 0 };
+    [[maybe_unused]] float mutationCenter{ 0.0f };
+    [[maybe_unused]] float mutationSigma{ 0.0f };
 };
 
 enum class AvailabilityResult {
-    Yes,
-    No,
+    Yes [[maybe_unused]],
+    No[[maybe_unused]],
     InternalCount
 };
 
@@ -196,16 +197,12 @@ enum class Actions : uint8_t {
 };
 
 struct ActionDescription {
-    std::string_view name;
-    int32_t energyCost{0};
-    int32_t brainTickCost{0};
+    [[maybe_unused]] std::string_view name;
+    int32_t energyCost{ 0 };
+    int32_t brainTickCost{ 0 };
 };
 
 static constexpr uint8_t ActionTypeCount = static_cast<uint8_t>(Actions::InternalCount);
-
-struct WorldContext {
-    std::mt19937 randomGenerator;
-};
 
 struct WorldDescription {
     std::array<ActionDescription, ActionTypeCount> actionRules{};
@@ -214,12 +211,98 @@ struct WorldDescription {
     std::array<bool, ActionTypeCount * GenesCount> actionsRequiredGene{}; //< which genes are required for this action?
     std::array<bool, ActionTypeCount * GenesCount> actionsForbiddenGene{}; //< which genes are forbidden for this action?
 
-    float neuronValueRangeSize{0.0f}; //< range = [-x / 2; x / 2]
+    float neuronValueRangeSize{ 0.0f }; //< range = [-x / 2; x / 2]
 
-    int32_t brainRestPerTickMin{0};
-    int32_t creatureEnergyMax{0};
-    int32_t creatureFatigueMax{0};
-    int32_t consumeEnergyPerBiteMax{0};
+    int32_t brainRestPerTickMin{ 0 };
+    int32_t creatureEnergyMax{ 0 };
+    int32_t creatureFatigueMax{ 0 };
+    int32_t consumeEnergyPerBiteMax{ 0 };
+};
+
+using RandomGenerator = std::mt19937;
+
+class Camera {
+public: //< getters:
+    float GetZoom() const {
+        return _zoom;
+    }
+
+    std::pair<float, float> GetPosition() const {
+        return { _centerX, _centerY };
+    }
+
+    std::pair<float, float> GetZoomLimits() const {
+        return { _zoomMin, _zoomMax };
+    }
+
+    bool IsVisible(float x, float y) const {
+        const auto [screenX, screenY] = ToScreenSpace(x, y);
+        return screenX >= 0 && screenY >= 0 && screenX < _screenPixelsWidth && screenY < _screenPixelsHeight;
+    }
+
+public: //< converter:
+    std::pair<int32_t, int32_t> ToScreenSpace(float x, float y) const {
+        const auto screenX = static_cast<int32_t>(std::round((x - _centerX) * _zoom + _screenPixelsWidth / 2.0f));
+        const auto screenY = static_cast<int32_t>(std::round((y - _centerY) * _zoom + _screenPixelsHeight / 2.0f));
+        return { screenX, screenY };
+    }
+
+    std::pair<float, float> ToWorldSpace(int32_t x, int32_t y) const {
+        const float worldX = static_cast<float>(x - _screenPixelsWidth / 2) / _zoom - _centerX;
+        const float worldY = static_cast<float>(y - _screenPixelsHeight / 2) / _zoom - _centerY;
+        return { worldX, worldY };
+    }
+
+public: //< controller:
+    void SetZoomLimits(float zoomMin, float zoomMax) {
+        _zoomMin = zoomMin;
+        _zoomMax = zoomMax;
+    }
+
+    void SetZoom(float zoom) {
+        _zoom = std::clamp(zoom, _zoomMin, _zoomMax);
+    }
+
+    void SetPosition(float x, float y) {
+        _centerX = x;
+        _centerY = y;
+    }
+
+    void SetScreenSize(int32_t width, int32_t height) {
+        ASSERT(width > 0 && height > 0, "Sanity check: screen size must be positive");
+        _screenPixelsWidth = width;
+        _screenPixelsHeight = height;
+    }
+
+    void Zoom(int32_t screenSpaceX, int32_t screenSpaceY, float zoomDelta) {
+        const auto [oldWorldX, oldWorldY] = ToWorldSpace(screenSpaceX, screenSpaceY);
+        SetZoom(_zoom * zoomDelta);
+        const auto [newWorldX, newWorldY] = ToWorldSpace(screenSpaceX, screenSpaceY);
+        _centerX += newWorldX - oldWorldX;
+        _centerY += newWorldY - oldWorldY;
+    }
+
+    void Move(int32_t screenSpaceDx, int32_t screenSpaceDy) {
+        _centerX += static_cast<float>(screenSpaceDx) / _zoom;
+        _centerY += static_cast<float>(screenSpaceDy) / _zoom;
+    }
+
+private:
+    float _centerX{ 0.0f }; //< world space X
+    float _centerY{ 0.0f }; //< world space Y
+
+    float _zoomMin{ 0.1f };
+    float _zoomMax{ 1.0f };
+    float _zoom{ (_zoomMax - _zoomMin) / 2.0f };
+
+    int32_t _screenPixelsWidth{ 800 };
+    int32_t _screenPixelsHeight{ 600 };
+};
+
+struct GameContext {
+    WorldDescription worldRules;
+    Camera camera;
+    RandomGenerator randomGenerator;
 };
 
 struct BrainSensorsComponent {
@@ -272,19 +355,19 @@ static float ActivationSigma(float x) {
     return 1.0f / (1.0f + std::exp(-x));
 }
 
-void EvaluateBrain(const BrainContext &context) {
+void EvaluateBrain(const BrainContext& context) {
     std::array<float, GenesCount> hiddenLayer{};
 
-    for (const uint8_t geneIndex: std::views::iota(static_cast<uint8_t>(0), GenesCount)) {
+    for (const uint8_t geneIndex : std::views::iota(static_cast<uint8_t>(0), GenesCount)) {
         const float bias = context.specialization->biasSensorToHidden[geneIndex];
         float sum = bias;
 
-        for (const uint8_t sensorIndex: std::views::iota(static_cast<uint8_t>(0), SensorsCount)) {
+        for (const uint8_t sensorIndex : std::views::iota(static_cast<uint8_t>(0), SensorsCount)) {
             const float sensorValue = context.sensors->data[sensorIndex];
             const float sensorWeight = context.specialization->weightSensorToHidden[geneIndex * GenesCount + sensorIndex];
             sum += sensorValue * sensorWeight;
         }
-        for (const uint8_t qualityIndex: std::views::iota(static_cast<uint8_t>(0), GenesCount)) {
+        for (const uint8_t qualityIndex : std::views::iota(static_cast<uint8_t>(0), GenesCount)) {
             const float quality = context.genome->quality[qualityIndex];
             const float sensorWeight = context.specialization->weightQualityToHidden[geneIndex * GenesCount + qualityIndex];
             sum += quality * sensorWeight;
@@ -294,11 +377,11 @@ void EvaluateBrain(const BrainContext &context) {
         hiddenLayer[geneIndex] = ActivationReLU(geneQuality * sum);
     }
 
-    for (const uint8_t actionIndex: std::views::iota(static_cast<uint8_t>(0), ActionTypeCount)) {
+    for (const uint8_t actionIndex : std::views::iota(static_cast<uint8_t>(0), ActionTypeCount)) {
         const float biasValue = context.specialization->biasHiddenToOutput[actionIndex];
         float sumValue = biasValue;
 
-        for (const uint8_t geneIndex: std::views::iota(static_cast<uint8_t>(0), GenesCount)) {
+        for (const uint8_t geneIndex : std::views::iota(static_cast<uint8_t>(0), GenesCount)) {
             const float hiddenValue = hiddenLayer[geneIndex];
             const float hiddenWeightValue = context.specialization->weightsHiddenToOutput[actionIndex * ActionTypeCount + geneIndex];
             sumValue += hiddenValue * hiddenWeightValue;
@@ -310,22 +393,22 @@ void EvaluateBrain(const BrainContext &context) {
 
 
 struct CreatureGenomeComponent {
-    std::array<bool, GenesCount> genes;
+    std::array<bool, GenesCount> Genes;
 };
 
 struct WorldPosition {
-    int16_t x{0};
-    int16_t y{0};
+    int16_t x{ 0 };
+    int16_t y{ 0 };
 };
 
 enum class WorldAreaIndex : uint8_t {
     Position_0_0,
     Position_0_1,
-    Position_0_2,
+    Position_0_2[[maybe_unused]],
     Position_1_0,
-    Position_1_1,
+    Position_1_1[[maybe_unused]],
     Position_1_2,
-    Position_2_0,
+    Position_2_0[[maybe_unused]],
     Position_2_1,
     Position_2_2,
     InternalCount
@@ -334,7 +417,7 @@ enum class WorldAreaIndex : uint8_t {
 static constexpr int32_t WorldAreaSize = static_cast<int32_t>(WorldAreaIndex::InternalCount);
 
 struct WorldAreaLocatorComponent {
-    std::array<EcsEntity, WorldAreaSize> entities;
+    [[maybe_unused]] std::array<EcsEntity, WorldAreaSize> entities;
 };
 
 
@@ -374,33 +457,33 @@ struct CreatureBrainIsOverloadedTag {
 };
 
 struct CreatureBrainReactionStateComponent {
-    uint16_t brainTicksConsumed{0};
+    uint16_t brainTicksConsumed{ 0 };
 };
 
 struct CreatureActionIdleTag {
 };
 
 struct CreatureStateEnergyComponent {
-    uint16_t value{0};
+    uint16_t value{ 0 };
 };
 
 struct CreatureOutOfEnergyTag {
 };
 
 struct CreatureStateFatigueComponent {
-    uint16_t value{0};
+    uint16_t value{ 0 };
 };
 
 struct CreatureStateRotationComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    WorldDirection value{ WorldDirection::InternalCount };
 };
 
 struct CreatureActionRotateComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    WorldDirection value{ WorldDirection::InternalCount };
 };
 
 struct CreatureActionMoveComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    WorldDirection value{ WorldDirection::InternalCount };
 };
 
 struct CreatureSensorTouchComponent {
@@ -411,14 +494,14 @@ struct CreatureActionReadTouchAreaTag {
 };
 
 struct CreatureSensorEnergyComponent {
-    uint16_t value{0};
+    uint16_t value{ 0 };
 };
 
 struct CreatureActionReadEnergyTag {
 };
 
 struct CreatureSensorRotationComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    WorldDirection value{ WorldDirection::InternalCount };
 };
 
 struct CreatureActionReadRotationTag {
@@ -429,13 +512,14 @@ struct WorldCreatureComponent {
 };
 
 struct CreatureActionBiteComponent {
-    float amplitude{0.0f};
+    float _amplitude{ 0.0f };
 };
 
 
-bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEntity creature, CreatureStateEnergyComponent &energy, Actions action, float amplitude = 1.0f) {
-    const SensorDescription &desc = worldDesc.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-    const ActionDescription &actionDesc = worldDesc.actionRules[static_cast<uint8_t>(action)];
+bool TryConsumeEnergy(EcsWorld& world, const WorldDescription& worldDesc, EcsEntity creature, CreatureStateEnergyComponent& energy, Actions action,
+    float amplitude = 1.0f) {
+    const SensorDescription& desc = worldDesc.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+    const ActionDescription& actionDesc = worldDesc.actionRules[static_cast<uint8_t>(action)];
     const int32_t energyCost = std::max(1, static_cast<int32_t>(std::round(static_cast<float>(actionDesc.energyCost) * amplitude)));
     const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -energyCost);
     if (r == SensorCalculationResult::MinValueReached) {
@@ -446,50 +530,51 @@ bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEnt
 }
 
 
-void InitCreatureGenome(EcsWorld &world, EcsEntity creature, EcsEntity position) {
-    const WorldDescription &worldRules = world.ctx().get<const WorldDescription>();
-    WorldContext &context = world.ctx().get<WorldContext>();
+void InitCreatureGenome(EcsWorld& world, EcsEntity creature, EcsEntity position) {
+    GameContext& context = world.ctx().get<GameContext>();
+    RandomGenerator& randomGenerator = context.randomGenerator;
+    const WorldDescription& worldRules = context.worldRules;
 
-    const int32_t initialEnergy = std::uniform_int_distribution{0, worldRules.creatureEnergyMax - 1}(context.randomGenerator);
-    const int32_t initialFatigue = std::uniform_int_distribution{0, worldRules.creatureFatigueMax - 1}(context.randomGenerator);
-    const int32_t initialRotation = std::uniform_int_distribution{0, WorldDirectionCount - 1}(context.randomGenerator);
+    const int32_t initialEnergy = std::uniform_int_distribution{ 0, worldRules.creatureEnergyMax - 1 }(randomGenerator);
+    const int32_t initialFatigue = std::uniform_int_distribution{ 0, worldRules.creatureFatigueMax - 1 }(randomGenerator);
+    const int32_t initialRotation = std::uniform_int_distribution{ 0, WorldDirectionCount - 1 }(randomGenerator);
 
     world.emplace<CreatureStateEnergyComponent>(creature, static_cast<uint16_t>(initialEnergy));
     world.emplace<CreatureStateFatigueComponent>(creature, static_cast<uint16_t>(initialFatigue));
     world.emplace<CreatureStateRotationComponent>(creature, static_cast<WorldDirection>(initialRotation));
-    world.emplace<CreatureBrainReactionStateComponent>(creature, uint16_t{0});
+    world.emplace<CreatureBrainReactionStateComponent>(creature, uint16_t{ 0 });
     world.emplace<CreaturePositionComponent>(creature, position);
 
-    world.emplace<CreatureSensorEnergyComponent>(creature, uint16_t{0});
+    world.emplace<CreatureSensorEnergyComponent>(creature, uint16_t{ 0 });
     world.emplace<CreatureSensorRotationComponent>(creature, WorldDirection::Down);
-    auto &[touches] = world.emplace<CreatureSensorTouchComponent>(creature);
+    auto& [touches] = world.emplace<CreatureSensorTouchComponent>(creature);
     touches.fill(TouchResult::Nothing);
 
-    auto &[actions] = world.emplace<BrainReactionComponent>(creature);
+    auto& [actions] = world.emplace<BrainReactionComponent>(creature);
     actions.fill(0.0f);
 
-    auto &[sensors] = world.emplace<BrainSensorsComponent>(creature);
+    auto& [sensors] = world.emplace<BrainSensorsComponent>(creature);
     sensors.fill(0.0f);
 
-    auto FillBrain = [&]<size_t S>(std::array<float, S> &neurons) {
-        for (float &neuron: neurons) {
-            neuron = std::uniform_real_distribution{-worldRules.neuronValueRangeSize / 2.0f, worldRules.neuronValueRangeSize / 2.0f}(context.randomGenerator);
+    auto FillBrain = [&]<size_t S>(std::array<float, S>& neurons) {
+        for (float& neuron : neurons) {
+            neuron = std::uniform_real_distribution{ -worldRules.neuronValueRangeSize / 2.0f, worldRules.neuronValueRangeSize / 2.0f }(context.randomGenerator);
         }
     };
-    auto &brain = world.emplace<BrainSpecializationComponent>(creature);
+    auto& brain = world.emplace<BrainSpecializationComponent>(creature);
     FillBrain(brain.biasHiddenToOutput);
     FillBrain(brain.biasSensorToHidden);
     FillBrain(brain.weightQualityToHidden);
     FillBrain(brain.weightSensorToHidden);
     FillBrain(brain.weightsHiddenToOutput);
 
-    auto &[genomeQuality] = world.emplace<BrainGenomeComponent>(creature);
-    for (float &quality: genomeQuality) {
-        quality = std::uniform_real_distribution{0.0f, 1.0f}(context.randomGenerator);
+    auto& [genomeQuality] = world.emplace<BrainGenomeComponent>(creature);
+    for (float& quality : genomeQuality) {
+        quality = std::uniform_real_distribution{ 0.0f, 1.0f }(context.randomGenerator);
     }
-    auto &[genes] = world.emplace<CreatureGenomeComponent>(creature);
+    auto& [genes] = world.emplace<CreatureGenomeComponent>(creature);
     ASSERT(genes.size() == genomeQuality.size(), "Sanity check: genome size matches quality size");
-    for (const size_t geneIndex: std::views::iota(size_t{0}, genes.size())) {
+    for (const size_t geneIndex : std::views::iota(size_t{ 0 }, genes.size())) {
         const bool isAbility = worldRules.geneRules[geneIndex].type == GeneTypes::Ability;
         const bool enabled = isAbility ? static_cast<bool>(std::round(genomeQuality[geneIndex])) : true;
         genes[geneIndex] = enabled;
@@ -497,17 +582,17 @@ void InitCreatureGenome(EcsWorld &world, EcsEntity creature, EcsEntity position)
 }
 
 
-bool IsActionAllowedForGenome(const WorldDescription &worldRules, const CreatureGenomeComponent &genome, Actions action) {
+bool IsActionAllowedForGenome(const WorldDescription& worldRules, const CreatureGenomeComponent& genome, Actions action) {
     for (uint8_t geneIndex = 0; geneIndex < GenesCount; ++geneIndex) {
         const bool geneRequired = worldRules.actionsRequiredGene[static_cast<uint8_t>(action) * ActionTypeCount + geneIndex];
-        if (geneRequired && !genome.genes[geneIndex]) {
+        if (geneRequired && !genome.Genes[geneIndex]) {
             return false;
         }
     }
 
     for (uint8_t geneIndex = 0; geneIndex < GenesCount; ++geneIndex) {
         const bool geneForbidden = worldRules.actionsForbiddenGene[static_cast<uint8_t>(action) * ActionTypeCount + geneIndex];
-        if (geneForbidden && !genome.genes[geneIndex]) {
+        if (geneForbidden && !genome.Genes[geneIndex]) {
             return false;
         }
     }
@@ -515,121 +600,117 @@ bool IsActionAllowedForGenome(const WorldDescription &worldRules, const Creature
     return true;
 }
 
-void ProcessWorldUpdate(EcsWorld &world) {
-    const WorldDescription &worldRules = world.ctx().get<WorldDescription>();
+void ProcessWorldUpdate(EcsWorld& world) {
+    GameContext& context = world.ctx().get<GameContext>();
+    const WorldDescription& worldRules = context.worldRules;
 
-    world.view<BrainSpecializationComponent, const BrainGenomeComponent>().each([&](BrainSpecializationComponent &specialization, const BrainGenomeComponent &genome) {
-        WorldContext &context = world.ctx().get<WorldContext>();
+    world.view<BrainSpecializationComponent, const BrainGenomeComponent>().each(
+        [&](BrainSpecializationComponent& specialization, const BrainGenomeComponent& genome) {
+            static constexpr auto MutationSpeedGeneIndex = static_cast<uint8_t>(Genes::GeneCreatureMutationSpeedFactor);
+            static constexpr float MutationSpeedFactorMin = 0.0001f;
+            static constexpr float MutationSpeedFactorMax = 1.0f;
+            const float mutationSigma = genome.quality[MutationSpeedGeneIndex] * (MutationSpeedFactorMax - MutationSpeedFactorMin) + MutationSpeedFactorMin;
 
-        static constexpr auto MutationSpeedGeneIndex = static_cast<uint8_t>(Genes::GeneCreatureMutationSpeedFactor);
-        static constexpr float MutationSpeedFactorMin = 0.0001f;
-        static constexpr float MutationSpeedFactorMax = 1.0f;
-        const float mutationSigma = genome.quality[MutationSpeedGeneIndex] * (MutationSpeedFactorMax - MutationSpeedFactorMin) + MutationSpeedFactorMin;
+            auto MutateNeuron = [&context, range=worldRules.neuronValueRangeSize, sigma=mutationSigma]<size_t N>(std::array<float, N>& neurons) {
+                for (float& neuron : neurons) {
+                    const float neuronMutation = std::normal_distribution{ 0.0f, sigma }(context.randomGenerator);
+                    neuron += neuronMutation;
+                    neuron = std::clamp(neuron, -range / 2.0f, range / 2.0f);
+                }
+            };
 
-        // {
-        //     const GeneDescription &desc = worldRules.geneRules[MutationSpeedGeneIndex];
-        //     std::normal_distribution distribution{desc.mutationCenter, desc.mutationSigma};
-        //     const float mutation = distribution(context.randomGenerator);
-        //
-        //     const float quality = genome.quality[MutationSpeedGeneIndex] * static_cast<float>((desc.maxValue - desc.minValue)) + desc.minValue;
-        //     const float mutatedQuality = quality * std::exp(mutation);
-        //     const float normalizedQuality = (mutatedQuality - static_cast<float>(desc.minValue)) / static_cast<float>(desc.maxValue - desc.minValue);
-        //     genome.quality[MutationSpeedGeneIndex] = normalizedQuality;
-        //     mutationSigma = mutatedQuality;
-        // }
+            MutateNeuron(specialization.weightSensorToHidden);
+            MutateNeuron(specialization.weightQualityToHidden);
+            MutateNeuron(specialization.weightsHiddenToOutput);
+            MutateNeuron(specialization.biasSensorToHidden);
+            MutateNeuron(specialization.biasHiddenToOutput);
+        });
 
-        auto MutateNeuron = [&context, range=worldRules.neuronValueRangeSize, sigma=mutationSigma]<size_t N>(std::array<float, N> &neurons) {
-            for (float &neuron: neurons) {
-                const float neuronMutation = std::normal_distribution{0.0f, sigma}(context.randomGenerator);
-                neuron += neuronMutation;
-                neuron = std::clamp(neuron, -range / 2.0f, range / 2.0f);
+    world.view<BrainSensorsComponent, const CreatureSensorEnergyComponent, const CreatureSensorRotationComponent, const CreatureSensorTouchComponent>().each(
+        [&](BrainSensorsComponent& sensors, const CreatureSensorEnergyComponent energySensor, const CreatureSensorRotationComponent rotationSensor,
+        const CreatureSensorTouchComponent& touchSensor) {
+            sensors.data[static_cast<uint8_t>(Sensors::CreatureEnergy)] = ConvertToSensorValue(energySensor.value,
+                worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)]);
+            sensors.data[static_cast<uint8_t>(Sensors::CreatureRotation)] = ConvertToSensorValue(rotationSensor.value);
+            sensors.data[static_cast<uint8_t>(Sensors::CreatureFatigue)] = ConvertToSensorValue(energySensor.value,
+                worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)]);
+
+            for (const int32_t touchIndex : std::views::iota(0, WorldAreaSize)) {
+                const TouchResult touch = touchSensor.touches[touchIndex];
+                sensors.data[static_cast<int32_t>(Sensors::TouchArea_0_0) + touchIndex] = ConvertToSensorValue(touch);
             }
-        };
+        });
 
-        MutateNeuron(specialization.weightSensorToHidden);
-        MutateNeuron(specialization.weightQualityToHidden);
-        MutateNeuron(specialization.weightsHiddenToOutput);
-        MutateNeuron(specialization.biasSensorToHidden);
-        MutateNeuron(specialization.biasHiddenToOutput);
-    });
-
-    world.view<BrainSensorsComponent, const CreatureSensorEnergyComponent, const CreatureSensorRotationComponent, const CreatureSensorTouchComponent>().each([&](BrainSensorsComponent &sensors, const CreatureSensorEnergyComponent energySensor, const CreatureSensorRotationComponent rotationSensor, const CreatureSensorTouchComponent &touchSensor) {
-        sensors.data[static_cast<uint8_t>(Sensors::CreatureEnergy)] = ConvertToSensorValue(energySensor.value, worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)]);
-        sensors.data[static_cast<uint8_t>(Sensors::CreatureRotation)] = ConvertToSensorValue(rotationSensor.value);
-        sensors.data[static_cast<uint8_t>(Sensors::CreatureFatigue)] = ConvertToSensorValue(energySensor.value, worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)]);
-
-        for (const int32_t touchIndex: std::views::iota(0, WorldAreaSize)) {
-            const TouchResult touch = touchSensor.touches[touchIndex];
-            sensors.data[static_cast<int32_t>(Sensors::TouchArea_0_0) + touchIndex] = ConvertToSensorValue(touch);
-        }
-    });
-
-    world.view<const BrainSensorsComponent, const BrainGenomeComponent, const BrainSpecializationComponent, BrainReactionComponent>().each([&](const BrainSensorsComponent &sensors, const BrainGenomeComponent &genome, const BrainSpecializationComponent &specialization, BrainReactionComponent &output) {
-        const BrainContext context{ConstRef{&sensors}, ConstRef{&genome}, ConstRef{&specialization}, Ref{&output}};
-        EvaluateBrain(context);
-    });
+    world.view<const BrainSensorsComponent, const BrainGenomeComponent, const BrainSpecializationComponent, BrainReactionComponent>().each(
+        [&](const BrainSensorsComponent& sensors, const BrainGenomeComponent& genome, const BrainSpecializationComponent& specialization,
+        BrainReactionComponent& output) {
+            const BrainContext context{ ConstRef{ &sensors }, ConstRef{ &genome }, ConstRef{ &specialization }, Ref{ &output } };
+            EvaluateBrain(context);
+        });
 
     auto BrainDispatchAction = [&](EcsEntity creature, const Actions action, float value) {
         switch (action) {
-            case Actions::Idle:
-                world.emplace<CreatureActionIdleTag>(creature);
-                break;
-            case Actions::ReadCreatureEnergy:
-                world.emplace<CreatureActionReadEnergyTag>(creature);
-                break;
-            case Actions::ReadCreatureRotation:
-                world.emplace<CreatureActionReadRotationTag>(creature);
-                break;
-            case Actions::ReadAreaTouch:
-                world.emplace<CreatureActionReadTouchAreaTag>(creature);
-                break;
-            case Actions::Bite:
-                world.emplace<CreatureActionBiteComponent>(creature, value);
-                break;
-            case Actions::Move: {
-                const auto direction = ConvertFromSensorValue<WorldDirection>(value);
-                world.emplace<CreatureActionMoveComponent>(creature, direction);
-            }
+        case Actions::Idle:
+            world.emplace<CreatureActionIdleTag>(creature);
             break;
-            case Actions::Rotate: {
-                const auto direction = ConvertFromSensorValue<WorldDirection>(value);
-                world.emplace<CreatureActionRotateComponent>(creature, direction);
-            }
+        case Actions::ReadCreatureEnergy:
+            world.emplace<CreatureActionReadEnergyTag>(creature);
             break;
-            case Actions::MakeChild:
-                break;
-            case Actions::InternalCount:
-            default:
-                ASSERT_FAIL("Sanity check: invalid action type");
-                break;
+        case Actions::ReadCreatureRotation:
+            world.emplace<CreatureActionReadRotationTag>(creature);
+            break;
+        case Actions::ReadAreaTouch:
+            world.emplace<CreatureActionReadTouchAreaTag>(creature);
+            break;
+        case Actions::Bite:
+            world.emplace<CreatureActionBiteComponent>(creature, value);
+            break;
+        case Actions::Move: {
+            const auto direction = ConvertFromSensorValue<WorldDirection>(value);
+            world.emplace<CreatureActionMoveComponent>(creature, direction);
+        }
+        break;
+        case Actions::Rotate: {
+            const auto direction = ConvertFromSensorValue<WorldDirection>(value);
+            world.emplace<CreatureActionRotateComponent>(creature, direction);
+        }
+        break;
+        case Actions::MakeChild:
+            break;
+        case Actions::InternalCount:
+        default:
+            ASSERT_FAIL("Sanity check: invalid action type");
+            break;
         }
     };
 
-    world.view<const BrainReactionComponent, const CreatureGenomeComponent, CreatureBrainReactionStateComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each([&](EcsEntity creature, const BrainReactionComponent &reaction, const CreatureGenomeComponent &genome, CreatureBrainReactionStateComponent &brainState) {
-        int32_t brainTickRequested = 0;
-        for (uint8_t actionIndex = 0; actionIndex < ActionTypeCount; ++actionIndex) {
-            if (!IsActionAllowedForGenome(worldRules, genome, static_cast<Actions>(actionIndex))) {
-                continue;
+    world.view<const BrainReactionComponent, const CreatureGenomeComponent,
+        CreatureBrainReactionStateComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each(
+        [&](EcsEntity creature, const BrainReactionComponent& reaction, const CreatureGenomeComponent& genome,
+        CreatureBrainReactionStateComponent& brainState) {
+            int32_t brainTickRequested = 0;
+            for (uint8_t actionIndex = 0; actionIndex < ActionTypeCount; ++actionIndex) {
+                if (!IsActionAllowedForGenome(worldRules, genome, static_cast<Actions>(actionIndex))) {
+                    continue;
+                }
+
+                const float actionValue = reaction.actionsValue[actionIndex];
+                BrainDispatchAction(creature, static_cast<Actions>(actionIndex), actionValue);
+                brainTickRequested += worldRules.actionRules[actionIndex].brainTickCost;
             }
 
-            const float actionValue = reaction.actionsValue[actionIndex];
-            BrainDispatchAction(creature, static_cast<Actions>(actionIndex), actionValue);
-            brainTickRequested += worldRules.actionRules[actionIndex].brainTickCost;
-        }
+            brainState.brainTicksConsumed = static_cast<uint16_t>(brainTickRequested);
+        });
 
-        brainState.brainTicksConsumed = static_cast<uint16_t>(brainTickRequested);
-    });
-
-    world.view<const CreatureBrainReactionStateComponent, CreatureStateFatigueComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each([&](EcsEntity creature, const CreatureBrainReactionStateComponent &brainState, CreatureStateFatigueComponent &fatigue) {
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
-        const SensorCalculationResult r = UpdateSensorValue(desc, fatigue.value, brainState.brainTicksConsumed);
-        if (r == SensorCalculationResult::MaxValueReached) {
-            world.emplace<CreatureBrainIsOverloadedTag>(creature);
-        }
-    });
-
-    {
-        auto overloadedBrains = world.view<const CreatureBrainIsOverloadedTag, const CreaturePositionComponent>();
+    world.view<const CreatureBrainReactionStateComponent, CreatureStateFatigueComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each(
+        [&](EcsEntity creature, const CreatureBrainReactionStateComponent& brainState, CreatureStateFatigueComponent& fatigue) {
+            const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
+            const SensorCalculationResult r = UpdateSensorValue(desc, fatigue.value, brainState.brainTicksConsumed);
+            if (r == SensorCalculationResult::MaxValueReached) {
+                world.emplace<CreatureBrainIsOverloadedTag>(creature);
+            }
+        }); {
+        const auto overloadedBrains = world.view<const CreatureBrainIsOverloadedTag, const CreaturePositionComponent>();
         world.erase<CreatureBrainIsOverloadedTag>(overloadedBrains.begin(), overloadedBrains.end());
         // overloadedBrains.each([&](const CreaturePositionComponent position) {
         //     // cleanup reference from world to creature
@@ -638,36 +719,37 @@ void ProcessWorldUpdate(EcsWorld &world) {
         // world.destroy(overloadedBrains.begin(), overloadedBrains.end());
     }
 
-    world.view<CreatureStateFatigueComponent>().each([&](CreatureStateFatigueComponent &fatigue) {
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
+    world.view<CreatureStateFatigueComponent>().each([&](CreatureStateFatigueComponent& fatigue) {
+        const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
         UpdateSensorValue(desc, fatigue.value, -worldRules.brainRestPerTickMin);
-    });
-
-    {
+    }); {
         const auto view = world.view<const CreatureActionIdleTag>();
         world.erase<CreatureActionIdleTag>(view.begin(), view.end());
     }
 
-    world.view<const CreatureActionRotateComponent, CreatureStateRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureActionRotateComponent &rotate, CreatureStateRotationComponent &rotation, CreatureStateEnergyComponent &energy) {
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-        const ActionDescription &actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
-        const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -actionDesc.energyCost);
-        if (r == SensorCalculationResult::MinValueReached) {
-            world.emplace<CreatureOutOfEnergyTag>(creature);
-        }
+    world.view<const CreatureActionRotateComponent, CreatureStateRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).
+        each([&](EcsEntity creature, const CreatureActionRotateComponent& rotate, CreatureStateRotationComponent& rotation,
+            CreatureStateEnergyComponent& energy) {
+                const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+                const ActionDescription& actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
+                const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -actionDesc.energyCost);
+                if (r == SensorCalculationResult::MinValueReached) {
+                    world.emplace<CreatureOutOfEnergyTag>(creature);
+                }
 
-        world.erase<CreatureActionRotateComponent>(creature);
-        rotation.value = rotate.value;
-    });
+                world.erase<CreatureActionRotateComponent>(creature);
+                rotation.value = rotate.value;
+            });
 
-    world.view<const CreatureActionMoveComponent, CreaturePositionComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureActionMoveComponent &move, CreaturePositionComponent &position, CreatureStateEnergyComponent &energy) {
-        world.erase<CreatureActionMoveComponent>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Move)) {
-            return;
-        }
+    world.view<const CreatureActionMoveComponent, CreaturePositionComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+        [&](EcsEntity creature, const CreatureActionMoveComponent& move, CreaturePositionComponent& position, CreatureStateEnergyComponent& energy) {
+            world.erase<CreatureActionMoveComponent>(creature);
+            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Move)) {
+                return;
+            }
 
-        WorldAreaIndex areaIndex = WorldAreaIndex::InternalCount;
-        switch (move.value) {
+            WorldAreaIndex areaIndex = WorldAreaIndex::InternalCount;
+            switch (move.value) {
             case WorldDirection::Up:
                 areaIndex = WorldAreaIndex::Position_0_1;
                 break;
@@ -682,93 +764,100 @@ void ProcessWorldUpdate(EcsWorld &world) {
                 break;
             case WorldDirection::InternalCount:
                 break;
-        }
-
-        if (areaIndex == WorldAreaIndex::InternalCount) [[unlikely]] {
-            ASSERT_FAIL("Sanity check: unknown move direction!");
-            return;
-        }
-
-        const auto &[location] = world.get<const WorldAreaLocatorComponent>(position.value);
-        const EcsEntity newPosition = location[static_cast<uint8_t>(areaIndex)];
-        if (!world.valid(newPosition)) {
-            return;
-        }
-        if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(newPosition)) {
-            return;
-        }
-
-        const EcsEntity oldPosition = position.value;
-        world.erase<WorldCreatureComponent>(oldPosition);
-        world.emplace<WorldCreatureComponent>(newPosition, creature);
-        position.value = newPosition;
-    });
-
-    world.view<const CreatureActionReadTouchAreaTag, const CreaturePositionComponent, CreatureSensorTouchComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreaturePositionComponent &creaturePosition, CreatureSensorTouchComponent &touchSensor, CreatureStateEnergyComponent &energy) {
-        world.erase<CreatureActionReadTouchAreaTag>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadAreaTouch)) {
-            return;
-        }
-        const auto &[entities] = world.get<const WorldAreaLocatorComponent>(creaturePosition.value);
-        for (uint8_t i = 0; i < WorldAreaSize; ++i) {
-            if (const EcsEntity areaPosition = entities[i]; world.any_of<WorldObstacleTag>(areaPosition)) {
-                touchSensor.touches[i] = TouchResult::Solid;
-            } else if (world.any_of<WorldCreatureComponent>(areaPosition)) {
-                touchSensor.touches[i] = TouchResult::Elastic;
-            } else {
-                touchSensor.touches[i] = TouchResult::Nothing;
             }
-        }
-    });
 
-    world.view<const CreatureActionReadEnergyTag, CreatureStateEnergyComponent, CreatureSensorEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, CreatureStateEnergyComponent &energy, CreatureSensorEnergyComponent &energySensor) {
-        world.erase<CreatureActionReadEnergyTag>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureEnergy)) {
-            return;
-        }
-        energySensor.value = energy.value;
-    });
+            if (areaIndex == WorldAreaIndex::InternalCount) [[unlikely]] {
+                ASSERT_FAIL("Sanity check: unknown move direction!");
+                return;
+            }
 
-    world.view<const CreatureActionReadRotationTag, const CreatureStateRotationComponent, CreatureSensorRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureStateRotationComponent &rotation, CreatureSensorRotationComponent &rotationSensor, CreatureStateEnergyComponent &energy) {
-        world.erase<CreatureActionReadRotationTag>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureRotation)) {
-            return;
-        }
-        rotationSensor.value = rotation.value;
-    });
+            const auto& [location] = world.get<const WorldAreaLocatorComponent>(position.value);
+            const EcsEntity newPosition = location[static_cast<uint8_t>(areaIndex)];
+            if (!world.valid(newPosition)) {
+                return;
+            }
+            if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(newPosition)) {
+                return;
+            }
 
+            const EcsEntity oldPosition = position.value;
+            world.erase<WorldCreatureComponent>(oldPosition);
+            world.emplace<WorldCreatureComponent>(newPosition, creature);
+            position.value = newPosition;
+        });
 
-    world.view<const CreatureActionBiteComponent, CreatureStateEnergyComponent, const CreatureStateRotationComponent, const CreaturePositionComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each([&](EcsEntity creature, const CreatureActionBiteComponent bite, CreatureStateEnergyComponent &energy, const CreatureStateRotationComponent rotation, const CreaturePositionComponent position) {
-        world.erase<CreatureActionBiteComponent>(creature);
-        if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Bite, bite.amplitude)) {
-            return;
-        }
+    world.view<const CreatureActionReadTouchAreaTag, const CreaturePositionComponent, CreatureSensorTouchComponent,
+        CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+        [&](EcsEntity creature, const CreaturePositionComponent& creaturePosition, CreatureSensorTouchComponent& touchSensor,
+        CreatureStateEnergyComponent& energy) {
+            world.erase<CreatureActionReadTouchAreaTag>(creature);
+            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadAreaTouch)) {
+                return;
+            }
+            const auto& [entities] = world.get<const WorldAreaLocatorComponent>(creaturePosition.value);
+            for (uint8_t i = 0; i < WorldAreaSize; ++i) {
+                if (const EcsEntity areaPosition = entities[i]; world.any_of<WorldObstacleTag>(areaPosition)) {
+                    touchSensor.touches[i] = TouchResult::Solid;
+                } else if (world.any_of<WorldCreatureComponent>(areaPosition)) {
+                    touchSensor.touches[i] = TouchResult::Elastic;
+                } else {
+                    touchSensor.touches[i] = TouchResult::Nothing;
+                }
+            }
+        });
 
-        const auto &[entities] = world.get<WorldAreaLocatorComponent>(position.value);
-        if (rotation.value == WorldDirection::InternalCount) {
-            return;
-        }
+    world.view<const CreatureActionReadEnergyTag, CreatureStateEnergyComponent, CreatureSensorEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+        [&](EcsEntity creature, CreatureStateEnergyComponent& energy, CreatureSensorEnergyComponent& energySensor) {
+            world.erase<CreatureActionReadEnergyTag>(creature);
+            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureEnergy)) {
+                return;
+            }
+            energySensor.value = energy.value;
+        });
 
-        const EcsEntity targetPosition = entities[static_cast<uint8_t>(rotation.value)];
-        const WorldCreatureComponent *target = world.try_get<const WorldCreatureComponent>(targetPosition);
-        if (!target) {
-            return;
-        }
+    world.view<const CreatureActionReadRotationTag, const CreatureStateRotationComponent, CreatureSensorRotationComponent,
+        CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+        [&](EcsEntity creature, const CreatureStateRotationComponent& rotation, CreatureSensorRotationComponent& rotationSensor,
+        CreatureStateEnergyComponent& energy) {
+            world.erase<CreatureActionReadRotationTag>(creature);
+            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureRotation)) {
+                return;
+            }
+            rotationSensor.value = rotation.value;
+        });
 
-        CreatureStateEnergyComponent &targetEnergy = world.get<CreatureStateEnergyComponent>(target->creature);
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-        const uint16_t oldValue = targetEnergy.value;
-        const SensorCalculationResult r = UpdateSensorValue(desc, targetEnergy.value, -worldRules.consumeEnergyPerBiteMax);
-        const uint16_t newValue = targetEnergy.value;
-        const int32_t consumedEnergy = oldValue - newValue;
-        UpdateSensorValue(desc, energy.value, consumedEnergy);
-        if (r == SensorCalculationResult::MinValueReached) {
-            world.emplace_or_replace<CreatureOutOfEnergyTag>(target->creature);
-        }
-    });
+    world.view<const CreatureActionBiteComponent, CreatureStateEnergyComponent, const CreatureStateRotationComponent, const
+        CreaturePositionComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+        [&](EcsEntity creature, const CreatureActionBiteComponent bite, CreatureStateEnergyComponent& energy, const CreatureStateRotationComponent rotation,
+        const CreaturePositionComponent position) {
+            world.erase<CreatureActionBiteComponent>(creature);
+            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Bite, bite._amplitude)) {
+                return;
+            }
 
-    {
-        auto creaturesToDestroy = world.view<const CreatureOutOfEnergyTag, const CreaturePositionComponent>();
+            const auto& [entities] = world.get<WorldAreaLocatorComponent>(position.value);
+            if (rotation.value == WorldDirection::InternalCount) {
+                return;
+            }
+
+            const EcsEntity targetPosition = entities[static_cast<uint8_t>(rotation.value)];
+            const WorldCreatureComponent* target = world.try_get<const WorldCreatureComponent>(targetPosition);
+            if (!target) {
+                return;
+            }
+
+            CreatureStateEnergyComponent& targetEnergy = world.get<CreatureStateEnergyComponent>(target->creature);
+            const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+            const uint16_t oldValue = targetEnergy.value;
+            const SensorCalculationResult r = UpdateSensorValue(desc, targetEnergy.value, -worldRules.consumeEnergyPerBiteMax);
+            const uint16_t newValue = targetEnergy.value;
+            const int32_t consumedEnergy = oldValue - newValue;
+            UpdateSensorValue(desc, energy.value, consumedEnergy);
+            if (r == SensorCalculationResult::MinValueReached) {
+                world.emplace_or_replace<CreatureOutOfEnergyTag>(target->creature);
+            }
+        }); {
+        const auto creaturesToDestroy = world.view<const CreatureOutOfEnergyTag, const CreaturePositionComponent>();
         creaturesToDestroy.each([&](const CreaturePositionComponent position) {
             // cleanup reference from world to creature
             world.erase<WorldCreatureComponent>(position.value);
@@ -784,34 +873,37 @@ int main() {
     }
 
     static constexpr uint32_t WindowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    SDL_Window *window = SDL_CreateWindow("Cells", 1200, 800, WindowFlags);
+    static constexpr int32_t ScreenWidth = 1200;
+    static constexpr int32_t ScreenHeight = 800;
+    SDL_Window* window = SDL_CreateWindow("Cells", ScreenWidth, ScreenHeight, WindowFlags);
     if (window == nullptr) {
         ASSERT_FAIL("SDL_CreateWindow failed");
         return -1;
     }
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, nullptr);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
     if (renderer == nullptr) {
         ASSERT_FAIL("SDL_CreateRenderer failed");
         return -1;
     }
 
-    SDL_Texture *renderTargetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 1200, 800);
+    SDL_Texture* renderTargetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, ScreenWidth, ScreenHeight);
     if (!renderTargetTexture) {
         ASSERT_FAIL("SDL_CreateTexture failed");
         return -1;
     }
 
-    WorldRasterizationTarget rasterizationTarget{*renderTargetTexture, SDL_Color{200, 200, 200, SDL_ALPHA_OPAQUE}, 4};
+    WorldRasterizationTarget rasterizationTarget{ *renderTargetTexture, SDL_Color{ 200, 200, 200, SDL_ALPHA_OPAQUE }, 4 };
 
     EcsWorld world{};
-    WorldDescription &worldRules = world.ctx().emplace<WorldDescription>();
-    WorldContext &worldContext = world.ctx().emplace<WorldContext>();
-    {
+    GameContext& gameContext = world.ctx().emplace<GameContext>();
+    WorldDescription& worldRules = gameContext.worldRules; {
         static constexpr std::string_view RandomSeed = "White";
-        std::seed_seq seed{RandomSeed.begin(), RandomSeed.end()};
-        worldContext.randomGenerator.seed(seed);
+        std::seed_seq seed{ RandomSeed.begin(), RandomSeed.end() };
+        gameContext.randomGenerator.seed(seed);
     }
+
+    gameContext.camera.SetScreenSize(ScreenWidth, ScreenHeight);
 
     static constexpr int32_t BrainInputCount = GenesCount + SensorsCount;
     static constexpr float SigmoidMeaningfulRangeSize = 10.0f; //< [-5; 5]
@@ -824,17 +916,17 @@ int main() {
     worldRules.actionsForbiddenGene.fill(false);
 
     auto MakeGeneAbility = [&](Genes gene, std::string_view name, float mutationSigma) {
-        worldRules.geneRules[static_cast<uint8_t>(gene)] = {name, GeneTypes::Ability, 0, AvailabilityResultCount, 0.0f, mutationSigma};
+        worldRules.geneRules[static_cast<uint8_t>(gene)] = { name, GeneTypes::Ability, 0, AvailabilityResultCount, 0.0f, mutationSigma };
     };
 
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Idle)] = {"Idle", 1, 0};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureEnergy)] = {"Read Creature Energy", 5, 0};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureRotation)] = {"Read Creature Rotation", 5, 0};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadAreaTouch)] = {"Read Area Touch", 15, 10};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Bite)] = {"Bite", 50, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Move)] = {"Move", 15, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)] = {"Rotate", 10, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::MakeChild)] = {"Make Child", 200, 15};
+    worldRules.actionRules[static_cast<uint8_t>(Actions::Idle)] = { "Idle", 1, 0 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureEnergy)] = { "Read Creature Energy", 5, 0 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureRotation)] = { "Read Creature Rotation", 5, 0 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadAreaTouch)] = { "Read Area Touch", 15, 10 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::Bite)] = { "Bite", 50, 5 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::Move)] = { "Move", 15, 5 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)] = { "Rotate", 10, 5 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::MakeChild)] = { "Make Child", 200, 15 };
 
     MakeGeneAbility(Genes::GeneCreatureEnergySensor, "Energy Sensor", 0.01f);
     MakeGeneAbility(Genes::GeneCreatureRotationSensor, "Rotation Sensor", 0.01f);
@@ -849,23 +941,22 @@ int main() {
         "Mutation Speed", GeneTypes::Property, 0, 0, std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN()
     };
 
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)] = {"Creature Energy", 0, worldRules.creatureEnergyMax};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureRotation)] = {"Creature Rotation", 0, WorldDirectionCount};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)] = {"Creature Fatigue", 0, worldRules.creatureFatigueMax};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_0)] = {"Touch Area 0-0", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_1)] = {"Touch Area 0-1", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_2)] = {"Touch Area 0-2", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_0)] = {"Touch Area 1-0", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_1)] = {"Touch Area 1-1", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_2)] = {"Touch Area 1-2", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_0)] = {"Touch Area 2-0", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_1)] = {"Touch Area 2-1", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_2)] = {"Touch Area 2-2", 0, TouchResultSize};
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)] = { "Creature Energy", 0, worldRules.creatureEnergyMax };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureRotation)] = { "Creature Rotation", 0, WorldDirectionCount };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)] = { "Creature Fatigue", 0, worldRules.creatureFatigueMax };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_0)] = { "Touch Area 0-0", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_1)] = { "Touch Area 0-1", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_2)] = { "Touch Area 0-2", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_0)] = { "Touch Area 1-0", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_1)] = { "Touch Area 1-1", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_2)] = { "Touch Area 1-2", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_0)] = { "Touch Area 2-0", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_1)] = { "Touch Area 2-1", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_2)] = { "Touch Area 2-2", 0, TouchResultSize };
 
-    static constexpr int32_t WorldSize = 100;
-    {
+    static constexpr int32_t WorldSize = 100; {
         // init world
-        std::vector cells{WorldSize * WorldSize, InvalidEcsEntity};
+        std::vector cells{ WorldSize * WorldSize, InvalidEcsEntity };
         for (int y = 0; y < WorldSize; ++y) {
             for (int x = 0; x < WorldSize; ++x) {
                 const EcsEntity entity = world.create();
@@ -876,7 +967,7 @@ int main() {
         for (int y = 0; y < WorldSize; ++y) {
             for (int x = 0; x < WorldSize; ++x) {
                 const EcsEntity worldEntity = cells[y * WorldSize + x];
-                auto &[entities] = world.emplace<WorldAreaLocatorComponent>(worldEntity);
+                auto& [entities] = world.emplace<WorldAreaLocatorComponent>(worldEntity);
 
                 for (int offsetX = -1; offsetX <= 1; ++offsetX) {
                     for (int offsetY = -1; offsetY <= 1; ++offsetY) {
@@ -909,8 +1000,8 @@ int main() {
         }
 
         auto cellsToShuffle = cells;
-        std::ranges::shuffle(cellsToShuffle, worldContext.randomGenerator);
-        for (const EcsEntity position: cellsToShuffle | std::views::take((WorldSize * WorldSize) / 10)) {
+        std::ranges::shuffle(cellsToShuffle, gameContext.randomGenerator);
+        for (const EcsEntity position : cellsToShuffle | std::views::take((WorldSize * WorldSize) / 10)) {
             if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(position)) {
                 continue;
             }
@@ -920,11 +1011,10 @@ int main() {
         }
     }
 
-
     /// Main loop
     bool shouldStopMainLoop = false;
     std::chrono::steady_clock::time_point lastFrameTime = std::chrono::steady_clock::now();
-    static constexpr std::chrono::milliseconds TargetFrameTime{1000 / 60};
+    static constexpr std::chrono::milliseconds TargetFrameTime{ 1000 / 60 };
     while (!shouldStopMainLoop) {
         const std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
         const auto frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
@@ -938,16 +1028,23 @@ int main() {
             shouldStopMainLoop |= stopByQuitEvent || stopByWindowEvent;
         }
 
+        // gameContext.camera.Move(5, 5);
+        gameContext.camera.Zoom(5, 5, 0.1f);
         ProcessWorldUpdate(world);
 
         SDL_SetRenderDrawColor(renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
-        rasterizationTarget.Lock();
-        {
-            world.view<const WorldPositionComponent, const WorldCreatureComponent>().each([&](const WorldPositionComponent &position, const WorldCreatureComponent &/*creature*/) {
-                CellPosition p{position.position.x, position.position.y};
-                rasterizationTarget.Set(p, SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE});
-            });
+        rasterizationTarget.Lock(); {
+            world.view<const WorldPositionComponent, const WorldCreatureComponent>().each(
+                [&](const WorldPositionComponent& position, const WorldCreatureComponent&/*creature*/) {
+                    static constexpr float CreatureWorldSpaceRadius = 5.0f;
+                    const float creatureScreenSpaceRadius = CreatureWorldSpaceRadius * gameContext.camera.GetZoom();
+                    if (!gameContext.camera.IsVisible(position.position.x, position.position.y)) {
+                        return;
+                    }
+                    const auto [screenSpaceX, screenSpaceY] = gameContext.camera.ToScreenSpace(position.position.x, position.position.y);
+                    rasterizationTarget.SetFilledCircle(screenSpaceX, screenSpaceY, creatureScreenSpaceRadius, SDL_Color{ 0, 200, 0, SDL_ALPHA_OPAQUE });
+                });
         }
         rasterizationTarget.Unlock();
         if (!SDL_RenderTexture(renderer, renderTargetTexture, nullptr, nullptr)) {
