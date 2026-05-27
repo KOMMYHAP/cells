@@ -290,9 +290,9 @@ public: //< controller:
         _centerY += newWorldY - oldWorldY;
     }
 
-    void Move(int32_t screenSpaceDx, int32_t screenSpaceDy) {
-        _centerX += static_cast<float>(screenSpaceDx) / _zoom;
-        _centerY += static_cast<float>(screenSpaceDy) / _zoom;
+    void Move(float screenSpaceDx, float screenSpaceDy) {
+        _centerX += screenSpaceDx / _zoom;
+        _centerY += screenSpaceDy / _zoom;
     }
 
 private:
@@ -300,8 +300,8 @@ private:
     float _centerY{ 0.0f }; //< world space Y
 
     float _zoomMin{ 0.1f };
-    float _zoomMax{ 1.0f };
-    float _zoom{ (_zoomMax - _zoomMin) / 2.0f };
+    float _zoomMax{ 10.0f };
+    float _zoom{ 1.0f };
 
     int32_t _screenPixelsWidth{ 800 };
     int32_t _screenPixelsHeight{ 600 };
@@ -311,6 +311,9 @@ struct GameContext {
     WorldDescription worldRules;
     Camera camera;
     RandomGenerator randomGenerator;
+
+    std::optional<float> prevMousePosX;
+    std::optional<float> prevMousePosY;
 };
 
 struct BrainSensorsComponent {
@@ -992,21 +995,48 @@ void SetupWorldRules(const int32_t& ScreenWidth, const int32_t& ScreenHeight, Ga
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_2)] = { "Touch Area 2-2", 0, TouchResultSize };
 }
 
-void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld& /*world*/) {
+void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld& world) {
+    GameContext& context = world.ctx().get<GameContext>();
+    const ImGuiIO& io = ImGui::GetIO();
+    const float mouseWheelDelta = io.MouseWheel;
+    const float mousePosX = io.MousePos.x;
+    const float mousePosY = io.MousePos.y;
+    const float mouseDeltaX = mousePosX - context.prevMousePosX.value_or(mousePosX);
+    const float mouseDeltaY = mousePosY - context.prevMousePosY.value_or(mousePosY);
+    context.prevMousePosX = mousePosX;
+    context.prevMousePosY = mousePosY;
+    const int32_t mousePosScreenSpaceX = static_cast<int32_t>(std::round(mousePosX));
+    const int32_t mousePosScreenSpaceY = static_cast<int32_t>(std::round(mousePosY));
+
+    // Update camera:
+    if (std::abs(mouseWheelDelta) > 0.001f) {
+        context.camera.Zoom(mousePosScreenSpaceX, mousePosScreenSpaceY, mouseWheelDelta);
+    }
+    if (io.MouseDown[ImGuiMouseButton_Left] && !ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
+        if (std::abs(mouseDeltaX) > 0.001f || std::abs(mouseDeltaY) > 0.001f) {
+            context.camera.Move(mouseDeltaX, mouseDeltaY);
+        }
+    }
+    const auto [cameraPositionX, cameraPositionY] = context.camera.GetPosition();
+
     if (ImGui::BeginMainMenuBar()) {
         static bool demoWindowOpened{ false };
         if (ImGui::MenuItem("Demo", nullptr, &demoWindowOpened)) {
             ImGui::ShowDemoWindow(&demoWindowOpened);
         }
         ImGui::EndMainMenuBar();
-    } {
-        // status window
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.8f, 0.8f, 0.8f, 0.65f));
-        ImGui::Begin("##status_window", nullptr, ImGuiWindowFlags_NoDecoration);
-        ImGui::Text("FPS: %3.0f (%03d ms)", 1000.0f / elapsedTime.count(), static_cast<int32_t>(elapsedTime.count()));
-        ImGui::End();
-        ImGui::PopStyleColor();
     }
+
+    // Status window:
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.8f, 0.8f, 0.8f, 0.65f));
+    ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiCond_FirstUseEver);
+    ImGui::Begin("##status_window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse);
+    ImGui::Text("FPS: %3.0f (%03d ms)", 1000.0f / elapsedTime.count(), static_cast<int32_t>(elapsedTime.count()));
+    ImGui::Text("Mouse: position = (%.0f, %.0f), scroll = %.0f", mousePosX, mousePosY, mouseWheelDelta);
+    ImGui::Text("Camera: position = (%.0f, %.0f), zoom = %.0f", cameraPositionX, cameraPositionY, context.camera.GetZoom());
+    ImGui::End();
+    ImGui::PopStyleColor();
+
 }
 
 int main() {
@@ -1089,8 +1119,6 @@ int main() {
         ProcessImGui(elapsedFrameTime, world);
         ImGui::Render();
 
-        // gameContext.camera.Move(5, 5);
-        gameContext.camera.Zoom(5, 5, 0.1f);
         ProcessWorldUpdate(world);
 
         SDL_SetRenderDrawColor(renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
