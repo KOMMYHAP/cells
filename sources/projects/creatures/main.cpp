@@ -1,7 +1,15 @@
 #include "ecs_config.h"
-#include "components/generated/auto_cell_position.h"
 #include "SDL3/SDL.h"
+
+#include "imgui.h"
+
+
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
+#include "misc/cpp/imgui_stdlib.h"
+
 #include "widgets/world/world_rasterization_target.h"
+
 
 enum class Sensors : uint8_t {
     CreatureEnergy,
@@ -866,37 +874,66 @@ void ProcessWorldUpdate(EcsWorld& world) {
     }
 }
 
-int main() {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
-        ASSERT_FAIL("SDL_Init failed");
-        return -1;
+void FillWorldContent(EcsWorld& world, GameContext& gameContext) {
+    static constexpr int32_t WorldSize = 100;
+
+    // init world
+    std::vector cells{ WorldSize * WorldSize, InvalidEcsEntity };
+    for (int y = 0; y < WorldSize; ++y) {
+        for (int x = 0; x < WorldSize; ++x) {
+            const EcsEntity entity = world.create();
+            world.emplace<WorldPositionComponent>(entity, static_cast<int16_t>(x), static_cast<int16_t>(y));
+            cells[y * WorldSize + x] = entity;
+        }
+    }
+    for (int y = 0; y < WorldSize; ++y) {
+        for (int x = 0; x < WorldSize; ++x) {
+            const EcsEntity worldEntity = cells[y * WorldSize + x];
+            auto& [entities] = world.emplace<WorldAreaLocatorComponent>(worldEntity);
+
+            for (int offsetX = -1; offsetX <= 1; ++offsetX) {
+                for (int offsetY = -1; offsetY <= 1; ++offsetY) {
+                    const int32_t areaX = x + offsetX;
+                    const int32_t areaY = y + offsetY;
+                    EcsEntity worldAreaEntity = InvalidEcsEntity;
+                    if (areaX >= 0 && areaX < WorldSize && areaY >= 0 && areaY < WorldSize) {
+                        worldAreaEntity = cells[areaY * WorldSize + areaX];
+                    }
+                    const int32_t areaIndex = (offsetY + 1) * 3 + (offsetX + 1);
+                    ASSERT(
+                        areaIndex >= static_cast<int32_t>(WorldAreaIndex::Position_0_0) && areaIndex <= static_cast<int32_t>(WorldAreaIndex::Position_2_2),
+                        "Sanity check: invalid area index");
+                    entities[static_cast<uint8_t>(areaIndex)] = worldAreaEntity;
+                }
+            }
+        }
     }
 
-    static constexpr uint32_t WindowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    static constexpr int32_t ScreenWidth = 1200;
-    static constexpr int32_t ScreenHeight = 800;
-    SDL_Window* window = SDL_CreateWindow("Cells", ScreenWidth, ScreenHeight, WindowFlags);
-    if (window == nullptr) {
-        ASSERT_FAIL("SDL_CreateWindow failed");
-        return -1;
+    auto MakeObstacle = [&](const int x, const int y) {
+        const EcsEntity border = cells[y * WorldSize + x];
+        world.emplace_or_replace<WorldObstacleTag>(border);
+    };
+
+    for (int i = 0; i < WorldSize; ++i) {
+        MakeObstacle(i, 0);
+        MakeObstacle(i, WorldSize - 1);
+        MakeObstacle(WorldSize - 1, i);
+        MakeObstacle(0, i);
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
-    if (renderer == nullptr) {
-        ASSERT_FAIL("SDL_CreateRenderer failed");
-        return -1;
+    auto cellsToShuffle = cells;
+    std::ranges::shuffle(cellsToShuffle, gameContext.randomGenerator);
+    for (const EcsEntity position : cellsToShuffle | std::views::take(cells.size() / 10)) {
+        if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(position)) {
+            continue;
+        }
+        const EcsEntity creature = world.create();
+        world.emplace<WorldCreatureComponent>(position, creature);
+        InitCreatureGenome(world, creature, position);
     }
+}
 
-    SDL_Texture* renderTargetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, ScreenWidth, ScreenHeight);
-    if (!renderTargetTexture) {
-        ASSERT_FAIL("SDL_CreateTexture failed");
-        return -1;
-    }
-
-    WorldRasterizationTarget rasterizationTarget{ *renderTargetTexture, SDL_Color{ 200, 200, 200, SDL_ALPHA_OPAQUE }, 4 };
-
-    EcsWorld world{};
-    GameContext& gameContext = world.ctx().emplace<GameContext>();
+void SetupWorldRules(const int32_t& ScreenWidth, const int32_t& ScreenHeight, GameContext& gameContext) {
     WorldDescription& worldRules = gameContext.worldRules; {
         static constexpr std::string_view RandomSeed = "White";
         std::seed_seq seed{ RandomSeed.begin(), RandomSeed.end() };
@@ -953,63 +990,77 @@ int main() {
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_0)] = { "Touch Area 2-0", 0, TouchResultSize };
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_1)] = { "Touch Area 2-1", 0, TouchResultSize };
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_2)] = { "Touch Area 2-2", 0, TouchResultSize };
+}
 
-    static constexpr int32_t WorldSize = 100; {
-        // init world
-        std::vector cells{ WorldSize * WorldSize, InvalidEcsEntity };
-        for (int y = 0; y < WorldSize; ++y) {
-            for (int x = 0; x < WorldSize; ++x) {
-                const EcsEntity entity = world.create();
-                world.emplace<WorldPositionComponent>(entity, static_cast<int16_t>(x), static_cast<int16_t>(y));
-                cells[y * WorldSize + x] = entity;
-            }
+void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld& /*world*/) {
+    if (ImGui::BeginMainMenuBar()) {
+        static bool demoWindowOpened{ false };
+        if (ImGui::MenuItem("Demo", nullptr, &demoWindowOpened)) {
+            ImGui::ShowDemoWindow(&demoWindowOpened);
         }
-        for (int y = 0; y < WorldSize; ++y) {
-            for (int x = 0; x < WorldSize; ++x) {
-                const EcsEntity worldEntity = cells[y * WorldSize + x];
-                auto& [entities] = world.emplace<WorldAreaLocatorComponent>(worldEntity);
-
-                for (int offsetX = -1; offsetX <= 1; ++offsetX) {
-                    for (int offsetY = -1; offsetY <= 1; ++offsetY) {
-                        const int32_t areaX = x + offsetX;
-                        const int32_t areaY = y + offsetY;
-                        EcsEntity worldAreaEntity = InvalidEcsEntity;
-                        if (areaX >= 0 && areaX < WorldSize && areaY >= 0 && areaY < WorldSize) {
-                            worldAreaEntity = cells[areaY * WorldSize + areaX];
-                        }
-                        const int32_t areaIndex = (offsetY + 1) * 3 + (offsetX + 1);
-                        ASSERT(
-                            areaIndex >= static_cast<int32_t>(WorldAreaIndex::Position_0_0) && areaIndex <= static_cast<int32_t>(WorldAreaIndex::Position_2_2),
-                            "Sanity check: invalid area index");
-                        entities[static_cast<uint8_t>(areaIndex)] = worldAreaEntity;
-                    }
-                }
-            }
-        }
-
-        auto MakeObstacle = [&](const int x, const int y) {
-            const EcsEntity border = cells[y * WorldSize + x];
-            world.emplace_or_replace<WorldObstacleTag>(border);
-        };
-
-        for (int i = 0; i < WorldSize; ++i) {
-            MakeObstacle(i, 0);
-            MakeObstacle(i, WorldSize - 1);
-            MakeObstacle(WorldSize - 1, i);
-            MakeObstacle(0, i);
-        }
-
-        auto cellsToShuffle = cells;
-        std::ranges::shuffle(cellsToShuffle, gameContext.randomGenerator);
-        for (const EcsEntity position : cellsToShuffle | std::views::take((WorldSize * WorldSize) / 10)) {
-            if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(position)) {
-                continue;
-            }
-            const EcsEntity creature = world.create();
-            world.emplace<WorldCreatureComponent>(position, creature);
-            InitCreatureGenome(world, creature, position);
-        }
+        ImGui::EndMainMenuBar();
+    } {
+        // status window
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.8f, 0.8f, 0.8f, 0.65f));
+        ImGui::Begin("##status_window", nullptr, ImGuiWindowFlags_NoDecoration);
+        ImGui::Text("FPS: %3.0f (%03d ms)", 1000.0f / elapsedTime.count(), static_cast<int32_t>(elapsedTime.count()));
+        ImGui::End();
+        ImGui::PopStyleColor();
     }
+}
+
+int main() {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        ASSERT_FAIL("SDL_Init failed");
+        return -1;
+    }
+
+    static constexpr uint32_t WindowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
+    static constexpr int32_t ScreenWidth = 1200;
+    static constexpr int32_t ScreenHeight = 800;
+    SDL_Window* window = SDL_CreateWindow("Creatures", ScreenWidth, ScreenHeight, WindowFlags);
+    if (window == nullptr) {
+        ASSERT_FAIL("SDL_CreateWindow failed");
+        return -1;
+    }
+
+    const SDL_PropertiesID props = SDL_CreateProperties();
+    SDL_SetPointerProperty(props, SDL_PROP_RENDERER_CREATE_WINDOW_POINTER, window);
+    SDL_SetNumberProperty(props, SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER, 1);
+    SDL_Renderer* renderer = SDL_CreateRendererWithProperties(props);
+    SDL_DestroyProperties(props);
+
+    if (renderer == nullptr) {
+        std::fprintf(stderr, "SDL_CreateRenderer failed: %s\n", SDL_GetError());
+        ASSERT_FAIL("SDL_CreateRenderer failed");
+        return -1;
+    }
+
+    SDL_Texture* renderTargetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, ScreenWidth, ScreenHeight);
+    if (!renderTargetTexture) {
+        ASSERT_FAIL("SDL_CreateTexture failed");
+        return -1;
+    }
+
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+
+    if (!ImGui_ImplSDL3_InitForSDLRenderer(window, renderer)) {
+        ASSERT_FAIL("ImGui_ImplSDL2_InitForSDLRenderer failed!");
+        return -1;
+    }
+    if (!ImGui_ImplSDLRenderer3_Init(renderer)) {
+        ASSERT_FAIL("ImGui_ImplSDLRenderer2_Init failed!");
+        return -1;
+    }
+
+    WorldRasterizationTarget rasterizationTarget{ *renderTargetTexture, SDL_Color{ 200, 200, 200, SDL_ALPHA_OPAQUE }, 4 };
+
+    EcsWorld world{};
+    GameContext& gameContext = world.ctx().emplace<GameContext>();
+    SetupWorldRules(ScreenWidth, ScreenHeight, gameContext);
+    FillWorldContent(world, gameContext);
 
     /// Main loop
     bool shouldStopMainLoop = false;
@@ -1017,16 +1068,26 @@ int main() {
     static constexpr std::chrono::milliseconds TargetFrameTime{ 1000 / 60 };
     while (!shouldStopMainLoop) {
         const std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-        const auto frameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
+        auto elapsedFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
         lastFrameTime = currentTime;
-        std::this_thread::sleep_for(TargetFrameTime - frameTime);
+        // if (!vsyncChanged && elapsedFrameTime < TargetFrameTime) {
+        //     std::this_thread::sleep_for(TargetFrameTime - elapsedFrameTime);
+        //     elapsedFrameTime = TargetFrameTime;
+        // }
 
         SDL_Event event{};
         while (SDL_PollEvent(&event)) {
+            ImGui_ImplSDL3_ProcessEvent(&event);
             const bool stopByQuitEvent = event.type == SDL_EVENT_QUIT;
             const bool stopByWindowEvent = event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window);
             shouldStopMainLoop |= stopByQuitEvent || stopByWindowEvent;
         }
+
+        ImGui_ImplSDLRenderer3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+        ProcessImGui(elapsedFrameTime, world);
+        ImGui::Render();
 
         // gameContext.camera.Move(5, 5);
         gameContext.camera.Zoom(5, 5, 0.1f);
@@ -1051,8 +1112,13 @@ int main() {
             ASSERT_FAIL("Sanity check: failed to render texture");
             break;
         }
+        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
     }
+
+    ImGui_ImplSDLRenderer3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
 
     SDL_DestroyTexture(renderTargetTexture);
     SDL_DestroyRenderer(renderer);
