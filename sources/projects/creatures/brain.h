@@ -25,7 +25,6 @@ struct BrainEvaluator {
     struct BrainNeurons {
         std::array<float, Config::GetInputCount()> biasInputToHidden;
         std::array<float, Config::GetHiddenNeuronsCount() * Config::GetInputCount()> weightInputToHidden;
-        std::array<float, Config::GetHiddenNeuronsCount()> hiddenQuality;
 
         std::array<float, Config::GetTotalOutputCount() * Config::GetHiddenNeuronsCount()> weightHiddenToOutput;
         std::array<float, Config::GetTotalOutputCount()> biasHiddenToOutput;

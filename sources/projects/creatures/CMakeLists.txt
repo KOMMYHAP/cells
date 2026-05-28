@@ -5,8 +5,8 @@ target_sources(${PROJECT_NAME} PRIVATE
         main.cpp
         pch.h
         ecs_config.h
-        world_simulation/creature_simulation/brain_simulation/brain.hpp
-        world_simulation/creature_simulation/brain_simulation/brain.h
+        brain.hpp
+        brain.h
 )
 
 target_include_directories(${PROJECT_NAME} PUBLIC .)

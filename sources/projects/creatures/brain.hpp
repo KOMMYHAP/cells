@@ -27,8 +27,7 @@ void BrainEvaluator<Impl>::Evaluate(ConstRef<BrainInput> brainInput, ConstRef<Br
             sum += input * weight;
         }
 
-        const float quality = neurons->hiddenQuality[hiddenNeuronIndex];
-        hiddenLayer[hiddenNeuronIndex] = ActivationReLU(quality * sum);
+        hiddenLayer[hiddenNeuronIndex] = ActivationReLU(sum);
     }
 
     for (size_t linearOutputIndex{0}; linearOutputIndex < Config::GetLinearOutputCount(); ++linearOutputIndex) {
