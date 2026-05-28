@@ -113,7 +113,7 @@ void WorldRasterizationTarget::SetLine(int32_t offsetX, int32_t y, int32_t lengt
     int64_t bytesFrom = y * _pitch + offsetX * _bytesPerPixel;
     ASSERT(bytesFrom < static_cast<int64_t>(_destination.size()), "Line's start is out of screen bounds!");
     const int64_t bytesTo = bytesFrom + length * _bytesPerPixel;
-    ASSERT(bytesTo < static_cast<int64_t>(_destination.size()), "Line's end is out of screen bounds!");
+    ASSERT(bytesTo <= static_cast<int64_t>(_destination.size()), "Line's end is out of screen bounds!");
 
     int64_t bytesCount = bytesTo - bytesFrom;
     if (_bytesPerPixel == 4) {
