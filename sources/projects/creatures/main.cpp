@@ -298,8 +298,8 @@ public: //< controller:
     }
 
     void Move(float screenSpaceDx, float screenSpaceDy) {
-        _centerX += screenSpaceDx / _zoom;
-        _centerY += screenSpaceDy / _zoom;
+        _centerX -= screenSpaceDx / _zoom;
+        _centerY -= screenSpaceDy / _zoom;
     }
 
 private:
