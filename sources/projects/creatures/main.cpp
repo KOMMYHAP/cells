@@ -263,8 +263,8 @@ public: //< converter:
     }
 
     std::pair<float, float> ToWorldSpace(int32_t x, int32_t y) const {
-        const float worldX = static_cast<float>(x - _screenPixelsWidth / 2) / _zoom - _centerX;
-        const float worldY = static_cast<float>(y - _screenPixelsHeight / 2) / _zoom - _centerY;
+        const float worldX = static_cast<float>(x - _screenPixelsWidth / 2) / _zoom + _centerX;
+        const float worldY = static_cast<float>(y - _screenPixelsHeight / 2) / _zoom + _centerY;
         return {worldX, worldY};
     }
 
@@ -291,10 +291,10 @@ public: //< controller:
 
     void Zoom(int32_t screenSpaceX, int32_t screenSpaceY, float zoomDelta) {
         const auto [oldWorldX, oldWorldY] = ToWorldSpace(screenSpaceX, screenSpaceY);
-        SetZoom(_zoom * zoomDelta);
+        SetZoom(_zoom + zoomDelta);
         const auto [newWorldX, newWorldY] = ToWorldSpace(screenSpaceX, screenSpaceY);
-        _centerX += newWorldX - oldWorldX;
-        _centerY += newWorldY - oldWorldY;
+        _centerX -= newWorldX - oldWorldX;
+        _centerY -= newWorldY - oldWorldY;
     }
 
     void Move(float screenSpaceDx, float screenSpaceDy) {
@@ -944,8 +944,7 @@ void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld &world) {
             context.camera.Move(mouseDeltaX, mouseDeltaY);
         }
     }
-    const
-            auto [cameraPositionX, cameraPositionY] = context.camera.GetPosition();
+    const auto [cameraPositionX, cameraPositionY] = context.camera.GetPosition();
 
     if (ImGui::BeginMainMenuBar()) {
         static bool demoWindowOpened{false};
@@ -960,8 +959,8 @@ void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld &world) {
     ImGui::SetNextWindowSize(ImVec2(300, 100), ImGuiCond_FirstUseEver);
     ImGui::Begin("##status_window", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse);
     ImGui::Text("FPS: %3.0f (%03d ms)", 1000.0f / elapsedTime.count(), static_cast<int32_t>(elapsedTime.count()));
-    ImGui::Text("Mouse: position = (%.0f, %.0f), scroll = %.0f", mousePosX, mousePosY, mouseWheelDelta);
-    ImGui::Text("Camera: position = (%.0f, %.0f), zoom = %.0f", cameraPositionX, cameraPositionY, context.camera.GetZoom());
+    ImGui::Text("Mouse: position = (%.0f, %.0f), scroll = %.2f", mousePosX, mousePosY, mouseWheelDelta);
+    ImGui::Text("Camera: position = (%.0f, %.0f), zoom = %.2f", cameraPositionX, cameraPositionY, context.camera.GetZoom());
     ImGui::End();
     ImGui::PopStyleColor();
 }
@@ -1027,10 +1026,6 @@ int main() {
         const std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
         auto elapsedFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
         lastFrameTime = currentTime;
-        // if (!vsyncChanged && elapsedFrameTime < TargetFrameTime) {
-        //     std::this_thread::sleep_for(TargetFrameTime - elapsedFrameTime);
-        //     elapsedFrameTime = TargetFrameTime;
-        // }
 
         SDL_Event event{};
         while (SDL_PollEvent(&event)) {
@@ -1048,13 +1043,13 @@ int main() {
 
         ProcessWorldUpdate(world);
 
-        SDL_SetRenderDrawColor(renderer, 0xCC, 0xCC, 0xCC, SDL_ALPHA_OPAQUE);
+        SDL_SetRenderDrawColor(renderer, 0x70, 0x70, 0x70, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
         rasterizationTarget.Lock();
         {
             world.view<const WorldPositionComponent, const WorldCreatureComponent>().each(
                 [&](const WorldPositionComponent &position, const WorldCreatureComponent &/*creature*/) {
-                    static constexpr float CreatureWorldSpaceRadius = 5.0f;
+                    static constexpr float CreatureWorldSpaceRadius = 1.0f;
                     const float creatureScreenSpaceRadius = CreatureWorldSpaceRadius * gameContext.camera.GetZoom();
                     if (!gameContext.camera.IsVisible(position.position.x, position.position.y)) {
                         return;
