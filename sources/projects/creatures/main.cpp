@@ -161,7 +161,6 @@ enum class GeneTypes {
 
 struct GeneDescription {
     [[maybe_unused]] std::string_view name;
-    GeneTypes type{GeneTypes::InternalCount};
     [[maybe_unused]] uint16_t minValue{0};
     [[maybe_unused]] uint16_t maxValue{0};
     [[maybe_unused]] float mutationCenter{0.0f};
@@ -177,8 +176,6 @@ enum class AvailabilityResult {
 static constexpr uint8_t AvailabilityResultCount = static_cast<uint8_t>(AvailabilityResult::InternalCount);
 
 enum class Actions : uint8_t {
-    Idle,
-
     ReadCreatureEnergy,
     ReadCreatureRotation,
 
@@ -201,17 +198,30 @@ enum class Actions : uint8_t {
     InternalCount
 };
 
+struct LinearActionType {
+    float activationThreshold{0.0f};
+    float valueLimit{0.0f};
+    bool symmetric{false};
+};
+
+struct SigmoidActionType {
+    float weakActivationThreshold{0.0f};
+    float strongActivationThreshold{0.0f};
+};
+
+
 struct ActionDescription {
     [[maybe_unused]] std::string_view name;
     int32_t energyCost{0};
     int32_t brainTickCost{0};
+    std::variant<LinearActionType, SigmoidActionType> type{LinearActionType{}};
 };
 
 static constexpr uint8_t ActionTypeCount = static_cast<uint8_t>(Actions::InternalCount);
 
 
 struct CreatureBrainConfig {
-    static consteval size_t GetInputCount() { return SensorsCount; }
+    static consteval size_t GetInputCount() { return SensorsCount + GenesCount; }
     static consteval size_t GetHiddenNeuronsCount() { return GenesCount; }
     static consteval size_t GetLinearOutputCount() { return 0; }
     static consteval size_t GetSigmoidOutputCount() { return ActionTypeCount; }
@@ -225,6 +235,8 @@ struct WorldDescription {
     std::array<SensorDescription, SensorsCount> sensorRules{};
     std::array<bool, ActionTypeCount * GenesCount> actionsRequiredGene{}; //< which genes are required for this action?
     std::array<bool, ActionTypeCount * GenesCount> actionsForbiddenGene{}; //< which genes are forbidden for this action?
+    std::array<std::optional<LinearActionType>, ActionTypeCount> linearActions{};
+    std::array<std::optional<SigmoidActionType>, ActionTypeCount> sigmoidActions{};
 
     float neuronValueRangeSize{0.0f}; //< range = [-x / 2; x / 2]
 
@@ -339,28 +351,6 @@ struct BrainReactionComponent {
     CreatureBrain::BrainOutput values; //< (0; 1)
 };
 
-struct BrainContext {
-    ConstRef<CreatureSensorsComponent> sensors;
-    ConstRef<CreatureGenomeComponent> genome;
-    ConstRef<CreatureBrainNeuronsComponent> specialization;
-    Ref<BrainReactionComponent> output;
-};
-
-// struct CreatureMutationFactorComponent {
-//     float rootSigma{0.0f};
-// };
-
-// struct RandomSourceComponent {
-//     Ref<std::mt19937> generator;
-// };
-//
-// void MutateRootFactor(CreatureMutationFactorComponent &mutation, RandomSourceComponent &random) {
-//     static constexpr float SigmaMutationSpeed = 0.01f;
-//     std::normal_distribution distribution{0.0f, SigmaMutationSpeed};
-//     const float sigmaMutationFactor = distribution(*random.generator);
-//     mutation.rootSigma = mutation.rootSigma * std::exp(sigmaMutationFactor);
-// }
-
 struct WorldPosition {
     int16_t x{0};
     int16_t y{0};
@@ -423,9 +413,6 @@ struct CreatureBrainIsOverloadedTag {
 
 struct CreatureBrainReactionStateComponent {
     uint16_t brainTicksConsumed{0};
-};
-
-struct CreatureActionIdleTag {
 };
 
 struct CreatureStateEnergyComponent {
@@ -579,9 +566,10 @@ void ProcessWorldUpdate(EcsWorld &world) {
             }
         });
 
-    world.view<const CreatureSensorsComponent, const CreatureBrainNeuronsComponent, BrainReactionComponent>().each(
-        [&](const CreatureSensorsComponent &sensors, const CreatureBrainNeuronsComponent &neurons, BrainReactionComponent &output) {
+    world.view<const CreatureSensorsComponent, const CreatureGenomeComponent, const CreatureBrainNeuronsComponent, BrainReactionComponent>().each(
+        [&](const CreatureSensorsComponent &sensors, const CreatureGenomeComponent &genome, const CreatureBrainNeuronsComponent &neurons, BrainReactionComponent &output) {
             CreatureBrain::BrainInput input;
+            std::copy();
             input.values = sensors.values;
 
             static constexpr CreatureBrain brain;
@@ -590,9 +578,6 @@ void ProcessWorldUpdate(EcsWorld &world) {
 
     auto BrainDispatchAction = [&](EcsEntity creature, const Actions action, float intent) {
         switch (action) {
-            case Actions::Idle:
-                world.emplace<CreatureActionIdleTag>(creature);
-                break;
             case Actions::ReadCreatureEnergy:
                 world.emplace<CreatureActionReadEnergyTag>(creature);
                 break;
@@ -617,7 +602,6 @@ void ProcessWorldUpdate(EcsWorld &world) {
             break;
             case Actions::MakeChild:
                 break;
-            case Actions::InternalCount:
             default:
                 ASSERT_FAIL("Sanity check: invalid action type");
                 break;
@@ -646,22 +630,18 @@ void ProcessWorldUpdate(EcsWorld &world) {
         });
     {
         const auto overloadedBrains = world.view<const CreatureBrainIsOverloadedTag, const CreaturePositionComponent>();
-        world.erase<CreatureBrainIsOverloadedTag>(overloadedBrains.begin(), overloadedBrains.end());
-        // overloadedBrains.each([&](const CreaturePositionComponent position) {
-        //     // cleanup reference from world to creature
-        //     world.erase<WorldCreatureComponent>(position.value);
-        // });
-        // world.destroy(overloadedBrains.begin(), overloadedBrains.end());
+        // world.erase<CreatureBrainIsOverloadedTag>(overloadedBrains.begin(), overloadedBrains.end());
+        overloadedBrains.each([&](const CreaturePositionComponent position) {
+            // cleanup reference from world to creature
+            world.erase<WorldCreatureComponent>(position.value);
+        });
+        world.destroy(overloadedBrains.begin(), overloadedBrains.end());
     }
 
     world.view<CreatureStateFatigueComponent>().each([&](CreatureStateFatigueComponent &fatigue) {
         const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
         UpdateSensorValue(desc, fatigue.value, -worldRules.brainRestPerTickMin);
     });
-    {
-        const auto view = world.view<const CreatureActionIdleTag>();
-        world.erase<CreatureActionIdleTag>(view.begin(), view.end());
-    }
 
     world.view<const CreatureActionRotateComponent, CreatureStateRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).
             each([&](EcsEntity creature, const CreatureActionRotateComponent &rotate, CreatureStateRotationComponent &rotation,
@@ -886,7 +866,6 @@ void SetupWorldRules(const int32_t &ScreenWidth, const int32_t &ScreenHeight, Ga
         worldRules.geneRules[static_cast<uint8_t>(gene)] = {name, GeneTypes::Ability, 0, AvailabilityResultCount, 0.0f, mutationSigma};
     };
 
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Idle)] = {"Idle", 1, 0};
     worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureEnergy)] = {"Read Creature Energy", 5, 0};
     worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureRotation)] = {"Read Creature Rotation", 5, 0};
     worldRules.actionRules[static_cast<uint8_t>(Actions::ReadAreaTouch)] = {"Read Area Touch", 15, 10};
