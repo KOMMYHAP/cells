@@ -569,8 +569,8 @@ void ProcessWorldUpdate(EcsWorld &world) {
     world.view<const CreatureSensorsComponent, const CreatureGenomeComponent, const CreatureBrainNeuronsComponent, BrainReactionComponent>().each(
         [&](const CreatureSensorsComponent &sensors, const CreatureGenomeComponent &genome, const CreatureBrainNeuronsComponent &neurons, BrainReactionComponent &output) {
             CreatureBrain::BrainInput input;
-            std::copy();
-            input.values = sensors.values;
+            std::ranges::copy(sensors.values, std::ranges::begin(input.values));
+            std::ranges::copy(genome.quality, std::ranges::begin(input.values) + sensors.values.size());
 
             static constexpr CreatureBrain brain;
             brain.Evaluate(ConstRef{&input}, ConstRef{&neurons.values}, Ref{&output.values});
