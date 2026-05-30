@@ -8,6 +8,9 @@
 #include "brain.h"
 #include "widgets/world/world_rasterization_target.h"
 
+#include <numbers>
+
+
 enum class Sensors : uint8_t {
     CreatureEnergy,
     CreatureRotation,
@@ -70,8 +73,8 @@ static constexpr uint8_t SensorsCount = static_cast<uint8_t>(Sensors::InternalCo
 
 struct SensorDescription {
     [[maybe_unused]] std::string_view name;
-    int32_t minValue{0}; //< included
-    int32_t maxValue{0}; //< excluded
+    int32_t minValue{ 0 }; //< included
+    int32_t maxValue{ 0 }; //< excluded
 };
 
 enum class SensorCalculationResult {
@@ -80,7 +83,7 @@ enum class SensorCalculationResult {
     MaxValueReached,
 };
 
-SensorCalculationResult UpdateSensorValue(const SensorDescription &desc, uint16_t &value, int32_t diff) {
+SensorCalculationResult UpdateSensorValue(const SensorDescription& desc, uint16_t& value, int32_t diff) {
     const int32_t newValue = static_cast<int32_t>(value) + diff;
     if (newValue >= desc.maxValue) {
         value = static_cast<uint16_t>(desc.maxValue);
@@ -94,7 +97,7 @@ SensorCalculationResult UpdateSensorValue(const SensorDescription &desc, uint16_
     return SensorCalculationResult::ValueInRange;
 }
 
-uint16_t ConvertFromSensorValue(const float value, const SensorDescription &desc) {
+uint16_t ConvertFromSensorValue(const float value, const SensorDescription& desc) {
     const float rawValue = std::lerp(static_cast<float>(desc.minValue), static_cast<float>(desc.maxValue) - 1.0f, value);
     return static_cast<uint16_t>(std::roundf(rawValue));
 }
@@ -106,7 +109,7 @@ T ConvertFromSensorValue(const float value, const T minValue = T{}, const T maxV
     return static_cast<T>(static_cast<std::underlying_type_t<T>>(std::roundf(rawValue)));
 }
 
-float ConvertToSensorValue(const uint16_t value, const SensorDescription &desc) {
+float ConvertToSensorValue(const uint16_t value, const SensorDescription& desc) {
     const float rawValue = (static_cast<float>(value) - static_cast<float>(desc.minValue)) / static_cast<float>(desc.maxValue - desc.minValue);
     return std::clamp(rawValue, 0.0f, 1.0f);
 }
@@ -115,7 +118,7 @@ template<class T>
     requires std::is_enum_v<T>
 float ConvertToSensorValue(const T value, const T minValue = T{}, const T maxValue = T::InternalCount) {
     const float rawValue = (static_cast<float>(value) - static_cast<float>(minValue)) / static_cast<float>(std::to_underlying(maxValue) -
-                                                                                                           std::to_underlying(minValue));
+        std::to_underlying(minValue));
     return std::clamp(rawValue, 0.0f, 1.0f);
 }
 
@@ -161,10 +164,10 @@ enum class GeneTypes {
 
 struct GeneDescription {
     [[maybe_unused]] std::string_view name;
-    [[maybe_unused]] uint16_t minValue{0};
-    [[maybe_unused]] uint16_t maxValue{0};
-    [[maybe_unused]] float mutationCenter{0.0f};
-    [[maybe_unused]] float mutationSigma{0.0f};
+    [[maybe_unused]] uint16_t minValue{ 0 };
+    [[maybe_unused]] uint16_t maxValue{ 0 };
+    [[maybe_unused]] float mutationCenter{ 0.0f };
+    [[maybe_unused]] float mutationSigma{ 0.0f };
 };
 
 enum class AvailabilityResult {
@@ -199,32 +202,43 @@ enum class Actions : uint8_t {
 };
 
 struct LinearActionType {
-    float activationThreshold{0.0f};
-    float valueLimit{0.0f};
-    bool symmetric{false};
+    float activationThreshold{ 0.0f };
+    float valueLimit{ 0.0f };
+    bool symmetric{ false };
 };
 
 struct SigmoidActionType {
-    float weakActivationThreshold{0.0f};
-    float strongActivationThreshold{0.0f};
+    float weakActivationThreshold{ 0.0f };
+    float strongActivationThreshold{ 0.0f };
 };
 
 
 struct ActionDescription {
     [[maybe_unused]] std::string_view name;
-    int32_t energyCost{0};
-    int32_t brainTickCost{0};
-    std::variant<LinearActionType, SigmoidActionType> type{LinearActionType{}};
+    int32_t energyCost{ 0 };
+    int32_t brainTickCost{ 0 };
+    std::variant<LinearActionType, SigmoidActionType> type{ LinearActionType{} };
 };
 
 static constexpr uint8_t ActionTypeCount = static_cast<uint8_t>(Actions::InternalCount);
 
 
 struct CreatureBrainConfig {
-    static consteval size_t GetInputCount() { return SensorsCount + GenesCount; }
-    static consteval size_t GetHiddenNeuronsCount() { return GenesCount; }
-    static consteval size_t GetLinearOutputCount() { return 0; }
-    static consteval size_t GetSigmoidOutputCount() { return ActionTypeCount; }
+    static consteval size_t GetInputCount() {
+        return SensorsCount + GenesCount;
+    }
+
+    static consteval size_t GetHiddenNeuronsCount() {
+        return GenesCount;
+    }
+
+    static consteval size_t GetLinearOutputCount() {
+        return 0;
+    }
+
+    static consteval size_t GetSigmoidOutputCount() {
+        return ActionTypeCount;
+    }
 };
 
 using CreatureBrain = BrainEvaluator<CreatureBrainConfig>;
@@ -238,12 +252,14 @@ struct WorldDescription {
     std::array<std::optional<LinearActionType>, ActionTypeCount> linearActions{};
     std::array<std::optional<SigmoidActionType>, ActionTypeCount> sigmoidActions{};
 
-    float neuronValueRangeSize{0.0f}; //< range = [-x / 2; x / 2]
+    int32_t worldSizeX{ 0 };
+    int32_t worldSizeY{ 0 };
+    float neuronValueRangeSize{ 0.0f }; //< range = [-x / 2; x / 2]
 
-    int32_t brainRestPerTickMin{0};
-    int32_t creatureEnergyMax{0};
-    int32_t creatureFatigueMax{0};
-    int32_t consumeEnergyPerBiteMax{0};
+    int32_t brainRestPerTickMin{ 0 };
+    int32_t creatureEnergyMax{ 0 };
+    int32_t creatureFatigueMax{ 0 };
+    int32_t consumeEnergyPerBiteMax{ 0 };
 };
 
 using RandomGenerator = std::mt19937;
@@ -255,11 +271,11 @@ public: //< getters:
     }
 
     std::pair<float, float> GetPosition() const {
-        return {_centerX, _centerY};
+        return { _centerX, _centerY };
     }
 
     std::pair<float, float> GetZoomLimits() const {
-        return {_zoomMin, _zoomMax};
+        return { _zoomMin, _zoomMax };
     }
 
     bool IsVisible(float x, float y) const {
@@ -271,13 +287,13 @@ public: //< converter:
     std::pair<int32_t, int32_t> ToScreenSpace(float x, float y) const {
         const auto screenX = static_cast<int32_t>(std::round((x - _centerX) * _zoom + _screenPixelsWidth / 2.0f));
         const auto screenY = static_cast<int32_t>(std::round((y - _centerY) * _zoom + _screenPixelsHeight / 2.0f));
-        return {screenX, screenY};
+        return { screenX, screenY };
     }
 
     std::pair<float, float> ToWorldSpace(int32_t x, int32_t y) const {
         const float worldX = static_cast<float>(x - _screenPixelsWidth / 2) / _zoom + _centerX;
         const float worldY = static_cast<float>(y - _screenPixelsHeight / 2) / _zoom + _centerY;
-        return {worldX, worldY};
+        return { worldX, worldY };
     }
 
 public: //< controller:
@@ -315,18 +331,107 @@ public: //< controller:
     }
 
 private:
-    float _centerX{0.0f}; //< world space X
-    float _centerY{0.0f}; //< world space Y
+    float _centerX{ 0.0f }; //< world space X
+    float _centerY{ 0.0f }; //< world space Y
 
-    float _zoomMin{0.1f};
-    float _zoomMax{10.0f};
-    float _zoom{1.0f};
+    float _zoomMin{ 0.1f };
+    float _zoomMax{ 10.0f };
+    float _zoom{ 1.0f };
 
-    int32_t _screenPixelsWidth{800};
-    int32_t _screenPixelsHeight{600};
+    int32_t _screenPixelsWidth{ 800 };
+    int32_t _screenPixelsHeight{ 600 };
 };
 
+class WorldLocator {
+public:
+    WorldLocator() = default;
+
+    WorldLocator(int32_t worldSizeX, int32_t worldSizeY);
+
+    EcsEntity Find(float x, float y) const;
+
+    bool TryReset(EcsEntity entity, float x, float y);
+
+    bool TrySet(EcsEntity entity, float x, float y);
+
+    bool TryMove(EcsEntity entity, float xFrom, float yFrom, float xTo, float yTo);
+
+private:
+    int32_t ToCellIndex(float x, float y) const;
+
+    int32_t worldSizeX{ 0 };
+    std::vector<EcsEntity> _cells;
+};
+
+int32_t WorldLocator::ToCellIndex(float x, float y) const {
+    const int32_t cellX = static_cast<int32_t>(std::round(x));
+    const int32_t cellY = static_cast<int32_t>(std::round(y));
+    const int32_t index = cellY * worldSizeX + cellX;
+    if (index >= 0 && index < _cells.size()) {
+        return index;
+    }
+    return -1;
+}
+
+WorldLocator::WorldLocator(int32_t worldSizeX, int32_t worldSizeY)
+    : _cells(worldSizeX * worldSizeY, InvalidEcsEntity) {
+}
+
+EcsEntity WorldLocator::Find(float x, float y) const {
+    const int32_t index = ToCellIndex(x, y);
+    if (index < 0) {
+        return InvalidEcsEntity;
+    }
+    return _cells[index];
+}
+
+bool WorldLocator::TrySet(EcsEntity entity, float x, float y) {
+    const int32_t index = ToCellIndex(x, y);
+    if (index < 0) {
+        return false;
+    }
+
+    if (_cells[index] != InvalidEcsEntity) {
+        return false;
+    }
+
+    _cells[index] = entity;
+    return true;
+}
+
+bool WorldLocator::TryReset(EcsEntity entity, float x, float y) {
+    const int32_t index = ToCellIndex(x, y);
+    if (index < 0) {
+        return false;
+    }
+
+    if (_cells[index] != entity) {
+        return false;
+    }
+
+    _cells[index] = InvalidEcsEntity;
+    return true;
+}
+
+bool WorldLocator::TryMove(EcsEntity entity, float xFrom, float yFrom, float xTo, float yTo) {
+    const int32_t indexFrom = ToCellIndex(xFrom, yFrom);
+    const int32_t indexTo = ToCellIndex(xTo, yTo);
+    if (indexFrom < 0 || indexTo < 0) {
+        return false;
+    }
+    if (_cells[indexFrom] != entity) {
+        return false;
+    }
+    if (_cells[indexTo] != InvalidEcsEntity) {
+        return false;
+    }
+    _cells[indexTo] = std::exchange(_cells[indexFrom], InvalidEcsEntity);
+    return true;
+}
+
+
 struct GameContext {
+    WorldLocator worldLocator;
     WorldDescription worldRules;
     Camera camera;
     RandomGenerator randomGenerator;
@@ -351,30 +456,6 @@ struct BrainReactionComponent {
     CreatureBrain::BrainOutput values; //< (0; 1)
 };
 
-struct WorldPosition {
-    int16_t x{0};
-    int16_t y{0};
-};
-
-enum class WorldAreaIndex : uint8_t {
-    Position_0_0,
-    Position_0_1,
-    Position_0_2[[maybe_unused]],
-    Position_1_0,
-    Position_1_1[[maybe_unused]],
-    Position_1_2,
-    Position_2_0[[maybe_unused]],
-    Position_2_1,
-    Position_2_2,
-    InternalCount
-};
-
-static constexpr int32_t WorldAreaSize = static_cast<int32_t>(WorldAreaIndex::InternalCount);
-
-struct WorldAreaLocatorComponent {
-    [[maybe_unused]] std::array<EcsEntity, WorldAreaSize> entities;
-};
-
 
 enum class WorldDirection : uint8_t {
     Up,
@@ -386,12 +467,10 @@ enum class WorldDirection : uint8_t {
 
 static constexpr uint8_t WorldDirectionCount = static_cast<uint8_t>(WorldDirection::InternalCount);
 
-struct CreaturePositionComponent {
-    EcsEntity value;
-};
 
 struct WorldPositionComponent {
-    WorldPosition position;
+    float x{ 0.0f };
+    float y{ 0.0f };
 };
 
 enum class TouchResult : uint8_t {
@@ -403,75 +482,71 @@ enum class TouchResult : uint8_t {
     InternalCount
 };
 
-struct WorldObstacleTag {
-};
-
 static constexpr int32_t TouchResultSize = static_cast<int32_t>(TouchResult::InternalCount);
 
 struct CreatureBrainIsOverloadedTag {
 };
 
 struct CreatureBrainReactionStateComponent {
-    uint16_t brainTicksConsumed{0};
+    uint16_t brainTicksConsumed{ 0 };
 };
 
 struct CreatureStateEnergyComponent {
-    uint16_t value{0};
+    uint16_t value{ 0 };
 };
 
 struct CreatureOutOfEnergyTag {
 };
 
 struct CreatureStateFatigueComponent {
-    uint16_t value{0};
+    uint16_t value{ 0 };
 };
 
 struct CreatureStateRotationComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    WorldDirection value{ WorldDirection::InternalCount };
 };
 
 struct CreatureActionRotateComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    WorldDirection value{ WorldDirection::InternalCount };
 };
 
 struct CreatureActionMoveComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    float thrust{ 0.0f }; //< [0; 1]
 };
 
 struct CreatureSensorTouchComponent {
-    std::array<TouchResult, WorldAreaSize> touches;
+    std::array<TouchResult, 3> touches; //< left, forward, up
 };
 
 struct CreatureActionReadTouchAreaTag {
 };
 
 struct CreatureSensorEnergyComponent {
-    uint16_t value{0};
+    uint16_t value{ 0 };
 };
 
 struct CreatureActionReadEnergyTag {
 };
 
 struct CreatureSensorRotationComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    float angle{ 0.0f }; //< radians, [0; 2 * PI)
 };
 
 struct CreatureActionReadRotationTag {
 };
 
-struct WorldCreatureComponent {
-    EcsEntity creature;
+struct WorldCreatureTag {
 };
 
 struct CreatureActionBiteComponent {
-    float _amplitude{0.0f};
+    float _amplitude{ 0.0f };
 };
 
 
-bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEntity creature, CreatureStateEnergyComponent &energy, Actions action,
-                      float amplitude = 1.0f) {
-    const SensorDescription &desc = worldDesc.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-    const ActionDescription &actionDesc = worldDesc.actionRules[static_cast<uint8_t>(action)];
+bool TryConsumeEnergy(EcsWorld& world, const WorldDescription& worldDesc, EcsEntity creature, CreatureStateEnergyComponent& energy, Actions action,
+    float amplitude = 1.0f) {
+    const SensorDescription& desc = worldDesc.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+    const ActionDescription& actionDesc = worldDesc.actionRules[static_cast<uint8_t>(action)];
     const int32_t energyCost = std::max(1, static_cast<int32_t>(std::round(static_cast<float>(actionDesc.energyCost) * amplitude)));
     const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -energyCost);
     if (r == SensorCalculationResult::MinValueReached) {
@@ -482,64 +557,63 @@ bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEnt
 }
 
 
-void InitCreatureGenome(EcsWorld &world, EcsEntity creature, EcsEntity position) {
-    GameContext &context = world.ctx().get<GameContext>();
-    RandomGenerator &randomGenerator = context.randomGenerator;
-    const WorldDescription &worldRules = context.worldRules;
+void InitCreatureGenome(EcsWorld& world, EcsEntity creature) {
+    GameContext& context = world.ctx().get<GameContext>();
+    RandomGenerator& randomGenerator = context.randomGenerator;
+    const WorldDescription& worldRules = context.worldRules;
 
-    const int32_t initialEnergy = std::uniform_int_distribution{0, worldRules.creatureEnergyMax - 1}(randomGenerator);
-    const int32_t initialFatigue = std::uniform_int_distribution{0, worldRules.creatureFatigueMax - 1}(randomGenerator);
-    const int32_t initialRotation = std::uniform_int_distribution{0, WorldDirectionCount - 1}(randomGenerator);
+    const int32_t initialEnergy = std::uniform_int_distribution{ 0, worldRules.creatureEnergyMax - 1 }(randomGenerator);
+    const int32_t initialFatigue = std::uniform_int_distribution{ 0, worldRules.creatureFatigueMax - 1 }(randomGenerator);
+    const float initialRotation = std::uniform_real_distribution<float>{ 0.0f, 2 * std::numbers::pi_v<float> }(randomGenerator);
 
     world.emplace<CreatureStateEnergyComponent>(creature, static_cast<uint16_t>(initialEnergy));
     world.emplace<CreatureStateFatigueComponent>(creature, static_cast<uint16_t>(initialFatigue));
     world.emplace<CreatureStateRotationComponent>(creature, static_cast<WorldDirection>(initialRotation));
-    world.emplace<CreatureBrainReactionStateComponent>(creature, uint16_t{0});
-    world.emplace<CreaturePositionComponent>(creature, position);
+    world.emplace<CreatureBrainReactionStateComponent>(creature, uint16_t{ 0 });
 
-    world.emplace<CreatureSensorEnergyComponent>(creature, uint16_t{0});
-    world.emplace<CreatureSensorRotationComponent>(creature, WorldDirection::Down);
-    auto &[touches] = world.emplace<CreatureSensorTouchComponent>(creature);
+    world.emplace<CreatureSensorEnergyComponent>(creature, uint16_t{ initialEnergy });
+    world.emplace<CreatureSensorRotationComponent>(creature, initialRotation);
+    auto& [touches] = world.emplace<CreatureSensorTouchComponent>(creature);
     touches.fill(TouchResult::Nothing);
 
-    auto &[actions] = world.emplace<BrainReactionComponent>(creature);
+    auto& [actions] = world.emplace<BrainReactionComponent>(creature);
     actions.sigmoidValues.fill(0.0f);
     actions.linearValues.fill(0.0f);
 
-    auto &[sensors] = world.emplace<CreatureSensorsComponent>(creature);
+    auto& [sensors] = world.emplace<CreatureSensorsComponent>(creature);
     sensors.fill(0.0f);
 
-    auto FillBrain = [&]<size_t S>(std::array<float, S> &values) {
-        for (float &value: values) {
-            value = std::uniform_real_distribution{-worldRules.neuronValueRangeSize / 2.0f, worldRules.neuronValueRangeSize / 2.0f}(context.randomGenerator);
+    auto FillBrain = [&]<size_t S>(std::array<float, S>& values) {
+        for (float& value : values) {
+            value = std::uniform_real_distribution{ -worldRules.neuronValueRangeSize / 2.0f, worldRules.neuronValueRangeSize / 2.0f }(context.randomGenerator);
         }
     };
-    auto &neurons = world.emplace<CreatureBrainNeuronsComponent>(creature);
+    auto& neurons = world.emplace<CreatureBrainNeuronsComponent>(creature);
     FillBrain(neurons.values.biasInputToHidden);
     FillBrain(neurons.values.weightInputToHidden);
     FillBrain(neurons.values.biasHiddenToOutput);
     FillBrain(neurons.values.weightHiddenToOutput);
 
-    auto &[genomeQuality] = world.emplace<CreatureGenomeComponent>(creature);
-    for (float &quality: genomeQuality) {
-        quality = std::uniform_real_distribution{0.0f, 1.0f}(context.randomGenerator);
+    auto& [genomeQuality] = world.emplace<CreatureGenomeComponent>(creature);
+    for (float& quality : genomeQuality) {
+        quality = std::uniform_real_distribution{ 0.0f, 1.0f }(context.randomGenerator);
     }
 }
 
-void ProcessWorldUpdate(EcsWorld &world) {
-    GameContext &context = world.ctx().get<GameContext>();
-    const WorldDescription &worldRules = context.worldRules;
+void ProcessWorldUpdate(EcsWorld& world) {
+    GameContext& context = world.ctx().get<GameContext>();
+    const WorldDescription& worldRules = context.worldRules;
 
     world.view<CreatureBrainNeuronsComponent, const CreatureGenomeComponent>().each(
-        [&](CreatureBrainNeuronsComponent &neurons, const CreatureGenomeComponent &genome) {
+        [&](CreatureBrainNeuronsComponent& neurons, const CreatureGenomeComponent& genome) {
             static constexpr auto MutationSpeedGeneIndex = static_cast<uint8_t>(Genes::GeneCreatureMutationSpeedFactor);
             static constexpr float MutationSpeedFactorMin = 0.0001f;
             static constexpr float MutationSpeedFactorMax = 1.0f;
             const float mutationSigma = genome.quality[MutationSpeedGeneIndex] * (MutationSpeedFactorMax - MutationSpeedFactorMin) + MutationSpeedFactorMin;
 
-            auto MutateNeuron = [&context, range=worldRules.neuronValueRangeSize, sigma=mutationSigma]<size_t N>(std::array<float, N> &values) {
-                for (float &value: values) {
-                    const float neuronMutation = std::normal_distribution{0.0f, sigma}(context.randomGenerator);
+            auto MutateNeuron = [&context, range=worldRules.neuronValueRangeSize, sigma=mutationSigma]<size_t N>(std::array<float, N>& values) {
+                for (float& value : values) {
+                    const float neuronMutation = std::normal_distribution{ 0.0f, sigma }(context.randomGenerator);
                     value += neuronMutation;
                     value = std::clamp(value, -range / 2.0f, range / 2.0f);
                 }
@@ -552,64 +626,66 @@ void ProcessWorldUpdate(EcsWorld &world) {
         });
 
     world.view<CreatureSensorsComponent, const CreatureSensorEnergyComponent, const CreatureSensorRotationComponent, const CreatureSensorTouchComponent>().each(
-        [&](CreatureSensorsComponent &sensors, const CreatureSensorEnergyComponent energySensor, const CreatureSensorRotationComponent rotationSensor,
-            const CreatureSensorTouchComponent &touchSensor) {
+        [&](CreatureSensorsComponent& sensors, const CreatureSensorEnergyComponent energySensor, const CreatureSensorRotationComponent rotationSensor,
+        const CreatureSensorTouchComponent& touchSensor) {
             sensors.values[static_cast<uint8_t>(Sensors::CreatureEnergy)] = ConvertToSensorValue(energySensor.value,
-                                                                                                 worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)]);
-            sensors.values[static_cast<uint8_t>(Sensors::CreatureRotation)] = ConvertToSensorValue(rotationSensor.value);
+                worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)]);
+            sensors.values[static_cast<uint8_t>(Sensors::CreatureRotation)] = ConvertToSensorValue(rotationSensor.angle,
+                worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureRotation)]);
             sensors.values[static_cast<uint8_t>(Sensors::CreatureFatigue)] = ConvertToSensorValue(energySensor.value,
-                                                                                                  worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)]);
+                worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)]);
 
-            for (const int32_t touchIndex: std::views::iota(0, WorldAreaSize)) {
+            for (const int32_t touchIndex : std::views::iota(0, static_cast<int32_t>(touchSensor.touches.size()))) {
                 const TouchResult touch = touchSensor.touches[touchIndex];
                 sensors.values[static_cast<int32_t>(Sensors::TouchArea_0_0) + touchIndex] = ConvertToSensorValue(touch);
             }
         });
 
     world.view<const CreatureSensorsComponent, const CreatureGenomeComponent, const CreatureBrainNeuronsComponent, BrainReactionComponent>().each(
-        [&](const CreatureSensorsComponent &sensors, const CreatureGenomeComponent &genome, const CreatureBrainNeuronsComponent &neurons, BrainReactionComponent &output) {
+        [&](const CreatureSensorsComponent& sensors, const CreatureGenomeComponent& genome, const CreatureBrainNeuronsComponent& neurons,
+        BrainReactionComponent& output) {
             CreatureBrain::BrainInput input;
             std::ranges::copy(sensors.values, std::ranges::begin(input.values));
             std::ranges::copy(genome.quality, std::ranges::begin(input.values) + sensors.values.size());
 
             static constexpr CreatureBrain brain;
-            brain.Evaluate(ConstRef{&input}, ConstRef{&neurons.values}, Ref{&output.values});
+            brain.Evaluate(ConstRef{ &input }, ConstRef{ &neurons.values }, Ref{ &output.values });
         });
 
     auto BrainDispatchAction = [&](EcsEntity creature, const Actions action, float intent) {
         switch (action) {
-            case Actions::ReadCreatureEnergy:
-                world.emplace<CreatureActionReadEnergyTag>(creature);
-                break;
-            case Actions::ReadCreatureRotation:
-                world.emplace<CreatureActionReadRotationTag>(creature);
-                break;
-            case Actions::ReadAreaTouch:
-                world.emplace<CreatureActionReadTouchAreaTag>(creature);
-                break;
-            case Actions::Bite:
-                world.emplace<CreatureActionBiteComponent>(creature, intent);
-                break;
-            case Actions::Move: {
-                const auto direction = ConvertFromSensorValue<WorldDirection>(intent);
-                world.emplace<CreatureActionMoveComponent>(creature, direction);
-            }
+        case Actions::ReadCreatureEnergy:
+            world.emplace<CreatureActionReadEnergyTag>(creature);
             break;
-            case Actions::Rotate: {
-                const auto direction = ConvertFromSensorValue<WorldDirection>(intent);
-                world.emplace<CreatureActionRotateComponent>(creature, direction);
-            }
+        case Actions::ReadCreatureRotation:
+            world.emplace<CreatureActionReadRotationTag>(creature);
             break;
-            case Actions::MakeChild:
-                break;
-            default:
-                ASSERT_FAIL("Sanity check: invalid action type");
-                break;
+        case Actions::ReadAreaTouch:
+            world.emplace<CreatureActionReadTouchAreaTag>(creature);
+            break;
+        case Actions::Bite:
+            world.emplace<CreatureActionBiteComponent>(creature, intent);
+            break;
+        case Actions::Move: {
+            const auto direction = ConvertFromSensorValue<WorldDirection>(intent);
+            world.emplace<CreatureActionMoveComponent>(creature, direction);
+        }
+        break;
+        case Actions::Rotate: {
+            const auto direction = ConvertFromSensorValue<WorldDirection>(intent);
+            world.emplace<CreatureActionRotateComponent>(creature, direction);
+        }
+        break;
+        case Actions::MakeChild:
+            break;
+        default:
+            ASSERT_FAIL("Sanity check: invalid action type");
+            break;
         }
     };
 
     world.view<const BrainReactionComponent, CreatureBrainReactionStateComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each(
-        [&](EcsEntity creature, const BrainReactionComponent &reaction, CreatureBrainReactionStateComponent &brainState) {
+        [&](EcsEntity creature, const BrainReactionComponent& reaction, CreatureBrainReactionStateComponent& brainState) {
             int32_t brainTickRequested = 0;
             for (uint8_t actionIndex = 0; actionIndex < ActionTypeCount; ++actionIndex) {
                 const float intent = reaction.values.sigmoidValues[actionIndex];
@@ -621,33 +697,32 @@ void ProcessWorldUpdate(EcsWorld &world) {
         });
 
     world.view<const CreatureBrainReactionStateComponent, CreatureStateFatigueComponent>(entt::exclude_t<CreatureBrainIsOverloadedTag>{}).each(
-        [&](EcsEntity creature, const CreatureBrainReactionStateComponent &brainState, CreatureStateFatigueComponent &fatigue) {
-            const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
+        [&](EcsEntity creature, const CreatureBrainReactionStateComponent& brainState, CreatureStateFatigueComponent& fatigue) {
+            const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
             const SensorCalculationResult r = UpdateSensorValue(desc, fatigue.value, brainState.brainTicksConsumed);
             if (r == SensorCalculationResult::MaxValueReached) {
                 world.emplace<CreatureBrainIsOverloadedTag>(creature);
             }
-        });
-    {
-        const auto overloadedBrains = world.view<const CreatureBrainIsOverloadedTag, const CreaturePositionComponent>();
-        // world.erase<CreatureBrainIsOverloadedTag>(overloadedBrains.begin(), overloadedBrains.end());
-        overloadedBrains.each([&](const CreaturePositionComponent position) {
-            // cleanup reference from world to creature
-            world.erase<WorldCreatureComponent>(position.value);
-        });
-        world.destroy(overloadedBrains.begin(), overloadedBrains.end());
+        }); {
+        const auto overloadedBrains = world.view<const CreatureBrainIsOverloadedTag>();
+        world.erase<CreatureBrainIsOverloadedTag>(overloadedBrains.begin(), overloadedBrains.end());
+        // overloadedBrains.each([&](const CreaturePositionComponent position) {
+        //     // cleanup reference from world to creature
+        //     world.erase<WorldCreatureComponent>(position.value);
+        // });
+        // world.destroy(overloadedBrains.begin(), overloadedBrains.end());
     }
 
-    world.view<CreatureStateFatigueComponent>().each([&](CreatureStateFatigueComponent &fatigue) {
-        const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
+    world.view<CreatureStateFatigueComponent>().each([&](CreatureStateFatigueComponent& fatigue) {
+        const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)];
         UpdateSensorValue(desc, fatigue.value, -worldRules.brainRestPerTickMin);
     });
 
     world.view<const CreatureActionRotateComponent, CreatureStateRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).
-            each([&](EcsEntity creature, const CreatureActionRotateComponent &rotate, CreatureStateRotationComponent &rotation,
-                     CreatureStateEnergyComponent &energy) {
-                const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-                const ActionDescription &actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
+        each([&](EcsEntity creature, const CreatureActionRotateComponent& rotate, CreatureStateRotationComponent& rotation,
+            CreatureStateEnergyComponent& energy) {
+                const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+                const ActionDescription& actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
                 const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -actionDesc.energyCost);
                 if (r == SensorCalculationResult::MinValueReached) {
                     world.emplace<CreatureOutOfEnergyTag>(creature);
@@ -657,37 +732,18 @@ void ProcessWorldUpdate(EcsWorld &world) {
                 rotation.value = rotate.value;
             });
 
-    world.view<const CreatureActionMoveComponent, CreaturePositionComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
-        [&](EcsEntity creature, const CreatureActionMoveComponent &move, CreaturePositionComponent &position, CreatureStateEnergyComponent &energy) {
+    world.view<const CreatureActionMoveComponent, WorldPositionComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+        [&](EcsEntity creature, const CreatureActionMoveComponent& move, WorldPositionComponent& position, CreatureStateEnergyComponent& energy) {
             world.erase<CreatureActionMoveComponent>(creature);
             if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Move)) {
                 return;
             }
 
-            WorldAreaIndex areaIndex = WorldAreaIndex::InternalCount;
-            switch (move.value) {
-                case WorldDirection::Up:
-                    areaIndex = WorldAreaIndex::Position_0_1;
-                    break;
-                case WorldDirection::Down:
-                    areaIndex = WorldAreaIndex::Position_2_1;
-                    break;
-                case WorldDirection::Left:
-                    areaIndex = WorldAreaIndex::Position_1_0;
-                    break;
-                case WorldDirection::Right:
-                    areaIndex = WorldAreaIndex::Position_1_2;
-                    break;
-                case WorldDirection::InternalCount:
-                    break;
-            }
 
-            if (areaIndex == WorldAreaIndex::InternalCount) [[unlikely]] {
-                ASSERT_FAIL("Sanity check: unknown move direction!");
-                return;
-            }
+            WorldLocator& worldLocator = context.worldLocator;
+            move.value
 
-            const auto &[location] = world.get<const WorldAreaLocatorComponent>(position.value);
+            const auto& [location] = world.get<const WorldAreaLocatorComponent>(position.value);
             const EcsEntity newPosition = location[static_cast<uint8_t>(areaIndex)];
             if (!world.valid(newPosition)) {
                 return;
@@ -704,13 +760,13 @@ void ProcessWorldUpdate(EcsWorld &world) {
 
     world.view<const CreatureActionReadTouchAreaTag, const CreaturePositionComponent, CreatureSensorTouchComponent,
         CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
-        [&](EcsEntity creature, const CreaturePositionComponent &creaturePosition, CreatureSensorTouchComponent &touchSensor,
-            CreatureStateEnergyComponent &energy) {
+        [&](EcsEntity creature, const CreaturePositionComponent& creaturePosition, CreatureSensorTouchComponent& touchSensor,
+        CreatureStateEnergyComponent& energy) {
             world.erase<CreatureActionReadTouchAreaTag>(creature);
             if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadAreaTouch)) {
                 return;
             }
-            const auto &[entities] = world.get<const WorldAreaLocatorComponent>(creaturePosition.value);
+            const auto& [entities] = world.get<const WorldAreaLocatorComponent>(creaturePosition.value);
             for (uint8_t i = 0; i < WorldAreaSize; ++i) {
                 if (const EcsEntity areaPosition = entities[i]; world.any_of<WorldObstacleTag>(areaPosition)) {
                     touchSensor.touches[i] = TouchResult::Solid;
@@ -723,7 +779,7 @@ void ProcessWorldUpdate(EcsWorld &world) {
         });
 
     world.view<const CreatureActionReadEnergyTag, CreatureStateEnergyComponent, CreatureSensorEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
-        [&](EcsEntity creature, CreatureStateEnergyComponent &energy, CreatureSensorEnergyComponent &energySensor) {
+        [&](EcsEntity creature, CreatureStateEnergyComponent& energy, CreatureSensorEnergyComponent& energySensor) {
             world.erase<CreatureActionReadEnergyTag>(creature);
             if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureEnergy)) {
                 return;
@@ -733,8 +789,8 @@ void ProcessWorldUpdate(EcsWorld &world) {
 
     world.view<const CreatureActionReadRotationTag, const CreatureStateRotationComponent, CreatureSensorRotationComponent,
         CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
-        [&](EcsEntity creature, const CreatureStateRotationComponent &rotation, CreatureSensorRotationComponent &rotationSensor,
-            CreatureStateEnergyComponent &energy) {
+        [&](EcsEntity creature, const CreatureStateRotationComponent& rotation, CreatureSensorRotationComponent& rotationSensor,
+        CreatureStateEnergyComponent& energy) {
             world.erase<CreatureActionReadRotationTag>(creature);
             if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureRotation)) {
                 return;
@@ -744,26 +800,26 @@ void ProcessWorldUpdate(EcsWorld &world) {
 
     world.view<const CreatureActionBiteComponent, CreatureStateEnergyComponent, const CreatureStateRotationComponent, const
         CreaturePositionComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
-        [&](EcsEntity creature, const CreatureActionBiteComponent bite, CreatureStateEnergyComponent &energy, const CreatureStateRotationComponent rotation,
-            const CreaturePositionComponent position) {
+        [&](EcsEntity creature, const CreatureActionBiteComponent bite, CreatureStateEnergyComponent& energy, const CreatureStateRotationComponent rotation,
+        const CreaturePositionComponent position) {
             world.erase<CreatureActionBiteComponent>(creature);
             if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Bite, bite._amplitude)) {
                 return;
             }
 
-            const auto &[entities] = world.get<WorldAreaLocatorComponent>(position.value);
+            const auto& [entities] = world.get<WorldAreaLocatorComponent>(position.value);
             if (rotation.value == WorldDirection::InternalCount) {
                 return;
             }
 
             const EcsEntity targetPosition = entities[static_cast<uint8_t>(rotation.value)];
-            const WorldCreatureComponent *target = world.try_get<const WorldCreatureComponent>(targetPosition);
+            const WorldCreatureComponent* target = world.try_get<const WorldCreatureComponent>(targetPosition);
             if (!target) {
                 return;
             }
 
-            CreatureStateEnergyComponent &targetEnergy = world.get<CreatureStateEnergyComponent>(target->creature);
-            const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+            CreatureStateEnergyComponent& targetEnergy = world.get<CreatureStateEnergyComponent>(target->creature);
+            const SensorDescription& desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
             const uint16_t oldValue = targetEnergy.value;
             const SensorCalculationResult r = UpdateSensorValue(desc, targetEnergy.value, -worldRules.consumeEnergyPerBiteMax);
             const uint16_t newValue = targetEnergy.value;
@@ -772,8 +828,7 @@ void ProcessWorldUpdate(EcsWorld &world) {
             if (r == SensorCalculationResult::MinValueReached) {
                 world.emplace_or_replace<CreatureOutOfEnergyTag>(target->creature);
             }
-        });
-    {
+        }); {
         const auto creaturesToDestroy = world.view<const CreatureOutOfEnergyTag, const CreaturePositionComponent>();
         creaturesToDestroy.each([&](const CreaturePositionComponent position) {
             // cleanup reference from world to creature
@@ -783,79 +838,44 @@ void ProcessWorldUpdate(EcsWorld &world) {
     }
 }
 
-void FillWorldContent(EcsWorld &world, GameContext &gameContext) {
-    static constexpr int32_t WorldSize = 100;
+void FillWorldContent(EcsWorld& world, GameContext& gameContext) {
+    WorldLocator& worldLocator = gameContext.worldLocator;
+    std::uniform_real_distribution<float> positionDistX{ 0.0f, static_cast<float>(gameContext.worldRules.worldSizeX) };
+    std::uniform_real_distribution<float> positionDistY{ 0.0f, static_cast<float>(gameContext.worldRules.worldSizeY) };
 
-    // init world
-    std::vector cells{WorldSize * WorldSize, InvalidEcsEntity};
-    for (int y = 0; y < WorldSize; ++y) {
-        for (int x = 0; x < WorldSize; ++x) {
-            const EcsEntity entity = world.create();
-            world.emplace<WorldPositionComponent>(entity, static_cast<int16_t>(x), static_cast<int16_t>(y));
-            cells[y * WorldSize + x] = entity;
-        }
-    }
-    for (int y = 0; y < WorldSize; ++y) {
-        for (int x = 0; x < WorldSize; ++x) {
-            const EcsEntity worldEntity = cells[y * WorldSize + x];
-            auto &[entities] = world.emplace<WorldAreaLocatorComponent>(worldEntity);
-
-            for (int offsetX = -1; offsetX <= 1; ++offsetX) {
-                for (int offsetY = -1; offsetY <= 1; ++offsetY) {
-                    const int32_t areaX = x + offsetX;
-                    const int32_t areaY = y + offsetY;
-                    EcsEntity worldAreaEntity = InvalidEcsEntity;
-                    if (areaX >= 0 && areaX < WorldSize && areaY >= 0 && areaY < WorldSize) {
-                        worldAreaEntity = cells[areaY * WorldSize + areaX];
-                    }
-                    const int32_t areaIndex = (offsetY + 1) * 3 + (offsetX + 1);
-                    ASSERT(
-                        areaIndex >= static_cast<int32_t>(WorldAreaIndex::Position_0_0) && areaIndex <= static_cast<int32_t>(WorldAreaIndex::Position_2_2),
-                        "Sanity check: invalid area index");
-                    entities[static_cast<uint8_t>(areaIndex)] = worldAreaEntity;
-                }
-            }
-        }
-    }
-
-    auto MakeObstacle = [&](const int x, const int y) {
-        const EcsEntity border = cells[y * WorldSize + x];
-        world.emplace_or_replace<WorldObstacleTag>(border);
-    };
-
-    for (int i = 0; i < WorldSize; ++i) {
-        MakeObstacle(i, 0);
-        MakeObstacle(i, WorldSize - 1);
-        MakeObstacle(WorldSize - 1, i);
-        MakeObstacle(0, i);
-    }
-
-    auto cellsToShuffle = cells;
-    std::ranges::shuffle(cellsToShuffle, gameContext.randomGenerator);
-    for (const EcsEntity position: cellsToShuffle | std::views::take(cells.size() / 10)) {
-        if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(position)) {
+    const int32_t initialCellsCount = static_cast<int32_t>(gameContext.worldRules.worldSizeX * gameContext.worldRules.worldSizeY * 0.25f);
+    for (const int32_t _ : std::views::iota(0, initialCellsCount)) {
+        const float x = positionDistX(gameContext.randomGenerator);
+        const float y = positionDistY(gameContext.randomGenerator);
+        const EcsEntity entity = worldLocator.Find(x, y);
+        if (entity != InvalidEcsEntity) {
             continue;
         }
         const EcsEntity creature = world.create();
-        world.emplace<WorldCreatureComponent>(position, creature);
-        InitCreatureGenome(world, creature, position);
+        const bool placed = worldLocator.TrySet(creature, x, y);
+        ASSERT(placed, "sanity check: place was empty!");
+        world.emplace<WorldCreatureTag>(creature);
+        InitCreatureGenome(world, creature);
     }
 }
 
-void SetupWorldRules(const int32_t &ScreenWidth, const int32_t &ScreenHeight, GameContext &gameContext) {
-    WorldDescription &worldRules = gameContext.worldRules;
-    {
+void SetupWorldRules(const int32_t& ScreenWidth, const int32_t& ScreenHeight, GameContext& gameContext) {
+    WorldDescription& worldRules = gameContext.worldRules; {
         static constexpr std::string_view RandomSeed = "White";
-        std::seed_seq seed{RandomSeed.begin(), RandomSeed.end()};
+        std::seed_seq seed{ RandomSeed.begin(), RandomSeed.end() };
         gameContext.randomGenerator.seed(seed);
     }
 
+    static constexpr int32_t WorldSize = 100;
+    gameContext.worldLocator = WorldLocator(WorldSize, WorldSize);
     gameContext.camera.SetScreenSize(ScreenWidth, ScreenHeight);
 
     static constexpr int32_t BrainInputCount = GenesCount + SensorsCount;
     static constexpr float SigmoidMeaningfulRangeSize = 10.0f; //< [-5; 5]
     worldRules.neuronValueRangeSize = static_cast<float>(BrainInputCount) / SigmoidMeaningfulRangeSize;
 
+    worldRules.worldSizeX = WorldSize;
+    worldRules.worldSizeY = WorldSize;
     worldRules.creatureEnergyMax = 100000;
     worldRules.brainRestPerTickMin = 5;
     worldRules.creatureFatigueMax = 200;
@@ -863,16 +883,16 @@ void SetupWorldRules(const int32_t &ScreenWidth, const int32_t &ScreenHeight, Ga
     worldRules.actionsForbiddenGene.fill(false);
 
     auto MakeGeneAbility = [&](Genes gene, std::string_view name, float mutationSigma) {
-        worldRules.geneRules[static_cast<uint8_t>(gene)] = {name, GeneTypes::Ability, 0, AvailabilityResultCount, 0.0f, mutationSigma};
+        worldRules.geneRules[static_cast<uint8_t>(gene)] = { name, GeneTypes::Ability, 0, AvailabilityResultCount, 0.0f, mutationSigma };
     };
 
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureEnergy)] = {"Read Creature Energy", 5, 0};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureRotation)] = {"Read Creature Rotation", 5, 0};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadAreaTouch)] = {"Read Area Touch", 15, 10};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Bite)] = {"Bite", 50, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Move)] = {"Move", 15, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)] = {"Rotate", 10, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::MakeChild)] = {"Make Child", 200, 15};
+    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureEnergy)] = { "Read Creature Energy", 5, 0 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureRotation)] = { "Read Creature Rotation", 5, 0 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadAreaTouch)] = { "Read Area Touch", 15, 10 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::Bite)] = { "Bite", 50, 5 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::Move)] = { "Move", 15, 5 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)] = { "Rotate", 10, 5 };
+    worldRules.actionRules[static_cast<uint8_t>(Actions::MakeChild)] = { "Make Child", 200, 15 };
 
     MakeGeneAbility(Genes::GeneCreatureEnergySensor, "Energy Sensor", 0.01f);
     MakeGeneAbility(Genes::GeneCreatureRotationSensor, "Rotation Sensor", 0.01f);
@@ -887,23 +907,23 @@ void SetupWorldRules(const int32_t &ScreenWidth, const int32_t &ScreenHeight, Ga
         "Mutation Speed", GeneTypes::Property, 0, 0, std::numeric_limits<float>::signaling_NaN(), std::numeric_limits<float>::signaling_NaN()
     };
 
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)] = {"Creature Energy", 0, worldRules.creatureEnergyMax};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureRotation)] = {"Creature Rotation", 0, WorldDirectionCount};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)] = {"Creature Fatigue", 0, worldRules.creatureFatigueMax};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_0)] = {"Touch Area 0-0", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_1)] = {"Touch Area 0-1", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_2)] = {"Touch Area 0-2", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_0)] = {"Touch Area 1-0", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_1)] = {"Touch Area 1-1", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_2)] = {"Touch Area 1-2", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_0)] = {"Touch Area 2-0", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_1)] = {"Touch Area 2-1", 0, TouchResultSize};
-    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_2)] = {"Touch Area 2-2", 0, TouchResultSize};
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)] = { "Creature Energy", 0, worldRules.creatureEnergyMax };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureRotation)] = { "Creature Rotation", 0, WorldDirectionCount };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureFatigue)] = { "Creature Fatigue", 0, worldRules.creatureFatigueMax };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_0)] = { "Touch Area 0-0", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_1)] = { "Touch Area 0-1", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_0_2)] = { "Touch Area 0-2", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_0)] = { "Touch Area 1-0", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_1)] = { "Touch Area 1-1", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_1_2)] = { "Touch Area 1-2", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_0)] = { "Touch Area 2-0", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_1)] = { "Touch Area 2-1", 0, TouchResultSize };
+    worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_2)] = { "Touch Area 2-2", 0, TouchResultSize };
 }
 
-void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld &world) {
-    GameContext &context = world.ctx().get<GameContext>();
-    const ImGuiIO &io = ImGui::GetIO();
+void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld& world) {
+    GameContext& context = world.ctx().get<GameContext>();
+    const ImGuiIO& io = ImGui::GetIO();
     const float mouseWheelDelta = io.MouseWheel;
     const float mousePosX = io.MousePos.x;
     const float mousePosY = io.MousePos.y;
@@ -926,7 +946,7 @@ void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld &world) {
     const auto [cameraPositionX, cameraPositionY] = context.camera.GetPosition();
 
     if (ImGui::BeginMainMenuBar()) {
-        static bool demoWindowOpened{false};
+        static bool demoWindowOpened{ false };
         if (ImGui::MenuItem("Demo", nullptr, &demoWindowOpened)) {
             ImGui::ShowDemoWindow(&demoWindowOpened);
         }
@@ -953,7 +973,7 @@ int main() {
     static constexpr uint32_t WindowFlags = SDL_WINDOW_HIGH_PIXEL_DENSITY;
     static constexpr int32_t ScreenWidth = 1200;
     static constexpr int32_t ScreenHeight = 800;
-    SDL_Window *window = SDL_CreateWindow("Creatures", ScreenWidth, ScreenHeight, WindowFlags);
+    SDL_Window* window = SDL_CreateWindow("Creatures", ScreenWidth, ScreenHeight, WindowFlags);
     if (window == nullptr) {
         ASSERT_FAIL("SDL_CreateWindow failed");
         return -1;
@@ -962,7 +982,7 @@ int main() {
     const SDL_PropertiesID props = SDL_CreateProperties();
     SDL_SetPointerProperty(props, SDL_PROP_RENDERER_CREATE_WINDOW_POINTER, window);
     SDL_SetNumberProperty(props, SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER, 1);
-    SDL_Renderer *renderer = SDL_CreateRendererWithProperties(props);
+    SDL_Renderer* renderer = SDL_CreateRendererWithProperties(props);
     SDL_DestroyProperties(props);
 
     if (renderer == nullptr) {
@@ -971,14 +991,14 @@ int main() {
         return -1;
     }
 
-    SDL_Texture *renderTargetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, ScreenWidth, ScreenHeight);
+    SDL_Texture* renderTargetTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, ScreenWidth, ScreenHeight);
     if (!renderTargetTexture) {
         ASSERT_FAIL("SDL_CreateTexture failed");
         return -1;
     }
 
     ImGui::CreateContext();
-    ImGuiIO &io = ImGui::GetIO();
+    ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 
     if (!ImGui_ImplSDL3_InitForSDLRenderer(window, renderer)) {
@@ -990,17 +1010,17 @@ int main() {
         return -1;
     }
 
-    WorldRasterizationTarget rasterizationTarget{*renderTargetTexture, SDL_Color{200, 200, 200, SDL_ALPHA_OPAQUE}, 4};
+    WorldRasterizationTarget rasterizationTarget{ *renderTargetTexture, SDL_Color{ 200, 200, 200, SDL_ALPHA_OPAQUE }, 4 };
 
     EcsWorld world{};
-    GameContext &gameContext = world.ctx().emplace<GameContext>();
+    GameContext& gameContext = world.ctx().emplace<GameContext>();
     SetupWorldRules(ScreenWidth, ScreenHeight, gameContext);
     FillWorldContent(world, gameContext);
 
     /// Main loop
     bool shouldStopMainLoop = false;
     std::chrono::steady_clock::time_point lastFrameTime = std::chrono::steady_clock::now();
-    static constexpr std::chrono::milliseconds TargetFrameTime{1000 / 60};
+    static constexpr std::chrono::milliseconds TargetFrameTime{ 1000 / 60 };
     while (!shouldStopMainLoop) {
         const std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
         auto elapsedFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
@@ -1024,17 +1044,17 @@ int main() {
 
         SDL_SetRenderDrawColor(renderer, 0x70, 0x70, 0x70, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
-        rasterizationTarget.Lock();
-        {
-            world.view<const WorldPositionComponent, const WorldCreatureComponent>().each(
-                [&](const WorldPositionComponent &position, const WorldCreatureComponent &/*creature*/) {
-                    static constexpr float CreatureWorldSpaceRadius = 1.0f;
-                    const float creatureScreenSpaceRadius = CreatureWorldSpaceRadius * gameContext.camera.GetZoom();
-                    if (!gameContext.camera.IsVisible(position.position.x, position.position.y)) {
+        rasterizationTarget.Lock(); {
+            world.view<const CreaturePositionComponent>().each(
+                [&](const CreaturePositionComponent position) {
+                    if (!gameContext.camera.IsVisible(position.x, position.y)) {
                         return;
                     }
+
+                    static constexpr float CreatureWorldSpaceRadius = 1.0f;
+                    const float creatureScreenSpaceRadius = CreatureWorldSpaceRadius * gameContext.camera.GetZoom();
                     const auto [screenSpaceX, screenSpaceY] = gameContext.camera.ToScreenSpace(position.position.x, position.position.y);
-                    rasterizationTarget.SetFilledCircle(screenSpaceX, screenSpaceY, creatureScreenSpaceRadius, SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE});
+                    rasterizationTarget.SetFilledCircle(screenSpaceX, screenSpaceY, creatureScreenSpaceRadius, SDL_Color{ 0, 200, 0, SDL_ALPHA_OPAQUE });
                 });
         }
         rasterizationTarget.Unlock();
