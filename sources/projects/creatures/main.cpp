@@ -1,3 +1,5 @@
+#include <numbers>
+
 #include "ecs_config.h"
 #include "SDL3/SDL.h"
 
@@ -8,7 +10,8 @@
 #include "brain.h"
 #include "widgets/world/world_rasterization_target.h"
 
-#include <numbers>
+#include "box2d/box2d.h"
+#include "glm/glm.hpp"
 
 
 enum class Sensors : uint8_t {
@@ -180,23 +183,24 @@ static constexpr uint8_t AvailabilityResultCount = static_cast<uint8_t>(Availabi
 
 enum class Actions : uint8_t {
     ReadCreatureEnergy,
-    ReadCreatureRotation,
+    // ReadCreatureRotation,
 
     // ReadAreaSound,
-    ReadAreaTouch,
+    // ReadAreaTouch,
     // ReadAreaSmell,
     // ReadAreaPhoto,
     // ReadAreaThermo,
 
-    Bite,
-    Move,
-    Rotate,
+    // Bite,
+    MoveVelocity,
+    MoveIntent,
+    // Rotate,
 
     // MakeSound,
     // MakeSmell,
     // MakeTemperature,
     // MakeFlash,
-    MakeChild,
+    // MakeChild,
 
     InternalCount
 };
@@ -208,8 +212,7 @@ struct LinearActionType {
 };
 
 struct SigmoidActionType {
-    float weakActivationThreshold{0.0f};
-    float strongActivationThreshold{0.0f};
+    float activationThreshold{0.0f};
 };
 
 
@@ -217,7 +220,6 @@ struct ActionDescription {
     [[maybe_unused]] std::string_view name;
     int32_t energyCost{0};
     int32_t brainTickCost{0};
-    std::variant<LinearActionType, SigmoidActionType> type{LinearActionType{}};
 };
 
 static constexpr uint8_t ActionTypeCount = static_cast<uint8_t>(Actions::InternalCount);
@@ -247,8 +249,6 @@ struct WorldDescription {
     std::array<ActionDescription, ActionTypeCount> actionRules{};
     std::array<GeneDescription, GenesCount> geneRules{};
     std::array<SensorDescription, SensorsCount> sensorRules{};
-    std::array<bool, ActionTypeCount * GenesCount> actionsRequiredGene{}; //< which genes are required for this action?
-    std::array<bool, ActionTypeCount * GenesCount> actionsForbiddenGene{}; //< which genes are forbidden for this action?
     std::array<std::optional<LinearActionType>, ActionTypeCount> linearActions{};
     std::array<std::optional<SigmoidActionType>, ActionTypeCount> sigmoidActions{};
 
@@ -272,6 +272,10 @@ public: //< getters:
 
     std::pair<float, float> GetPosition() const {
         return {_centerX, _centerY};
+    }
+
+    std::pair<float, float> GetSize() const {
+        return {_screenPixelsWidth / _zoom, _screenPixelsHeight / _zoom};
     }
 
     std::pair<float, float> GetZoomLimits() const {
@@ -431,6 +435,7 @@ bool WorldLocator::TryMove(EcsEntity entity, float xFrom, float yFrom, float xTo
 
 
 struct GameContext {
+    b2WorldId physicsWorld{};
     WorldLocator worldLocator;
     WorldDescription worldRules;
     Camera camera;
@@ -468,11 +473,6 @@ enum class WorldDirection : uint8_t {
 static constexpr uint8_t WorldDirectionCount = static_cast<uint8_t>(WorldDirection::InternalCount);
 
 
-struct WorldPositionComponent {
-    float x{0.0f};
-    float y{0.0f};
-};
-
 enum class TouchResult : uint8_t {
     Nothing,
     // Fluid,
@@ -502,16 +502,19 @@ struct CreatureStateFatigueComponent {
     uint16_t value{0};
 };
 
-struct CreatureStateRotationComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+struct CreatureStateAngularVelocityComponent {
+    float angularVelocity{0.0f}; //< radians per second
 };
 
 struct CreatureActionRotateComponent {
-    WorldDirection value{WorldDirection::InternalCount};
+    float angularVelocity{0.0f};
 };
 
-struct CreatureActionMoveComponent {
-    float thrust{0.0f}; //< [0; 1]
+struct CreatureActionMoveTag {
+};
+
+struct CreatureActionSpeedComponent {
+    float speed{0.0f};
 };
 
 struct CreatureSensorTouchComponent {
@@ -538,10 +541,16 @@ struct CreatureActionReadRotationTag {
 struct WorldCreatureTag {
 };
 
+struct PhysicsBodyComponent {
+    b2BodyId id{};
+};
+
 struct CreatureActionBiteComponent {
     float _amplitude{0.0f};
 };
 
+struct RenderDirtyTag {
+};
 
 bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEntity creature, CreatureStateEnergyComponent &energy, Actions action,
                       float amplitude = 1.0f) {
@@ -550,7 +559,7 @@ bool TryConsumeEnergy(EcsWorld &world, const WorldDescription &worldDesc, EcsEnt
     const int32_t energyCost = std::max(1, static_cast<int32_t>(std::round(static_cast<float>(actionDesc.energyCost) * amplitude)));
     const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -energyCost);
     if (r == SensorCalculationResult::MinValueReached) {
-        world.emplace<CreatureOutOfEnergyTag>(creature);
+        // world.emplace<CreatureOutOfEnergyTag>(creature);
         return false;
     }
     return true;
@@ -564,15 +573,15 @@ void InitCreatureGenome(EcsWorld &world, EcsEntity creature) {
 
     const int32_t initialEnergy = std::uniform_int_distribution{0, worldRules.creatureEnergyMax - 1}(randomGenerator);
     const int32_t initialFatigue = std::uniform_int_distribution{0, worldRules.creatureFatigueMax - 1}(randomGenerator);
-    const float initialRotation = std::uniform_real_distribution<float>{0.0f, 2 * std::numbers::pi_v<float>}(randomGenerator);
+    // const float initialRotation = std::uniform_real_distribution<float>{}(randomGenerator);
 
     world.emplace<CreatureStateEnergyComponent>(creature, static_cast<uint16_t>(initialEnergy));
     world.emplace<CreatureStateFatigueComponent>(creature, static_cast<uint16_t>(initialFatigue));
-    world.emplace<CreatureStateRotationComponent>(creature, static_cast<WorldDirection>(initialRotation));
+    // world.emplace<CreatureStateAngularVelocityComponent>(creature, static_cast<WorldDirection>(initialRotation));
     world.emplace<CreatureBrainReactionStateComponent>(creature, uint16_t{0});
 
-    // world.emplace<CreatureSensorEnergyComponent>(creature, uint16_t{ initialEnergy });
-    world.emplace<CreatureSensorRotationComponent>(creature, initialRotation);
+    world.emplace<CreatureSensorEnergyComponent>(creature, static_cast<uint16_t>(initialEnergy));
+    // world.emplace<CreatureSensorRotationComponent>(creature, initialRotation);
     auto &[touches] = world.emplace<CreatureSensorTouchComponent>(creature);
     touches.fill(TouchResult::Nothing);
 
@@ -651,33 +660,36 @@ void ProcessWorldUpdate(EcsWorld &world) {
             brain.Evaluate(ConstRef{&input}, ConstRef{&neurons.values}, Ref{&output.values});
         });
 
-    auto BrainDispatchAction = [&](EcsEntity creature, const Actions action, float intent) {
-        return;
+    auto BrainDispatchAction = [&](EcsEntity creature, const Actions action, float value) {
         switch (action) {
             case Actions::ReadCreatureEnergy:
                 world.emplace<CreatureActionReadEnergyTag>(creature);
                 break;
-            case Actions::ReadCreatureRotation:
-                world.emplace<CreatureActionReadRotationTag>(creature);
+            // case Actions::ReadCreatureRotation:
+            //     world.emplace<CreatureActionReadRotationTag>(creature);
+            //     break;
+            // case Actions::ReadAreaTouch:
+            //     world.emplace<CreatureActionReadTouchAreaTag>(creature);
+            //     break;
+            // case Actions::Bite:
+            //     // world.emplace<CreatureActionBiteComponent>(creature, intent);
+            //     break;
+            case Actions::MoveVelocity: {
+                world.emplace<CreatureActionSpeedComponent>(creature, value);
                 break;
-            case Actions::ReadAreaTouch:
-                world.emplace<CreatureActionReadTouchAreaTag>(creature);
+            }
+            case Actions::MoveIntent: {
+                world.emplace<CreatureActionMoveTag>(creature);
                 break;
-            case Actions::Bite:
-                world.emplace<CreatureActionBiteComponent>(creature, intent);
-                break;
-            case Actions::Move: {
+            }
+            break;
+                // case Actions::Rotate: {
                 // const auto direction = ConvertFromSensorValue<WorldDirection>(intent);
-                // world.emplace<CreatureActionMoveComponent>(creature, direction);
-            }
-            break;
-            case Actions::Rotate: {
-                const auto direction = ConvertFromSensorValue<WorldDirection>(intent);
-                world.emplace<CreatureActionRotateComponent>(creature, direction);
-            }
-            break;
-            case Actions::MakeChild:
+                // world.emplace<CreatureActionRotateComponent>(creature, direction);
+                // }
                 break;
+            // case Actions::MakeChild:
+            //     break;
             default:
                 ASSERT_FAIL("Sanity check: invalid action type");
                 break;
@@ -719,44 +731,30 @@ void ProcessWorldUpdate(EcsWorld &world) {
         UpdateSensorValue(desc, fatigue.value, -worldRules.brainRestPerTickMin);
     });
 
-    world.view<const CreatureActionRotateComponent, CreatureStateRotationComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).
-            each([&](EcsEntity creature, const CreatureActionRotateComponent &rotate, CreatureStateRotationComponent &rotation,
-                     CreatureStateEnergyComponent &energy) {
-                const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
-                const ActionDescription &actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
-                const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -actionDesc.energyCost);
-                if (r == SensorCalculationResult::MinValueReached) {
-                    world.emplace<CreatureOutOfEnergyTag>(creature);
-                }
+    world.view<const CreatureActionRotateComponent, PhysicsBodyComponent, CreatureStateAngularVelocityComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).
+            each([&](EcsEntity creature, const CreatureActionRotateComponent &rotate, PhysicsBodyComponent physicsBody, CreatureStateAngularVelocityComponent &rotation, CreatureStateEnergyComponent &/*energy*/) {
+                // const SensorDescription &desc = worldRules.sensorRules[static_cast<uint8_t>(Sensors::CreatureEnergy)];
+                // const ActionDescription &actionDesc = worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)];
+                // const SensorCalculationResult r = UpdateSensorValue(desc, energy.value, -actionDesc.energyCost);
+                // if (r == SensorCalculationResult::MinValueReached) {
+                //     world.emplace<CreatureOutOfEnergyTag>(creature);
+                // }
 
                 world.erase<CreatureActionRotateComponent>(creature);
-                rotation.value = rotate.value;
+                rotation.angularVelocity = rotate.angularVelocity;
+                b2Body_SetAngularVelocity(physicsBody.id, rotation.angularVelocity);
             });
 
-    world.view<const CreatureActionMoveComponent, WorldPositionComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
-        [&](EcsEntity creature, const CreatureActionMoveComponent &/*move*/, WorldPositionComponent &/*position*/, CreatureStateEnergyComponent &energy) {
-            world.erase<CreatureActionMoveComponent>(creature);
-            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::Move)) {
+    world.view<const CreatureActionMoveTag, const CreatureActionSpeedComponent, PhysicsBodyComponent, CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+        [&](EcsEntity creature, const CreatureActionSpeedComponent &move, PhysicsBodyComponent physicsBody, CreatureStateEnergyComponent &energy) {
+            world.erase<CreatureActionSpeedComponent, CreatureActionMoveTag>(creature);
+            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::MoveVelocity)) {
                 return;
             }
 
-
-            // WorldLocator& worldLocator = context.worldLocator;
-            // move.value
-            //
-            // const auto& [location] = world.get<const WorldAreaLocatorComponent>(position.value);
-            // const EcsEntity newPosition = location[static_cast<uint8_t>(areaIndex)];
-            // if (!world.valid(newPosition)) {
-            //     return;
-            // }
-            // if (world.any_of<WorldCreatureComponent, WorldObstacleTag>(newPosition)) {
-            //     return;
-            // }
-            //
-            // const EcsEntity oldPosition = position.value;
-            // world.erase<WorldCreatureComponent>(oldPosition);
-            // world.emplace<WorldCreatureComponent>(newPosition, creature);
-            // position.value = newPosition;
+            const b2Rot rotation = b2Body_GetRotation(physicsBody.id);
+            const b2Vec2 velocity = b2RotateVector(rotation, b2Vec2{0.0f, move.speed});
+            b2Body_SetLinearVelocity(physicsBody.id, velocity);
         });
 
     // world.view<const CreatureActionReadTouchAreaTag, const CreaturePositionComponent, CreatureSensorTouchComponent,
@@ -788,16 +786,16 @@ void ProcessWorldUpdate(EcsWorld &world) {
             energySensor.value = energy.value;
         });
 
-    world.view<const CreatureActionReadRotationTag, const CreatureStateRotationComponent, CreatureSensorRotationComponent,
-        CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
-        [&](EcsEntity creature, const CreatureStateRotationComponent &/*rotation*/, CreatureSensorRotationComponent &/*rotationSensor*/,
-            CreatureStateEnergyComponent &energy) {
-            world.erase<CreatureActionReadRotationTag>(creature);
-            if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureRotation)) {
-                return;
-            }
-            // rotationSensor.value = rotation.value;
-        });
+    // world.view<const CreatureActionReadRotationTag, const CreatureStateRotationComponent, CreatureSensorRotationComponent,
+    //     CreatureStateEnergyComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
+    //     [&](EcsEntity creature, const CreatureStateRotationComponent &/*rotation*/, CreatureSensorRotationComponent &/*rotationSensor*/,
+    //         CreatureStateEnergyComponent &energy) {
+    //         world.erase<CreatureActionReadRotationTag>(creature);
+    //         if (!TryConsumeEnergy(world, worldRules, creature, energy, Actions::ReadCreatureRotation)) {
+    //             return;
+    //         }
+    //         rotationSensor.value = rotation.value;
+    //     });
 
     // world.view<const CreatureActionBiteComponent, CreatureStateEnergyComponent, const CreatureStateRotationComponent, const
     //     CreaturePositionComponent>(entt::exclude_t<CreatureOutOfEnergyTag>{}).each(
@@ -829,33 +827,47 @@ void ProcessWorldUpdate(EcsWorld &world) {
     //         if (r == SensorCalculationResult::MinValueReached) {
     //             world.emplace_or_replace<CreatureOutOfEnergyTag>(target->creature);
     //         }
-    //     }); {
-    //     const auto creaturesToDestroy = world.view<const CreatureOutOfEnergyTag, const CreaturePositionComponent>();
-    //     creaturesToDestroy.each([&](const CreaturePositionComponent position) {
-    //         // cleanup reference from world to creature
-    //         world.erase<WorldCreatureComponent>(position.value);
     //     });
-    //     world.destroy(creaturesToDestroy.begin(), creaturesToDestroy.end());
-    // }
+    {
+        const auto creaturesToDestroy = world.view<const CreatureOutOfEnergyTag>();
+        // creaturesToDestroy.each([&](const CreaturePositionComponent position) {
+        //     // cleanup reference from world to creature
+        //     world.erase<WorldCreatureComponent>(position.value);
+        // });
+        // world.destroy(creaturesToDestroy.begin(), creaturesToDestroy.end());
+        world.erase<CreatureOutOfEnergyTag>(creaturesToDestroy.begin(), creaturesToDestroy.end());
+    }
 }
 
 void FillWorldContent(EcsWorld &world, GameContext &gameContext) {
-    WorldLocator &worldLocator = gameContext.worldLocator;
     std::uniform_real_distribution<float> positionDistX{0.0f, static_cast<float>(gameContext.worldRules.worldSizeX)};
     std::uniform_real_distribution<float> positionDistY{0.0f, static_cast<float>(gameContext.worldRules.worldSizeY)};
+    std::uniform_real_distribution<float> radiusDist{1.0f, 10.0f};
 
-    const int32_t initialCellsCount = static_cast<int32_t>(gameContext.worldRules.worldSizeX * gameContext.worldRules.worldSizeY * 0.25f);
+    const int32_t initialCellsCount = static_cast<int32_t>(gameContext.worldRules.worldSizeX * gameContext.worldRules.worldSizeY * 0.005f);
     for ([[maybe_unused]] const int32_t _: std::views::iota(0, initialCellsCount)) {
+        const EcsEntity creature = world.create();
+
         const float x = positionDistX(gameContext.randomGenerator);
         const float y = positionDistY(gameContext.randomGenerator);
-        const EcsEntity entity = worldLocator.Find(x, y);
-        if (entity != InvalidEcsEntity) {
-            continue;
-        }
-        const EcsEntity creature = world.create();
-        const bool placed = worldLocator.TrySet(creature, x, y);
-        ASSERT(placed, "sanity check: place was empty!");
+        const float radius = radiusDist(gameContext.randomGenerator);
+
+
+        b2BodyDef bodyDef = b2DefaultBodyDef();
+        bodyDef.position = {x, y};
+        bodyDef.type = b2_kinematicBody;
+
+        const uint64_t rawCreatureId = std::bit_cast<uint32_t>(creature);
+        bodyDef.userData = std::bit_cast<void *>(rawCreatureId);
+
+        const b2BodyId bodyId = b2CreateBody(gameContext.physicsWorld, &bodyDef);
+
+        b2ShapeDef shapeDef = b2DefaultShapeDef();
+        const b2Circle circle{b2Vec2{0.0f, 0.0f}, radius};
+        b2CreateCircleShape(bodyId, &shapeDef, &circle);
+
         world.emplace<WorldCreatureTag>(creature);
+        world.emplace<PhysicsBodyComponent>(creature, bodyId);
         InitCreatureGenome(world, creature);
     }
 }
@@ -868,7 +880,7 @@ void SetupWorldRules(const int32_t &ScreenWidth, const int32_t &ScreenHeight, Ga
         gameContext.randomGenerator.seed(seed);
     }
 
-    static constexpr int32_t WorldSize = 100;
+    static constexpr int32_t WorldSize = 1000;
     gameContext.worldLocator = WorldLocator(WorldSize, WorldSize);
     gameContext.camera.SetScreenSize(ScreenWidth, ScreenHeight);
 
@@ -881,20 +893,16 @@ void SetupWorldRules(const int32_t &ScreenWidth, const int32_t &ScreenHeight, Ga
     worldRules.creatureEnergyMax = 100000;
     worldRules.brainRestPerTickMin = 5;
     worldRules.creatureFatigueMax = 200;
-    worldRules.actionsRequiredGene.fill(false);
-    worldRules.actionsForbiddenGene.fill(false);
 
     auto MakeGene = [&](Genes gene, std::string_view name, float mutationSigma) {
         worldRules.geneRules[static_cast<uint8_t>(gene)] = {name, 0, AvailabilityResultCount, 0.0f, mutationSigma};
     };
 
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureEnergy)] = {"Read Creature Energy", 5, 0};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureRotation)] = {"Read Creature Rotation", 5, 0};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadAreaTouch)] = {"Read Area Touch", 15, 10};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Bite)] = {"Bite", 50, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Move)] = {"Move", 15, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)] = {"Rotate", 10, 5};
-    worldRules.actionRules[static_cast<uint8_t>(Actions::MakeChild)] = {"Make Child", 200, 15};
+    // worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureRotation)] = {"Read Creature Rotation", 5, 0};
+    // worldRules.actionRules[static_cast<uint8_t>(Actions::ReadAreaTouch)] = {"Read Area Touch", 15, 10};
+    // worldRules.actionRules[static_cast<uint8_t>(Actions::Bite)] = {"Bite", 50, 5};
+    // worldRules.actionRules[static_cast<uint8_t>(Actions::Rotate)] = {"Rotate", 10, 5};
+    // worldRules.actionRules[static_cast<uint8_t>(Actions::MakeChild)] = {"Make Child", 200, 15};
 
     MakeGene(Genes::GeneCreatureEnergySensor, "Energy Sensor", 0.01f);
     MakeGene(Genes::GeneCreatureRotationSensor, "Rotation Sensor", 0.01f);
@@ -918,6 +926,26 @@ void SetupWorldRules(const int32_t &ScreenWidth, const int32_t &ScreenHeight, Ga
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_0)] = {"Touch Area 2-0", 0, TouchResultSize};
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_1)] = {"Touch Area 2-1", 0, TouchResultSize};
     worldRules.sensorRules[static_cast<uint8_t>(Sensors::TouchArea_2_2)] = {"Touch Area 2-2", 0, TouchResultSize};
+
+    auto MakeSigmoidAction = [&](Actions action, ActionDescription desc, SigmoidActionType sigmoid) {
+        const auto index = static_cast<uint8_t>(action);
+        ASSERT(!worldRules.linearActions[index].has_value() && !worldRules.sigmoidActions[index].has_value(), "sanity check: action has been registered already!");
+        worldRules.sigmoidActions[index] = std::move(sigmoid);
+        worldRules.actionRules[index] = std::move(desc);
+    };
+    auto MakeLinearAction = [&](Actions action, ActionDescription desc, LinearActionType linear) {
+        const auto index = static_cast<uint8_t>(action);
+        ASSERT(!worldRules.linearActions[index].has_value() && !worldRules.sigmoidActions[index].has_value(), "sanity check: action has been registered already!");
+        worldRules.linearActions[index] = std::move(linear);
+        worldRules.actionRules[index] = std::move(desc);
+    };
+
+    MakeSigmoidAction(Actions::MoveIntent, ActionDescription{"Move Intent", 15, 5}, SigmoidActionType{0.5f});
+    MakeLinearAction(Actions::MoveVelocity, ActionDescription{"Velocity", 5, 1}, LinearActionType{0.0f, 1.0f, true});
+
+    MakeLinearAction(Actions::ReadCreatureEnergy, ActionDescription{"Move Intent", 15, 5}, LinearActionType{0.5f,});
+
+    worldRules.actionRules[static_cast<uint8_t>(Actions::ReadCreatureEnergy)] = {"Read Creature Energy", 5, 0};
 }
 
 void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld &world) {
@@ -959,29 +987,13 @@ void ProcessImGui(std::chrono::milliseconds elapsedTime, EcsWorld &world) {
     ImGui::Text("FPS: %3.0f (%03d ms)", 1000.0f / elapsedTime.count(), static_cast<int32_t>(elapsedTime.count()));
     ImGui::Text("Mouse: position = (%.0f, %.0f), scroll = %.2f", mousePosX, mousePosY, mouseWheelDelta);
     ImGui::Text("Camera: position = (%.0f, %.0f), zoom = %.2f", cameraPositionX, cameraPositionY, context.camera.GetZoom());
+    const b2Counters counters = b2World_GetCounters(context.physicsWorld);
+    ImGui::Text("Physics body: %d", counters.bodyCount);
     ImGui::End();
     ImGui::PopStyleColor();
 }
 
-#include "box2d/box2d.h"
-#include "glm/glm.hpp"
-
 int main() {
-    {
-        const b2WorldDef worldDef = b2DefaultWorldDef();
-        b2WorldId world = b2CreateWorld(&worldDef);
-        const b2BodyDef bodyDef = b2DefaultBodyDef();
-        b2BodyId body = b2CreateBody(world, &bodyDef);
-
-        b2DestroyBody(body);
-        b2DestroyWorld(world);
-    }
-    {
-        glm::vec3 a{0.0f, 0.0f, 1.0f};
-        glm::vec3 b{0.0f, 0.0f, -1.0f};
-        const auto c = glm::cross(a, b);
-    }
-
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         ASSERT_FAIL("SDL_Init failed");
         return -1;
@@ -1031,16 +1043,23 @@ int main() {
 
     EcsWorld world{};
     GameContext &gameContext = world.ctx().emplace<GameContext>();
+    {
+        const b2WorldDef worldDef = b2DefaultWorldDef();
+        gameContext.physicsWorld = b2CreateWorld(&worldDef);
+    }
     SetupWorldRules(ScreenWidth, ScreenHeight, gameContext);
     FillWorldContent(world, gameContext);
 
     /// Main loop
     bool shouldStopMainLoop = false;
     std::chrono::steady_clock::time_point lastFrameTime = std::chrono::steady_clock::now();
-    static constexpr std::chrono::milliseconds TargetFrameTime{1000 / 60};
+
+    std::chrono::steady_clock::duration physicsRestTime;
+    static constexpr std::chrono::steady_clock::duration PhysicsStep = std::chrono::milliseconds(30);
+
     while (!shouldStopMainLoop) {
         const std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
-        auto elapsedFrameTime = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastFrameTime);
+        const std::chrono::steady_clock::duration elapsedFrameTime = currentTime - lastFrameTime;
         lastFrameTime = currentTime;
 
         SDL_Event event{};
@@ -1051,10 +1070,20 @@ int main() {
             shouldStopMainLoop |= stopByQuitEvent || stopByWindowEvent;
         }
 
+        physicsRestTime += elapsedFrameTime;
+        if (physicsRestTime > PhysicsStep) {
+            const int64_t physicsSteps = physicsRestTime / PhysicsStep;
+            for (int i = 0; i < physicsSteps; ++i) {
+                static constexpr float PhysicsStepSeconds = 1.0f / std::chrono::duration_cast<std::chrono::milliseconds>(PhysicsStep).count();
+                b2World_Step(gameContext.physicsWorld, PhysicsStepSeconds, 4);
+            }
+            physicsRestTime -= physicsSteps * PhysicsStep;
+        }
+
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-        ProcessImGui(elapsedFrameTime, world);
+        ProcessImGui(std::chrono::duration_cast<std::chrono::milliseconds>(elapsedFrameTime), world);
         ImGui::Render();
 
         ProcessWorldUpdate(world);
@@ -1063,17 +1092,47 @@ int main() {
         SDL_RenderClear(renderer);
         rasterizationTarget.Lock();
         {
-            // world.view<const CreaturePositionComponent>().each(
-            //     [&](const CreaturePositionComponent position) {
-            //         if (!gameContext.camera.IsVisible(position.x, position.y)) {
-            //             return;
-            //         }
-            //
-            //         static constexpr float CreatureWorldSpaceRadius = 1.0f;
-            //         const float creatureScreenSpaceRadius = CreatureWorldSpaceRadius * gameContext.camera.GetZoom();
-            //         const auto [screenSpaceX, screenSpaceY] = gameContext.camera.ToScreenSpace(position.position.x, position.position.y);
-            //         rasterizationTarget.SetFilledCircle(screenSpaceX, screenSpaceY, creatureScreenSpaceRadius, SDL_Color{ 0, 200, 0, SDL_ALPHA_OPAQUE });
-            //     });
+            const auto [centerX, centerY] = gameContext.camera.GetPosition();
+            const auto [sizeX, sizeY] = gameContext.camera.GetSize();
+            const b2AABB visibleRegion{b2Vec2{centerX - sizeX / 2.0f, centerY - sizeY / 2.0f}, b2Vec2{centerX + sizeX / 2.0f, centerY + sizeY / 2.0f}};
+
+            const b2QueryFilter queryFilter = b2DefaultQueryFilter();
+            auto overlapResultFcn = [](b2ShapeId shapeId, void *userData) -> bool {
+                EcsWorld &world = *static_cast<EcsWorld *>(userData);
+                const b2BodyId bodyId = b2Shape_GetBody(shapeId);
+                void *bodyUserData = b2Body_GetUserData(bodyId);
+                if (!bodyUserData) {
+                    return true;
+                }
+
+                const uint32_t rawCreatureId = static_cast<uint32_t>(std::bit_cast<uint64_t>(bodyUserData));
+                const EcsEntity entity = std::bit_cast<EcsEntity>(rawCreatureId);
+
+                world.emplace<RenderDirtyTag>(entity);
+                return true;
+            };
+
+            b2World_OverlapAABB(gameContext.physicsWorld, visibleRegion, queryFilter, overlapResultFcn, &world);
+            auto entitiesToRender = world.view<const RenderDirtyTag, const PhysicsBodyComponent>();
+            const auto debugCount = entitiesToRender.size_hint();
+            entitiesToRender.each([&](EcsEntity entity, const PhysicsBodyComponent physicsBody) {
+                world.erase<RenderDirtyTag>(entity);
+
+                const b2Vec2 position = b2Body_GetPosition(physicsBody.id);
+                b2ShapeId shapeId{};
+                const int32_t shapesCount = b2Body_GetShapes(physicsBody.id, &shapeId, 1);
+                ASSERT(shapesCount == 1, "sanity check: body should have only one shape!");
+                const b2Circle circle = b2Shape_GetCircle(shapeId);
+                const float creatureScreenSpaceRadius = circle.radius * gameContext.camera.GetZoom();
+
+                const auto [screenSpaceX, screenSpaceY] = gameContext.camera.ToScreenSpace(position.x, position.y);
+                rasterizationTarget.SetFilledCircle(screenSpaceX, screenSpaceY, creatureScreenSpaceRadius, SDL_Color{0, 200, 0, SDL_ALPHA_OPAQUE});
+            });
+
+            {
+                const auto unusedTags = world.view<const RenderDirtyTag>();
+                world.erase<RenderDirtyTag>(unusedTags.begin(), unusedTags.end());
+            }
         }
         rasterizationTarget.Unlock();
         if (!SDL_RenderTexture(renderer, renderTargetTexture, nullptr, nullptr)) {
@@ -1083,6 +1142,8 @@ int main() {
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);
     }
+
+    b2DestroyWorld(gameContext.physicsWorld);
 
     ImGui_ImplSDLRenderer3_Shutdown();
     ImGui_ImplSDL3_Shutdown();

@@ -101,9 +101,9 @@ void WorldRasterizationTarget::SetLine(int32_t offsetX, int32_t y, int32_t lengt
         return;
     }
     offsetX = std::max(offsetX, 0);
-    length = std::min(length, _texture->w);
+    length = std::clamp(length, 0, _texture->w - offsetX);
     const int32_t endX = offsetX + length;
-    const bool hasXInside = offsetX < _texture->w && endX > 0;
+    const bool hasXInside = offsetX < _texture->w && endX > 0 && length > 0;
     if (!hasXInside) {
         return;
     }
