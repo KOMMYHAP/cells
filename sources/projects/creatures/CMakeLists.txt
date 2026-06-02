@@ -17,6 +17,8 @@ target_link_libraries(${PROJECT_NAME}
         EnTT::EnTT
         SDL3::SDL3
         ImGuiLib
+        glm
+        box2d
 )
 target_precompile_headers(${PROJECT_NAME} PRIVATE pch.h)
 target_copy_required_dll(${PROJECT_NAME})

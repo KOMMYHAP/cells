@@ -10,3 +10,5 @@ add_subdirectory(gsl)
 add_subdirectory(entt)
 add_subdirectory(sdl)
 add_subdirectory(imgui) # imgui depends on SDL2 backend
+add_subdirectory(box2d)
+add_subdirectory(glm)
